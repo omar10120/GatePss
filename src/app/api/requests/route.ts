@@ -66,30 +66,24 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Handle file upload
-        let imagePath: string | null = null;
+        // Handle file uploads
+        const uploadFile = async (file: File | null, prefix: string) => {
+            if (!file) return null;
 
-        if (passportIdImage) {
-            const bytes = await passportIdImage.arrayBuffer();
+            const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
 
             // Validate file size (5MB max)
             const maxSize = parseInt(process.env.MAX_FILE_SIZE || '5242880');
             if (buffer.length > maxSize) {
-                return NextResponse.json(
-                    { error: 'Validation Error', message: 'File size exceeds 5MB limit' },
-                    { status: 400 }
-                );
+                throw new Error(`File ${file.name} size exceeds 5MB limit`);
             }
 
             // Validate file type
             const allowedTypes = ['jpg', 'jpeg', 'png', 'pdf'];
-            const fileExt = passportIdImage.name.split('.').pop()?.toLowerCase();
+            const fileExt = file.name.split('.').pop()?.toLowerCase();
             if (!fileExt || !allowedTypes.includes(fileExt)) {
-                return NextResponse.json(
-                    { error: 'Validation Error', message: 'Only JPG, PNG, and PDF files are allowed' },
-                    { status: 400 }
-                );
+                throw new Error(`Only JPG, PNG, and PDF files are allowed for ${file.name}`);
             }
 
             // Create upload directory if it doesn't exist
@@ -98,16 +92,38 @@ export async function POST(request: NextRequest) {
 
             // Generate unique filename
             const timestamp = Date.now();
-            const filename = `passport_${timestamp}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+            const filename = `${prefix}_${timestamp}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
             const filepath = path.join(uploadDir, filename);
 
             // Save file
             await writeFile(filepath, buffer);
-            imagePath = `/uploads/passports/${filename}`;
+            return `/uploads/passports/${filename}`;
+        };
+
+        let imagePath: string | null = null;
+        let otherDoc1Path: string | null = null;
+        let otherDoc2Path: string | null = null;
+
+        try {
+            imagePath = await uploadFile(passportIdImage, 'passport');
+            otherDoc1Path = await uploadFile(formData.get('otherDocuments1') as File | null, 'other1');
+            otherDoc2Path = await uploadFile(formData.get('otherDocuments2') as File | null, 'other2');
+        } catch (err: any) {
+            return NextResponse.json(
+                { error: 'Validation Error', message: err.message },
+                { status: 400 }
+            );
+        }
+
+        if (!imagePath) {
+            return NextResponse.json(
+                { error: 'Validation Error', message: 'Passport/ID image is required' },
+                { status: 400 }
+            );
         }
 
         // Parse extra fields
-        let extraFields = null;
+        let extraFields: any = {};
         if (extraFieldsStr) {
             try {
                 extraFields = JSON.parse(extraFieldsStr);
@@ -115,6 +131,10 @@ export async function POST(request: NextRequest) {
                 console.warn('Failed to parse extra fields:', e);
             }
         }
+
+        // Add file paths to extra fields
+        if (otherDoc1Path) extraFields.otherDocuments1Path = otherDoc1Path;
+        if (otherDoc2Path) extraFields.otherDocuments2Path = otherDoc2Path;
 
         // Generate request number
         const requestNumber = generateRequestNumber();

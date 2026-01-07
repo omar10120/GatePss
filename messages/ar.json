@@ -97,5 +97,48 @@
             "privacy": "سياسة الخصوصية",
             "terms": "الشروط والأحكام"
         }
+    },
+    "GatePassPage": {
+        "title": "احصل على تصريح دخول سريع",
+        "subtitle": "مثالي للاحتياجات العاجلة للسفر أو الجداول المزدحمة، يرجى إعادة التحقق من المرفقات قبل التقديم.",
+        "sections": {
+            "passPermitInfo": "معلومات تصريح المرور",
+            "passHolderInfo": "معلومات حامل التصريح"
+        },
+        "fields": {
+            "passType": "نوع التصريح",
+            "nationality": "الجنسية",
+            "identification": "الهوية",
+            "organization": "المنظمة / المنظمة المضيفة",
+            "passStartingDate": "تاريخ بدء التصريح",
+            "validityPeriod": "فترة الصلاحية",
+            "passFor": "التصريح لـ",
+            "purposeOfVisit": "الغرض من الزيارة",
+            "fullNameEn": "الاسم الكامل لحامل التصريح (EN)",
+            "fullNameAr": "الاسم الكامل لحامل التصريح (AR)",
+            "telephone": "الهاتف",
+            "email": "البريد الإلكتروني",
+            "gender": "الجنس",
+            "profession": "المهنة",
+            "idPassportNumber": "رقم الهوية أو جواز السفر لحامل التصريح",
+            "copyOfCivilId": "نسخة من البطاقة المدنية",
+            "otherDocuments1": "مستندات أخرى ١",
+            "otherDocuments2": "مستندات أخرى ٢"
+        },
+        "placeholders": {
+            "select": "اختر --",
+            "selectPassType": "اختر نوع التصريح --",
+            "typeOrganization": "اكتب اسم المنظمة --",
+            "selectDate": "اختر تاريخاً لزيارتك --",
+            "selectBeneficiary": "اختر المستفيد من التصريح --",
+            "typePurpose": "اكتب الغرض من الزيارة",
+            "enterFullName": "أدخل اسمك الكامل",
+            "telephoneHolder": "هاتف حامل التصريح",
+            "emailHolder": "البريد الإلكتروني لحامل التصريح",
+            "typeIdPassport": "اكتب رقم الهوية أو جواز السفر لحامل التصريح",
+            "chooseFile": "اختر ملفاً (PNG, JPG, PDF) بحد أقصى ١ ميجابايت"
+        },
+        "confirmation": "أؤكد أنني راجعت جميع المعلومات والمرفقات في هذا الطلب، وأتحمل المسؤولية الكاملة عن جميع المعلومات التي يحتوي عليها.",
+        "submit": "تقديم التصريح"
     }
 }
