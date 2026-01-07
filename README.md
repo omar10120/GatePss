@@ -102,6 +102,26 @@ npm run dev
 
 The application will be available at: http://localhost:3000
 
+### Running with Docker
+
+You can also run the entire system using Docker and Docker Compose. This is the recommended way for production-like environments.
+
+1. **Start the containers**
+
+```bash
+docker compose up -d
+```
+
+2. **Run database migrations and seed**
+
+```bash
+docker compose exec app npx prisma@6.0.1 migrate deploy
+docker compose exec app npm run db:seed
+```
+
+The application will be available at: http://localhost:3000
+The MySQL database is accessible on the host at `localhost:3007`.
+
 ## 📁 Project Structure
 
 ```
