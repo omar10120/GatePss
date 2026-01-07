@@ -53,6 +53,13 @@ module.exports = {
                     600: '#dc2626',
                     700: '#b91c1c',
                 },
+                info: {
+                    50: '#f0fdf4',
+                    100: '#dcfce7',
+                    500: '#0d9488',
+                    600: '#16a34a',
+                    700: '#15803d',
+                },
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -81,6 +88,7 @@ module.exports = {
                     '100%': { transform: 'translateY(0)', opacity: '1' },
                 },
             },
+
         },
     },
     plugins: [],

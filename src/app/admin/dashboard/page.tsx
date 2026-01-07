@@ -242,7 +242,7 @@ export default function AdminDashboardPage() {
                 <header className="bg-white shadow-sm sticky top-0 z-30">
                     <div className="px-6 py-4">
                         <div className="flex items-center justify-between">
-                            
+
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={toggleLocale}
@@ -267,146 +267,146 @@ export default function AdminDashboardPage() {
 
                 {/* Main Content */}
                 <main className="px-6 py-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    {content.welcome}, {user?.name}!
-                </h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                        {content.welcome}, {user?.name}!
+                    </h2>
 
-                {permissionDenied ? (
-                    <div className="card p-12 text-center">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
+                    {permissionDenied ? (
+                        <div className="card p-12 text-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
+                            <p className="text-gray-500">{content.contactAdmin}</p>
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
-                        <p className="text-gray-500">{content.contactAdmin}</p>
-                    </div>
-                ) : (
-                    <>
-                        {/* Summary Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <div className="card">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">{content.total}</p>
-                                        <p className="text-3xl font-bold text-gray-900">{data?.summary.total || 0}</p>
+                    ) : (
+                        <>
+                            {/* Summary Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <div className="card">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-gray-600 mb-1">{content.total}</p>
+                                            <p className="text-3xl font-bold text-gray-900">{data?.summary.total || 0}</p>
+                                        </div>
+                                        <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-info-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
                                     </div>
-                                    <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
+                                </div>
+
+                                <div className="card">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-gray-600 mb-1">{content.approved}</p>
+                                            <p className="text-3xl font-bold text-success-600">{data?.summary.approved || 0}</p>
+                                        </div>
+                                        <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="card">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-gray-600 mb-1">{content.rejected}</p>
+                                            <p className="text-3xl font-bold text-danger-600">{data?.summary.rejected || 0}</p>
+                                        </div>
+                                        <div className="w-12 h-12 bg-danger-100 rounded-lg flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-danger-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="card">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-gray-600 mb-1">{content.pending}</p>
+                                            <p className="text-3xl font-bold text-warning-600">{data?.summary.pending || 0}</p>
+                                        </div>
+                                        <div className="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-warning-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="card">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">{content.approved}</p>
-                                        <p className="text-3xl font-bold text-success-600">{data?.summary.approved || 0}</p>
-                                    </div>
-                                    <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
+                            {/* Requests by Type */}
+                            <div className="card mb-8">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">{content.byType}</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {Object.entries(data?.byType || {}).map(([type, count]) => (
+                                        <div key={type} className="text-center p-4 bg-gray-50 rounded-lg">
+                                            <p className="text-2xl font-bold text-gray-900">{count}</p>
+                                            <p className="text-sm text-gray-600">{content.types[type as keyof typeof content.types]}</p>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
+                            {/* Recent Requests */}
                             <div className="card">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">{content.rejected}</p>
-                                        <p className="text-3xl font-bold text-danger-600">{data?.summary.rejected || 0}</p>
-                                    </div>
-                                    <div className="w-12 h-12 bg-danger-100 rounded-lg flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-danger-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-900">{content.recent}</h3>
+                                    <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 text-sm font-medium">
+                                        {content.viewAll} →
+                                    </Link>
                                 </div>
-                            </div>
 
-                            <div className="card">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">{content.pending}</p>
-                                        <p className="text-3xl font-bold text-warning-600">{data?.summary.pending || 0}</p>
-                                    </div>
-                                    <div className="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-warning-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Requests by Type */}
-                        <div className="card mb-8">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{content.byType}</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {Object.entries(data?.byType || {}).map(([type, count]) => (
-                                    <div key={type} className="text-center p-4 bg-gray-50 rounded-lg">
-                                        <p className="text-2xl font-bold text-gray-900">{count}</p>
-                                        <p className="text-sm text-gray-600">{content.types[type as keyof typeof content.types]}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Recent Requests */}
-                        <div className="card">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold text-gray-900">{content.recent}</h3>
-                                <Link href="/admin/requests" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-                                    {content.viewAll} →
-                                </Link>
-                            </div>
-
-                            {data?.recentRequests && data.recentRequests.length > 0 ? (
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-gray-50 border-b border-gray-200">
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Request #</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applicant</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200">
-                                            {data.recentRequests.map((request) => (
-                                                <tr key={request.id} className="hover:bg-gray-50">
-                                                    <td className="px-4 py-3">
-                                                        <Link href={`/admin/requests/${request.id}`} className="text-primary-600 hover:text-primary-700 font-medium">
-                                                            {request.requestNumber}
-                                                        </Link>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-gray-900">{request.applicantName}</td>
-                                                    <td className="px-4 py-3 text-gray-600">
-                                                        {content.types[request.requestType as keyof typeof content.types]}
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>
-                                                            {content.status[request.status as keyof typeof content.status]}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-gray-600 text-sm">
-                                                        {new Date(request.createdAt).toLocaleDateString()}
-                                                    </td>
+                                {data?.recentRequests && data.recentRequests.length > 0 ? (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-gray-50 border-b border-gray-200">
+                                                <tr>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Request #</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applicant</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ) : (
-                                <p className="text-gray-500 text-center py-8">{content.noRequests}</p>
-                            )}
-                        </div>
-                    </>
-                )}
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200">
+                                                {data.recentRequests.map((request) => (
+                                                    <tr key={request.id} className="hover:bg-gray-50">
+                                                        <td className="px-4 py-3">
+                                                            <Link href={`/admin/requests/${request.id}`} className="text-info-500 hover:text-primary-700 font-medium">
+                                                                {request.requestNumber}
+                                                            </Link>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-gray-900">{request.applicantName}</td>
+                                                        <td className="px-4 py-3 text-gray-600">
+                                                            {content.types[request.requestType as keyof typeof content.types]}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>
+                                                                {content.status[request.status as keyof typeof content.status]}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-gray-600 text-sm">
+                                                            {new Date(request.createdAt).toLocaleDateString()}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 text-center py-8">{content.noRequests}</p>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </main>
             </div>
         </div>

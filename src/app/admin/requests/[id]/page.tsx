@@ -354,7 +354,7 @@ export default function RequestDetailsPage() {
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-gray-600">Request not found</p>
-                    <Link href="/admin/requests" className="text-primary-600 hover:text-primary-700 mt-4 inline-block">
+                    <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 mt-4 inline-block">
                         Back to Requests
                     </Link>
                 </div>
@@ -407,7 +407,7 @@ export default function RequestDetailsPage() {
                             {content.dashboard}
                         </Link>
                         {hasPermission('MANAGE_REQUESTS') && (
-                            <Link href="/admin/requests" className="px-4 py-3 border-b-2 border-primary-600 text-primary-600 font-medium">
+                            <Link href="/admin/requests" className="px-4 py-3 border-b-2 border-primary-600 text-info-500 font-medium">
                                 {content.requests}
                             </Link>
                         )}
@@ -436,14 +436,14 @@ export default function RequestDetailsPage() {
                         </div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
                         <p className="text-gray-500">{content.contactAdmin}</p>
-                        <Link href="/admin/requests" className="text-primary-600 hover:text-primary-700 mt-4 inline-block">
+                        <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 mt-4 inline-block">
                             {content.backToRequests}
                         </Link>
                     </div>
                 ) : request ? (
                     <>
                         <div className="mb-6">
-                            <Link href="/admin/requests" className="text-primary-600 hover:text-primary-700 flex items-center gap-2">
+                            <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 flex items-center gap-2">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>
@@ -501,7 +501,7 @@ export default function RequestDetailsPage() {
                                                 href={request.passportIdImagePath}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-primary-600 hover:text-primary-700 font-medium"
+                                                className="text-info-500 hover:text-primary-700 font-medium"
                                             >
                                                 {content.viewDocument} →
                                             </a>

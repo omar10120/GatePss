@@ -48,8 +48,8 @@ const NavLink: React.FC<NavLinkProps> = ({ item, direction }) => {
 
     const activeStyles = item.active
         ? isHorizontal
-            ? 'border-primary-600 text-primary-600 font-medium'
-            : 'bg-primary-50 text-primary-600 font-medium'
+            ? 'border-primary-600 text-info-500 font-medium'
+            : 'bg-primary-50 text-info-500 font-medium'
         : isHorizontal
             ? 'border-transparent text-gray-600 hover:text-gray-900'
             : 'text-gray-700 hover:bg-gray-100';

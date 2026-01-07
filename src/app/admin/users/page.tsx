@@ -394,7 +394,7 @@ export default function AdminUsersPage() {
                 <header className="bg-white shadow-sm sticky top-0 z-30">
                     <div className="px-6 py-4">
                         <div className="flex items-center justify-between">
-                            
+
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={toggleLocale}
@@ -420,100 +420,100 @@ export default function AdminUsersPage() {
                 {/* Main Content */}
                 <main className="px-6 py-8">
                     <div className="flex items-center justify-between mb-6">
-                    {!permissionDenied && (
-                        <button
-                            onClick={() => handleOpenModal()}
-                            className="btn btn-primary"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                            {content.addUser}
-                        </button>
-                    )}
-                </div>
-
-                {permissionDenied ? (
-                    <div className="card p-12 text-center">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
-                        <p className="text-gray-500">{content.contactAdmin}</p>
-                    </div>
-                ) : (
-                    <>
-                        {success && (
-                            <div className="mb-6 p-4 bg-success-50 border border-success-200 rounded-lg text-success-700">
-                                {success}
-                            </div>
+                        {!permissionDenied && (
+                            <button
+                                onClick={() => handleOpenModal()}
+                                className="btn btn-primary"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                {content.addUser}
+                            </button>
                         )}
+                    </div>
 
-                        {/* Users Table */}
-                        <div className="card">
-                            {users.length > 0 ? (
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-gray-50 border-b border-gray-200">
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.name}</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.email}</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.role}</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.status}</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.permissions}</th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.actions}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200">
-                                            {users.map((u) => (
-                                                <tr key={u.id} className="hover:bg-gray-50">
-                                                    <td className="px-4 py-3 text-gray-900 font-medium">{u.name}</td>
-                                                    <td className="px-4 py-3 text-gray-600">{u.email}</td>
-                                                    <td className="px-4 py-3 text-gray-600">
-                                                        {content.roles[u.role as keyof typeof content.roles]}
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${u.isActive ? 'bg-success-100 text-success-700' : 'bg-gray-100 text-gray-700'
-                                                            }`}>
-                                                            {u.isActive ? content.active : content.inactive}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-gray-600 text-sm">
-                                                        {u.permissions.length} permissions
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => handleOpenModal(u)}
-                                                                className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-                                                                disabled={u.id === user?.id}
-                                                            >
-                                                                {content.edit}
-                                                            </button>
-                                                            {u.id !== user?.id && (
-                                                                <button
-                                                                    onClick={() => handleToggleActive(u.id, u.isActive)}
-                                                                    className={`text-sm font-medium ${u.isActive ? 'text-danger-600 hover:text-danger-700' : 'text-success-600 hover:text-success-700'
-                                                                        }`}
-                                                                >
-                                                                    {u.isActive ? content.deactivate : content.activate}
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ) : (
-                                <p className="text-gray-500 text-center py-12">{content.noUsers}</p>
-                            )}
+                    {permissionDenied ? (
+                        <div className="card p-12 text-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
+                            <p className="text-gray-500">{content.contactAdmin}</p>
                         </div>
-                    </>
-                )}
+                    ) : (
+                        <>
+                            {success && (
+                                <div className="mb-6 p-4 bg-success-50 border border-success-200 rounded-lg text-success-700">
+                                    {success}
+                                </div>
+                            )}
+
+                            {/* Users Table */}
+                            <div className="card">
+                                {users.length > 0 ? (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-gray-50 border-b border-gray-200">
+                                                <tr>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.name}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.email}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.role}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.status}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.permissions}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.actions}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200">
+                                                {users.map((u) => (
+                                                    <tr key={u.id} className="hover:bg-gray-50">
+                                                        <td className="px-4 py-3 text-gray-900 font-medium">{u.name}</td>
+                                                        <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                                                        <td className="px-4 py-3 text-gray-600">
+                                                            {content.roles[u.role as keyof typeof content.roles]}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${u.isActive ? 'bg-success-100 text-success-700' : 'bg-gray-100 text-gray-700'
+                                                                }`}>
+                                                                {u.isActive ? content.active : content.inactive}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-gray-600 text-sm">
+                                                            {u.permissions.length} permissions
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => handleOpenModal(u)}
+                                                                    className="text-info-500 hover:text-primary-700 text-sm font-medium"
+                                                                    disabled={u.id === user?.id}
+                                                                >
+                                                                    {content.edit}
+                                                                </button>
+                                                                {u.id !== user?.id && (
+                                                                    <button
+                                                                        onClick={() => handleToggleActive(u.id, u.isActive)}
+                                                                        className={`text-sm font-medium ${u.isActive ? 'text-danger-600 hover:text-danger-700' : 'text-success-600 hover:text-success-700'
+                                                                            }`}
+                                                                    >
+                                                                        {u.isActive ? content.deactivate : content.activate}
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 text-center py-12">{content.noUsers}</p>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </main>
             </div>
 

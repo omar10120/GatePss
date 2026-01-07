@@ -266,7 +266,7 @@ export default function AdminActivityPage() {
                 <header className="bg-white shadow-sm sticky top-0 z-30">
                     <div className="px-6 py-4">
                         <div className="flex items-center justify-between">
-                            
+
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={toggleLocale}
@@ -291,123 +291,123 @@ export default function AdminActivityPage() {
 
                 {/* Main Content */}
                 <main className="px-6 py-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">{content.title}</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">{content.title}</h2>
 
-                {permissionDenied ? (
-                    <div className="card p-12 text-center">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
+                    {permissionDenied ? (
+                        <div className="card p-12 text-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
+                            <p className="text-gray-500">{content.contactAdmin}</p>
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
-                        <p className="text-gray-500">{content.contactAdmin}</p>
-                    </div>
-                ) : (
-                    <>
-                        {/* Filters */}
-                        <div className="card mb-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <input
-                                        type="text"
-                                        placeholder={content.search}
-                                        value={filters.search}
-                                        onChange={(e) => handleFilterChange('search', e.target.value)}
-                                        className="input"
-                                    />
-                                </div>
-                                <div>
-                                    <select
-                                        value={filters.actionType}
-                                        onChange={(e) => handleFilterChange('actionType', e.target.value)}
-                                        className="input"
-                                    >
-                                        <option value="">{content.allTypes}</option>
-                                        <option value="REQUEST_MANAGEMENT">{content.actionTypes.REQUEST_MANAGEMENT}</option>
-                                        <option value="USER_MANAGEMENT">{content.actionTypes.USER_MANAGEMENT}</option>
-                                        <option value="SYSTEM_INTEGRATION">{content.actionTypes.SYSTEM_INTEGRATION}</option>
-                                        <option value="AUTH">{content.actionTypes.AUTH}</option>
-                                    </select>
+                    ) : (
+                        <>
+                            {/* Filters */}
+                            <div className="card mb-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <input
+                                            type="text"
+                                            placeholder={content.search}
+                                            value={filters.search}
+                                            onChange={(e) => handleFilterChange('search', e.target.value)}
+                                            className="input"
+                                        />
+                                    </div>
+                                    <div>
+                                        <select
+                                            value={filters.actionType}
+                                            onChange={(e) => handleFilterChange('actionType', e.target.value)}
+                                            className="input"
+                                        >
+                                            <option value="">{content.allTypes}</option>
+                                            <option value="REQUEST_MANAGEMENT">{content.actionTypes.REQUEST_MANAGEMENT}</option>
+                                            <option value="USER_MANAGEMENT">{content.actionTypes.USER_MANAGEMENT}</option>
+                                            <option value="SYSTEM_INTEGRATION">{content.actionTypes.SYSTEM_INTEGRATION}</option>
+                                            <option value="AUTH">{content.actionTypes.AUTH}</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Logs Table */}
-                        <div className="card">
-                            {logs.length > 0 ? (
-                                <>
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead className="bg-gray-50 border-b border-gray-200">
-                                                <tr>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.timestamp}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.user}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.type}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.action}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-gray-200">
-                                                {logs.map((log) => (
-                                                    <tr key={log.id} className="hover:bg-gray-50">
-                                                        <td className="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">
-                                                            {new Date(log.timestamp).toLocaleString()}
-                                                        </td>
-                                                        <td className="px-4 py-3">
-                                                            {log.user ? (
-                                                                <div>
-                                                                    <p className="text-gray-900 font-medium">{log.user.name}</p>
-                                                                    <p className="text-xs text-gray-500">{log.user.email}</p>
-                                                                </div>
-                                                            ) : (
-                                                                <span className="text-gray-500 italic">{content.system}</span>
-                                                            )}
-                                                        </td>
-                                                        <td className="px-4 py-3">
-                                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getActionTypeColor(log.actionType)}`}>
-                                                                {content.actionTypes[log.actionType as keyof typeof content.actionTypes] || log.actionType}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-4 py-3 text-gray-900">
-                                                            {log.actionPerformed}
-                                                        </td>
+                            {/* Logs Table */}
+                            <div className="card">
+                                {logs.length > 0 ? (
+                                    <>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
+                                                <thead className="bg-gray-50 border-b border-gray-200">
+                                                    <tr>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.timestamp}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.user}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.type}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.action}</th>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    {/* Pagination */}
-                                    {pagination && pagination.totalPages > 1 && (
-                                        <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
-                                            <div className="text-sm text-gray-600">
-                                                {content.showing} {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} {content.of} {pagination.total} {content.results}
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handlePageChange(pagination.page - 1)}
-                                                    disabled={pagination.page === 1}
-                                                    className="btn btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                    {content.previous}
-                                                </button>
-                                                <button
-                                                    onClick={() => handlePageChange(pagination.page + 1)}
-                                                    disabled={pagination.page === pagination.totalPages}
-                                                    className="btn btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                    {content.next}
-                                                </button>
-                                            </div>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-200">
+                                                    {logs.map((log) => (
+                                                        <tr key={log.id} className="hover:bg-gray-50">
+                                                            <td className="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">
+                                                                {new Date(log.timestamp).toLocaleString()}
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                {log.user ? (
+                                                                    <div>
+                                                                        <p className="text-gray-900 font-medium">{log.user.name}</p>
+                                                                        <p className="text-xs text-gray-500">{log.user.email}</p>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="text-gray-500 italic">{content.system}</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getActionTypeColor(log.actionType)}`}>
+                                                                    {content.actionTypes[log.actionType as keyof typeof content.actionTypes] || log.actionType}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-4 py-3 text-gray-900">
+                                                                {log.actionPerformed}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
                                         </div>
-                                    )}
-                                </>
-                            ) : (
-                                <p className="text-gray-500 text-center py-12">{content.noLogs}</p>
-                            )}
-                        </div>
-                    </>
-                )}
+
+                                        {/* Pagination */}
+                                        {pagination && pagination.totalPages > 1 && (
+                                            <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
+                                                <div className="text-sm text-gray-600">
+                                                    {content.showing} {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} {content.of} {pagination.total} {content.results}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handlePageChange(pagination.page - 1)}
+                                                        disabled={pagination.page === 1}
+                                                        className="btn btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {content.previous}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handlePageChange(pagination.page + 1)}
+                                                        disabled={pagination.page === pagination.totalPages}
+                                                        className="btn btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {content.next}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <p className="text-gray-500 text-center py-12">{content.noLogs}</p>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </main>
             </div>
         </div>

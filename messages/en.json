@@ -2,8 +2,9 @@
     "HomePage": {
         "nav": {
             "home": "Home",
-            "services": "Services",
-            "about": "About us"
+            "services": "Roles",
+            "about": "About us",
+            "MAJIS": "MAJIS Web"
         },
         "hero": {
             "title": "Get A Fast-Track Entry Permit",
@@ -41,10 +42,53 @@
             "subtitle": "Perfect for urgent travel needs or busy schedules",
             "seawater": "Seawater Extraction",
             "cooling": "COOLING WATER",
+            "coolingDescription": "COOLING WATER IDEAS",
             "potable": "POTABLE WATER",
+            "potableDescription": "POTABLE WATER IDEAS",
             "irrigation": "IRRIGATION WATER",
+            "irrigationDescription": "irrigation Description",
+            "process1Description": "PROCESS WATER IDEAS",
+            "process2Description": "PROCESS WATER IDEAS",
             "process1": "PROCESS WATER",
-            "process2": "PROCESS WATER"
+            "process2": "PROCESS WATER",
+            "GetFast": "Get Fast Track Entry Permit",
+            "GetFastDescription": "Perfect for urgent travel needs or busy schedules",
+            "seawaterDescription": "EXTRACT SEA WATER"
+        },
+        "assistance": {
+            "title": "NEED ASSISTANCE?",
+            "description": "Explorer detailed guides and resources in our Help Center",
+            "getInTouch": "Get in Touch",
+            "supportDescription": "We're here to help you with any questions or issues you may have",
+            "supportEmail": "support@example.com",
+            "supportPhone": "+1-234-567-8901",
+            "contactSupport": "Contact Our Support Team",
+            "faqs": {
+                "item1": {
+                    "q": "How long does it take to get a permit?",
+                    "a": "The processing time for a permit typically varies depending on the type of request. Generally, it takes between 24-48 hours for standard applications. You will receive an email notification once your permit is approved."
+                },
+                "item2": {
+                    "q": "How do I get a permit when I need it?",
+                    "a": "You can request a permit through our online portal by filling out the application form and uploading the required documents. Once submitted, our team will review your request."
+                },
+                "item3": {
+                    "q": "What documents are required for the application?",
+                    "a": "Required documents typically include a valid ID, company registration details, and specific documents related to your visit or vehicle entry."
+                },
+                "item4": {
+                    "q": "How can I track my application status?",
+                    "a": "You can track your application status using the 'Track Application' button on the home page and entering your reference number."
+                },
+                "item5": {
+                    "q": "Is there a fast-track option available?",
+                    "a": "Yes, we offer fast-track processing for urgent needs. Please select the 'Fast-Track' option during the application process."
+                },
+                "item6": {
+                    "q": "What should I do if my permit is rejected?",
+                    "a": "If your permit is rejected, you will receive an email with the reason for rejection. You can correct the issues and resubmit your application."
+                }
+            }
         },
         "footer": {
             "technicalSupport": "Technical Support",
