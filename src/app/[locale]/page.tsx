@@ -1,71 +1,27 @@
 'use client';
-
 import { useState } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 export default function HomePage() {
-    const [locale, setLocale] = useState<'en' | 'ar'>('en');
+    const t = useTranslations('HomePage');
+    const locale = useLocale();
+    const router = useRouter();
+    const pathname = usePathname();
+
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const toggleLocale = () => {
-        setLocale(prev => prev === 'en' ? 'ar' : 'en');
-        document.body.dir = locale === 'en' ? 'rtl' : 'ltr';
+        const newLocale = locale === 'en' ? 'ar' : 'en';
+        // Replace the locale part of the pathname
+        const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
+        router.push(newPathname || `/${newLocale}`);
     };
-
-    const t = {
-        en: {
-            nav: {
-                home: 'Home',
-                services: 'Services',
-                about: 'About us',
-                // majisWeb: 'MAJIS Web',
-            },
-            hero: {
-                title: 'Get A Fast-Track Entry Permit',
-                subtitle: 'Perfect for urgent travel needs or busy schedules',
-            },
-            categories: {
-                visitors: 'Visitors',
-                contractors: 'Contractors',
-                vehicles: 'Vehicles',
-                employees: 'Employees',
-            },
-            actions: {
-                trackApplication: 'Track Application',
-                requestPermit: 'Request a permit',
-            },
-            contact: 'Contact us',
-        },
-        ar: {
-            nav: {
-                home: 'الرئيسية',
-                services: 'الخدمات',
-                about: 'من نحن',
-                // majisWeb: 'موقع ماجس',
-            },
-            hero: {
-                title: 'احصل على تصريح دخول سريع',
-                subtitle: 'مثالي للاحتياجات العاجلة للسفر أو الجداول المزدحمة',
-            },
-            categories: {
-                visitors: 'زوار',
-                contractors: 'مقاولون',
-                vehicles: 'مركبات',
-                employees: 'موظفون',
-            },
-            actions: {
-                trackApplication: 'تتبع الطلب',
-                requestPermit: 'طلب تصريح',
-            },
-            contact: 'اتصل بنا',
-        },
-    };
-
-    const content = t[locale];
 
     return (
-        <div className="min-h-screen bg-white" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-white">
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50">
                 <div className="container mx-auto px-4 lg:px-6">
@@ -77,7 +33,7 @@ export default function HomePage() {
                                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-green-400 rounded-lg"></div>
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
                                     </svg>
                                 </div>
                             </div>
@@ -86,21 +42,21 @@ export default function HomePage() {
                                     {locale === 'ar' ? 'محسس' : 'MAJIS'}
                                 </div>
                                 <div className="text-lg font-bold text-gray-900">
-                                    {locale === 'ar' ? 'MAJIS' : 'MAJIS'}
+                                    MAJIS
                                 </div>
                             </div>
                         </div>
 
                         {/* Navigation */}
                         <nav className="hidden md:flex items-center gap-8">
-                            <Link href="/" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                                {content.nav.home}
+                            <Link href={`/${locale}`} className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                                {t('nav.home')}
                             </Link>
                             <Link href="#services" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                                {content.nav.services}
+                                {t('nav.services')}
                             </Link>
                             <Link href="#about" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                                {content.nav.about}
+                                {t('nav.about')}
                             </Link>
                         </nav>
 
@@ -142,7 +98,7 @@ export default function HomePage() {
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                 </svg>
-                                <span className="hidden sm:inline">{content.contact}</span>
+                                <span className="hidden sm:inline">{t('contact')}</span>
                             </Link>
                         </div>
                     </div>
@@ -152,14 +108,14 @@ export default function HomePage() {
                 {mobileMenuOpen && (
                     <div className="md:hidden border-t border-gray-200 bg-white">
                         <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
-                            <Link href="/" className="text-gray-700 hover:text-primary-600 font-medium transition-colors py-2">
-                                {content.nav.home}
+                            <Link href={`/${locale}`} className="text-gray-700 hover:text-primary-600 font-medium transition-colors py-2">
+                                {t('nav.home')}
                             </Link>
                             <Link href="#services" className="text-gray-700 hover:text-primary-600 font-medium transition-colors py-2">
-                                {content.nav.services}
+                                {t('nav.services')}
                             </Link>
                             <Link href="#about" className="text-gray-700 hover:text-primary-600 font-medium transition-colors py-2">
-                                {content.nav.about}
+                                {t('nav.about')}
                             </Link>
                         </nav>
                     </div>
@@ -170,45 +126,44 @@ export default function HomePage() {
             <section className="relative min-h-[600px] md:min-h-[700px] flex items-center justify-center overflow-hidden">
                 {/* Background Image with Overlay */}
                 <div className="absolute inset-0">
-                    <div 
+                    <div
                         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                         style={{
                             backgroundImage: 'url(https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1920&q=80)',
                         }}
                     >
                         <div className="absolute inset-0 bg-blue-900/60"></div>
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
                 {/* Content */}
                 <div className="relative z-10 container mx-auto px-4 lg:px-6 text-center text-white">
                     <div className="max-w-4xl mx-auto">
                         {/* Main Title */}
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                            {content.hero.title}
+                            {t('hero.title')}
                         </h1>
 
                         {/* Subtitle */}
                         <p className="text-lg md:text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
-                            {content.hero.subtitle}
+                            {t('hero.subtitle')}
                         </p>
 
                         {/* Category Buttons */}
                         <div className="flex flex-wrap justify-center gap-4 mb-12">
                             {[
-                                { key: 'visitors', label: content.categories.visitors },
-                                { key: 'contractors', label: content.categories.contractors },
-                                { key: 'vehicles', label: content.categories.vehicles },
-                                { key: 'employees', label: content.categories.employees },
+                                { key: 'visitors', label: t('categories.visitors') },
+                                { key: 'contractors', label: t('categories.contractors') },
+                                { key: 'vehicles', label: t('categories.vehicles') },
+                                { key: 'employees', label: t('categories.employees') },
                             ].map((category) => (
                                 <button
                                     key={category.key}
                                     onClick={() => setSelectedCategory(category.key)}
-                                    className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                                        selectedCategory === category.key
-                                            ? 'bg-white text-blue-900 shadow-lg scale-105'
-                                            : 'bg-gray-800/70 text-white hover:bg-gray-700/70 backdrop-blur-sm'
-                                    }`}
+                                    className={`px-6 py-3 rounded-lg font-medium transition-all ${selectedCategory === category.key
+                                        ? 'bg-white text-blue-900 shadow-lg scale-105'
+                                        : 'bg-gray-800/70 text-white hover:bg-gray-700/70 backdrop-blur-sm'
+                                        }`}
                                 >
                                     {category.label}
                                 </button>
@@ -224,17 +179,17 @@ export default function HomePage() {
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
-                                {content.actions.trackApplication}
+                                {t('actions.trackApplication')}
                             </Link>
 
                             <Link
-                                href="/gate-pass"
+                                href={`/${locale}/gate-pass`}
                                 className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                 </svg>
-                                {content.actions.requestPermit}
+                                {t('actions.requestPermit')}
                             </Link>
                         </div>
                     </div>
@@ -245,13 +200,10 @@ export default function HomePage() {
             <section id="services" className="py-20 px-4 bg-white">
                 <div className="container mx-auto">
                     <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ color: '#1e3a5f' }}>
-                        {locale === 'en' ? 'How It Works' : 'كيف يعمل'}
+                        {t('howItWorks.title')}
                     </h2>
                     <p className="text-center text-gray-700 mb-16 max-w-2xl mx-auto text-lg">
-                        {locale === 'en' 
-                            ? 'To ensures a smooth process for your business needs'
-                            : 'لضمان عملية سلسة لاحتياجات عملك'
-                        }
+                        {t('howItWorks.subtitle')}
                     </p>
 
                     <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -266,10 +218,8 @@ export default function HomePage() {
                                         <text x="12" y="15" textAnchor="middle" fontSize="7" fill="#14b8a6" fontWeight="bold">24</text>
                                     </svg>
                                 ),
-                                title: locale === 'en' ? '1. Submit Application' : '١. تقديم الطلب',
-                                desc: locale === 'en' 
-                                    ? 'Fill out required details and upload documents'
-                                    : 'املأ التفاصيل المطلوبة وقم بتحميل المستندات',
+                                title: t('howItWorks.step1.title'),
+                                desc: t('howItWorks.step1.description'),
                             },
                             {
                                 // Step 2: Hourglass with dollar sign in circle and coins
@@ -280,12 +230,10 @@ export default function HomePage() {
                                         <text x="12" y="20.5" textAnchor="middle" fontSize="7" fill="white" fontWeight="bold">$</text>
                                         <circle cx="16" cy="19" r="1.5" fill="#14b8a6" opacity="0.6" />
                                         <circle cx="18.5" cy="19" r="1.5" fill="#14b8a6" opacity="0.4" />
-                                </svg>
+                                    </svg>
                                 ),
-                                title: locale === 'en' ? '2. Review & Approval' : '٢. المراجعة والموافقة',
-                                desc: locale === 'en'
-                                    ? 'Majis team validates and processes your request'
-                                    : 'يقوم فريق ماجس بالتحقق من طلبك ومعالجته',
+                                title: t('howItWorks.step2.title'),
+                                desc: t('howItWorks.step2.description'),
                             },
                             {
                                 // Step 3: Person silhouette in frame with open padlock
@@ -297,30 +245,28 @@ export default function HomePage() {
                                         <rect x="16" y="10" width="4" height="6" rx="1" strokeWidth={2} />
                                         <path d="M18 12v2" strokeWidth={2} strokeLinecap="round" />
                                         <circle cx="18" cy="11" r="0.5" fill="#14b8a6" />
-                                </svg>
+                                    </svg>
                                 ),
-                                title: locale === 'en' ? '3. Receive Digital Permit' : '٣. استلام التصريح الرقمي',
-                                desc: locale === 'en'
-                                    ? 'Approved applicants receive a QR-coded permit by email'
-                                    : 'يحصل المتقدمون المعتمدون على تصريح برمز QR عبر البريد الإلكتروني',
+                                title: t('howItWorks.step3.title'),
+                                desc: t('howItWorks.step3.description'),
                             },
                         ].map((feature, index) => (
-                            <div 
-                                key={index} 
+                            <div
+                                key={index}
                                 className="text-center p-8 rounded-xl transition-all"
-                                style={{ 
+                                style={{
                                     backgroundColor: '#e6f7ff',
                                     border: 'none',
                                 }}
                             >
                                 <div className="flex items-center justify-center mx-auto mb-6">
                                     {feature.icon}
-                            </div>
+                                </div>
                                 <h3 className="text-lg font-bold text-gray-800 mb-3">
-                                    {feature.title}
+                                    {t(`howItWorks.step${index + 1}.title`)}
                                 </h3>
                                 <p className="text-gray-700 leading-relaxed text-sm">
-                                    {feature.desc}
+                                    {t(`howItWorks.step${index + 1}.description`)}
                                 </p>
                             </div>
                         ))}
@@ -332,20 +278,17 @@ export default function HomePage() {
             <section id="services" className="py-20 px-4 bg-white">
                 <div className="container mx-auto">
                     <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ color: '#1e3a5f' }}>
-                        {locale === 'en' ? 'You Can Request A Permit To Explore' : 'يمكنك طلب تصريح للاستكشاف'}
+                        {t('services.title')}
                     </h2>
                     <p className="text-center text-gray-700 mb-16 max-w-2xl mx-auto text-lg">
-                        {locale === 'en'
-                            ? 'Perfect for urgent travel needs or busy schedules'
-                            : 'مثالي للاحتياجات العاجلة للسفر أو الجداول المزدحمة'
-                        }
+                        {t('services.subtitle')}
                     </p>
 
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12">
                         {[
                             {
                                 key: 'seawater',
-                                title: locale === 'en' ? 'Seawater Extraction' : 'استخراج مياه البحر',
+                                title: t('services.seawater'),
                                 icon: (
                                     <svg className="w-16 h-16" fill="none" stroke="#14b8a6" viewBox="0 0 24 24" strokeWidth={1.5}>
                                         {/* Sun with quarter section */}
@@ -365,7 +308,7 @@ export default function HomePage() {
                             },
                             {
                                 key: 'cooling',
-                                title: locale === 'en' ? 'COOLING WATER' : 'مياه التبريد',
+                                title: t('services.cooling'),
                                 icon: (
                                     <svg className="w-16 h-16" fill="none" stroke="#14b8a6" viewBox="0 0 24 24" strokeWidth={1.5}>
                                         {/* Cooling tower structure */}
@@ -385,7 +328,7 @@ export default function HomePage() {
                             },
                             {
                                 key: 'potable',
-                                title: locale === 'en' ? 'POTABLE WATER' : 'المياه الصالحة للشرب',
+                                title: t('services.potable'),
                                 icon: (
                                     <svg className="w-16 h-16" fill="none" stroke="#14b8a6" viewBox="0 0 24 24" strokeWidth={1.5}>
                                         {/* House structure */}
@@ -411,7 +354,7 @@ export default function HomePage() {
                             },
                             {
                                 key: 'irrigation',
-                                title: locale === 'en' ? 'IRRIGATION WATER' : 'مياه الري',
+                                title: t('services.irrigation'),
                                 icon: (
                                     <svg className="w-16 h-16" fill="none" stroke="#14b8a6" viewBox="0 0 24 24" strokeWidth={1.5}>
                                         {/* Sprinkler head */}
@@ -434,7 +377,7 @@ export default function HomePage() {
                             },
                             {
                                 key: 'process1',
-                                title: locale === 'en' ? 'PROCESS WATER' : 'مياه المعالجة',
+                                title: t('services.process1'),
                                 icon: (
                                     <svg className="w-16 h-16" fill="none" stroke="#14b8a6" viewBox="0 0 24 24" strokeWidth={1.5}>
                                         {/* Pipe/conduit */}
@@ -454,7 +397,7 @@ export default function HomePage() {
                             },
                             {
                                 key: 'process2',
-                                title: locale === 'en' ? 'PROCESS WATER' : 'مياه المعالجة',
+                                title: t('services.process2'),
                                 icon: (
                                     <svg className="w-16 h-16" fill="none" stroke="#14b8a6" viewBox="0 0 24 24" strokeWidth={1.5}>
                                         {/* Interconnected pipes */}
@@ -472,8 +415,8 @@ export default function HomePage() {
                                 ),
                             },
                         ].map(({ key, title, icon }) => (
-                            <div 
-                                key={key} 
+                            <div
+                                key={key}
                                 className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-all flex items-center gap-4"
                             >
                                 <div className="flex-shrink-0">
@@ -495,7 +438,7 @@ export default function HomePage() {
                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d9488'}
                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#14b8a6'}
                         >
-                            {locale === 'en' ? 'Request a permit' : 'طلب تصريح'}
+                            {t('actions.requestPermit')}
                         </Link>
                     </div>
                 </div>
@@ -531,19 +474,19 @@ export default function HomePage() {
                             {/* X (Twitter) */}
                             <a href="#" className="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style={{ backgroundColor: '#1e3a5f' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#152a47'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1e3a5f'} aria-label="X (Twitter)">
                                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                                 </svg>
                             </a>
                             {/* Instagram */}
                             <a href="#" className="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style={{ backgroundColor: '#1e3a5f' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#152a47'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1e3a5f'} aria-label="Instagram">
                                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
                                 </svg>
                             </a>
                             {/* YouTube */}
                             <a href="#" className="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style={{ backgroundColor: '#1e3a5f' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#152a47'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1e3a5f'} aria-label="YouTube">
                                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                                 </svg>
                             </a>
                             {/* LinkedIn */}
@@ -560,27 +503,19 @@ export default function HomePage() {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         {/* Left Side - Copyright */}
                         <div className="text-sm text-gray-600">
-                            {locale === 'en' ? (
-                                <>
-                                    Technical Support <span style={{ color: '#14b8a6' }}>Pixel Tech</span>.©2025 All right reserved
-                                </>
-                            ) : (
-                                <>
-                                    الدعم الفني <span style={{ color: '#14b8a6' }}>بيكسل تك</span>.©2025 جميع الحقوق محفوظة
-                                </>
-                            )}
+                            {t('footer.technicalSupport')} <span style={{ color: '#14b8a6' }}>Pixel Tech</span>.©2025 {t('footer.allRightsReserved')}
                         </div>
 
                         {/* Right Side - Navigation Links */}
                         <div className="flex flex-wrap gap-6 text-sm text-gray-600">
                             <Link href="#faq" className="hover:text-gray-900 transition-colors">
-                                {locale === 'en' ? 'FAQ' : 'الأسئلة الشائعة'}
+                                {t('footer.faq')}
                             </Link>
                             <Link href="#privacy" className="hover:text-gray-900 transition-colors">
-                                {locale === 'en' ? 'Policy Privacy' : 'سياسة الخصوصية'}
+                                {t('footer.privacy')}
                             </Link>
                             <Link href="#terms" className="hover:text-gray-900 transition-colors">
-                                {locale === 'en' ? 'Terms & Conditions' : 'الشروط والأحكام'}
+                                {t('footer.terms')}
                             </Link>
                         </div>
                     </div>

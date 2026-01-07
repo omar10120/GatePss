@@ -1,0 +1,57 @@
+{
+    "HomePage": {
+        "nav": {
+            "home": "Home",
+            "services": "Services",
+            "about": "About us"
+        },
+        "hero": {
+            "title": "Get A Fast-Track Entry Permit",
+            "subtitle": "Perfect for urgent travel needs or busy schedules"
+        },
+        "categories": {
+            "visitors": "Visitors",
+            "contractors": "Contractors",
+            "vehicles": "Vehicles",
+            "employees": "Employees"
+        },
+        "actions": {
+            "trackApplication": "Track Application",
+            "requestPermit": "Request a permit"
+        },
+        "contact": "Contact us",
+        "howItWorks": {
+            "title": "How It Works",
+            "subtitle": "To ensures a smooth process for your business needs",
+            "step1": {
+                "title": "1. Submit Application",
+                "description": "Fill out required details and upload documents"
+            },
+            "step2": {
+                "title": "2. Review & Approval",
+                "description": "Majis team validates and processes your request"
+            },
+            "step3": {
+                "title": "3. Receive Digital Permit",
+                "description": "Approved applicants receive a QR-coded permit by email"
+            }
+        },
+        "services": {
+            "title": "You Can Request A Permit To Explore",
+            "subtitle": "Perfect for urgent travel needs or busy schedules",
+            "seawater": "Seawater Extraction",
+            "cooling": "COOLING WATER",
+            "potable": "POTABLE WATER",
+            "irrigation": "IRRIGATION WATER",
+            "process1": "PROCESS WATER",
+            "process2": "PROCESS WATER"
+        },
+        "footer": {
+            "technicalSupport": "Technical Support",
+            "allRightsReserved": "All right reserved",
+            "faq": "FAQ",
+            "privacy": "Policy Privacy",
+            "terms": "Terms & Conditions"
+        }
+    }
+}
