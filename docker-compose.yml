@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: gatepass
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: gatepass_user
+      MYSQL_PASSWORD: gatepass_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "mysql://gatepass_user:gatepass_password@db:3306/gatepass"
+      JWT_SECRET: "your-super-secret-jwt-key-change-this-in-production-12345"
+      NODE_ENV: production
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      SOHAR_PORT_MOCK_MODE: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
