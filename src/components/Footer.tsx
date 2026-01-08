@@ -2,7 +2,7 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-
+import LanguageSelector from "@/components/ui/LanguageSelector"
 export default function Footer() {
     const t = useTranslations('HomePage');
     const locale = useLocale();
@@ -13,10 +13,9 @@ export default function Footer() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
                     {/* Brand Section */}
                     <div className="max-w-xs">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">MAJIS Web</h3>
-                        <p className="text-gray-600 text-sm leading-relaxed">
-                            {t('footer.allRightsReserved')}
-                        </p>
+
+                        <LanguageSelector />
+
                     </div>
 
                     {/* Social Links */}
