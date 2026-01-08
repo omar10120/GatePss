@@ -24,41 +24,41 @@ export const Input: React.FC<InputProps> = ({
     return (
         <div className="w-full">
             {label && (
-                <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor={inputId} className="block text-[16px] font-normal text-[#222222] mb-2 font-['Rubik']">
                     {label}
                 </label>
             )}
             <div className="relative">
                 {leftIcon && (
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         {leftIcon}
                     </div>
                 )}
                 <input
                     id={inputId}
                     className={`
-                        block w-full rounded-lg border
-                        ${hasError ? 'border-danger-500 focus:ring-danger-500 focus:border-danger-500' : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'}
-                        ${leftIcon ? 'pl-10' : 'pl-3'}
-                        ${rightIcon ? 'pr-10' : 'pr-3'}
-                        py-2 text-gray-900 placeholder-gray-400
-                        focus:outline-none focus:ring-2
-                        disabled:bg-gray-100 disabled:cursor-not-allowed
+                        flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] px-4 py-4 
+                        text-[14px] font-['Rubik'] placeholder:text-[#747474] 
+                        focus:outline-none focus:ring-2 focus:ring-[#00B09C]/20 focus:border-[#00B09C] 
+                        transition-all disabled:cursor-not-allowed disabled:opacity-50
+                        ${hasError ? "border-danger-500 focus:ring-danger-500/20 focus:border-danger-500" : ""}
+                        ${leftIcon ? "pl-12" : ""}
+                        ${rightIcon ? "pr-12" : ""}
                         ${className}
                     `.trim()}
                     {...props}
                 />
                 {rightIcon && (
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                         {rightIcon}
                     </div>
                 )}
             </div>
             {error && (
-                <p className="mt-1 text-sm text-danger-600">{error}</p>
+                <p className="mt-1.5 text-[12px] text-danger-600 font-medium font-['Rubik']">{error}</p>
             )}
             {helperText && !error && (
-                <p className="mt-1 text-sm text-gray-500">{helperText}</p>
+                <p className="mt-1.5 text-[12px] text-gray-400 font-['Rubik']">{helperText}</p>
             )}
         </div>
     );
@@ -86,33 +86,43 @@ export const Select: React.FC<SelectProps> = ({
     return (
         <div className="w-full">
             {label && (
-                <label htmlFor={selectId} className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor={selectId} className="block text-[16px] font-normal text-[#222222] mb-2 font-['Rubik']">
                     {label}
                 </label>
             )}
-            <select
-                id={selectId}
-                className={`
-                    block w-full rounded-lg border
-                    ${hasError ? 'border-danger-500 focus:ring-danger-500 focus:border-danger-500' : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'}
-                    px-3 py-2 text-gray-900 focus:outline-none focus:ring-2
-                    disabled:bg-gray-100 disabled:cursor-not-allowed
-                    ${className}
-                `.trim()}
-                {...props}
-            >
-                {options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                        {option.label}
-                    </option>
-                ))}
-            </select>
+            <div className="relative">
+                <select
+                    id={selectId}
+                    className={`
+                        flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] px-4 py-4 
+                        text-[14px] font-['Rubik'] text-[#747474] appearance-none
+                        focus:outline-none focus:ring-2 focus:ring-[#00B09C]/20 focus:border-[#00B09C] 
+                        transition-all disabled:cursor-not-allowed disabled:opacity-50
+                        ${hasError ? "border-danger-500 focus:ring-danger-500/20 focus:border-danger-500" : ""}
+                        ${className}
+                    `.trim()}
+                    {...props}
+                >
+                    {options.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                    <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+            </div>
             {error && (
-                <p className="mt-1 text-sm text-danger-600">{error}</p>
+                <p className="mt-1.5 text-[12px] text-danger-600 font-medium font-['Rubik']">{error}</p>
             )}
             {helperText && !error && (
-                <p className="mt-1 text-sm text-gray-500">{helperText}</p>
+                <p className="mt-1.5 text-[12px] text-gray-400 font-['Rubik']">{helperText}</p>
             )}
         </div>
     );
 };
+
+
