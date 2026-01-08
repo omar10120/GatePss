@@ -96,6 +96,29 @@
             "faq": "FAQ",
             "privacy": "Policy Privacy",
             "terms": "Terms & Conditions"
+        },
+        "trackApplication": {
+            "title": "Get A Fast-Track Entry Permit",
+            "subtitle": "Perfect for urgent travel needs or busy schedules",
+            "inputLabel": "Application Number",
+            "inputPlaceholder": "Enter your Application Number",
+            "checkStatus": "Check Status"
+        },
+        "permitStatus": {
+            "rejectedTitle": "The Request Application Was Rejected",
+            "rejectedDescription": "The system informed you of the reason for the rejection via your Email, Please check it.",
+            "reviewTitle": "The Request Application Currently Under Review By SOHAR System",
+            "acceptedTitle": "The Request Application Was Accepted",
+            "acceptedDescription": "The system informed you with the Application Acception via your Email, Please check it."
+        },
+        "legal": {
+            "termsTitle": "Terms & Conditions",
+            "privacyTitle": "Privacy Policy",
+            "lorem": "Lorem ipsum dolor sit amet consectetur. Faucibus id massa semper molestie. Ut diam proin odio diam interdum ultrices ipsum dictum ullamcorper. Lacus elit blandit in sed nunc at. Eget non sed lobortis rhoncus sed amet leo arcu. Pellentesque risus interdum felis elementum eget quis imperdiet phasellus quis. Malesuada quam et lorem pellentesque consectetur. Id diam lectus lorem non in nunc. Ipsum sem maecenas purus odio aliquam. Nam tortor ac in adipiscing cras eget viverra bibendum. Lectus volutpat ac suspendisse sit. Est iaculis orci pulvinar nec consequat etiam phasellus dolor. Amet nec ultrices ut integer. Tempor ornare turpis varius arcu. Elit mattis sagittis vulputate aliquam egestas maecenas vitae vel. Lobortis eget massa id nunc ipsum vitae diam vestibulum. Quam praesent id sit semper mauris fermentum arcu consequat. Ipsum vitae sagittis in justo venenatis sed porttitor tortor porta. Risus volutpat et nibh orci arcu nascetur imperdiet. Cursus libero aenean auctor posuere id arcu. Tortor sed feugiat enim egestas aliquet orci massa mauris. Proin integer sed a orci ullamcorper proin venenatis. Sit purus tellus nunc semper elementum mauris ac.\n\nMolestie scelerisque urna etiam scelerisque. Diam elit est pretium posuere. Ultricies pulvinar nisi pulvinar malesuada. Gravida felis vitae habitasse ut. Sed egestas sed sodales amet velit nunc leo. Nunc risus aliquet sit consequat hendrerit aliquam ultricies nisl. Lacus et sagittis id mauris curabitur sed. Erat enim sed volutpat tortor rhoncus. Sagittis vitae faucibus ac at. Nec vel nulla in vel turpis aliquet arcu. Quis dolor nec sit nisi auctor ipsum suspendisse scelerisque urna. In maecenas nisl risus sit dignissim. Hac ornare metus rhoncus phasellus sagittis viverra turpis senectus. Nascetur ac id dictum aenean vitae. Pretium eget fringilla urna rutrum. Nec dui aenean arcu scelerisque donec vulputate. Congue venenatis quis non hac sed vitae. Phasellus praesent tincidunt varius nunc mauris suscipit. Aliquam ac rhoncus malesuada proin orci. Ornare nunc suspendisse quis tellus. Ornare eu nisl mauris neque tortor."
+        },
+        "faqPage": {
+            "title": "Frequent Asked Questions",
+            "subtitle": "Find quick answers to the most common questions about our services"
         }
     },
     "GatePassPage": {
