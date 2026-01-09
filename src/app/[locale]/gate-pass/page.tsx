@@ -42,10 +42,10 @@ export default function FAQPage() {
                             {/* Header Section */}
                             <div className="text-center mb-10 md:mb-16">
                                 <h2 className="text-3xl md:text-[48px] md:leading-[57px] font-medium text-[#0666A3] mb-4 font-['Rubik'] capitalize">
-                                    How It Works
+                                    {t('question')}
                                 </h2>
                                 <p className="text-[#1F1F1F] max-w-2xl mx-auto text-lg md:text-[24px] md:leading-[28px] font-['Rubik']">
-                                    Ensures a smooth process for your business needs
+                                    {t('answer')}
                                 </p>
                             </div>
 
@@ -62,8 +62,9 @@ export default function FAQPage() {
                                                 <path d="M20 12c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8" strokeDasharray="2 2" />
                                             </svg>
                                         ),
-                                        title: "1. Submit Application",
-                                        desc: "Fill out required details and upload documents"
+                                        // Fixed: Removed the {} from around the t() calls
+                                        title: t('step1_title'),
+                                        desc: t('step1_desc')
                                     },
                                     {
                                         icon: (
@@ -74,8 +75,8 @@ export default function FAQPage() {
                                                 <path d="M9 16l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
                                             </svg>
                                         ),
-                                        title: "2. Review & Approval",
-                                        desc: "Majis team validates and processes your request"
+                                        title: t('step2_title'),
+                                        desc: t('step2_desc')
                                     },
                                     {
                                         icon: (
@@ -88,8 +89,8 @@ export default function FAQPage() {
                                                 <circle cx="16" cy="14" r="3" stroke="white" />
                                             </svg>
                                         ),
-                                        title: "3. Receive Digital Permit",
-                                        desc: "Approved applicants receive a QR-coded permit by email"
+                                        title: t('step3_title'),
+                                        desc: t('step3_desc')
                                     }
                                 ].map((step, index) => (
                                     <div
