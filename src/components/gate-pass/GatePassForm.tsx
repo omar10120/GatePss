@@ -25,7 +25,7 @@ export const GatePassForm: React.FC = () => {
         setSuccess('');
 
         const formData = new FormData(e.currentTarget);
-        
+
         // Collect extra fields into a JSON object
         const extraFields: Record<string, any> = {
             nationality: formData.get('nationality'),
@@ -263,13 +263,15 @@ export const GatePassForm: React.FC = () => {
                 </div>
             </section>
 
-            {/* Confirmation and Submit */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-10 pt-4">
-                <label className="flex items-start gap-4 cursor-pointer group max-w-2xl">
+            {/* Confirmation and Submit Section */}
+            <div className="flex flex-col items-center gap-10 pt-10 w-full">
+
+                {/* Checkbox Wrapper - Aligned to the start/left */}
+                <label className="flex items-start gap-3 cursor-pointer group w-full max-w-4xl self-start">
                     <div className="relative flex items-center mt-1">
                         <input
                             type="checkbox"
-                            className="peer h-[30px] w-7 cursor-pointer appearance-none rounded border border-[#DADADA] checked:bg-[#00B09C] checked:border-[#00B09C] transition-all"
+                            className="peer h-6 w-6 cursor-pointer appearance-none rounded border-2 border-[#00B09C] checked:bg-[#00B09C] transition-all"
                             checked={confirmed}
                             onChange={(e) => setConfirmed(e.target.checked)}
                         />
@@ -288,18 +290,20 @@ export const GatePassForm: React.FC = () => {
                     </span>
                 </label>
 
+                {/* Submit Button - Centered */}
                 <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !confirmed}
                     className={`
-                        flex items-center justify-center px-12 py-6 bg-[#00B09C] text-white rounded-[68px] 
-                        text-[24px] font-medium font-['Rubik'] transition-all shadow-lg hover:shadow-xl 
-                        hover:bg-[#009686] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
-                        min-w-[311px] h-[66px] capitalize
-                    `.trim()}
+            flex items-center justify-center px-16 py-4 bg-[#00B09C] text-white rounded-full 
+            text-[22px] md:text-[28px] font-medium font-['Rubik'] transition-all shadow-md 
+            hover:shadow-xl hover:bg-[#009686] active:scale-[0.98] 
+            disabled:opacity-50 disabled:cursor-not-allowed
+            min-w-[320px] md:min-w-[440px] h-[70px] md:h-[84px]
+        `.trim()}
                 >
                     {loading ? (
-                        <svg className="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg className="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>

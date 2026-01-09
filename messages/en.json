@@ -175,6 +175,14 @@
             "chooseFile": "Choose File (PNG, JPG, PDF) max 1MB"
         },
         "confirmation": "I Confirm That I Have Reviewed All Information And Attachments In This Request, And I Am Fully Responsible For All Information That Contains.",
-        "submit": "Submit The Permit"
+        "submit": "Submit The Permit",
+        "question": "How It Works",
+        "answer": "Ensures a smooth process for your business needs",
+        "step1_title": "1. Submit Application",
+        "step1_desc": "Fill out required details and upload documents",
+        "step2_title": "2. Review & Approval",
+        "step2_desc": "Majis team validates and processes your request",
+        "step3_title": "3. Receive Digital Permit",
+        "step3_desc": "Approved applicants receive a QR-coded permit by email"
     }
 }
