@@ -119,6 +119,19 @@
         "faqPage": {
             "title": "Frequent Asked Questions",
             "subtitle": "Find quick answers to the most common questions about our services"
+        },
+        "aboutPage": {
+            "hero": {
+                "title": "Our Mission And Values",
+                "subtitle": "facilitating efficient permit access while upholding integrity, compliance, and customer satisfaction"
+            },
+            "mission": {
+                "experience": "Years of experience",
+                "title": "About us",
+                "description": "To be a global supplier of innovative water solutions enhancing values to our stakeholders.",
+                "section1": "Majis Industrial Services was established in 2006 with the business vision, “To be a global supplier of innovative water solutions enhancing value to our stakeholders”. Majis supplies sustainable eco-friendly water solutions to clients in Sohar Industrial Port Area (SIPA), Sohar Free Zone (SFZ) and Sohar Industrial City (SIC). ",
+                "section2": "Majis’ continued efforts in pursuing operational excellence, maximizing the utilization of the available capacity and maintaining excellent relationships with stakeholders."
+            }
         }
     },
     "GatePassPage": {
