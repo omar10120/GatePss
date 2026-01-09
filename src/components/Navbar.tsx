@@ -40,7 +40,7 @@ export default function Navbar() {
                         <Link href="#services" className="text-gray-700 hover:text-info-500 font-medium transition-colors">
                             {t('nav.services')}
                         </Link>
-                        <Link href="#about" className="text-gray-700 hover:text-info-500 font-medium transition-colors">
+                        <Link href={`/${locale}/about`} className="text-gray-700 hover:text-info-500 font-medium transition-colors">
                             {t('nav.about')}
                         </Link>
                         <Link href="#MAJIS" className="text-gray-700 hover:text-info-500 font-medium transition-colors">
