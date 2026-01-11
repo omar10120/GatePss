@@ -3,7 +3,7 @@ import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
 import { SoharPortClient } from '@/lib/sohar-port';
 import { sendRequestApprovalEmail } from '@/lib/email';
-import { ActionType } from '@prisma/client';
+import { ActionType } from '@/lib/enums';
 import { formatDate } from '@/utils/helpers';
 
 interface ApproveRequestBody {

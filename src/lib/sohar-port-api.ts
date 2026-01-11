@@ -1,6 +1,6 @@
 import axios from 'axios';
 import prisma from './prisma';
-import { ActionType } from '@prisma/client';
+import { ActionType } from '@/lib/enums';
 
 const SOHAR_PORT_API_URL = process.env.SOHAR_PORT_API_URL || '';
 const SOHAR_PORT_API_KEY = process.env.SOHAR_PORT_API_KEY || '';
