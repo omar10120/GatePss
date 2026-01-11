@@ -1,8 +1,12 @@
+import Footer from '@/components/Footer';
+import Navbar from '@/components/Navbar';
+
 import '../globals.css';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+
 
 export const metadata: Metadata = {
     title: 'Majis Gate Pass System - Sohar Port Access Control',
@@ -35,7 +39,9 @@ export default async function LocaleLayout({
             </head>
             <body>
                 <NextIntlClientProvider messages={messages}>
+                    <Navbar />
                     {children}
+                    <Footer />
                 </NextIntlClientProvider>
             </body>
         </html>

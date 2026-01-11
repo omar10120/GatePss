@@ -19,7 +19,6 @@ export const GatePassForm: React.FC = () => {
             setError('Please confirm the information is correct');
             return;
         }
-
         setLoading(true);
         setError('');
         setSuccess('');

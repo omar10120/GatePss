@@ -1,9 +1,8 @@
 'use client'
 import Image from 'next/image';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import HowtWork from '@/components/HowtWork';
+
+import HowtWork from '@/components/ui/HowtWork';
 import { useLocale } from 'next-intl';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -17,7 +16,6 @@ export default function HomePage() {
 
     return (
         <div className="min-h-screen bg-white">
-            <Navbar />
 
             {/* Hero Section */}
             <section className="relative min-h-[600px] md:min-h-[700px] flex items-center justify-center overflow-hidden">
@@ -57,9 +55,8 @@ export default function HomePage() {
                                 </svg>
                                 {t('actions.trackApplication')}
                             </Link>
-
                             <Link
-                                href={`/${locale}/gate-pass`}
+                                href={`/${locale}/RequestPermit`}
                                 className="inline-flex items-center justify-center gap-2 bg-info-500 hover:bg-green-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,7 +92,7 @@ export default function HomePage() {
                     {/* CTA Button */}
                     <div className="text-center py-6">
                         <Link
-                            href="/gate-pass"
+                            href="/RequestPermit"
                             className="inline-flex items-center justify-center gap-2 text-white px-12 py-4 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                             style={{ backgroundColor: '#14b8a6' }}
                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d9488'}
@@ -538,8 +535,7 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
-            <Footer />
-
+            0
         </div>
     );
 }

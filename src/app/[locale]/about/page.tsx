@@ -1,16 +1,12 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 
-export default function FAQPage() {
+export default function About() {
     const t = useTranslations('HomePage.aboutPage');
 
     return (
         <div className="min-h-screen bg-white">
-            <Navbar />
-
 
 
             <section
@@ -90,7 +86,7 @@ export default function FAQPage() {
                 </div>
             </main>
 
-            <Footer />
+
         </div>
     );
 }
