@@ -8,7 +8,7 @@ export default function Footer() {
     const locale = useLocale();
 
     return (
-        <footer className="bg-gray-50 pt-16 pb-8 border-t border-gray-100">
+        <footer className="bg-gray-50 pt-16 pb-8 border-t border-gray-100" id='footer'>
             <div className="container mx-auto px-4 lg:px-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
                     {/* Brand Section */}

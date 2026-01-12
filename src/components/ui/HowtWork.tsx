@@ -9,7 +9,7 @@ export default function Footer() {
     return (
         <>
             {/* How It Works Section */}
-            <section className="py-20 px-4 bg-gray-50/50">
+            <section className="py-20 px-4 bg-gray-50/50" id='howtowork'>
                 <div className="container mx-auto px-4 lg:px-6">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">{t('howItWorks.title')}</h2>
