@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { generateRequestNumber, validateEmail, validatePassportId } from '@/utils/helpers';
 import { sendRequestConfirmationEmail, sendAdminNotificationEmail } from '@/lib/email';
-import { ActionType, RequestType } from '@prisma/client';
+import { ActionType, RequestType } from '@/lib/enums';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         const passportIdImage = formData.get('passportIdImage') as File | null;
         const extraFieldsStr = formData.get('extraFields') as string;
 
-        // Validate required fields
+        // Validate required fields using BRD requirements
         const errors: string[] = [];
 
         if (!applicantName || applicantName.trim().length < 2) {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (!requestType || !['VISITOR', 'CONTRACTOR', 'EMPLOYEE', 'VEHICLE'].includes(requestType)) {
-            errors.push('Valid request type is required');
+            errors.push('Valid request type is required (VISITOR, CONTRACTOR, EMPLOYEE, or VEHICLE)');
         }
 
         if (!passportIdImage) {

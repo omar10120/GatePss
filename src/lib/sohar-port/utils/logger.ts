@@ -5,7 +5,7 @@
  */
 
 import prisma from '@/lib/prisma';
-import { ActionType } from '@prisma/client';
+import { ActionType } from '@/lib/enums';
 import { SoharPortActivityLog } from '../types';
 
 /**

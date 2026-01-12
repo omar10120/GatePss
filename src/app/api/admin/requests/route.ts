@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
-import { RequestStatus, RequestType } from '@prisma/client';
+import { RequestStatus, RequestType } from '@/lib/enums';
 
 export async function GET(request: NextRequest) {
     return requirePermission(request, 'MANAGE_REQUESTS', async (req, user) => {

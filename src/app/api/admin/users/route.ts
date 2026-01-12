@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
             const body = await req.json();
             const { name, email, password, role, permissionIds } = body;
 
-            // Validate input
+            // Validate input - BRD requirements
             const errors: string[] = [];
 
             if (!name || name.trim().length < 2) {
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
             }
 
             if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                errors.push('Valid email is required');
+                errors.push('Valid email address is required');
             }
 
             if (!password || password.length < 6) {
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
             }
 
             if (!role || !['SUPER_ADMIN', 'SUB_ADMIN'].includes(role)) {
-                errors.push('Valid role is required');
+                errors.push('Valid role is required (SUPER_ADMIN or SUB_ADMIN)');
             }
 
             if (errors.length > 0) {

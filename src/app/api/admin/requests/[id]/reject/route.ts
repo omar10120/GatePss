@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
 import { sendRequestRejectionEmail } from '@/lib/email';
-import { ActionType } from '@prisma/client';
+import { ActionType } from '@/lib/enums';
 
 export async function POST(
     request: NextRequest,
@@ -23,7 +23,7 @@ export async function POST(
             const body = await req.json();
             const { rejectionReason } = body;
 
-            // Validate rejection reason
+            // Validate rejection reason - BRD requirement: minimum 10 characters
             if (!rejectionReason || rejectionReason.trim().length < 10) {
                 return NextResponse.json(
                     { error: 'Validation Error', message: 'Rejection reason is required (minimum 10 characters)' },
@@ -43,6 +43,7 @@ export async function POST(
                 );
             }
 
+            // BRD requirement: Only pending requests can be rejected
             if (gateRequest.status !== 'PENDING') {
                 return NextResponse.json(
                     { error: 'Invalid Operation', message: 'Only pending requests can be rejected' },

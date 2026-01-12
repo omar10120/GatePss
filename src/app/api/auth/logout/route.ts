@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/middleware/api';
-import { ActionType } from '@prisma/client';
+import { ActionType } from '@/lib/enums';
 import prisma from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
