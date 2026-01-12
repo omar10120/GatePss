@@ -60,6 +60,14 @@ module.exports = {
                     600: '#16a34a',
                     700: '#15803d',
                 },
+                login: {
+                    start: '#71CFF5',
+                    mid: '#00B09C',
+                    end: '#0666A3',
+                },
+            },
+            backgroundImage: {
+                'login-gradient': 'linear-gradient(180deg, #71CFF5 0%, #00B09C 56.73%, #0666A3 100%)',
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],

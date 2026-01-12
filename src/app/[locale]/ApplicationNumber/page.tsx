@@ -2,9 +2,7 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import HowtWork from '@/components/HowtWork';
+import HowtWork from '@/components/ui/HowtWork';
 
 export default function TrackApplication() {
     const t = useTranslations('HomePage');
@@ -12,9 +10,8 @@ export default function TrackApplication() {
 
     return (
         <div className="min-h-screen bg-white">
-            <Navbar />
 
-            {/* Hero Section */}
+            {/* ApplicationNumber Section */}
             <section className="py-20 px-4 bg-white">
                 <div className="container mx-auto max-w-4xl text-center">
                     <h1 className="text-4xl md:text-5xl font-bold text-[#0571B6] mb-4">
@@ -46,7 +43,7 @@ export default function TrackApplication() {
 
             {/* How It Works Section */}
             <HowtWork />
-            <Footer />
+
         </div>
     );
 }

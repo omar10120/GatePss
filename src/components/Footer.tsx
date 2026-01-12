@@ -56,7 +56,7 @@ export default function Footer() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     {/* Left Side - Copyright */}
                     <div className="text-sm text-gray-600">
-                        {t('footer.technicalSupport')} <span style={{ color: '#14b8a6' }}>Pixel Tech</span>.©2025 {t('footer.allRightsReserved')}
+                        {t('footer.technicalSupport')} <span style={{ color: '#14b8a6' }}>Pixel Tech</span>.©2026 {t('footer.allRightsReserved')}
                     </div>
 
                     {/* Right Side - Navigation Links */}
@@ -64,10 +64,12 @@ export default function Footer() {
                         <Link href={`/${locale}/faq`} className="hover:text-gray-900 transition-colors">
                             {t('footer.faq')}
                         </Link>
-                        <Link href={`/${locale}/privacy-policy`} className="hover:text-gray-900 transition-colors">
+                        {/* <Link href={`/${locale}/privacy-policy`} className="hover:text-gray-900 transition-colors"> */}
+                        <Link href={`https://majis.om/privacy-policy/`} className="hover:text-gray-900 transition-colors">
                             {t('footer.privacy')}
                         </Link>
-                        <Link href={`/${locale}/terms-and-conditions`} className="hover:text-gray-900 transition-colors">
+                        {/* <Link href={`/${locale}/terms-and-conditions`} className="hover:text-gray-900 transition-colors"> */}
+                        <Link href={`https://majis.om/terms-and-conditions/`} className="hover:text-gray-900 transition-colors">
                             {t('footer.terms')}
                         </Link>
                     </div>

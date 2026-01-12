@@ -1,8 +1,7 @@
-import { useState } from 'react';
+
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter, usePathname } from '@/i18n/navigation';
+
 export default function LanguageSelector() {
     const locale = useLocale();
     const pathname = usePathname();

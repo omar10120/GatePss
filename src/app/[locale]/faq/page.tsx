@@ -1,19 +1,18 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import FAQAccordion from '@/components/FAQAccordion';
+
+import FAQAccordion from '@/components/ui/FAQAccordion';
 
 export default function FAQPage() {
     const t = useTranslations('HomePage.faqPage');
 
     return (
         <div className="min-h-screen bg-white">
-            <Navbar />
+
 
             <main className="py-20 px-4">
-                <div className="container mx-auto">
+                <div className="container mx-auto">``
                     {/* Header Section */}
                     <div className="text-center mb-16">
                         <div className="flex justify-center mb-6">
@@ -35,7 +34,7 @@ export default function FAQPage() {
                 </div>
             </main>
 
-            <Footer />
+
         </div>
     );
 }

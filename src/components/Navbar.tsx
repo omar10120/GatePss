@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
 import LanguageSelector from "@/components/ui/LanguageSelector"
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,12 +14,7 @@ export default function Navbar() {
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    const toggleLocale = () => {
-        const newLocale = locale === 'en' ? 'ar' : 'en';
-        // Replace the locale part of the pathname
-        const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
-        router.push(newPathname || `/${newLocale}`);
-    };
+
 
     return (
         <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -43,7 +38,8 @@ export default function Navbar() {
                         <Link href={`/${locale}/about`} className="text-gray-700 hover:text-info-500 font-medium transition-colors">
                             {t('nav.about')}
                         </Link>
-                        <Link href="#MAJIS" className="text-gray-700 hover:text-info-500 font-medium transition-colors">
+                        {/* <Link href="#MAJIS" className="text-gray-700 hover:text-info-500 font-medium transition-colors"> */}
+                        <Link href="https://majis.om/" className="text-gray-700 hover:text-info-500 font-medium transition-colors">
                             {t('nav.MAJIS')}
                         </Link>
                     </nav>
