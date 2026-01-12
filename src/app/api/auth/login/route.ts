@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyPassword, generateToken } from '@/lib/auth';
-import { ActionType } from '@prisma/client';
+import { ActionType } from '@/lib/enums';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { email, password } = body;
 
-        // Validate input
+        // Validate input - BRD requirement: Cannot login without filling all fields
         if (!email || !password) {
             return NextResponse.json(
-                { error: 'Validation Error', message: 'Email and password are required' },
+                { error: 'Validation Error', message: 'Cannot login without filling all fields' },
                 { status: 400 }
             );
         }
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Get user permissions
-        const permissions = user.permissions.map(up => up.permission.key);
+        const permissions = user.permissions.map((up: { permission: { key: string } }) => up.permission.key);
 
         // Generate JWT token
         const token = generateToken({

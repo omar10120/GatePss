@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
 import { hashPassword } from '@/lib/auth';
-import { ActionType, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { ActionType } from '@/lib/enums';
 
 // PUT /api/admin/users/[id] - Update user
 export async function PUT(
