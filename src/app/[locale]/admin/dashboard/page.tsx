@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
+import { useTranslations, useLocale } from 'next-intl';
+import Image from 'next/image';
+import LanguageSelector from '@/components/ui/LanguageSelector';
 
 interface DashboardData {
     summary: {
@@ -31,12 +34,12 @@ interface DashboardData {
 export default function AdminDashboardPage() {
     const router = useRouter();
     const pathname = usePathname();
-    const [locale, setLocale] = useState<'en' | 'ar'>('en');
+    const locale = useLocale() as 'en' | 'ar';
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<DashboardData | null>(null);
     const [user, setUser] = useState<any>(null);
-
     const [permissionDenied, setPermissionDenied] = useState(false);
+    const t = useTranslations('Admin.dashboard');
 
     // Helper function to check if user has a specific permission
     const hasPermission = (permissionKey: string) => {
@@ -44,75 +47,6 @@ export default function AdminDashboardPage() {
         if (user.role === 'SUPER_ADMIN') return true;
         return user.permissions?.includes(permissionKey) || false;
     };
-
-    const toggleLocale = () => {
-        setLocale(prev => prev === 'en' ? 'ar' : 'en');
-    };
-
-    const t = {
-        en: {
-            title: 'Dashboard',
-            welcome: 'Welcome back',
-            logout: 'Logout',
-            summary: 'Summary',
-            total: 'Total Requests',
-            approved: 'Approved',
-            rejected: 'Rejected',
-            pending: 'Pending',
-            byType: 'Requests by Type',
-            recent: 'Recent Requests',
-            viewAll: 'View All Requests',
-            requests: 'Requests',
-            users: 'Users',
-            logs: 'Activity Logs',
-            noRequests: 'No recent requests',
-            permissionDenied: 'You do not have permission to view the dashboard.',
-            contactAdmin: 'Please contact your administrator if you believe this is a mistake.',
-            types: {
-                VISITOR: 'Visitor',
-                CONTRACTOR: 'Contractor',
-                EMPLOYEE: 'Employee',
-                VEHICLE: 'Vehicle',
-            },
-            status: {
-                PENDING: 'Pending',
-                APPROVED: 'Approved',
-                REJECTED: 'Rejected',
-            },
-        },
-        ar: {
-            title: 'لوحة التحكم',
-            welcome: 'مرحباً بعودتك',
-            logout: 'تسجيل الخروج',
-            summary: 'ملخص',
-            total: 'إجمالي الطلبات',
-            approved: 'موافق عليها',
-            rejected: 'مرفوضة',
-            pending: 'قيد الانتظار',
-            byType: 'الطلبات حسب النوع',
-            recent: 'الطلبات الأخيرة',
-            viewAll: 'عرض جميع الطلبات',
-            requests: 'الطلبات',
-            users: 'المستخدمون',
-            logs: 'سجل النشاط',
-            noRequests: 'لا توجد طلبات حديثة',
-            permissionDenied: 'ليس لديك صلاحية لعرض لوحة التحكم.',
-            contactAdmin: 'يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.',
-            types: {
-                VISITOR: 'زائر',
-                CONTRACTOR: 'مقاول',
-                EMPLOYEE: 'موظف',
-                VEHICLE: 'مركبة',
-            },
-            status: {
-                PENDING: 'قيد الانتظار',
-                APPROVED: 'موافق عليه',
-                REJECTED: 'مرفوض',
-            },
-        },
-    };
-
-    const content = t[locale];
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -217,7 +151,7 @@ export default function AdminDashboardPage() {
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading dashboard...</p>
+                    <p className="text-gray-600">{t('loading')}</p>
                 </div>
             </div>
         );
@@ -242,13 +176,9 @@ export default function AdminDashboardPage() {
                     <div className="px-6 py-4">
                         <div className="flex items-center justify-between">
 
+                            <div></div>
                             <div className="flex items-center gap-4">
-                                <button
-                                    onClick={toggleLocale}
-                                    className="btn btn-secondary text-sm"
-                                >
-                                    {locale === 'en' ? 'العربية' : 'English'}
-                                </button>
+                                <LanguageSelector />
                                 <div className="text-right">
                                     <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                                     <p className="text-xs text-gray-500">{user?.role}</p>
@@ -257,7 +187,7 @@ export default function AdminDashboardPage() {
                                     onClick={handleLogout}
                                     className="btn btn-danger text-sm"
                                 >
-                                    {content.logout}
+                                    {t('logout')}
                                 </button>
                             </div>
                         </div>
@@ -267,7 +197,7 @@ export default function AdminDashboardPage() {
                 {/* Main Content */}
                 <main className="px-6 py-8">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        {content.welcome}, {user?.name}!
+                        {t('welcome')}, {user?.name}!
                     </h2>
 
                     {permissionDenied ? (
@@ -277,8 +207,8 @@ export default function AdminDashboardPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
-                            <p className="text-gray-500">{content.contactAdmin}</p>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('permissionDenied')}</h3>
+                            <p className="text-gray-500">{t('contactAdmin')}</p>
                         </div>
                     ) : (
                         <>
@@ -287,7 +217,7 @@ export default function AdminDashboardPage() {
                                 <div className="card">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.total}</p>
+                                            <p className="text-sm text-gray-600 mb-1">{t('total')}</p>
                                             <p className="text-3xl font-bold text-gray-900">{data?.summary.total || 0}</p>
                                         </div>
                                         <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
@@ -301,7 +231,7 @@ export default function AdminDashboardPage() {
                                 <div className="card">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.approved}</p>
+                                            <p className="text-sm text-gray-600 mb-1">{t('approved')}</p>
                                             <p className="text-3xl font-bold text-success-600">{data?.summary.approved || 0}</p>
                                         </div>
                                         <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center">
@@ -315,7 +245,7 @@ export default function AdminDashboardPage() {
                                 <div className="card">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.rejected}</p>
+                                            <p className="text-sm text-gray-600 mb-1">{t('rejected')}</p>
                                             <p className="text-3xl font-bold text-danger-600">{data?.summary.rejected || 0}</p>
                                         </div>
                                         <div className="w-12 h-12 bg-danger-100 rounded-lg flex items-center justify-center">
@@ -329,7 +259,7 @@ export default function AdminDashboardPage() {
                                 <div className="card">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.pending}</p>
+                                            <p className="text-sm text-gray-600 mb-1">{t('pending')}</p>
                                             <p className="text-3xl font-bold text-warning-600">{data?.summary.pending || 0}</p>
                                         </div>
                                         <div className="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center">
@@ -343,12 +273,12 @@ export default function AdminDashboardPage() {
 
                             {/* Requests by Type */}
                             <div className="card mb-8">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">{content.byType}</h3>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('byType')}</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {Object.entries(data?.byType || {}).map(([type, count]) => (
                                         <div key={type} className="text-center p-4 bg-gray-50 rounded-lg">
                                             <p className="text-2xl font-bold text-gray-900">{count}</p>
-                                            <p className="text-sm text-gray-600">{content.types[type as keyof typeof content.types]}</p>
+                                            <p className="text-sm text-gray-600">{t(`types.${type}`)}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -357,9 +287,9 @@ export default function AdminDashboardPage() {
                             {/* Recent Requests */}
                             <div className="card">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-semibold text-gray-900">{content.recent}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-900">{t('recent')}</h3>
                                     <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 text-sm font-medium">
-                                        {content.viewAll} →
+                                        {t('viewAll')} →
                                     </Link>
                                 </div>
 
@@ -385,11 +315,11 @@ export default function AdminDashboardPage() {
                                                         </td>
                                                         <td className="px-4 py-3 text-gray-900">{request.applicantName}</td>
                                                         <td className="px-4 py-3 text-gray-600">
-                                                            {content.types[request.requestType as keyof typeof content.types]}
+                                                            {t(`types.${request.requestType}`)}
                                                         </td>
                                                         <td className="px-4 py-3">
                                                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>
-                                                                {content.status[request.status as keyof typeof content.status]}
+                                                                {t(`status.${request.status}`)}
                                                             </span>
                                                         </td>
                                                         <td className="px-4 py-3 text-gray-600 text-sm">
@@ -401,7 +331,7 @@ export default function AdminDashboardPage() {
                                         </table>
                                     </div>
                                 ) : (
-                                    <p className="text-gray-500 text-center py-8">{content.noRequests}</p>
+                                    <p className="text-gray-500 text-center py-8">{t('noRequests')}</p>
                                 )}
                             </div>
                         </>
