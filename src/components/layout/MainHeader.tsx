@@ -4,16 +4,16 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
 
 interface MainHeaderProps {
     backgroundColor?: string;
     showShadow?: boolean;
 }
 
-export const MainHeader: React.FC<MainHeaderProps> = ({ 
+export const MainHeader: React.FC<MainHeaderProps> = ({
     backgroundColor = 'bg-white',
-    showShadow = true 
+    showShadow = true
 }) => {
     const t = useTranslations('HomePage');
     const locale = useLocale();

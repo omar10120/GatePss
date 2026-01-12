@@ -1,5 +1,4 @@
-import Footer from '@/components/Footer';
-import Navbar from '@/components/Navbar';
+import LayoutWrapper from '@/components/LayoutWrapper';
 
 import '../globals.css';
 import type { Metadata } from 'next';
@@ -39,9 +38,9 @@ export default async function LocaleLayout({
             </head>
             <body>
                 <NextIntlClientProvider messages={messages}>
-                    <Navbar />
-                    {children}
-                    <Footer />
+                    <LayoutWrapper>
+                        {children}
+                    </LayoutWrapper>
                 </NextIntlClientProvider>
             </body>
         </html>

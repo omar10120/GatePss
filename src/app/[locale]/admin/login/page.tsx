@@ -1,49 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
+import LanguageSelector from '@/components/ui/LanguageSelector';
+
 
 export default function AdminLoginPage() {
     const router = useRouter();
-    const [locale, setLocale] = useState<'en' | 'ar'>('en');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const t = useTranslations('HomePage.login');
+    const locale = useLocale();
 
-    const toggleLocale = () => {
-        setLocale(prev => prev === 'en' ? 'ar' : 'en');
-    };
 
-    const t = {
-        en: {
-            title: 'Sign In',
-            subtitle: 'Please login to continue to your account',
-            email: 'Email',
-            password: 'Password',
-            signIn: 'Login',
-            signingIn: 'Signing in...',
-            emailPlaceholder: 'Enter Your Email',
-            passwordPlaceholder: 'Enter your password',
-            leadership: 'Leadership-Focused',
-            administrative: 'Administrative',
-            description: 'expert with a knack for problem-solving and team coordination',
-        },
-        ar: {
-            title: 'تسجيل الدخول',
-            subtitle: 'يرجى تسجيل الدخول للمتابعة إلى حسابك',
-            email: 'البريد الإلكتروني',
-            password: 'كلمة المرور',
-            signIn: 'تسجيل الدخول',
-            signingIn: 'جاري تسجيل الدخول...',
-            emailPlaceholder: 'أدخل بريدك الإلكتروني',
-            passwordPlaceholder: 'أدخل كلمة المرور',
-            leadership: 'القيادة',
-            administrative: 'الإدارية',
-            description: 'خبير مع موهبة في حل المشكلات وتنسيق الفريق',
-        },
-    };
-
-    const content = t[locale];
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -85,7 +57,7 @@ export default function AdminLoginPage() {
     return (
         <div className="min-h-screen flex" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             {/* Left Section - Gradient Background */}
-            <div 
+            <div
                 className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center px-12 text-white"
                 style={{
                     background: 'linear-gradient(to bottom, #14b8a6, #0ea5e9)',
@@ -93,24 +65,26 @@ export default function AdminLoginPage() {
             >
                 {/* Icon */}
                 <div className="mb-12">
-                    <svg className="w-24 h-24" fill="none" stroke="white" viewBox="0 0 24 24" strokeWidth={1.5}>
-                        <circle cx="12" cy="12" r="10" strokeWidth={2} />
-                        <path d="M12 2v20M2 12h20" strokeWidth={2} />
-                        <path d="M12 2l8 8-8 8-8-8z" strokeWidth={1.5} strokeLinecap="round" />
-                    </svg>
+                    <Image
+                        src="/images/svg/Pipe_light.svg"
+                        alt="Logo"
+                        width={80}
+                        height={80}
+                        className="object-contain"
+                        priority
+                    />
                 </div>
 
                 {/* Main Text */}
-                <h1 className="text-5xl font-bold mb-4 text-center">
-                    {content.leadership}
-                </h1>
-                <h2 className="text-5xl font-bold mb-8 text-center">
-                    {content.administrative}
+
+                <h2 className="text-4xl font-bold mb-8 text-center">
+                    {t('leftTitle')}
+
                 </h2>
 
                 {/* Description */}
                 <p className="text-xl text-center max-w-md leading-relaxed">
-                    {content.description}
+                    {t('leftDescription')}
                 </p>
             </div>
 
@@ -120,31 +94,28 @@ export default function AdminLoginPage() {
                     {/* Logo */}
                     <div className="flex items-center justify-center gap-3 mb-8">
                         <div className="relative w-16 h-16">
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-blue-500 to-green-500 rounded-lg transform rotate-12"></div>
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-green-400 rounded-lg flex items-center justify-center">
-                                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-                                </svg>
-                            </div>
+
+                            <Image
+                                src="/images/Logo.png"
+                                alt="Logo"
+                                width={160}
+                                height={80}
+                                className="object-contain"
+                                priority
+                            />
                         </div>
-                        <div>
-                            <div className="text-sm font-medium" style={{ color: '#1e3a5f' }}>
-                                {locale === 'ar' ? 'مجيس' : 'مجيس'}
-                            </div>
-                            <div className="text-xl font-bold" style={{ color: '#1e3a5f' }}>
-                                MAJIS
-                            </div>
-                        </div>
+
                     </div>
 
                     {/* Title */}
                     <h2 className="text-3xl font-bold mb-2 text-center" style={{ color: '#1e3a5f' }}>
-                        {content.title}
+                        {t('signIn')}
                     </h2>
 
                     {/* Subtitle */}
                     <p className="text-gray-600 text-center mb-8">
-                        {content.subtitle}
+                        {t('signInSubtitle')}
+
                     </p>
 
                     {/* Error Message */}
@@ -159,7 +130,7 @@ export default function AdminLoginPage() {
                         {/* Email Input */}
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                {content.email}
+                                {t('emailLabel')}
                             </label>
                             <div className="relative">
                                 <input
@@ -168,7 +139,7 @@ export default function AdminLoginPage() {
                                     name="email"
                                     required
                                     className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                                    placeholder={content.emailPlaceholder}
+                                    placeholder={t('emailPlaceholder')}
                                     autoComplete="email"
                                 />
                                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -182,7 +153,7 @@ export default function AdminLoginPage() {
                         {/* Password Input */}
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                {content.password}
+                                {t('passwordLabel')}
                             </label>
                             <div className="relative">
                                 <input
@@ -191,7 +162,7 @@ export default function AdminLoginPage() {
                                     name="password"
                                     required
                                     className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                                    placeholder={content.passwordPlaceholder}
+                                    placeholder={t('passwordPlaceholder')}
                                     autoComplete="current-password"
                                 />
                                 <button
@@ -222,37 +193,19 @@ export default function AdminLoginPage() {
                             onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#0d9488')}
                             onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#14b8a6')}
                         >
-                            {loading ? content.signingIn : content.signIn}
+                            {loading ? t('signingIn') : t('signIn')}
                         </button>
                     </form>
 
                     {/* Language Selector */}
                     <div className="mt-8 flex items-center justify-center gap-2">
-                        <button
-                            onClick={toggleLocale}
-                            className="flex items-center gap-2 text-gray-700 hover:text-teal-600 transition-colors"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                            </svg>
-                            <span className="text-sm font-medium">{locale === 'en' ? 'English' : 'العربية'}</span>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+                        <LanguageSelector />
                     </div>
 
                     {/* Copyright */}
                     <div className="mt-8 text-center text-sm text-gray-600">
-                        {locale === 'en' ? (
-                            <>
-                                Design with <span style={{ color: '#14b8a6' }}>Pixel Tech</span>.©2025 All right reserved
-                            </>
-                        ) : (
-                            <>
-                                تصميم بواسطة <span style={{ color: '#14b8a6' }}>بيكسل تك</span>.©2025 جميع الحقوق محفوظة
-                            </>
-                        )}
+                        {/* Design with <span style={{ color: '#14b8a6' }}>Pixel Tech</span>.©2026 All right reserved */}
+                        {t('CopyRights')} <span style={{ color: '#14b8a6' }}>{t('Ctitle')}</span> {t('copyright')}
                     </div>
                 </div>
             </div>

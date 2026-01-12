@@ -1,22 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 
-interface Request {
+interface ActivityLog {
     id: number;
-    requestNumber: string;
-    applicantName: string;
-    applicantEmail: string;
-    passportIdNumber: string;
-    purposeOfVisit: string;
-    dateOfVisit: string;
-    requestType: string;
-    status: string;
-    createdAt: string;
+    timestamp: string;
+    userId: number | null;
+    actionType: string;
+    actionPerformed: string;
+    affectedEntityType: string | null;
+    affectedEntityId: number | null;
+    details: string | null;
+    user: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
 }
 
 interface Pagination {
@@ -26,17 +28,16 @@ interface Pagination {
     totalPages: number;
 }
 
-export default function AdminRequestsPage() {
+export default function AdminActivityPage() {
     const router = useRouter();
     const pathname = usePathname();
     const [locale, setLocale] = useState<'en' | 'ar'>('en');
     const [loading, setLoading] = useState(true);
-    const [requests, setRequests] = useState<Request[]>([]);
+    const [logs, setLogs] = useState<ActivityLog[]>([]);
     const [pagination, setPagination] = useState<Pagination | null>(null);
     const [user, setUser] = useState<any>(null);
     const [filters, setFilters] = useState({
-        status: '',
-        requestType: '',
+        actionType: '',
         search: '',
         page: 1,
     });
@@ -56,72 +57,67 @@ export default function AdminRequestsPage() {
 
     const t = {
         en: {
-            title: 'Gate Pass Requests',
+            title: 'Activity Logs',
             dashboard: 'Dashboard',
             requests: 'Requests',
             users: 'Users',
             logs: 'Activity Logs',
             logout: 'Logout',
-            search: 'Search by name, email, or request number...',
-            filterStatus: 'Filter by Status',
+            search: 'Search in actions...',
             filterType: 'Filter by Type',
-            allStatuses: 'All Statuses',
             allTypes: 'All Types',
             showing: 'Showing',
             of: 'of',
             results: 'results',
             previous: 'Previous',
             next: 'Next',
-            noRequests: 'No requests found',
-            viewDetails: 'View Details',
-            permissionDenied: 'You do not have permission to view requests.',
+            noLogs: 'No activity logs found',
+            permissionDenied: 'You do not have permission to view activity logs.',
             contactAdmin: 'Please contact your administrator if you believe this is a mistake.',
-            types: {
-                VISITOR: 'Visitor',
-                CONTRACTOR: 'Contractor',
-                EMPLOYEE: 'Employee',
-                VEHICLE: 'Vehicle',
-            },
-            status: {
-                PENDING: 'Pending',
-                APPROVED: 'Approved',
-                REJECTED: 'Rejected',
+            timestamp: 'Timestamp',
+            user: 'User',
+            action: 'Action',
+            type: 'Type',
+            system: 'System',
+            actionTypes: {
+                REQUEST_MANAGEMENT: 'Request Management',
+                USER_MANAGEMENT: 'User Management',
+                SYSTEM_INTEGRATION: 'System Integration',
+                AUTH: 'Authentication',
             },
         },
         ar: {
-            title: 'طلبات تصاريح البوابة',
+            title: 'سجل النشاط',
             dashboard: 'لوحة التحكم',
             requests: 'الطلبات',
             users: 'المستخدمون',
             logs: 'سجل النشاط',
             logout: 'تسجيل الخروج',
-            search: 'البحث بالاسم أو البريد الإلكتروني أو رقم الطلب...',
-            filterStatus: 'تصفية حسب الحالة',
+            search: 'البحث في الإجراءات...',
             filterType: 'تصفية حسب النوع',
-            allStatuses: 'جميع الحالات',
             allTypes: 'جميع الأنواع',
             showing: 'عرض',
             of: 'من',
             results: 'نتيجة',
             previous: 'السابق',
             next: 'التالي',
-            noRequests: 'لم يتم العثور على طلبات',
-            viewDetails: 'عرض التفاصيل',
-            permissionDenied: 'ليس لديك صلاحية لعرض الطلبات.',
+            noLogs: 'لم يتم العثور على سجلات نشاط',
+            permissionDenied: 'ليس لديك صلاحية لعرض سجلات النشاط.',
             contactAdmin: 'يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.',
-            types: {
-                VISITOR: 'زائر',
-                CONTRACTOR: 'مقاول',
-                EMPLOYEE: 'موظف',
-                VEHICLE: 'مركبة',
-            },
-            status: {
-                PENDING: 'قيد الانتظار',
-                APPROVED: 'موافق عليه',
-                REJECTED: 'مرفوض',
+            timestamp: 'الوقت',
+            user: 'المستخدم',
+            action: 'الإجراء',
+            type: 'النوع',
+            system: 'النظام',
+            actionTypes: {
+                REQUEST_MANAGEMENT: 'إدارة الطلبات',
+                USER_MANAGEMENT: 'إدارة المستخدمين',
+                SYSTEM_INTEGRATION: 'تكامل النظام',
+                AUTH: 'المصادقة',
             },
         },
     };
+
 
     const content = t[locale];
 
@@ -160,21 +156,20 @@ export default function AdminRequestsPage() {
             })
             .catch(err => console.error('Error refreshing user data:', err));
 
-        fetchRequests(token);
+        fetchLogs(token);
     }, [filters]);
 
-    const fetchRequests = async (token: string) => {
+    const fetchLogs = async (token: string) => {
         setLoading(true);
         setPermissionDenied(false);
         try {
             const params = new URLSearchParams();
-            if (filters.status) params.append('status', filters.status);
-            if (filters.requestType) params.append('requestType', filters.requestType);
+            if (filters.actionType) params.append('actionType', filters.actionType);
             if (filters.search) params.append('search', filters.search);
             params.append('page', filters.page.toString());
-            params.append('limit', '20');
+            params.append('limit', '50');
 
-            const response = await fetch(`/api/admin/requests?${params}`, {
+            const response = await fetch(`/api/admin/logs?${params}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
@@ -186,14 +181,14 @@ export default function AdminRequestsPage() {
             }
 
             if (!response.ok) {
-                throw new Error('Failed to fetch requests');
+                throw new Error('Failed to fetch logs');
             }
 
             const result = await response.json();
-            setRequests(result.data.requests);
+            setLogs(result.data.logs);
             setPagination(result.data.pagination);
         } catch (error) {
-            console.error('Error fetching requests:', error);
+            console.error('Error fetching logs:', error);
         } finally {
             setLoading(false);
         }
@@ -218,19 +213,6 @@ export default function AdminRequestsPage() {
         router.push('/admin/login');
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'APPROVED':
-                return 'bg-success-100 text-success-700';
-            case 'REJECTED':
-                return 'bg-danger-100 text-danger-700';
-            case 'PENDING':
-                return 'bg-warning-100 text-warning-700';
-            default:
-                return 'bg-gray-100 text-gray-700';
-        }
-    };
-
     const handleFilterChange = (key: string, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
     };
@@ -239,12 +221,27 @@ export default function AdminRequestsPage() {
         setFilters(prev => ({ ...prev, page: newPage }));
     };
 
-    if (loading && requests.length === 0) {
+    const getActionTypeColor = (actionType: string) => {
+        switch (actionType) {
+            case 'REQUEST_MANAGEMENT':
+                return 'bg-primary-100 text-primary-700';
+            case 'USER_MANAGEMENT':
+                return 'bg-warning-100 text-warning-700';
+            case 'SYSTEM_INTEGRATION':
+                return 'bg-success-100 text-success-700';
+            case 'AUTH':
+                return 'bg-gray-100 text-gray-700';
+            default:
+                return 'bg-gray-100 text-gray-700';
+        }
+    };
+
+    if (loading && logs.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading requests...</p>
+                    <p className="text-gray-600">Loading activity logs...</p>
                 </div>
             </div>
         );
@@ -309,7 +306,7 @@ export default function AdminRequestsPage() {
                         <>
                             {/* Filters */}
                             <div className="card mb-6">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <input
                                             type="text"
@@ -321,77 +318,57 @@ export default function AdminRequestsPage() {
                                     </div>
                                     <div>
                                         <select
-                                            value={filters.status}
-                                            onChange={(e) => handleFilterChange('status', e.target.value)}
-                                            className="input"
-                                        >
-                                            <option value="">{content.allStatuses}</option>
-                                            <option value="PENDING">{content.status.PENDING}</option>
-                                            <option value="APPROVED">{content.status.APPROVED}</option>
-                                            <option value="REJECTED">{content.status.REJECTED}</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <select
-                                            value={filters.requestType}
-                                            onChange={(e) => handleFilterChange('requestType', e.target.value)}
+                                            value={filters.actionType}
+                                            onChange={(e) => handleFilterChange('actionType', e.target.value)}
                                             className="input"
                                         >
                                             <option value="">{content.allTypes}</option>
-                                            <option value="VISITOR">{content.types.VISITOR}</option>
-                                            <option value="CONTRACTOR">{content.types.CONTRACTOR}</option>
-                                            <option value="EMPLOYEE">{content.types.EMPLOYEE}</option>
-                                            <option value="VEHICLE">{content.types.VEHICLE}</option>
+                                            <option value="REQUEST_MANAGEMENT">{content.actionTypes.REQUEST_MANAGEMENT}</option>
+                                            <option value="USER_MANAGEMENT">{content.actionTypes.USER_MANAGEMENT}</option>
+                                            <option value="SYSTEM_INTEGRATION">{content.actionTypes.SYSTEM_INTEGRATION}</option>
+                                            <option value="AUTH">{content.actionTypes.AUTH}</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Requests Table */}
+                            {/* Logs Table */}
                             <div className="card">
-                                {requests.length > 0 ? (
+                                {logs.length > 0 ? (
                                     <>
                                         <div className="overflow-x-auto">
                                             <table className="w-full">
                                                 <thead className="bg-gray-50 border-b border-gray-200">
                                                     <tr>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Request #</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applicant</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visit Date</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.timestamp}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.user}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.type}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.action}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-200">
-                                                    {requests.map((request) => (
-                                                        <tr key={request.id} className="hover:bg-gray-50">
-                                                            <td className="px-4 py-3">
-                                                                <Link href={`/admin/requests/${request.id}`} className="text-info-500 hover:text-primary-700 font-medium">
-                                                                    {request.requestNumber}
-                                                                </Link>
-                                                            </td>
-                                                            <td className="px-4 py-3 text-gray-900">{request.applicantName}</td>
-                                                            <td className="px-4 py-3 text-gray-600">{request.applicantEmail}</td>
-                                                            <td className="px-4 py-3 text-gray-600">
-                                                                {content.types[request.requestType as keyof typeof content.types]}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-gray-600 text-sm">
-                                                                {new Date(request.dateOfVisit).toLocaleDateString()}
+                                                    {logs.map((log) => (
+                                                        <tr key={log.id} className="hover:bg-gray-50">
+                                                            <td className="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">
+                                                                {new Date(log.timestamp).toLocaleString()}
                                                             </td>
                                                             <td className="px-4 py-3">
-                                                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>
-                                                                    {content.status[request.status as keyof typeof content.status]}
+                                                                {log.user ? (
+                                                                    <div>
+                                                                        <p className="text-gray-900 font-medium">{log.user.name}</p>
+                                                                        <p className="text-xs text-gray-500">{log.user.email}</p>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="text-gray-500 italic">{content.system}</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getActionTypeColor(log.actionType)}`}>
+                                                                    {content.actionTypes[log.actionType as keyof typeof content.actionTypes] || log.actionType}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-4 py-3">
-                                                                <Link
-                                                                    href={`/admin/requests/${request.id}`}
-                                                                    className="text-info-500 hover:text-primary-700 text-sm font-medium"
-                                                                >
-                                                                    {content.viewDetails}
-                                                                </Link>
+                                                            <td className="px-4 py-3 text-gray-900">
+                                                                {log.actionPerformed}
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -425,7 +402,7 @@ export default function AdminRequestsPage() {
                                         )}
                                     </>
                                 ) : (
-                                    <p className="text-gray-500 text-center py-12">{content.noRequests}</p>
+                                    <p className="text-gray-500 text-center py-12">{content.noLogs}</p>
                                 )}
                             </div>
                         </>

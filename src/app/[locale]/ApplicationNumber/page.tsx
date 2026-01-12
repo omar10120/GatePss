@@ -11,7 +11,7 @@ export default function TrackApplication() {
     return (
         <div className="min-h-screen bg-white">
 
-            {/* Hero Section */}
+            {/* ApplicationNumber Section */}
             <section className="py-20 px-4 bg-white">
                 <div className="container mx-auto max-w-4xl text-center">
                     <h1 className="text-4xl md:text-5xl font-bold text-[#0571B6] mb-4">

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
 
 export const MainFooter: React.FC = () => {
     const t = useTranslations('HomePage');
@@ -58,7 +58,7 @@ export const MainFooter: React.FC = () => {
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     {/* Left Side - Copyright */}
                     <div className="text-[14px] leading-[16px] text-[#92989F] font-['Rubik'] text-center tracking-[0.25px]">
-                        {t('footer.technicalSupport')} Pixel Tech.©2025 {t('footer.allRightsReserved')}
+                        {t('footer.technicalSupport')} Pixel Tech.©2026 {t('footer.allRightsReserved')}
                     </div>
 
                     {/* Right Side - Navigation Links */}

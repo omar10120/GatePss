@@ -120,6 +120,20 @@
             "title": "الأسئلة الشائعة",
             "subtitle": "اعثر على إجابات سريعة للأسئلة الأكثر شيوعاً حول خدماتنا"
         },
+        "login": {
+            "leftTitle": "إدارة تركز على القيادة",
+            "leftDescription": "خبير في حل المشكلات وتنسيق الفريق",
+            "signIn": "تسجيل الدخول",
+            "signInSubtitle": "يرجى تسجيل الدخول للمتابعة إلى حسابك",
+            "emailLabel": "البريد الإلكتروني",
+            "emailPlaceholder": "أدخل بريدك الإلكتروني",
+            "passwordLabel": "كلمة المرور",
+            "passwordPlaceholder": "********",
+            "loginButton": "دخول",
+            "signingIn": "تسجيل دخول...",
+            "Ctitle": "Pixel Tech",
+            "CopyRights": "صمم بواسطة"
+        },
         "aboutPage": {
             "hero": {
                 "title": "مهمتنا وقيمنا",

@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import FAQAccordion from '@/components/FAQAccordion';
+import FAQAccordion from '@/components/ui/FAQAccordion';
 
 export default function FAQPage() {
     const t = useTranslations('HomePage.faqPage');

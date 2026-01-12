@@ -120,6 +120,21 @@
             "title": "Frequent Asked Questions",
             "subtitle": "Find quick answers to the most common questions about our services"
         },
+        "login": {
+            "leftTitle": "Leadership-Focused Administrative",
+            "leftDescription": "expert with a knack for problem-solving and team coordination",
+            "signIn": "Sign In",
+            "signInSubtitle": "Please login to continue to your account",
+            "emailLabel": "Email",
+            "emailPlaceholder": "Enter Your Email",
+            "passwordLabel": "Password",
+            "passwordPlaceholder": "********",
+            "loginButton": "Login",
+            "signingIn": "signing In...",
+            "copyright": "@2026 All right reserved",
+            "Ctitle": "Pixel Tech",
+            "CopyRights": "Design with"
+        },
         "aboutPage": {
             "hero": {
                 "title": "Our Mission And Values",
