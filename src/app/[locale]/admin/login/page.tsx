@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import LanguageSelector from '@/components/ui/LanguageSelector';
-
+import VerifyIdentity from '@/components/ui/VerifyIdentity';
 
 export default function AdminLoginPage() {
     const router = useRouter();
@@ -204,9 +204,11 @@ export default function AdminLoginPage() {
 
                     {/* Copyright */}
                     <div className="mt-8 text-center text-sm text-gray-600">
-                        {/* Design with <span style={{ color: '#14b8a6' }}>Pixel Tech</span>.©2026 All right reserved */}
                         {t('CopyRights')} <span style={{ color: '#14b8a6' }}>{t('Ctitle')}</span> {t('copyright')}
                     </div>
+
+                    {/* <VerifyIdentity isLoading={loading} onVerify={() => { }} onResend={() => { }} onClose={() => { }} /> */}
+
                 </div>
             </div>
         </div>

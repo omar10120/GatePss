@@ -133,7 +133,14 @@
             "signingIn": "signing In...",
             "copyright": "@2026 All right reserved",
             "Ctitle": "Pixel Tech",
-            "CopyRights": "Design with"
+            "CopyRights": "Design with",
+            "verify": {
+                "title": "Verifying Your Identity",
+                "subtitle": "We Sent an OTP code to your Email, Type it",
+                "verifyButton": "Verify",
+                "verifying": "Verifying...",
+                "resendLink": "Resend again"
+            }
         },
         "aboutPage": {
             "hero": {

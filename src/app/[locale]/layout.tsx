@@ -35,6 +35,7 @@ export default async function LocaleLayout({
         <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             <head>
                 <link rel="icon" href="/favicon.ico" />
+
             </head>
             <body>
                 <NextIntlClientProvider messages={messages}>

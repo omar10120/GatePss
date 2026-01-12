@@ -132,7 +132,15 @@
             "loginButton": "دخول",
             "signingIn": "تسجيل دخول...",
             "Ctitle": "Pixel Tech",
-            "CopyRights": "صمم بواسطة"
+            "copyright": "حقوق الطبع و النشر محفوظة",
+            "CopyRights": "صمم بواسطة",
+            "verify": {
+                "title": "التحقق من هويتك",
+                "subtitle": "لقد أرسلنا رمز OTP إلى بريدك الإلكتروني، يرجى كتابته",
+                "verifyButton": "تحقق",
+                "verifying": "جاري التحقق...",
+                "resendLink": "إعادة الإرسال مرة أخرى"
+            }
         },
         "aboutPage": {
             "hero": {
