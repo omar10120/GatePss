@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
-import Header from '../dashboard/components/Header';
+import Header from '../components/Header';
 
 interface ActivityLog {
     id: number;

@@ -7,11 +7,11 @@ import { getSidebarItems } from '@/config/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 
 
-import { KPICards } from './components/KPICards';
-import { LatestRequests } from './components/LatestRequests';
-import { VisitorsApplicationsCard } from './components/VisitorsApplicationsCard';
-import { ActivitiesOfAction } from './components/ActivitiesOfAction';
-import Header from './components/Header';
+import { KPICards } from '../components/KPICards';
+import { LatestRequests } from '../components/LatestRequests';
+import { VisitorsApplicationsCard } from '../components/VisitorsApplicationsCard';
+import { ActivitiesOfAction } from '../components/ActivitiesOfAction';
+import Header from '../components/Header';
 
 interface DashboardData {
     summary: {
