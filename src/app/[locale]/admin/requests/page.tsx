@@ -71,27 +71,6 @@ export default function AdminRequestsPage() {
             setUser(JSON.parse(userData));
         }
 
-        // Fetch fresh user data
-        fetch('/api/auth/me', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    setUser(data.data.user);
-                    localStorage.setItem('user', JSON.stringify(data.data.user));
-                } else {
-                    if (data.error === 'Unauthorized' || data.error === 'Forbidden') {
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                        router.push('/admin/login');
-                    }
-                }
-            })
-            .catch(err => console.error('Error refreshing user data:', err));
-
         fetchRequests(token);
     }, [filters]);
 
@@ -119,14 +98,26 @@ export default function AdminRequestsPage() {
             }
 
             if (!response.ok) {
-                throw new Error('Failed to fetch requests');
+                const errorData = await response.json().catch(() => ({ message: 'Failed to fetch requests' }));
+                throw new Error(errorData.message || errorData.error || 'Failed to fetch requests');
             }
 
             const result = await response.json();
-            setRequests(result.data.requests);
-            setPagination(result.data.pagination);
-        } catch (error) {
+            
+            // Handle successful response with empty data
+            if (result.success && result.data) {
+                setRequests(result.data.requests || []);
+                setPagination(result.data.pagination || null);
+            } else {
+                // If response is not in expected format, set empty state
+                setRequests([]);
+                setPagination(null);
+            }
+        } catch (error: any) {
             console.error('Error fetching requests:', error);
+            // Set empty state on error so UI can still render
+            setRequests([]);
+            setPagination(null);
         } finally {
             setLoading(false);
         }

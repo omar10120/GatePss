@@ -21,7 +21,6 @@ model User {
   otpCode       String?   @map("otp_code")
   otpExpiresAt  DateTime? @map("otp_expires_at")
   createdAt     DateTime  @default(now()) @map("created_at")
-  createdRequests    Request[]        @relation("CreatedBy")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
   // Relations
@@ -67,7 +66,6 @@ model Request {
   dateOfVisit                DateTime      @map("date_of_visit")
   requestType                String        @map("request_type") // RequestType: VISITOR | CONTRACTOR | EMPLOYEE | VEHICLE
   status                     String        @default("PENDING") // RequestStatus: PENDING | APPROVED | REJECTED
-  createdById                Int?          @map("created_by")
   rejectionReason            String?       @db.Text @map("rejection_reason")
   createdAt                  DateTime      @default(now()) @map("created_at")
   updatedAt                  DateTime      @updatedAt @map("updated_at")
@@ -79,7 +77,6 @@ model Request {
 
   // Relations
   approvedBy User?         @relation("ApprovedBy", fields: [approvedById], references: [id])
-  createdBy  User?         @relation("CreatedBy", fields: [createdById], references: [id])
 
   uploads    Upload[]
 
