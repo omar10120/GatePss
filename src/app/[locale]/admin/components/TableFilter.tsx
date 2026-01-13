@@ -12,8 +12,12 @@ interface TableFilterProps {
     currentFilters: {
         search: string;
         status: string;
-        date: string;
+        date?: string;
     };
+    // New props for customization
+    statusOptions?: Array<{ value: string; label: string }>;
+    statusLabel?: string;
+    hideDate?: boolean;
 }
 
 export const TableFilter: React.FC<TableFilterProps> = ({
@@ -22,10 +26,22 @@ export const TableFilter: React.FC<TableFilterProps> = ({
     onStatusChange,
     onReset,
     currentFilters,
+    statusOptions,
+    statusLabel,
+    hideDate = false,
 }) => {
     const t = useTranslations('Admin.requests');
     const locale = useLocale();
     const isRtl = locale === 'ar';
+
+    // Default status options if not provided
+    const defaultStatusOptions = [
+        { value: "PENDING", label: "Pending" },
+        { value: "APPROVED", label: "Approved" },
+        { value: "REJECTED", label: "Rejected" },
+    ];
+
+    const optionsToRender = statusOptions || defaultStatusOptions;
 
     return (
         <div className="bg-white rounded-[12px] border border-gray-100 flex items-center h-[60px] overflow-hidden shadow-sm mb-6">
@@ -53,22 +69,24 @@ export const TableFilter: React.FC<TableFilterProps> = ({
             </div>
 
             {/* Date Dropdown */}
-            <div className={`flex items-center px-6 h-full border-l border-gray-100 min-w-[140px] ${isRtl ? 'border-r border-l-0' : 'border-l'}`}>
-                <select
-                    value={currentFilters.date}
-                    onChange={(e) => onDateChange(e.target.value)}
-                    className="bg-transparent border-none outline-none text-gray-900 text-[14px] font-bold appearance-none cursor-pointer w-full"
-                >
-                    <option value="">{t('date')}</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="this_week">This Week</option>
-                    <option value="this_month">This Month</option>
-                </select>
-                <svg className="w-4 h-4 text-gray-900 ml-2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M6 9l6 6 6-6"></path>
-                </svg>
-            </div>
+            {!hideDate && (
+                <div className={`flex items-center px-6 h-full border-l border-gray-100 min-w-[140px] ${isRtl ? 'border-r border-l-0' : 'border-l'}`}>
+                    <select
+                        value={currentFilters.date || ''}
+                        onChange={(e) => onDateChange(e.target.value)}
+                        className="bg-transparent border-none outline-none text-gray-900 text-[14px] font-bold appearance-none cursor-pointer w-full"
+                    >
+                        <option value="">{t('date')}</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="this_week">This Week</option>
+                        <option value="this_month">This Month</option>
+                    </select>
+                    <svg className="w-4 h-4 text-gray-900 ml-2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 9l6 6 6-6"></path>
+                    </svg>
+                </div>
+            )}
 
             {/* Status Dropdown */}
             <div className={`flex items-center px-6 h-full border-l border-gray-100 min-w-[140px] ${isRtl ? 'border-r border-l-0' : 'border-l'}`}>
@@ -77,10 +95,12 @@ export const TableFilter: React.FC<TableFilterProps> = ({
                     onChange={(e) => onStatusChange(e.target.value)}
                     className="bg-transparent border-none outline-none text-gray-900 text-[14px] font-bold appearance-none cursor-pointer w-full"
                 >
-                    <option value="">{t('status')}</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="APPROVED">Approved</option>
-                    <option value="REJECTED">Rejected</option>
+                    <option value="">{statusLabel || t('status')}</option>
+                    {optionsToRender.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
                 </select>
                 <svg className="w-4 h-4 text-gray-900 ml-2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M6 9l6 6 6-6"></path>

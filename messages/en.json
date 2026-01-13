@@ -304,6 +304,34 @@
             "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
             "notFound": "Request not found",
             "loading": "Loading request details..."
+        },
+        "activity": {
+            "title": "Activity Logs",
+            "search": "Search in actions...",
+            "filterType": "Filter by Type",
+            "allTypes": "All Types",
+            "noLogs": "No activity logs found",
+            "permissionDenied": "You do not have permission to view activity logs.",
+            "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
+            "timestamp": "Timestamp",
+            "user": "User",
+            "action": "Action",
+            "type": "Type",
+            "system": "System",
+            "loading": "Loading activity logs...",
+            "actionTypes": {
+                "REQUEST_MANAGEMENT": "Request Management",
+                "USER_MANAGEMENT": "User Management",
+                "SYSTEM_INTEGRATION": "System Integration",
+                "AUTH": "Authentication"
+            },
+            "pagination": {
+                "showing": "Showing",
+                "of": "of",
+                "results": "results",
+                "previous": "Previous",
+                "next": "Next"
+            }
         }
     }
 }
