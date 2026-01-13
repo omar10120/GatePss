@@ -11,28 +11,68 @@ export async function POST(request: NextRequest) {
         const formData = await request.formData();
 
         // Extract form fields
-        const applicantName = formData.get('applicantName') as string;
+        const applicantNameEn = formData.get('applicantName') as string;
+        const applicantNameAr = formData.get('fullNameAr') as string;
         const applicantEmail = formData.get('applicantEmail') as string;
+        const applicantPhone = formData.get('telephone') as string;
+        const gender = formData.get('gender') as string;
+        const profession = formData.get('profession') as string;
         const passportIdNumber = formData.get('passportIdNumber') as string;
+        const nationality = formData.get('nationality') as string;
+        const identification = formData.get('identification') as string;
+        const organization = formData.get('organization') as string;
+        const validityPeriod = formData.get('validityPeriod') as string;
         const purposeOfVisit = formData.get('purposeOfVisit') as string;
         const dateOfVisit = formData.get('dateOfVisit') as string;
         const requestType = formData.get('requestType') as string;
         const passportIdImage = formData.get('passportIdImage') as File | null;
-        const extraFieldsStr = formData.get('extraFields') as string;
+        const passFor = formData.get('passFor') as string | null;
 
         // Validate required fields using BRD requirements
         const errors: string[] = [];
 
-        if (!applicantName || applicantName.trim().length < 2) {
-            errors.push('Applicant name is required (minimum 2 characters)');
+        if (!applicantNameEn || applicantNameEn.trim().length < 2) {
+            errors.push('Applicant name (English) is required (minimum 2 characters)');
+        }
+
+        if (!applicantNameAr || applicantNameAr.trim().length < 2) {
+            errors.push('Applicant name (Arabic) is required (minimum 2 characters)');
         }
 
         if (!applicantEmail || !validateEmail(applicantEmail)) {
             errors.push('Valid email address is required');
         }
 
+        if (!applicantPhone || applicantPhone.trim().length < 8) {
+            errors.push('Valid phone number is required (minimum 8 characters)');
+        }
+
+        if (!gender || !['MALE', 'FEMALE'].includes(gender)) {
+            errors.push('Gender is required (MALE or FEMALE)');
+        }
+
+        if (!profession || profession.trim().length < 2) {
+            errors.push('Profession is required (minimum 2 characters)');
+        }
+
         if (!passportIdNumber || !validatePassportId(passportIdNumber)) {
             errors.push('Valid passport/ID number is required (6-20 alphanumeric characters)');
+        }
+
+        if (!nationality || nationality.trim().length < 2) {
+            errors.push('Nationality is required');
+        }
+
+        if (!identification || !['ID', 'PASSPORT'].includes(identification)) {
+            errors.push('Identification type is required (ID or PASSPORT)');
+        }
+
+        if (!organization || organization.trim().length < 2) {
+            errors.push('Organization is required (minimum 2 characters)');
+        }
+
+        if (!validityPeriod || !['1_DAY', '1_WEEK', '1_MONTH'].includes(validityPeriod)) {
+            errors.push('Validity period is required (1_DAY, 1_WEEK, or 1_MONTH)');
         }
 
         if (!purposeOfVisit || purposeOfVisit.trim().length < 10) {
@@ -122,83 +162,136 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Parse extra fields
-        let extraFields: any = {};
-        if (extraFieldsStr) {
-            try {
-                extraFields = JSON.parse(extraFieldsStr);
-            } catch (e) {
-                console.warn('Failed to parse extra fields:', e);
-            }
-        }
+        // Calculate valid_from and valid_to based on validityPeriod and dateOfVisit
+        const visitDate = new Date(dateOfVisit);
+        visitDate.setHours(0, 0, 0, 0);
+        
+        let validFrom = new Date(visitDate);
+        let validTo = new Date(visitDate);
 
-        // Add file paths to extra fields
-        if (otherDoc1Path) extraFields.otherDocuments1Path = otherDoc1Path;
-        if (otherDoc2Path) extraFields.otherDocuments2Path = otherDoc2Path;
+        switch (validityPeriod) {
+            case '1_DAY':
+                validTo.setDate(validTo.getDate() + 1);
+                break;
+            case '1_WEEK':
+                validTo.setDate(validTo.getDate() + 7);
+                break;
+            case '1_MONTH':
+                validTo.setMonth(validTo.getMonth() + 1);
+                break;
+            default:
+                validTo.setDate(validTo.getDate() + 1); // Default to 1 day
+        }
+        validTo.setHours(23, 59, 59, 999);
 
         // Generate request number
         const requestNumber = generateRequestNumber();
 
         // Create request in database
-        const newRequest = await prisma.request.create({
-            data: {
-                requestNumber,
-                applicantName: applicantName.trim(),
-                applicantEmail: applicantEmail.toLowerCase().trim(),
-                passportIdNumber: passportIdNumber.toUpperCase().trim(),
-                passportIdImagePath: imagePath,
-                purposeOfVisit: purposeOfVisit.trim(),
-                dateOfVisit: new Date(dateOfVisit),
-                requestType: requestType as RequestType,
-                extraFields: extraFields ? JSON.stringify(extraFields) : undefined,
-            },
-        });
-
-        // Log the request creation
-        await prisma.activityLog.create({
-            data: {
-                actionType: ActionType.REQUEST_MANAGEMENT,
-                actionPerformed: `New gate pass request submitted: ${requestNumber}`,
-                affectedEntityType: 'REQUEST',
-                affectedEntityId: newRequest.id,
-                details: JSON.stringify({
+        try {
+            const newRequest = await prisma.request.create({
+                data: {
                     requestNumber,
-                    applicantName,
-                    applicantEmail,
-                    requestType,
-                }),
-            },
-        });
+                    applicantNameEn: applicantNameEn.trim(),
+                    applicantNameAr: applicantNameAr.trim(),
+                    applicantEmail: applicantEmail.toLowerCase().trim(),
+                    applicantPhone: applicantPhone?.trim() || null,
+                    gender: gender,
+                    profession: profession.trim(),
+                    passportIdNumber: passportIdNumber.toUpperCase().trim(),
+                    passportIdImagePath: imagePath,
+                    nationality: nationality.trim(),
+                    identification: identification,
+                    organization: organization.trim(),
+                    validFrom: validFrom,
+                    validTo: validTo,
+                    purposeOfVisit: purposeOfVisit.trim(),
+                    dateOfVisit: new Date(dateOfVisit),
+                    requestType: requestType as RequestType,
+                    passFor: passFor?.trim() || null,
+                },
+            });
 
-        // Send confirmation email to applicant (async, don't wait)
-        sendRequestConfirmationEmail(
-            applicantEmail,
-            applicantName,
-            requestNumber
-        ).catch(err => console.error('Failed to send confirmation email:', err));
+            // Store other documents as uploads if they exist
+            if (otherDoc1Path) {
+                await prisma.upload.create({
+                    data: {
+                        requestId: newRequest.id,
+                        fileType: 'OTHER_DOCUMENT_1',
+                        filePath: otherDoc1Path,
+                    },
+                });
+            }
 
-        // Send notification to admins (async, don't wait)
-        sendAdminNotificationEmail(
-            requestNumber,
-            applicantName,
-            requestType,
-            new Date(dateOfVisit).toLocaleDateString()
-        ).catch(err => console.error('Failed to send admin notification:', err));
+            if (otherDoc2Path) {
+                await prisma.upload.create({
+                    data: {
+                        requestId: newRequest.id,
+                        fileType: 'OTHER_DOCUMENT_2',
+                        filePath: otherDoc2Path,
+                    },
+                });
+            }
 
-        return NextResponse.json({
-            success: true,
-            message: 'Gate pass request submitted successfully',
-            data: {
+            // Log the request creation
+            await prisma.activityLog.create({
+                data: {
+                    actionType: ActionType.REQUEST_MANAGEMENT,
+                    actionPerformed: `New gate pass request submitted: ${requestNumber}`,
+                    affectedEntityType: 'REQUEST',
+                    affectedEntityId: newRequest.id,
+                    details: JSON.stringify({
+                        requestNumber,
+                        applicantNameEn,
+                        applicantNameAr,
+                        applicantEmail,
+                        requestType,
+                    }),
+                },
+            });
+
+            // Send confirmation email to applicant (async, don't wait)
+            sendRequestConfirmationEmail(
+                applicantEmail,
+                applicantNameEn,
+                requestNumber
+            ).catch(err => console.error('Failed to send confirmation email:', err));
+
+            // Send notification to admins (async, don't wait)
+            sendAdminNotificationEmail(
                 requestNumber,
-                id: newRequest.id,
-                status: newRequest.status,
-            },
-        }, { status: 201 });
+                applicantNameEn,
+                requestType,
+                new Date(dateOfVisit).toLocaleDateString()
+            ).catch(err => console.error('Failed to send admin notification:', err));
+
+            return NextResponse.json({
+                success: true,
+                message: 'Gate pass request submitted successfully',
+                data: {
+                    requestNumber,
+                    id: newRequest.id,
+                    status: newRequest.status,
+                },
+            }, { status: 201 });
+        } catch (dbError: any) {
+            console.error('Database error:', dbError);
+            console.error('Database error message:', dbError?.message);
+            console.error('Database error code:', dbError?.code);
+            throw dbError; // Re-throw to be caught by outer catch
+        }
+
 
     } catch (error: unknown) {
         console.error('Request submission error:', error);
+        console.error('Error details:', error instanceof Error ? error.message : String(error));
+        console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
         return NextResponse.json(
-            { error: 'Internal Server Error', message: 'Failed to submit request. Please try again.' },
+            { 
+                error: 'Internal Server Error', 
+                message: error instanceof Error ? error.message : 'Failed to submit request. Please try again.',
+                details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : String(error)) : undefined
+            },
             { status: 500 }
         );
     }

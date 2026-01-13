@@ -31,13 +31,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                     type="file"
                     name={name}
                     id={id}
-                    required={required}
                     accept={accept}
                     className="hidden"
                     onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
                             setFileName(file.name);
+                        } else {
+                            setFileName(null);
                         }
                     }}
                 />

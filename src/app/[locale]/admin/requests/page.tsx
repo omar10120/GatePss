@@ -11,14 +11,30 @@ import { TableFilter } from '../components/TableFilter';
 interface Request {
     id: number;
     requestNumber: string;
-    applicantName: string;
+    applicantNameEn: string;
+    applicantNameAr: string;
     applicantEmail: string;
+    applicantPhone?: string | null;
+    gender: string;
+    profession: string;
     passportIdNumber: string;
+    nationality: string;
+    identification: string;
+    organization: string;
+    validFrom: string;
+    validTo: string;
     purposeOfVisit: string;
     dateOfVisit: string;
     requestType: string;
     status: string;
+    passFor?: string | null;
     createdAt: string;
+    updatedAt: string;
+    approvedBy?: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
 }
 
 interface Pagination {
@@ -249,7 +265,7 @@ export default function AdminRequestsPage() {
                                                                     {request.requestNumber}
                                                                 </Link>
                                                             </td>
-                                                            <td className="px-6 py-4 text-[#222222] font-bold text-[14px]">{request.applicantName}</td>
+                                                            <td className="px-6 py-4 text-[#222222] font-bold text-[14px]">{request.applicantNameEn}</td>
                                                             <td className="px-6 py-4 text-[#747474] text-[14px]">{request.applicantEmail}</td>
                                                             <td className="px-6 py-4 text-[#747474] text-[14px]">
                                                                 {dt(`types.${request.requestType}`)}

@@ -11,18 +11,42 @@ import { getSidebarItems } from '@/config/navigation';
 interface RequestDetails {
     id: number;
     requestNumber: string;
-    applicantName: string;
+    applicantNameEn: string;
+    applicantNameAr: string;
     applicantEmail: string;
+    applicantPhone: string | null;
+    gender: string;
+    profession: string;
     passportIdNumber: string;
-    passportIdImagePath: string;
+    passportIdImagePath: string | null;
+    nationality: string;
+    identification: string;
+    organization: string;
+    validFrom: string;
+    validTo: string;
     purposeOfVisit: string;
     dateOfVisit: string;
     requestType: string;
     status: string;
     rejectionReason: string | null;
-    externalReference: string | null;
+    passFor: string | null;
     createdAt: string;
     updatedAt: string;
+    approvedById: number | null;
+    externalReference: string | null;
+    lastIntegrationStatusCode: number | null;
+    lastIntegrationStatusMessage: string | null;
+    approvedBy: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
+    uploads: Array<{
+        id: number;
+        fileType: string;
+        filePath: string;
+        uploadedAt: string;
+    }>;
     logs: Array<{
         id: number;
         timestamp: string;
@@ -313,8 +337,12 @@ export default function RequestDetailsPage() {
                                         <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('applicantInfo')}</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('name')}</p>
-                                                <p className="text-gray-900 font-medium">{request.applicantName}</p>
+                                                <p className="text-sm text-gray-600 mb-1">{t('name')} (EN)</p>
+                                                <p className="text-gray-900 font-medium">{request.applicantNameEn}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">{t('name')} (AR)</p>
+                                                <p className="text-gray-900 font-medium">{request.applicantNameAr}</p>
                                             </div>
                                             <div>
                                                 <p className="text-sm text-gray-600 mb-1">{t('email')}</p>
@@ -326,14 +354,18 @@ export default function RequestDetailsPage() {
                                             </div>
                                             <div>
                                                 <p className="text-sm text-gray-600 mb-1">{t('document')}</p>
-                                                <a
-                                                    href={request.passportIdImagePath}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-info-500 hover:text-primary-700 font-medium"
-                                                >
-                                                    {t('viewDocument')} →
-                                                </a>
+                                                {request.passportIdImagePath ? (
+                                                    <a
+                                                        href={request.passportIdImagePath}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-info-500 hover:text-primary-700 font-medium"
+                                                    >
+                                                        {t('viewDocument')} →
+                                                    </a>
+                                                ) : (
+                                                    <p className="text-gray-500 text-sm">{t('noDocument') || 'No document uploaded'}</p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

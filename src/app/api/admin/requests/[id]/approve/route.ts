@@ -8,13 +8,15 @@ import { formatDate } from '@/utils/helpers';
 
 interface ApproveRequestBody {
     updates?: {
-        applicantName?: string;
+        applicantNameEn?: string;
+        applicantNameAr?: string;
         applicantEmail?: string;
+        applicantPhone?: string;
         passportIdNumber?: string;
         purposeOfVisit?: string;
         dateOfVisit?: string;
         requestType?: string;
-        extraFields?: unknown;
+        passFor?: string;
     };
 }
 
@@ -69,13 +71,15 @@ export async function POST(
             // Apply any last-minute edits if provided
             if (body.updates) {
                 const updateData: any = {};
-                if (body.updates.applicantName) updateData.applicantName = body.updates.applicantName.trim();
+                if (body.updates.applicantNameEn) updateData.applicantNameEn = body.updates.applicantNameEn.trim();
+                if (body.updates.applicantNameAr) updateData.applicantNameAr = body.updates.applicantNameAr.trim();
                 if (body.updates.applicantEmail) updateData.applicantEmail = body.updates.applicantEmail.toLowerCase().trim();
+                if (body.updates.applicantPhone) updateData.applicantPhone = body.updates.applicantPhone.trim();
                 if (body.updates.passportIdNumber) updateData.passportIdNumber = body.updates.passportIdNumber.toUpperCase().trim();
                 if (body.updates.purposeOfVisit) updateData.purposeOfVisit = body.updates.purposeOfVisit.trim();
                 if (body.updates.dateOfVisit) updateData.dateOfVisit = new Date(body.updates.dateOfVisit);
                 if (body.updates.requestType) updateData.requestType = body.updates.requestType;
-                if (body.updates.extraFields) updateData.extraFields = JSON.stringify(body.updates.extraFields);
+                if (body.updates.passFor !== undefined) updateData.passFor = body.updates.passFor?.trim() || null;
 
                 if (Object.keys(updateData).length > 0) {
                     await prisma.request.update({
@@ -101,13 +105,13 @@ export async function POST(
 
             const apiResponse = await soharPortClient.send.createGatePass({
                 requestNumber: gateRequest.requestNumber,
-                applicantName: gateRequest.applicantName,
+                applicantName: gateRequest.applicantNameEn,
                 applicantEmail: gateRequest.applicantEmail,
                 passportIdNumber: gateRequest.passportIdNumber,
                 purposeOfVisit: gateRequest.purposeOfVisit,
                 dateOfVisit: gateRequest.dateOfVisit.toISOString(),
                 requestType: gateRequest.requestType as any,
-                extraFields: gateRequest.extraFields ? JSON.parse(gateRequest.extraFields as string) : undefined,
+                extraFields: gateRequest.passFor ? { passFor: gateRequest.passFor } : undefined,
             });
 
             if (!apiResponse.success) {
@@ -158,7 +162,7 @@ export async function POST(
             // Send approval email to applicant (async)
             sendRequestApprovalEmail(
                 gateRequest.applicantEmail,
-                gateRequest.applicantName,
+                gateRequest.applicantNameEn,
                 gateRequest.requestNumber,
                 formatDate(gateRequest.dateOfVisit)
             ).catch(err => console.error('Failed to send approval email:', err));
