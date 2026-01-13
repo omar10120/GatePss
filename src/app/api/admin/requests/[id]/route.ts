@@ -21,13 +21,6 @@ export async function GET(
             const gateRequest = await prisma.request.findUnique({
                 where: { id: requestId },
                 include: {
-                    createdBy: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true,
-                        },
-                    },
                     approvedBy: {
                         select: {
                             id: true,
