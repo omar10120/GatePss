@@ -47,8 +47,13 @@ export const GatePassForm: React.FC = () => {
             });
 
             const data = await response.json();
+            console.log('Response data:', data);
 
             if (!response.ok) {
+                // If there are validation errors, format them nicely
+                if (data.errors && Array.isArray(data.errors)) {
+                    throw new Error(data.errors.join(', '));
+                }
                 throw new Error(data.message || 'Failed to submit request');
             }
 
@@ -56,6 +61,7 @@ export const GatePassForm: React.FC = () => {
             (e.target as HTMLFormElement).reset();
             setConfirmed(false);
         } catch (err: any) {
+            console.error('Submission error:', err);
             setError(err.message || 'An error occurred while submitting your request');
         } finally {
             setLoading(false);
@@ -266,7 +272,7 @@ export const GatePassForm: React.FC = () => {
             <div className="flex flex-col items-center gap-10 pt-10 w-full">
 
                 {/* Checkbox Wrapper - Aligned to the start/left */}
-                <label className="flex items-start gap-3 cursor-pointer group w-full max-w-4xl self-start">
+                <label className="flex items-center gap-3 cursor-pointer group w-full max-w-4xl self-start">
                     <div className="relative flex items-center mt-1">
                         <input
                             type="checkbox"
