@@ -19,26 +19,20 @@ export const GatePassForm: React.FC = () => {
             setError('Please confirm the information is correct');
             return;
         }
+
+        const formData = new FormData(e.currentTarget);
+
+        // Validate required file upload manually (since hidden inputs can't use required attribute)
+        const passportIdImage = formData.get('passportIdImage') as File | null;
+        if (!passportIdImage || passportIdImage.size === 0) {
+            setError('Passport/ID image is required');
+            return;
+        }
+
         setLoading(true);
         setError('');
         setSuccess('');
 
-        const formData = new FormData(e.currentTarget);
-
-        // Collect extra fields into a JSON object
-        const extraFields: Record<string, any> = {
-            nationality: formData.get('nationality'),
-            identification: formData.get('identification'),
-            organization: formData.get('organization'),
-            validityPeriod: formData.get('validityPeriod'),
-            passFor: formData.get('passFor'),
-            fullNameAr: formData.get('fullNameAr'),
-            telephone: formData.get('telephone'),
-            gender: formData.get('gender'),
-            profession: formData.get('profession'),
-        };
-
-        formData.append('extraFields', JSON.stringify(extraFields));
 
         try {
             const response = await fetch('/api/requests', {

@@ -118,13 +118,15 @@ export async function PUT(
             // Update allowed fields
             const updateData: any = {};
 
-            if (body.applicantName) updateData.applicantName = body.applicantName.trim();
+            if (body.applicantNameEn) updateData.applicantNameEn = body.applicantNameEn.trim();
+            if (body.applicantNameAr) updateData.applicantNameAr = body.applicantNameAr.trim();
             if (body.applicantEmail) updateData.applicantEmail = body.applicantEmail.toLowerCase().trim();
+            if (body.applicantPhone) updateData.applicantPhone = body.applicantPhone.trim();
             if (body.passportIdNumber) updateData.passportIdNumber = body.passportIdNumber.toUpperCase().trim();
             if (body.purposeOfVisit) updateData.purposeOfVisit = body.purposeOfVisit.trim();
             if (body.dateOfVisit) updateData.dateOfVisit = new Date(body.dateOfVisit);
             if (body.requestType) updateData.requestType = body.requestType;
-            if (body.extraFields) updateData.extraFields = JSON.stringify(body.extraFields);
+            if (body.passFor !== undefined) updateData.passFor = body.passFor?.trim() || null;
 
             const updatedRequest = await prisma.request.update({
                 where: { id: requestId },

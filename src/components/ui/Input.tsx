@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useId } from 'react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
@@ -18,7 +20,8 @@ export const Input: React.FC<InputProps> = ({
     id,
     ...props
 }) => {
-    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = useId();
+    const inputId = id || `input-${generatedId}`;
     const hasError = !!error;
 
     return (
@@ -80,7 +83,8 @@ export const Select: React.FC<SelectProps> = ({
     id,
     ...props
 }) => {
-    const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = useId();
+    const selectId = id || `select-${generatedId}`;
     const hasError = !!error;
 
     return (

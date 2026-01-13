@@ -27,6 +27,7 @@ model User {
   permissions        UserPermission[]
   approvedRequests   Request[]        @relation("ApprovedBy")
   activityLogs       ActivityLog[]
+  notifications      Notification[]
 
   @@map("users")
 }
@@ -58,10 +59,19 @@ model UserPermission {
 model Request {
   id                         Int           @id @default(autoincrement())
   requestNumber              String        @unique @map("request_number")
-  applicantName              String        @map("applicant_name")
+  applicantNameEn            String        @map("applicant_name_en")
+  applicantNameAr            String        @map("applicant_name_ar")
   applicantEmail             String        @map("applicant_email")
+  applicantPhone             String?       @map("applicant_phone")
+  gender                     String        @map("gender") // MALE | FEMALE
+  profession                 String        @map("profession")
   passportIdNumber           String        @map("passport_id_number")
   passportIdImagePath        String?       @map("passport_id_image_path")
+  nationality                String        @map("nationality")
+  identification             String        @map("identification")
+  organization               String        @map("organization")
+  validFrom                  DateTime      @map("valid_from")
+  validTo                    DateTime      @map("valid_to")
   purposeOfVisit             String        @db.Text @map("purpose_of_visit")
   dateOfVisit                DateTime      @map("date_of_visit")
   requestType                String        @map("request_type") // RequestType: VISITOR | CONTRACTOR | EMPLOYEE | VEHICLE
@@ -73,7 +83,7 @@ model Request {
   externalReference          String?       @map("external_reference")
   lastIntegrationStatusCode  Int?          @map("last_integration_status_code")
   lastIntegrationStatusMessage String?     @db.Text @map("last_integration_status_message")
-  extraFields                Json?         @map("extra_fields")
+  passFor                    String?       @map("pass_for")
 
   // Relations
   approvedBy User?         @relation("ApprovedBy", fields: [approvedById], references: [id])
@@ -84,6 +94,8 @@ model Request {
   @@index([requestType])
   @@index([dateOfVisit])
   @@index([createdAt])
+  @@index([validFrom])
+  @@index([validTo])
   @@map("requests")
 }
 
@@ -117,4 +129,44 @@ model ActivityLog {
   @@index([actionType])
   @@index([userId])
   @@map("activity_logs")
+}
+
+model PassType {
+  id        Int      @id @default(autoincrement())
+  nameEn    String   @map("name_en")
+  nameAr    String   @map("name_ar")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("pass_types")
+}
+
+model FAQ {
+  id         Int      @id @default(autoincrement())
+  questionEn String   @map("question_en")
+  questionAr String   @map("question_ar")
+  answerEn   String   @db.Text @map("answer_en")
+  answerAr   String   @db.Text @map("answer_ar")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("fqa")
+}
+
+model Notification {
+  id                Int       @id @default(autoincrement())
+  userId            Int       @map("user_id")
+  actionType        String    @map("action_type") // CREATE | UPDATE | DELETE
+  actionPerformed   String    @map("action_performed")
+  affectedEntityType String?  @map("affected_entity_type")
+  affectedEntityId  Int?      @map("affected_entity_id")
+  isRead            Boolean   @default(false) @map("is_read")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }

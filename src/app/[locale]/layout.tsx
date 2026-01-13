@@ -34,7 +34,7 @@ export default async function LocaleLayout({
     return (
         <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             <head>
-                <link rel="icon" href="/favicon.ico" />
+                <link rel="icon" href="/images/logo.png" />
 
             </head>
             <body>
