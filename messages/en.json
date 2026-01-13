@@ -244,6 +244,66 @@
                 "confirm": "Sign out",
                 "cancel": "Cancel"
             }
+        },
+        "requests": {
+            "title": "Gate Pass Requests",
+            "searchPlaceholder": "Search By Name, Email, ID Number",
+            "filterBy": "Filter By",
+            "date": "Date",
+            "status": "Status",
+            "resetFilter": "Reset Filter",
+            "columns": {
+                "requestNumber": "Request #",
+                "applicant": "Applicant",
+                "email": "Email",
+                "type": "Type",
+                "visitDate": "Visit Date",
+                "status": "Status",
+                "actions": "Actions"
+            },
+            "viewDetails": "View Details",
+            "noResults": "No requests found",
+            "pagination": {
+                "showing": "Showing",
+                "of": "of",
+                "results": "results",
+                "previous": "Previous",
+                "next": "Next"
+            }
+        },
+        "requestDetails": {
+            "title": "Request Details",
+            "backToRequests": "Back to Requests",
+            "requestNumber": "Request Number",
+            "applicantInfo": "Applicant Information",
+            "name": "Name",
+            "email": "Email",
+            "passportId": "Passport/ID Number",
+            "document": "Uploaded Document",
+            "viewDocument": "View Document",
+            "detailsTitle": "Request Details",
+            "type": "Type",
+            "visitDate": "Visit Date",
+            "purpose": "Purpose of Visit",
+            "externalRef": "External Reference",
+            "rejectionReason": "Rejection Reason",
+            "activityLog": "Activity Log",
+            "actions": "Actions",
+            "approve": "Approve Request",
+            "reject": "Reject Request",
+            "approving": "Approving...",
+            "rejecting": "Rejecting...",
+            "rejectModalTitle": "Reject Request",
+            "rejectModalDesc": "Please provide a reason for rejecting this request:",
+            "rejectReasonPlaceholder": "Enter rejection reason (minimum 10 characters)",
+            "cancel": "Cancel",
+            "confirmReject": "Confirm Rejection",
+            "submittedOn": "Submitted On",
+            "lastUpdated": "Last Updated",
+            "permissionDenied": "You do not have permission to view this request.",
+            "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
+            "notFound": "Request not found",
+            "loading": "Loading request details..."
         }
     }
 }

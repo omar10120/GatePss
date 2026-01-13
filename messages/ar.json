@@ -244,6 +244,66 @@
                 "confirm": "تسجيل خروج",
                 "cancel": "إلغاء"
             }
+        },
+        "requests": {
+            "title": "طلبات تصاريح البوابة",
+            "searchPlaceholder": "البحث بالاسم، البريد الإلكتروني، رقم الهوية",
+            "filterBy": "تصفية حسب",
+            "date": "التاريخ",
+            "status": "الحالة",
+            "resetFilter": "إعادة تعيين",
+            "columns": {
+                "requestNumber": "رقم الطلب #",
+                "applicant": "مقدم الطلب",
+                "email": "البريد الإلكتروني",
+                "type": "النوع",
+                "visitDate": "تاريخ الزيارة",
+                "status": "الحالة",
+                "actions": "الإجراءات"
+            },
+            "viewDetails": "عرض التفاصيل",
+            "noResults": "لم يتم العثور على طلبات",
+            "pagination": {
+                "showing": "عرض",
+                "of": "من",
+                "results": "نتيجة",
+                "previous": "السابق",
+                "next": "التالي"
+            }
+        },
+        "requestDetails": {
+            "title": "تفاصيل الطلب",
+            "backToRequests": "العودة للطلبات",
+            "requestNumber": "رقم الطلب",
+            "applicantInfo": "معلومات مقدم الطلب",
+            "name": "الاسم",
+            "email": "البريد الإلكتروني",
+            "passportId": "رقم جواز السفر/الهوية",
+            "document": "المستند المرفوع",
+            "viewDocument": "عرض المستند",
+            "detailsTitle": "تفاصيل الطلب",
+            "type": "النوع",
+            "visitDate": "تاريخ الزيارة",
+            "purpose": "الغرض من الزيارة",
+            "externalRef": "المرجع الخارجي",
+            "rejectionReason": "سبب الرفض",
+            "activityLog": "سجل النشاط",
+            "actions": "الإجراءات",
+            "approve": "الموافقة على الطلب",
+            "reject": "رفض الطلب",
+            "approving": "جاري الموافقة...",
+            "rejecting": "جاري الرفض...",
+            "rejectModalTitle": "رفض الطلب",
+            "rejectModalDesc": "يرجى تقديم سبب لرفض هذا الطلب:",
+            "rejectReasonPlaceholder": "أدخل سبب الرفض (10 أحرف على الأقل)",
+            "cancel": "إلغاء",
+            "confirmReject": "تأكيد الرفض",
+            "submittedOn": "تم التقديم في",
+            "lastUpdated": "آخر تحديث",
+            "permissionDenied": "ليس لديك صلاحية لعرض هذا الطلب.",
+            "contactAdmin": "يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.",
+            "notFound": "الطلب غير موجود",
+            "loading": "جاري تحميل تفاصيل الطلب..."
         }
     }
 }

@@ -5,6 +5,8 @@ import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import Header from '../components/Header';
+import { useLocale, useTranslations } from 'next-intl';
+import { TableFilter } from '../components/TableFilter';
 
 interface Request {
     id: number;
@@ -29,7 +31,11 @@ interface Pagination {
 export default function AdminRequestsPage() {
     const router = useRouter();
     const pathname = usePathname();
-    const [locale, setLocale] = useState<'en' | 'ar'>('en');
+    const locale = useLocale();
+    const isRtl = locale === 'ar';
+    const t = useTranslations('Admin.requests');
+    const dt = useTranslations('Admin.dashboard'); // For types and statuses if needed
+
     const [loading, setLoading] = useState(true);
     const [requests, setRequests] = useState<Request[]>([]);
     const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -38,6 +44,7 @@ export default function AdminRequestsPage() {
         status: '',
         requestType: '',
         search: '',
+        date: '',
         page: 1,
     });
 
@@ -49,81 +56,6 @@ export default function AdminRequestsPage() {
         if (user.role === 'SUPER_ADMIN') return true;
         return user.permissions?.includes(permissionKey) || false;
     };
-
-    const toggleLocale = () => {
-        setLocale(prev => prev === 'en' ? 'ar' : 'en');
-    };
-
-    const t = {
-        en: {
-            title: 'Gate Pass Requests',
-            dashboard: 'Dashboard',
-            requests: 'Requests',
-            users: 'Users',
-            logs: 'Activity Logs',
-            logout: 'Logout',
-            search: 'Search by name, email, or request number...',
-            filterStatus: 'Filter by Status',
-            filterType: 'Filter by Type',
-            allStatuses: 'All Statuses',
-            allTypes: 'All Types',
-            showing: 'Showing',
-            of: 'of',
-            results: 'results',
-            previous: 'Previous',
-            next: 'Next',
-            noRequests: 'No requests found',
-            viewDetails: 'View Details',
-            permissionDenied: 'You do not have permission to view requests.',
-            contactAdmin: 'Please contact your administrator if you believe this is a mistake.',
-            types: {
-                VISITOR: 'Visitor',
-                CONTRACTOR: 'Contractor',
-                EMPLOYEE: 'Employee',
-                VEHICLE: 'Vehicle',
-            },
-            status: {
-                PENDING: 'Pending',
-                APPROVED: 'Approved',
-                REJECTED: 'Rejected',
-            },
-        },
-        ar: {
-            title: 'طلبات تصاريح البوابة',
-            dashboard: 'لوحة التحكم',
-            requests: 'الطلبات',
-            users: 'المستخدمون',
-            logs: 'سجل النشاط',
-            logout: 'تسجيل الخروج',
-            search: 'البحث بالاسم أو البريد الإلكتروني أو رقم الطلب...',
-            filterStatus: 'تصفية حسب الحالة',
-            filterType: 'تصفية حسب النوع',
-            allStatuses: 'جميع الحالات',
-            allTypes: 'جميع الأنواع',
-            showing: 'عرض',
-            of: 'من',
-            results: 'نتيجة',
-            previous: 'السابق',
-            next: 'التالي',
-            noRequests: 'لم يتم العثور على طلبات',
-            viewDetails: 'عرض التفاصيل',
-            permissionDenied: 'ليس لديك صلاحية لعرض الطلبات.',
-            contactAdmin: 'يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.',
-            types: {
-                VISITOR: 'زائر',
-                CONTRACTOR: 'مقاول',
-                EMPLOYEE: 'موظف',
-                VEHICLE: 'مركبة',
-            },
-            status: {
-                PENDING: 'قيد الانتظار',
-                APPROVED: 'موافق عليه',
-                REJECTED: 'مرفوض',
-            },
-        },
-    };
-
-    const content = t[locale];
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -171,6 +103,7 @@ export default function AdminRequestsPage() {
             if (filters.status) params.append('status', filters.status);
             if (filters.requestType) params.append('requestType', filters.requestType);
             if (filters.search) params.append('search', filters.search);
+            if (filters.date) params.append('date', filters.date);
             params.append('page', filters.page.toString());
             params.append('limit', '20');
 
@@ -239,6 +172,16 @@ export default function AdminRequestsPage() {
         setFilters(prev => ({ ...prev, page: newPage }));
     };
 
+    const handleResetFilters = () => {
+        setFilters({
+            status: '',
+            requestType: '',
+            search: '',
+            date: '',
+            page: 1,
+        });
+    };
+
     if (loading && requests.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -251,25 +194,21 @@ export default function AdminRequestsPage() {
     }
 
     const sidebarItems = getSidebarItems(
-        locale,
+        locale as 'en' | 'ar',
         user?.permissions || [],
         user?.role,
         pathname
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 flex" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            {/* Sidebar */}
-            <Sidebar items={sidebarItems} locale={locale} />
+        <div className="min-h-screen bg-gray-50 flex" dir={isRtl ? 'rtl' : 'ltr'}>
+            <Sidebar items={sidebarItems} locale={locale as 'en' | 'ar'} />
 
-            {/* Main Content Area */}
-            <div className="flex-1" style={{ marginLeft: locale === 'ar' ? '0' : '16rem', marginRight: locale === 'ar' ? '16rem' : '0' }}>
-                {/* Header */}
+            <div className="flex-1" style={{ marginLeft: isRtl ? '0' : '16rem', marginRight: isRtl ? '16rem' : '0' }}>
                 <Header />
 
-                {/* Main Content */}
                 <main className="px-6 py-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">{content.title}</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('title')}</h2>
 
                     {permissionDenied ? (
                         <div className="card p-12 text-center">
@@ -278,95 +217,66 @@ export default function AdminRequestsPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
-                            <p className="text-gray-500">{content.contactAdmin}</p>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">{dt('permissionDenied')}</h3>
+                            <p className="text-gray-500">{dt('contactAdmin')}</p>
                         </div>
                     ) : (
                         <>
-                            {/* Filters */}
-                            <div className="card mb-6">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <input
-                                            type="text"
-                                            placeholder={content.search}
-                                            value={filters.search}
-                                            onChange={(e) => handleFilterChange('search', e.target.value)}
-                                            className="input"
-                                        />
-                                    </div>
-                                    <div>
-                                        <select
-                                            value={filters.status}
-                                            onChange={(e) => handleFilterChange('status', e.target.value)}
-                                            className="input"
-                                        >
-                                            <option value="">{content.allStatuses}</option>
-                                            <option value="PENDING">{content.status.PENDING}</option>
-                                            <option value="APPROVED">{content.status.APPROVED}</option>
-                                            <option value="REJECTED">{content.status.REJECTED}</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <select
-                                            value={filters.requestType}
-                                            onChange={(e) => handleFilterChange('requestType', e.target.value)}
-                                            className="input"
-                                        >
-                                            <option value="">{content.allTypes}</option>
-                                            <option value="VISITOR">{content.types.VISITOR}</option>
-                                            <option value="CONTRACTOR">{content.types.CONTRACTOR}</option>
-                                            <option value="EMPLOYEE">{content.types.EMPLOYEE}</option>
-                                            <option value="VEHICLE">{content.types.VEHICLE}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+                            <TableFilter
+                                currentFilters={{
+                                    search: filters.search,
+                                    status: filters.status,
+                                    date: filters.date,
+                                }}
+                                onSearch={(val) => handleFilterChange('search', val)}
+                                onStatusChange={(val) => handleFilterChange('status', val)}
+                                onDateChange={(val) => handleFilterChange('date', val)}
+                                onReset={handleResetFilters}
+                            />
 
-                            {/* Requests Table */}
-                            <div className="card">
+                            <div className="bg-white rounded-[12px] border border-gray-100 overflow-hidden shadow-sm">
                                 {requests.length > 0 ? (
                                     <>
                                         <div className="overflow-x-auto">
                                             <table className="w-full">
-                                                <thead className="bg-gray-50 border-b border-gray-200">
+                                                <thead className="bg-[#F9F9F9] border-b border-gray-100">
                                                     <tr>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Request #</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applicant</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visit Date</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.requestNumber')}</th>
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.applicant')}</th>
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.email')}</th>
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.type')}</th>
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.visitDate')}</th>
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.status')}</th>
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.actions')}</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y divide-gray-200">
+                                                <tbody className="divide-y divide-gray-100">
                                                     {requests.map((request) => (
-                                                        <tr key={request.id} className="hover:bg-gray-50">
-                                                            <td className="px-4 py-3">
-                                                                <Link href={`/admin/requests/${request.id}`} className="text-info-500 hover:text-primary-700 font-medium">
+                                                        <tr key={request.id} className="hover:bg-gray-50/50 transition-colors">
+                                                            <td className="px-6 py-4">
+                                                                <Link href={`/admin/requests/${request.id}`} className="text-[#00B09C] hover:text-[#008f7e] font-bold text-[14px]">
                                                                     {request.requestNumber}
                                                                 </Link>
                                                             </td>
-                                                            <td className="px-4 py-3 text-gray-900">{request.applicantName}</td>
-                                                            <td className="px-4 py-3 text-gray-600">{request.applicantEmail}</td>
-                                                            <td className="px-4 py-3 text-gray-600">
-                                                                {content.types[request.requestType as keyof typeof content.types]}
+                                                            <td className="px-6 py-4 text-[#222222] font-bold text-[14px]">{request.applicantName}</td>
+                                                            <td className="px-6 py-4 text-[#747474] text-[14px]">{request.applicantEmail}</td>
+                                                            <td className="px-6 py-4 text-[#747474] text-[14px]">
+                                                                {dt(`types.${request.requestType}`)}
                                                             </td>
-                                                            <td className="px-4 py-3 text-gray-600 text-sm">
+                                                            <td className="px-6 py-4 text-[#747474] text-[14px]">
                                                                 {new Date(request.dateOfVisit).toLocaleDateString()}
                                                             </td>
-                                                            <td className="px-4 py-3">
-                                                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>
-                                                                    {content.status[request.status as keyof typeof content.status]}
+                                                            <td className="px-6 py-4">
+                                                                <span className={`px-3 py-1 text-[12px] font-bold rounded-full ${getStatusColor(request.status)}`}>
+                                                                    {dt(`status.${request.status}`)}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-4 py-3">
+                                                            <td className="px-6 py-4">
                                                                 <Link
                                                                     href={`/admin/requests/${request.id}`}
-                                                                    className="text-info-500 hover:text-primary-700 text-sm font-medium"
+                                                                    className="text-[#00B09C] hover:text-[#008f7e] text-[14px] font-bold"
                                                                 >
-                                                                    {content.viewDetails}
+                                                                    {t('viewDetails')}
                                                                 </Link>
                                                             </td>
                                                         </tr>
@@ -375,33 +285,39 @@ export default function AdminRequestsPage() {
                                             </table>
                                         </div>
 
-                                        {/* Pagination */}
                                         {pagination && pagination.totalPages > 1 && (
-                                            <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
-                                                <div className="text-sm text-gray-600">
-                                                    {content.showing} {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} {content.of} {pagination.total} {content.results}
+                                            <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100">
+                                                <div className="text-[14px] text-[#A1A1A1] font-medium">
+                                                    {t('pagination.showing')} {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} {t('pagination.of')} {pagination.total} {t('pagination.results')}
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => handlePageChange(pagination.page - 1)}
                                                         disabled={pagination.page === 1}
-                                                        className="btn btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        className="px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                                     >
-                                                        {content.previous}
+                                                        {t('pagination.previous')}
                                                     </button>
                                                     <button
                                                         onClick={() => handlePageChange(pagination.page + 1)}
                                                         disabled={pagination.page === pagination.totalPages}
-                                                        className="btn btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        className="px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                                     >
-                                                        {content.next}
+                                                        {t('pagination.next')}
                                                     </button>
                                                 </div>
                                             </div>
                                         )}
                                     </>
                                 ) : (
-                                    <p className="text-gray-500 text-center py-12">{content.noRequests}</p>
+                                    <div className="flex flex-col items-center justify-center py-20">
+                                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                            <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                        <p className="text-[#A1A1A1] text-[16px] font-medium">{t('noResults')}</p>
+                                    </div>
                                 )}
                             </div>
                         </>

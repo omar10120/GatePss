@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter, Link } from '@/i18n/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+import Header from '../../components/Header';
+import { Sidebar } from '@/components/layout';
+import { getSidebarItems } from '@/config/navigation';
 
 interface RequestDetails {
     id: number;
@@ -39,8 +43,11 @@ export default function RequestDetailsPage() {
     const router = useRouter();
     const params = useParams();
     const requestId = params.id as string;
+    const locale = useLocale();
+    const isRtl = locale === 'ar';
+    const t = useTranslations('Admin.requestDetails');
+    const dt = useTranslations('Admin.dashboard');
 
-    const [locale, setLocale] = useState<'en' | 'ar'>('en');
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [request, setRequest] = useState<RequestDetails | null>(null);
@@ -58,113 +65,6 @@ export default function RequestDetailsPage() {
         return user.permissions?.includes(permissionKey) || false;
     };
 
-    const toggleLocale = () => {
-        setLocale(prev => prev === 'en' ? 'ar' : 'en');
-    };
-
-    const t = {
-        en: {
-            title: 'Request Details',
-            dashboard: 'Dashboard',
-            requests: 'Requests',
-            users: 'Users',
-            logs: 'Activity Logs',
-            logout: 'Logout',
-            backToRequests: 'Back to Requests',
-            requestNumber: 'Request Number',
-            applicantInfo: 'Applicant Information',
-            name: 'Name',
-            email: 'Email',
-            passportId: 'Passport/ID Number',
-            requestDetails: 'Request Details',
-            type: 'Type',
-            visitDate: 'Visit Date',
-            purpose: 'Purpose of Visit',
-            status: 'Status',
-            submittedOn: 'Submitted On',
-            lastUpdated: 'Last Updated',
-            externalRef: 'External Reference',
-            rejectionReason: 'Rejection Reason',
-            document: 'Uploaded Document',
-            viewDocument: 'View Document',
-            activityLog: 'Activity Log',
-            actions: 'Actions',
-            approve: 'Approve Request',
-            reject: 'Reject Request',
-            approving: 'Approving...',
-            rejecting: 'Rejecting...',
-            rejectModalTitle: 'Reject Request',
-            rejectModalDesc: 'Please provide a reason for rejecting this request:',
-            rejectReasonPlaceholder: 'Enter rejection reason (minimum 10 characters)',
-            cancel: 'Cancel',
-            confirmReject: 'Confirm Rejection',
-            types: {
-                VISITOR: 'Visitor',
-                CONTRACTOR: 'Contractor',
-                EMPLOYEE: 'Employee',
-                VEHICLE: 'Vehicle',
-            },
-            statuses: {
-                PENDING: 'Pending',
-                APPROVED: 'Approved',
-                REJECTED: 'Rejected',
-            },
-            permissionDenied: 'You do not have permission to view this request.',
-            contactAdmin: 'Please contact your administrator if you believe this is a mistake.',
-        },
-        ar: {
-            title: 'تفاصيل الطلب',
-            dashboard: 'لوحة التحكم',
-            requests: 'الطلبات',
-            users: 'المستخدمون',
-            logs: 'سجل النشاط',
-            logout: 'تسجيل الخروج',
-            backToRequests: 'العودة للطلبات',
-            requestNumber: 'رقم الطلب',
-            applicantInfo: 'معلومات مقدم الطلب',
-            name: 'الاسم',
-            email: 'البريد الإلكتروني',
-            passportId: 'رقم جواز السفر/الهوية',
-            requestDetails: 'تفاصيل الطلب',
-            type: 'النوع',
-            visitDate: 'تاريخ الزيارة',
-            purpose: 'الغرض من الزيارة',
-            status: 'الحالة',
-            submittedOn: 'تم التقديم في',
-            lastUpdated: 'آخر تحديث',
-            externalRef: 'المرجع الخارجي',
-            rejectionReason: 'سبب الرفض',
-            document: 'المستند المرفوع',
-            viewDocument: 'عرض المستند',
-            activityLog: 'سجل النشاط',
-            actions: 'الإجراءات',
-            approve: 'الموافقة على الطلب',
-            reject: 'رفض الطلب',
-            approving: 'جاري الموافقة...',
-            rejecting: 'جاري الرفض...',
-            rejectModalTitle: 'رفض الطلب',
-            rejectModalDesc: 'يرجى تقديم سبب لرفض هذا الطلب:',
-            rejectReasonPlaceholder: 'أدخل سبب الرفض (10 أحرف على الأقل)',
-            cancel: 'إلغاء',
-            confirmReject: 'تأكيد الرفض',
-            types: {
-                VISITOR: 'زائر',
-                CONTRACTOR: 'مقاول',
-                EMPLOYEE: 'موظف',
-                VEHICLE: 'مركبة',
-            },
-            statuses: {
-                PENDING: 'قيد الانتظار',
-                APPROVED: 'موافق عليه',
-                REJECTED: 'مرفوض',
-            },
-            permissionDenied: 'ليس لديك صلاحية لعرض هذا الطلب.',
-            contactAdmin: 'يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.',
-        },
-    };
-
-    const content = t[locale];
-
     useEffect(() => {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
@@ -174,12 +74,10 @@ export default function RequestDetailsPage() {
             return;
         }
 
-        // Initial load from localStorage for speed
         if (userData) {
             setUser(JSON.parse(userData));
         }
 
-        // Fetch fresh user data
         fetch('/api/auth/me', {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -306,25 +204,6 @@ export default function RequestDetailsPage() {
         }
     };
 
-    const handleLogout = async () => {
-        const token = localStorage.getItem('token');
-
-        try {
-            await fetch('/api/auth/logout', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-        } catch (error) {
-            console.error('Logout error:', error);
-        }
-
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        router.push('/admin/login');
-    };
-
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'APPROVED':
@@ -353,302 +232,253 @@ export default function RequestDetailsPage() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-gray-600">Request not found</p>
+                    <p className="text-gray-600">{t('notFound')}</p>
                     <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 mt-4 inline-block">
-                        Back to Requests
+                        {t('backToRequests')}
                     </Link>
                 </div>
             </div>
         );
     }
 
+    const sidebarItems = getSidebarItems(
+        locale as 'en' | 'ar',
+        user?.permissions || [],
+        user?.role,
+        '/admin/requests' // Active item
+    );
+
     return (
-        <div className="min-h-screen bg-gray-50" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            {/* Header */}
-            <header className="bg-white shadow-sm">
-                <div className="container mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                                <span className="text-white text-xl font-bold">M</span>
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold text-gray-900">Majis Industrial Services</h1>
-                                <p className="text-sm text-gray-600">{content.title}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={toggleLocale}
-                                className="btn btn-secondary text-sm"
-                            >
-                                {locale === 'en' ? 'العربية' : 'English'}
-                            </button>
-                            <div className="text-right">
-                                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                                <p className="text-xs text-gray-500">{user?.role}</p>
-                            </div>
-                            <button
-                                onClick={handleLogout}
-                                className="btn btn-danger text-sm"
-                            >
-                                {content.logout}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </header>
+        <div className="min-h-screen bg-gray-50 flex" dir={isRtl ? 'rtl' : 'ltr'}>
+            <Sidebar items={sidebarItems} locale={locale as 'en' | 'ar'} />
 
-            {/* Navigation */}
-            <nav className="bg-white border-b border-gray-200">
-                <div className="container mx-auto px-4">
-                    <div className="flex gap-6">
-                        <Link href="/admin/dashboard" className="px-4 py-3 border-b-2 border-transparent text-gray-600 hover:text-gray-900">
-                            {content.dashboard}
-                        </Link>
-                        {hasPermission('MANAGE_REQUESTS') && (
-                            <Link href="/admin/requests" className="px-4 py-3 border-b-2 border-primary-600 text-info-500 font-medium">
-                                {content.requests}
-                            </Link>
-                        )}
-                        {hasPermission('MANAGE_USERS') && (
-                            <Link href="/admin/users" className="px-4 py-3 border-b-2 border-transparent text-gray-600 hover:text-gray-900">
-                                {content.users}
-                            </Link>
-                        )}
-                        {hasPermission('VIEW_LOGS') && (
-                            <Link href="/admin/activity" className="px-4 py-3 border-b-2 border-transparent text-gray-600 hover:text-gray-900">
-                                {content.logs}
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            </nav>
+            <div className="flex-1" style={{ marginLeft: isRtl ? '0' : '16rem', marginRight: isRtl ? '16rem' : '0' }}>
+                <Header />
 
-            {/* Main Content */}
-            <main className="container mx-auto px-4 py-8">
-                {permissionDenied ? (
-                    <div className="card p-12 text-center">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
-                        <p className="text-gray-500">{content.contactAdmin}</p>
-                        <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 mt-4 inline-block">
-                            {content.backToRequests}
-                        </Link>
-                    </div>
-                ) : request ? (
-                    <>
-                        <div className="mb-6">
-                            <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 flex items-center gap-2">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <main className="px-6 py-8">
+                    {permissionDenied ? (
+                        <div className="card p-12 text-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
-                                {content.backToRequests}
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('permissionDenied')}</h3>
+                            <p className="text-gray-500">{t('contactAdmin')}</p>
+                            <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 mt-4 inline-block">
+                                {t('backToRequests')}
                             </Link>
                         </div>
-
-                        {error && (
-                            <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg text-danger-700">
-                                {error}
+                    ) : request ? (
+                        <>
+                            <div className="mb-6">
+                                <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 flex items-center gap-2">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isRtl ? "M14 5l7 7m0 0l-7 7m7-7H3" : "M10 19l-7-7m0 0l7-7m-7 7h18"} />
+                                    </svg>
+                                    {t('backToRequests')}
+                                </Link>
                             </div>
-                        )}
 
-                        {success && (
-                            <div className="mb-6 p-4 bg-success-50 border border-success-200 rounded-lg text-success-700">
-                                {success}
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Main Details */}
-                            <div className="lg:col-span-2 space-y-6">
-                                {/* Request Number & Status */}
-                                <div className="card">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.requestNumber}</p>
-                                            <p className="text-2xl font-bold text-gray-900">{request.requestNumber}</p>
-                                        </div>
-                                        <span className={`px-4 py-2 text-sm font-medium rounded-full ${getStatusColor(request.status)}`}>
-                                            {content.statuses[request.status as keyof typeof content.statuses]}
-                                        </span>
-                                    </div>
+                            {error && (
+                                <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg text-danger-700">
+                                    {error}
                                 </div>
+                            )}
 
-                                {/* Applicant Information */}
-                                <div className="card">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{content.applicantInfo}</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.name}</p>
-                                            <p className="text-gray-900 font-medium">{request.applicantName}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.email}</p>
-                                            <p className="text-gray-900 font-medium">{request.applicantEmail}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.passportId}</p>
-                                            <p className="text-gray-900 font-medium">{request.passportIdNumber}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.document}</p>
-                                            <a
-                                                href={request.passportIdImagePath}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-info-500 hover:text-primary-700 font-medium"
-                                            >
-                                                {content.viewDocument} →
-                                            </a>
-                                        </div>
-                                    </div>
+                            {success && (
+                                <div className="mb-6 p-4 bg-success-50 border border-success-200 rounded-lg text-success-700">
+                                    {success}
                                 </div>
+                            )}
 
-                                {/* Request Details */}
-                                <div className="card">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{content.requestDetails}</h3>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.type}</p>
-                                            <p className="text-gray-900 font-medium">
-                                                {content.types[request.requestType as keyof typeof content.types]}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.visitDate}</p>
-                                            <p className="text-gray-900 font-medium">
-                                                {new Date(request.dateOfVisit).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.purpose}</p>
-                                            <p className="text-gray-900">{request.purposeOfVisit}</p>
-                                        </div>
-                                        {request.externalReference && (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                {/* Main Details */}
+                                <div className="lg:col-span-2 space-y-6">
+                                    {/* Request Number & Status */}
+                                    <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
+                                        <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-sm text-gray-600 mb-1">{content.externalRef}</p>
-                                                <p className="text-gray-900 font-mono text-sm">{request.externalReference}</p>
+                                                <p className="text-sm text-gray-600 mb-1">{t('requestNumber')}</p>
+                                                <p className="text-2xl font-bold text-gray-900">{request.requestNumber}</p>
                                             </div>
-                                        )}
-                                        {request.rejectionReason && (
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{content.rejectionReason}</p>
-                                                <p className="text-danger-700">{request.rejectionReason}</p>
-                                            </div>
-                                        )}
+                                            <span className={`px-4 py-2 text-sm font-medium rounded-full ${getStatusColor(request.status)}`}>
+                                                {dt(`status.${request.status}`)}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Activity Log */}
-                                <div className="card">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{content.activityLog}</h3>
-                                    <div className="space-y-3">
-                                        {request.logs.map((log) => (
-                                            <div key={log.id} className="flex gap-3 pb-3 border-b border-gray-200 last:border-0">
-                                                <div className="w-2 h-2 bg-primary-600 rounded-full mt-2"></div>
-                                                <div className="flex-1">
-                                                    <p className="text-gray-900">{log.actionPerformed}</p>
-                                                    <p className="text-sm text-gray-500">
-                                                        {log.user?.name || 'System'} • {new Date(log.timestamp).toLocaleString()}
-                                                    </p>
+                                    {/* Applicant Information */}
+                                    <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('applicantInfo')}</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">{t('name')}</p>
+                                                <p className="text-gray-900 font-medium">{request.applicantName}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">{t('email')}</p>
+                                                <p className="text-gray-900 font-medium">{request.applicantEmail}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">{t('passportId')}</p>
+                                                <p className="text-gray-900 font-medium">{request.passportIdNumber}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">{t('document')}</p>
+                                                <a
+                                                    href={request.passportIdImagePath}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-info-500 hover:text-primary-700 font-medium"
+                                                >
+                                                    {t('viewDocument')} →
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Request Details */}
+                                    <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('detailsTitle')}</h3>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">{t('type')}</p>
+                                                <p className="text-gray-900 font-medium">
+                                                    {dt(`types.${request.requestType}`)}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">{t('visitDate')}</p>
+                                                <p className="text-gray-900 font-medium">
+                                                    {new Date(request.dateOfVisit).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">{t('purpose')}</p>
+                                                <p className="text-gray-900">{request.purposeOfVisit}</p>
+                                            </div>
+                                            {request.externalReference && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600 mb-1">{t('externalRef')}</p>
+                                                    <p className="text-gray-900 font-mono text-sm">{request.externalReference}</p>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            )}
+                                            {request.rejectionReason && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600 mb-1">{t('rejectionReason')}</p>
+                                                    <p className="text-danger-700">{request.rejectionReason}</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            {/* Sidebar */}
-                            <div className="space-y-6">
-                                {/* Actions */}
-                                {request.status === 'PENDING' && (
-                                    <div className="card">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">{content.actions}</h3>
+                                    {/* Activity Log */}
+                                    <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('activityLog')}</h3>
                                         <div className="space-y-3">
-                                            <button
-                                                onClick={handleApprove}
-                                                disabled={processing}
-                                                className="btn btn-success w-full"
-                                            >
-                                                {processing ? content.approving : content.approve}
-                                            </button>
-                                            <button
-                                                onClick={() => setShowRejectModal(true)}
-                                                disabled={processing}
-                                                className="btn btn-danger w-full"
-                                            >
-                                                {content.reject}
-                                            </button>
+                                            {request.logs.map((log) => (
+                                                <div key={log.id} className="flex gap-3 pb-3 border-b border-gray-200 last:border-0">
+                                                    <div className="w-2 h-2 bg-primary-600 rounded-full mt-2"></div>
+                                                    <div className="flex-1">
+                                                        <p className="text-gray-900">{log.actionPerformed}</p>
+                                                        <p className="text-sm text-gray-500">
+                                                            {log.user?.name || 'System'} • {new Date(log.timestamp).toLocaleString()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
-                                )}
+                                </div>
 
-                                {/* Metadata */}
-                                <div className="card">
-                                    <div className="space-y-3">
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.submittedOn}</p>
-                                            <p className="text-gray-900 text-sm">{new Date(request.createdAt).toLocaleString()}</p>
+                                {/* Sidebar */}
+                                <div className="space-y-6">
+                                    {/* Actions */}
+                                    {request.status === 'PENDING' && (
+                                        <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('actions')}</h3>
+                                            <div className="space-y-3">
+                                                <button
+                                                    onClick={handleApprove}
+                                                    disabled={processing}
+                                                    className="btn btn-success w-full"
+                                                >
+                                                    {processing ? t('approving') : t('approve')}
+                                                </button>
+                                                <button
+                                                    onClick={() => setShowRejectModal(true)}
+                                                    disabled={processing}
+                                                    className="btn btn-danger w-full"
+                                                >
+                                                    {t('reject')}
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm text-gray-600 mb-1">{content.lastUpdated}</p>
-                                            <p className="text-gray-900 text-sm">{new Date(request.updatedAt).toLocaleString()}</p>
+                                    )}
+
+                                    {/* Metadata */}
+                                    <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
+                                        <div className="space-y-3">
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">{t('submittedOn')}</p>
+                                                <p className="text-gray-900 text-sm">{new Date(request.createdAt).toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">{t('lastUpdated')}</p>
+                                                <p className="text-gray-900 text-sm">{new Date(request.updatedAt).toLocaleString()}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                    </>
-                ) : null}
-            </main>
+                        </>
+                    ) : null}
+                </main>
 
-            {/* Reject Modal */}
-            {
-                showRejectModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-lg max-w-md w-full p-6">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">{content.rejectModalTitle}</h3>
-                            <p className="text-gray-600 mb-4">{content.rejectModalDesc}</p>
+                {/* Reject Modal */}
+                {
+                    showRejectModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-lg max-w-md w-full p-6">
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">{t('rejectModalTitle')}</h3>
+                                <p className="text-gray-600 mb-4">{t('rejectModalDesc')}</p>
 
-                            <textarea
-                                value={rejectionReason}
-                                onChange={(e) => setRejectionReason(e.target.value)}
-                                placeholder={content.rejectReasonPlaceholder}
-                                rows={4}
-                                className="input mb-4"
-                                minLength={10}
-                            />
+                                <textarea
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                    placeholder={t('rejectReasonPlaceholder')}
+                                    rows={4}
+                                    className="input mb-4"
+                                    minLength={10}
+                                />
 
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => {
-                                        setShowRejectModal(false);
-                                        setRejectionReason('');
-                                        setError('');
-                                    }}
-                                    className="btn btn-secondary flex-1"
-                                    disabled={processing}
-                                >
-                                    {content.cancel}
-                                </button>
-                                <button
-                                    onClick={handleReject}
-                                    className="btn btn-danger flex-1"
-                                    disabled={processing || rejectionReason.length < 10}
-                                >
-                                    {processing ? content.rejecting : content.confirmReject}
-                                </button>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowRejectModal(false);
+                                            setRejectionReason('');
+                                            setError('');
+                                        }}
+                                        className="btn btn-secondary flex-1"
+                                        disabled={processing}
+                                    >
+                                        {t('cancel')}
+                                    </button>
+                                    <button
+                                        onClick={handleReject}
+                                        className="btn btn-danger flex-1"
+                                        disabled={processing || rejectionReason.length < 10}
+                                    >
+                                        {processing ? t('rejecting') : t('confirmReject')}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )
-            }
+                    )
+                }
+            </div>
         </div >
     );
 }
