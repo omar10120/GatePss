@@ -20,6 +20,7 @@ export default function VerifyIdentity({ onVerify, onResend, onClose, isLoading 
         useRef<HTMLInputElement>(null),
         useRef<HTMLInputElement>(null),
         useRef<HTMLInputElement>(null),
+
     ];
 
     useEffect(() => {

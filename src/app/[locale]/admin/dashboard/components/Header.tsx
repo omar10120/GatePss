@@ -3,6 +3,8 @@ import React, { useState } from 'react'
 import { getSidebarItems } from '@/config/navigation';
 import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { useTranslations, useLocale } from 'next-intl';
+import { LogoutConfirm } from '@/components/ui/LogoutConfirm';
+
 export default function Header() {
     const router = useRouter();
     const pathname = usePathname();
@@ -11,10 +13,8 @@ export default function Header() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [user, setUser] = useState<any>(null);
     const [permissionDenied, setPermissionDenied] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const t = useTranslations('Admin.dashboard');
-
-
-
 
     interface DashboardData {
         summary: {
@@ -88,18 +88,27 @@ export default function Header() {
                                 </div>
                             </div>
                             <button
-                                onClick={handleLogout}
+                                onClick={() => setIsLogoutModalOpen(true)}
                                 className="p-2 text-gray-400 hover:text-danger-500 transition-colors"
                                 title={t('logout')}
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
+                                <div className='flex gap-2'>
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    {t('logout')}
+                                </div>
                             </button>
                         </div>
                     </div>
                 </div>
             </header>
+
+            <LogoutConfirm
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleLogout}
+            />
         </>
     )
 }

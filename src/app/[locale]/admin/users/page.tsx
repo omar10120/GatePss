@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
+import Header from '../dashboard/components/Header';
 
 interface User {
     id: number;
@@ -391,31 +392,7 @@ export default function AdminUsersPage() {
             {/* Main Content Area */}
             <div className="flex-1" style={{ marginLeft: locale === 'ar' ? '0' : '16rem', marginRight: locale === 'ar' ? '16rem' : '0' }}>
                 {/* Header */}
-                <header className="bg-white shadow-sm sticky top-0 z-30">
-                    <div className="px-6 py-4">
-                        <div className="flex items-center justify-between">
-
-                            <div className="flex items-center gap-4">
-                                <button
-                                    onClick={toggleLocale}
-                                    className="btn btn-secondary text-sm"
-                                >
-                                    {locale === 'en' ? 'العربية' : 'English'}
-                                </button>
-                                <div className="text-right">
-                                    <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                                    <p className="text-xs text-gray-500">{user?.role}</p>
-                                </div>
-                                <button
-                                    onClick={handleLogout}
-                                    className="btn btn-danger text-sm"
-                                >
-                                    {content.logout}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </header>
+                <Header />
 
                 {/* Main Content */}
                 <main className="px-6 py-8">

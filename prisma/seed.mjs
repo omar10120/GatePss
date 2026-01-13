@@ -24,7 +24,7 @@ async function main() {
     }
 
     // Create Super Admin
-    const hashedPassword = await bcrypt.hash('Admin@123', 10);
+    const hashedPassword = await bcrypt.hash('admin123', 10);
 
     console.log('Creating Super Admin user...');
     const superAdmin = await prisma.user.upsert({
@@ -100,10 +100,10 @@ async function main() {
     console.log('\n📝 Default credentials:');
     console.log('Super Admin:');
     console.log('  Email: admin@majis.com');
-    console.log('  Password: Admin@123');
+    console.log('  Password: admin123');
     console.log('\nSub Admin:');
     console.log('  Email: subadmin@majis.com');
-    console.log('  Password: Admin@123');
+    console.log('  Password: admin123');
 }
 
 main()

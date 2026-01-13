@@ -209,35 +209,41 @@
     },
     "Admin": {
         "dashboard": {
-            "title": "Dashboard",
-            "welcome": "Welcome back",
-            "logout": "Logout",
-            "summary": "Summary",
-            "total": "Total Requests",
-            "approved": "Approved",
-            "rejected": "Rejected",
-            "pending": "Pending",
-            "byType": "Requests by Type",
-            "recent": "Recent Requests",
-            "viewAll": "View All Requests",
-            "requests": "Requests",
-            "users": "Users",
-            "logs": "Activity Logs",
-            "noRequests": "No recent requests",
-            "permissionDenied": "You do not have permission to view the dashboard.",
-            "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
+            "title": "لوحة التحكم",
+            "welcome": "مرحباً بك",
+            "logout": "تسجيل الخروج",
+            "summary": "ملخص",
+            "total": "إجمالي الطلبات",
+            "approved": "مقبول",
+            "rejected": "مرفوض",
+            "pending": "قيد الانتظار",
+            "byType": "الطلبات حسب النوع",
+            "recent": "أحدث الطلبات",
+            "viewAll": "عرض جميع الطلبات",
+            "requests": "الطلبات",
+            "users": "المستخدمين",
+            "logs": "سجلات النشاط",
+            "noRequests": "لا يوجد طلبات حديثة",
+            "permissionDenied": "ليس لديك صلاحية لعرض لوحة التحكم.",
+            "contactAdmin": "يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.",
             "types": {
-                "VISITOR": "Visitor",
-                "CONTRACTOR": "Contractor",
-                "EMPLOYEE": "Employee",
-                "VEHICLE": "Vehicle"
+                "VISITOR": "زائر",
+                "CONTRACTOR": "مقاول",
+                "EMPLOYEE": "موظف",
+                "VEHICLE": "مركبة"
             },
             "status": {
-                "PENDING": "Pending",
-                "APPROVED": "Approved",
-                "REJECTED": "Rejected"
+                "PENDING": "قيد الانتظار",
+                "APPROVED": "مقبول",
+                "REJECTED": "مرفوض"
             },
-            "loading": "Loading dashboard..."
+            "loading": "Loading dashboard...",
+            "logoutConfirm": {
+                "title": "تسجيل الخروج",
+                "message": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+                "confirm": "تسجيل خروج",
+                "cancel": "إلغاء"
+            }
         }
     }
 }

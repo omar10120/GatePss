@@ -237,7 +237,13 @@
                 "APPROVED": "Approved",
                 "REJECTED": "Rejected"
             },
-            "loading": "Loading dashboard..."
+            "loading": "Loading dashboard...",
+            "logoutConfirm": {
+                "title": "Logout",
+                "message": "Are you sure you want to logout?",
+                "confirm": "Sign out",
+                "cancel": "Cancel"
+            }
         }
     }
 }

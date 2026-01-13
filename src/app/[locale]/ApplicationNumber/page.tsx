@@ -7,7 +7,6 @@ import HowtWork from '@/components/ui/HowtWork';
 export default function TrackApplication() {
     const t = useTranslations('HomePage');
     const locale = useLocale();
-
     return (
         <div className="min-h-screen bg-white">
 

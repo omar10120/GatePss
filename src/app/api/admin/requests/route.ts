@@ -7,7 +7,6 @@ export async function GET(request: NextRequest) {
     return requirePermission(request, 'MANAGE_REQUESTS', async (req, user) => {
         try {
             const { searchParams } = new URL(req.url);
-
             // Parse query parameters
             const status = searchParams.get('status') as RequestStatus | null;
             const requestType = searchParams.get('requestType') as RequestType | null;
