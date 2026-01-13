@@ -236,3 +236,56 @@ export async function sendAdminNotificationEmail(
         html,
     });
 }
+
+export async function sendOTPEmail(
+    userEmail: string,
+    userName: string,
+    otpCode: string
+): Promise<void> {
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+        .otp-box { background: white; padding: 30px; border: 2px dashed #14b8a6; margin: 20px 0; text-align: center; border-radius: 8px; }
+        .otp-code { font-size: 32px; font-weight: bold; color: #14b8a6; letter-spacing: 8px; font-family: 'Courier New', monospace; }
+        .warning { background: #fef3c7; padding: 15px; border-left: 4px solid #f59e0b; margin: 20px 0; border-radius: 4px; }
+        .footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>🔐 Verify Your Identity</h1>
+        </div>
+        <div class="content">
+          <p>Dear ${userName},</p>
+          <p>You have requested to sign in to your account. Please use the following One-Time Password (OTP) to complete your login:</p>
+          <div class="otp-box">
+            <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">Your OTP Code:</p>
+            <div class="otp-code">${otpCode}</div>
+          </div>
+          <div class="warning">
+            <strong>⚠️ Security Notice:</strong> This OTP will expire in 10 minutes. Do not share this code with anyone.
+          </div>
+          <p>If you did not request this login, please ignore this email or contact support immediately.</p>
+          <p>Best regards,<br><strong>Majis Industrial Services</strong></p>
+        </div>
+        <div class="footer">
+          <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+    await sendEmail({
+        to: userEmail,
+        subject: 'Your Login Verification Code',
+        html,
+    });
+}

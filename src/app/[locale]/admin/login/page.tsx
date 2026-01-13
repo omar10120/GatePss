@@ -12,6 +12,9 @@ export default function AdminLoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [showOTPModal, setShowOTPModal] = useState(false);
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [userEmail, setUserEmail] = useState('');
     const t = useTranslations('HomePage.login');
     const locale = useLocale();
 
@@ -41,6 +44,46 @@ export default function AdminLoginPage() {
                 throw new Error(data.message || 'Login failed');
             }
 
+            // Check if OTP is required
+            if (data.data?.requiresOTP) {
+                setUserEmail(data.data.email);
+                setShowOTPModal(true);
+                setError('');
+                return;
+            }
+
+            // If no OTP required (shouldn't happen with new flow, but keep for backward compatibility)
+            if (data.data?.token) {
+                localStorage.setItem('token', data.data.token);
+                localStorage.setItem('user', JSON.stringify(data.data.user));
+                router.push('/admin/dashboard');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Invalid email or password');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOTP = async (otp: string) => {
+        setOtpLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch('/api/auth/verify-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: userEmail, otp }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'OTP verification failed');
+            }
+
             // Store token in localStorage
             localStorage.setItem('token', data.data.token);
             localStorage.setItem('user', JSON.stringify(data.data.user));
@@ -48,10 +91,43 @@ export default function AdminLoginPage() {
             // Redirect to dashboard
             router.push('/admin/dashboard');
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Invalid email or password');
+            setError(err instanceof Error ? err.message : 'Invalid OTP code');
         } finally {
-            setLoading(false);
+            setOtpLoading(false);
         }
+    };
+
+    const handleResendOTP = async () => {
+        setOtpLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: userEmail }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to resend OTP');
+            }
+
+            setError('');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to resend OTP');
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    const handleCloseOTPModal = () => {
+        setShowOTPModal(false);
+        setUserEmail('');
+        setError('');
     };
 
     return (
@@ -207,10 +283,21 @@ export default function AdminLoginPage() {
                         {t('CopyRights')} <span style={{ color: '#14b8a6' }}>{t('Ctitle')}</span> {t('copyright')}
                     </div>
 
-                    {/* <VerifyIdentity isLoading={loading} onVerify={() => { }} onResend={() => { }} onClose={() => { }} /> */}
-
                 </div>
             </div>
+
+            {/* OTP Verification Modal */}
+            {showOTPModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <VerifyIdentity
+                        isLoading={otpLoading}
+                        onVerify={handleVerifyOTP}
+                        onResend={handleResendOTP}
+                        onClose={handleCloseOTPModal}
+                    />
+                </div>
+            )}
         </div>
     );
 }
+

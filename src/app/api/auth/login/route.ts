@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { verifyPassword, generateToken } from '@/lib/auth';
+import { verifyPassword } from '@/lib/auth';
 import { ActionType } from '@/lib/enums';
+import { sendOTPEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
     try {
@@ -85,22 +86,32 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Get user permissions
-        const permissions = user.permissions.map((up: { permission: { key: string } }) => up.permission.key);
+        // Password is valid - generate and send OTP
+        const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
+        const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
-        // Generate JWT token
-        const token = generateToken({
-            userId: user.id,
-            email: user.email,
-            role: user.role,
-            permissions,
+        // Update user with OTP
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                otpCode,
+                otpExpiresAt,
+            },
         });
 
-        // Log successful login
+        // Send OTP email
+        try {
+            await sendOTPEmail(user.email, user.name, otpCode);
+        } catch (emailError) {
+            console.error('Error sending OTP email:', emailError);
+            // Continue even if email fails
+        }
+
+        // Log OTP sent
         await prisma.activityLog.create({
             data: {
                 actionType: ActionType.AUTH,
-                actionPerformed: `Successful login for user: ${email}`,
+                actionPerformed: `Password verified, OTP sent to user: ${email}`,
                 affectedEntityType: 'USER',
                 affectedEntityId: user.id,
                 userId: user.id,
@@ -110,16 +121,10 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: 'Login successful',
+            message: 'Password verified. OTP sent to your email.',
             data: {
-                token,
-                user: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    role: user.role,
-                    permissions,
-                },
+                requiresOTP: true,
+                email: user.email,
             },
         });
 
