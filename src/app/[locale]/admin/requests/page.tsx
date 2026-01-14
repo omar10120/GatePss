@@ -7,6 +7,7 @@ import { getSidebarItems } from '@/config/navigation';
 import Header from '../components/Header';
 import { useLocale, useTranslations } from 'next-intl';
 import { TableFilter } from '../components/TableFilter';
+import { StatusUpdate } from './components/StatusUpdate';
 
 interface Request {
     id: number;
@@ -136,6 +137,48 @@ export default function AdminRequestsPage() {
             setPagination(null);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleStatusUpdate = async (id: number, status: 'APPROVED' | 'REJECTED' | 'PENDING', reason?: string) => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        try {
+            let endpoint = '';
+            let body = {};
+
+            if (status === 'APPROVED') {
+                endpoint = `/api/admin/requests/${id}/approve`;
+            } else if (status === 'REJECTED') {
+                endpoint = `/api/admin/requests/${id}/reject`;
+                body = { reason };
+            } else {
+                // If we want to support setting back to pending, we might need an endpoint or just return
+                console.warn('Setting to PENDING not fully supported yet via simplified API');
+                return;
+            }
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to update status');
+            }
+
+            // Refresh the list to reflect changes (or optimistically update)
+            fetchRequests(token);
+
+        } catch (error: any) {
+            console.error('Error updating status:', error);
+            alert(error.message || 'Failed to update status');
         }
     };
 
@@ -274,9 +317,11 @@ export default function AdminRequestsPage() {
                                                                 {new Date(request.dateOfVisit).toLocaleDateString()}
                                                             </td>
                                                             <td className="px-6 py-4">
-                                                                <span className={`px-3 py-1 text-[12px] font-bold rounded-full ${getStatusColor(request.status)}`}>
-                                                                    {dt(`status.${request.status}`)}
-                                                                </span>
+                                                                <StatusUpdate
+                                                                    currentStatus={request.status}
+                                                                    getStatusColor={getStatusColor}
+                                                                    onUpdate={(newStatus, reason) => handleStatusUpdate(request.id, newStatus, reason)}
+                                                                />
                                                             </td>
                                                             <td className="px-6 py-4">
                                                                 <Link

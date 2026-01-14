@@ -10,7 +10,7 @@ import { ApiVersion, SoharPortConfig } from './types';
  * Default configuration values
  */
 export const DEFAULT_CONFIG: Required<SoharPortConfig> = {
-    baseUrl: process.env.SOHAR_PORT_API_BASE_URL || 'https://api.soharport.com',
+    baseUrl: process.env.SOHAR_PORT_API_URL || 'https://api.soharport.com',
     apiKey: process.env.SOHAR_PORT_API_KEY || '',
     version: (process.env.SOHAR_PORT_API_VERSION as ApiVersion) || 'v1',
     timeout: parseInt(process.env.SOHAR_PORT_TIMEOUT || '30000', 10),
@@ -108,10 +108,10 @@ export function getEndpointUrl(
 export function validateConfig(config: SoharPortConfig): void {
     if (!config.useMock) {
         if (!config.baseUrl) {
-            throw new Error('SOHAR_PORT_API_BASE_URL is required when not in mock mode');
+            throw new Error('SOHAR_PORT_API_URL is required when not in mock mode');
         }
         if (!config.apiKey) {
-            throw new Error('SOHAR_PORT_API_KEY is required when not in mock mode');
+            throw new Error('SOHAR_PORT_API_URL is required when not in mock mode');
         }
     }
 }
