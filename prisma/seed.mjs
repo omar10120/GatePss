@@ -28,11 +28,11 @@ async function main() {
 
     console.log('Creating Super Admin user...');
     const superAdmin = await prisma.user.upsert({
-        where: { email: 'admin@majis.com' },
+        where: { email: 'amrooody7@gmail.com' },
         update: {},
         create: {
             name: 'Super Administrator',
-            email: 'admin@majis.com',
+            email: 'amrooody7@gmail.com',
             passwordHash: hashedPassword,
             role: 'SUPER_ADMIN',
             isActive: true,
@@ -60,11 +60,11 @@ async function main() {
     // Create a sample Sub Admin
     console.log('Creating sample Sub Admin user...');
     const subAdmin = await prisma.user.upsert({
-        where: { email: 'subadmin@majis.com' },
+        where: { email: 'subamrooody7@gmail.com' },
         update: {},
         create: {
             name: 'Sub Administrator',
-            email: 'subadmin@majis.com',
+            email: 'subamrooody7@gmail.com',
             passwordHash: hashedPassword,
             role: 'SUB_ADMIN',
             isActive: true,
@@ -99,10 +99,10 @@ async function main() {
     console.log('✅ Database seeded successfully!');
     console.log('\n📝 Default credentials:');
     console.log('Super Admin:');
-    console.log('  Email: admin@majis.com');
+    console.log('  Email: amrooody7@gmail.com');
     console.log('  Password: admin123');
     console.log('\nSub Admin:');
-    console.log('  Email: subadmin@majis.com');
+    console.log('  Email: subamrooody7@gmail.com');
     console.log('  Password: admin123');
 }
 

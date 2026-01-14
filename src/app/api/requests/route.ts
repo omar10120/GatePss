@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
 
         // Handle file uploads
         const uploadFile = async (file: File | null, prefix: string) => {
-            if (!file) return null;
+            if (!file || file.size === 0 || file.name === undefined || file.name === '') return null;
 
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
@@ -121,7 +121,8 @@ export async function POST(request: NextRequest) {
 
             // Validate file type
             const allowedTypes = ['jpg', 'jpeg', 'png', 'pdf'];
-            const fileExt = file.name.split('.').pop()?.toLowerCase();
+            const fileExt = file.name.split('.').pop()?.toLowerCase().trim();
+
             if (!fileExt || !allowedTypes.includes(fileExt)) {
                 throw new Error(`Only JPG, PNG, and PDF files are allowed for ${file.name}`);
             }
@@ -165,7 +166,7 @@ export async function POST(request: NextRequest) {
         // Calculate valid_from and valid_to based on validityPeriod and dateOfVisit
         const visitDate = new Date(dateOfVisit);
         visitDate.setHours(0, 0, 0, 0);
-        
+
         let validFrom = new Date(visitDate);
         let validTo = new Date(visitDate);
 
@@ -287,8 +288,8 @@ export async function POST(request: NextRequest) {
         console.error('Error details:', error instanceof Error ? error.message : String(error));
         console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
         return NextResponse.json(
-            { 
-                error: 'Internal Server Error', 
+            {
+                error: 'Internal Server Error',
                 message: error instanceof Error ? error.message : 'Failed to submit request. Please try again.',
                 details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : String(error)) : undefined
             },
