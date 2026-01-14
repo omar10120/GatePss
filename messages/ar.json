@@ -159,6 +159,8 @@
     "GatePassPage": {
         "title": "احصل على تصريح دخول سريع",
         "subtitle": "مثالي للاحتياجات العاجلة للسفر أو الجداول المزدحمة، يرجى إعادة التحقق من المرفقات قبل التقديم.",
+        "successTitle": "تم الإرسال بنجاح ",
+        "done": "تم",
         "sections": {
             "passPermitInfo": "معلومات تصريح المرور",
             "passHolderInfo": "معلومات حامل التصريح"
@@ -303,7 +305,29 @@
             "permissionDenied": "ليس لديك صلاحية لعرض هذا الطلب.",
             "contactAdmin": "يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.",
             "notFound": "الطلب غير موجود",
-            "loading": "جاري تحميل تفاصيل الطلب..."
+            "loading": "جاري تحميل تفاصيل الطلب...",
+            "passPermitInfo": "معلومات تصريح المرور",
+            "passHolderInfo": "معلومات حامل التصريح",
+            "permitsQrCode": "التصاريح (رمز الاستجابة السريعة)",
+            "fields": {
+                "passType": "نوع التصريح",
+                "nationality": "الجنسية",
+                "identification": "الهوية",
+                "passStartingDate": "تاريخ بدء التصريح",
+                "validityPeriod": "فترة الصلاحية",
+                "passFor": "التصريح لـ",
+                "purposeOfVisit": "الغرض من الزيارة",
+                "organization": "المؤسسة المستضيفة",
+                "holderNameEn": "اسم الحامل (إنجليزي)",
+                "holderNameAr": "اسم الحامل (عربي)",
+                "telephone": "رقم الهاتف",
+                "email": "البريد الإلكتروني",
+                "gender": "الجنس",
+                "profession": "المهنة",
+                "idPassportNumber": "رقم الهوية أو الجواز",
+                "passportIdNumber": "رقم الجواز/الهوية",
+                "otherDocuments": "مستندات أخرى"
+            }
         },
         "activity": {
             "title": "سجل النشاط",

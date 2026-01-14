@@ -119,7 +119,7 @@ export default function AdminRequestsPage() {
             }
 
             const result = await response.json();
-            
+
             // Handle successful response with empty data
             if (result.success && result.data) {
                 setRequests(result.data.requests || []);

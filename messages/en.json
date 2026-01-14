@@ -159,6 +159,8 @@
     "GatePassPage": {
         "title": "Get A Fast-Track Entry Permit",
         "subtitle": "Perfect for urgent travel needs or busy schedules, Please Recheck the attachments before submitting.",
+        "successTitle": "Your application Submitted Successfully ",
+        "done": "Done",
         "sections": {
             "passPermitInfo": "Pass Permit Info",
             "passHolderInfo": "Pass Holder Info"
@@ -303,7 +305,29 @@
             "permissionDenied": "You do not have permission to view this request.",
             "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
             "notFound": "Request not found",
-            "loading": "Loading request details..."
+            "loading": "Loading request details...",
+            "passPermitInfo": "Pass Permit Info",
+            "passHolderInfo": "Pass Holder Info",
+            "permitsQrCode": "Permits(QR Code)",
+            "fields": {
+                "passType": "Pass Type",
+                "nationality": "Nationality",
+                "identification": "Identification",
+                "passStartingDate": "Pass Starting Date",
+                "validityPeriod": "Validity Period",
+                "passFor": "Pass For",
+                "purposeOfVisit": "Purpose of visit",
+                "organization": "Organization Host",
+                "holderNameEn": "Holder Name(En)",
+                "holderNameAr": "Holder Name(Ar)",
+                "telephone": "Telephone",
+                "email": "Email",
+                "gender": "Gender",
+                "profession": "Profession",
+                "idPassportNumber": "ID Or Passport Number",
+                "passportIdNumber": "Passport/ID Number",
+                "otherDocuments": "Other Documents"
+            }
         },
         "activity": {
             "title": "Activity Logs",

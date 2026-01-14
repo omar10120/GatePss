@@ -2,11 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { useRouter, Link } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import Header from '../../components/Header';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
+import { Link } from '@/i18n/navigation';
+
+import { RequestHeader } from './components/RequestHeader';
+import { InfoSection } from './components/InfoSection';
+import { DocumentCard } from './components/DocumentCard';
+import { PermitSection } from './components/PermitSection';
 
 interface RequestDetails {
     id: number;
@@ -282,6 +288,7 @@ export default function RequestDetailsPage() {
                 <main className="px-6 py-8">
                     {permissionDenied ? (
                         <div className="card p-12 text-center">
+                            {/* Permission denied content kept same */}
                             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -294,178 +301,82 @@ export default function RequestDetailsPage() {
                             </Link>
                         </div>
                     ) : request ? (
-                        <>
-                            <div className="mb-6">
-                                <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 flex items-center gap-2">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isRtl ? "M14 5l7 7m0 0l-7 7m7-7H3" : "M10 19l-7-7m0 0l7-7m-7 7h18"} />
-                                    </svg>
-                                    {t('backToRequests')}
-                                </Link>
-                            </div>
+                        <div className="animate-fade-in font-['Rubik']">
+                            {/* Header Section */}
+                            <div className="bg-white rounded-[16px] p-6 shadow-sm mb-6">
+                                <RequestHeader
+                                    requestNumber={request.requestNumber}
+                                    status={request.status}
+                                    statusLabel={dt(`status.${request.status}`)}
+                                />
 
-                            {error && (
-                                <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg text-danger-700">
-                                    {error}
-                                </div>
-                            )}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    {/* Left Column: Info Sections */}
+                                    <div className="border-r border-gray-100 pr-0 lg:pr-8">
+                                        <InfoSection
+                                            title={t('passPermitInfo') || "Pass Permit Info"}
+                                            data={[
+                                                { label: t('fields.passType') || "Pass Type", value: dt(`types.${request.requestType}`) },
+                                                { label: t('fields.nationality') || "Nationality", value: request.nationality },
+                                                { label: t('fields.identification') || "Identification", value: request.identification },
+                                                { label: t('fields.passStartingDate') || "Pass Starting Date", value: new Date(request.validFrom).toLocaleDateString() },
+                                                { label: t('fields.validityPeriod') || "Validity Period", value: new Date(request.validTo).toLocaleDateString() },
+                                                { label: t('fields.passFor') || "Pass For", value: request.passFor || 'Self' },
+                                                { label: t('fields.purposeOfVisit') || "Purpose of visit", value: request.purposeOfVisit },
+                                                { label: t('fields.organization') || "Organization Host", value: request.organization },
+                                            ]}
+                                        />
 
-                            {success && (
-                                <div className="mb-6 p-4 bg-success-50 border border-success-200 rounded-lg text-success-700">
-                                    {success}
-                                </div>
-                            )}
+                                        <div className="my-8 border-t border-gray-100"></div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                {/* Main Details */}
-                                <div className="lg:col-span-2 space-y-6">
-                                    {/* Request Number & Status */}
-                                    <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('requestNumber')}</p>
-                                                <p className="text-2xl font-bold text-gray-900">{request.requestNumber}</p>
-                                            </div>
-                                            <span className={`px-4 py-2 text-sm font-medium rounded-full ${getStatusColor(request.status)}`}>
-                                                {dt(`status.${request.status}`)}
-                                            </span>
-                                        </div>
+                                        <InfoSection
+                                            title={t('passHolderInfo') || "Pass Holder Info"}
+                                            data={[
+                                                { label: t('fields.holderNameEn') || "Holder Name(En)", value: request.applicantNameEn },
+                                                { label: t('fields.holderNameAr') || "Holder Name(Ar)", value: request.applicantNameAr },
+                                                { label: t('fields.telephone') || "Telephone", value: request.applicantPhone || '-' },
+                                                { label: t('fields.email') || "Email", value: request.applicantEmail },
+                                                { label: t('fields.gender') || "Gender", value: request.gender },
+                                                { label: t('fields.profession') || "Profession", value: request.profession },
+                                                { label: t('fields.idPassportNumber') || "ID Or Passport Number", value: request.passportIdNumber },
+                                            ]}
+                                        />
                                     </div>
 
-                                    {/* Applicant Information */}
-                                    <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('applicantInfo')}</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('name')} (EN)</p>
-                                                <p className="text-gray-900 font-medium">{request.applicantNameEn}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('name')} (AR)</p>
-                                                <p className="text-gray-900 font-medium">{request.applicantNameAr}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('email')}</p>
-                                                <p className="text-gray-900 font-medium">{request.applicantEmail}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('passportId')}</p>
-                                                <p className="text-gray-900 font-medium">{request.passportIdNumber}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('document')}</p>
-                                                {request.passportIdImagePath ? (
-                                                    <a
-                                                        href={request.passportIdImagePath}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-info-500 hover:text-primary-700 font-medium"
-                                                    >
-                                                        {t('viewDocument')} →
-                                                    </a>
-                                                ) : (
-                                                    <p className="text-gray-500 text-sm">{t('noDocument') || 'No document uploaded'}</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {/* Right Column: Documents */}
+                                    <div>
+                                        <DocumentCard
+                                            title={t('fields.passportIdNumber') || "Passport/ID Number"}
+                                            imageUrl={request.passportIdImagePath}
+                                        />
 
-                                    {/* Request Details */}
-                                    <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('detailsTitle')}</h3>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('type')}</p>
-                                                <p className="text-gray-900 font-medium">
-                                                    {dt(`types.${request.requestType}`)}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('visitDate')}</p>
-                                                <p className="text-gray-900 font-medium">
-                                                    {new Date(request.dateOfVisit).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('purpose')}</p>
-                                                <p className="text-gray-900">{request.purposeOfVisit}</p>
-                                            </div>
-                                            {request.externalReference && (
-                                                <div>
-                                                    <p className="text-sm text-gray-600 mb-1">{t('externalRef')}</p>
-                                                    <p className="text-gray-900 font-mono text-sm">{request.externalReference}</p>
-                                                </div>
-                                            )}
-                                            {request.rejectionReason && (
-                                                <div>
-                                                    <p className="text-sm text-gray-600 mb-1">{t('rejectionReason')}</p>
-                                                    <p className="text-danger-700">{request.rejectionReason}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Activity Log */}
-                                    <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('activityLog')}</h3>
-                                        <div className="space-y-3">
-                                            {request.logs.map((log) => (
-                                                <div key={log.id} className="flex gap-3 pb-3 border-b border-gray-200 last:border-0">
-                                                    <div className="w-2 h-2 bg-primary-600 rounded-full mt-2"></div>
-                                                    <div className="flex-1">
-                                                        <p className="text-gray-900">{log.actionPerformed}</p>
-                                                        <p className="text-sm text-gray-500">
-                                                            {log.user?.name || 'System'} • {new Date(log.timestamp).toLocaleString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
+                                        {/* Display Other Documents if available */}
+                                        {request.uploads
+                                            .filter(u => u.fileType.startsWith('OTHER'))
+                                            .map((upload, idx) => (
+                                                <DocumentCard
+                                                    key={upload.id}
+                                                    title={`${t('fields.otherDocuments') || "Other Documents"} ${idx + 1}`}
+                                                    imageUrl={upload.filePath}
+                                                />
                                             ))}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Sidebar */}
-                                <div className="space-y-6">
-                                    {/* Actions */}
-                                    {request.status === 'PENDING' && (
-                                        <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('actions')}</h3>
-                                            <div className="space-y-3">
-                                                <button
-                                                    onClick={handleApprove}
-                                                    disabled={processing}
-                                                    className="btn btn-success w-full"
-                                                >
-                                                    {processing ? t('approving') : t('approve')}
-                                                </button>
-                                                <button
-                                                    onClick={() => setShowRejectModal(true)}
-                                                    disabled={processing}
-                                                    className="btn btn-danger w-full"
-                                                >
-                                                    {t('reject')}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Metadata */}
-                                    <div className="bg-white rounded-[12px] border border-gray-100 p-6 shadow-sm">
-                                        <div className="space-y-3">
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('submittedOn')}</p>
-                                                <p className="text-gray-900 text-sm">{new Date(request.createdAt).toLocaleString()}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-1">{t('lastUpdated')}</p>
-                                                <p className="text-gray-900 text-sm">{new Date(request.updatedAt).toLocaleString()}</p>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                        </>
+                            {/* Permit Section (Bottom) */}
+                            <div className="bg-white rounded-[16px] p-6 shadow-sm">
+                                <PermitSection
+                                    status={request.status}
+                                    requestType={request.requestType}
+                                    title={t('permitsQrCode') || "Permits(QR Code)"}
+                                    subtitle={request.status === 'REJECTED' && request.rejectionReason
+                                        ? request.rejectionReason
+                                        : "The user was informed of the reason for the rejection via his Email."}
+                                />
+                            </div>
+
+                        </div>
                     ) : null}
                 </main>
 

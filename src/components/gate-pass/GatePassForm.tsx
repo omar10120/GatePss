@@ -5,6 +5,9 @@ import { useTranslations } from 'next-intl';
 import { Input, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { FileUpload } from '@/components/ui/FileUpload';
+import Image from 'next/image';
+
+import { SuccessfullDialog } from '../ui/SuccessfullDialog';
 
 export const GatePassForm: React.FC = () => {
     const t = useTranslations('GatePassPage');
@@ -12,6 +15,7 @@ export const GatePassForm: React.FC = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [confirmed, setConfirmed] = useState(false);
+    const [createdRequestNumber, setCreatedRequestNumber] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -32,6 +36,7 @@ export const GatePassForm: React.FC = () => {
         setLoading(true);
         setError('');
         setSuccess('');
+        setCreatedRequestNumber(null);
 
 
         try {
@@ -51,7 +56,8 @@ export const GatePassForm: React.FC = () => {
                 throw new Error(data.message || 'Failed to submit request');
             }
 
-            setSuccess(`Request submitted successfully! Request Number: ${data.data.requestNumber}`);
+            setSuccess('true');
+            setCreatedRequestNumber(data.data.requestNumber);
             (e.target as HTMLFormElement).reset();
             setConfirmed(false);
         } catch (err: any) {
@@ -62,17 +68,29 @@ export const GatePassForm: React.FC = () => {
         }
     };
 
+
+
+    const handleReset = () => {
+        setSuccess('');
+        setCreatedRequestNumber(null);
+        setConfirmed(false);
+        setError('');
+    };
+
+    if (success) {
+        return (
+            <SuccessfullDialog
+                requestNumber={createdRequestNumber}
+                onDone={handleReset}
+            />
+        );
+    }
+
     return (
         <form onSubmit={handleSubmit} className="space-y-12">
             {error && (
                 <div className="p-4 bg-danger-50 border border-danger-200 rounded-2xl text-danger-700 animate-fade-in text-sm font-medium font-['Rubik']">
                     {error}
-                </div>
-            )}
-
-            {success && (
-                <div className="p-4 bg-success-50 border border-success-200 rounded-2xl text-success-700 animate-fade-in text-sm font-medium font-['Rubik']">
-                    {success}
                 </div>
             )}
 
