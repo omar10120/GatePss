@@ -140,7 +140,7 @@ export default function AdminRequestsPage() {
         }
     };
 
-    const handleStatusUpdate = async (id: number, status: 'APPROVED' | 'REJECTED' | 'PENDING', reason?: string) => {
+    const handleStatusUpdate = async (id: number, status: 'APPROVED' | 'REJECTED' | 'PENDING', rejectionReason?: string) => {
         const token = localStorage.getItem('token');
         if (!token) return;
 
@@ -152,7 +152,7 @@ export default function AdminRequestsPage() {
                 endpoint = `/api/admin/requests/${id}/approve`;
             } else if (status === 'REJECTED') {
                 endpoint = `/api/admin/requests/${id}/reject`;
-                body = { reason };
+                body = { rejectionReason };
             } else {
                 // If we want to support setting back to pending, we might need an endpoint or just return
                 console.warn('Setting to PENDING not fully supported yet via simplified API');
@@ -320,7 +320,7 @@ export default function AdminRequestsPage() {
                                                                 <StatusUpdate
                                                                     currentStatus={request.status}
                                                                     getStatusColor={getStatusColor}
-                                                                    onUpdate={(newStatus, reason) => handleStatusUpdate(request.id, newStatus, reason)}
+                                                                    onUpdate={(newStatus, rejectionReason) => handleStatusUpdate(request.id, newStatus, rejectionReason)}
                                                                 />
                                                             </td>
                                                             <td className="px-6 py-4">
