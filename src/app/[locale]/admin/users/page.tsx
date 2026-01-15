@@ -5,6 +5,7 @@ import { useRouter, usePathname } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import Header from '../components/Header';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface User {
     id: number;
@@ -29,7 +30,6 @@ interface Permission {
 export default function AdminUsersPage() {
     const router = useRouter();
     const pathname = usePathname();
-    const [locale, setLocale] = useState<'en' | 'ar'>('en');
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
     const [permissions, setPermissions] = useState<Permission[]>([]);
@@ -48,90 +48,8 @@ export default function AdminUsersPage() {
     const [success, setSuccess] = useState('');
 
     const [permissionDenied, setPermissionDenied] = useState(false);
-
-    // Helper function to check if user has a specific permission
-    const hasPermission = (permissionKey: string) => {
-        if (!user) return false;
-        if (user.role === 'SUPER_ADMIN') return true;
-        return user.permissions?.includes(permissionKey) || false;
-    };
-
-    const toggleLocale = () => {
-        setLocale(prev => prev === 'en' ? 'ar' : 'en');
-    };
-
-    const t = {
-        en: {
-            title: 'User Management',
-            dashboard: 'Dashboard',
-            requests: 'Requests',
-            users: 'Users',
-            logs: 'Activity Logs',
-            logout: 'Logout',
-            addUser: 'Add New User',
-            editUser: 'Edit User',
-            name: 'Name',
-            email: 'Email',
-            password: 'Password',
-            role: 'Role',
-            status: 'Status',
-            permissions: 'Permissions',
-            actions: 'Actions',
-            active: 'Active',
-            inactive: 'Inactive',
-            edit: 'Edit',
-            deactivate: 'Deactivate',
-            activate: 'Activate',
-            save: 'Save',
-            cancel: 'Cancel',
-            saving: 'Saving...',
-            noUsers: 'No users found',
-            permissionDenied: 'You do not have permission to view users.',
-            contactAdmin: 'Please contact your administrator if you believe this is a mistake.',
-            roles: {
-                SUPER_ADMIN: 'Super Admin',
-                SUB_ADMIN: 'Sub Admin',
-            },
-            passwordHint: 'Leave blank to keep current password',
-            selectPermissions: 'Select Permissions',
-        },
-        ar: {
-            title: 'إدارة المستخدمين',
-            dashboard: 'لوحة التحكم',
-            requests: 'الطلبات',
-            users: 'المستخدمون',
-            logs: 'سجل النشاط',
-            logout: 'تسجيل الخروج',
-            addUser: 'إضافة مستخدم جديد',
-            editUser: 'تعديل المستخدم',
-            name: 'الاسم',
-            email: 'البريد الإلكتروني',
-            password: 'كلمة المرور',
-            role: 'الدور',
-            status: 'الحالة',
-            permissions: 'الصلاحيات',
-            actions: 'الإجراءات',
-            active: 'نشط',
-            inactive: 'غير نشط',
-            edit: 'تعديل',
-            deactivate: 'إلغاء التفعيل',
-            activate: 'تفعيل',
-            save: 'حفظ',
-            cancel: 'إلغاء',
-            saving: 'جاري الحفظ...',
-            noUsers: 'لم يتم العثور على مستخدمين',
-            permissionDenied: 'ليس لديك صلاحية لعرض المستخدمين.',
-            contactAdmin: 'يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.',
-            roles: {
-                SUPER_ADMIN: 'مدير رئيسي',
-                SUB_ADMIN: 'مدير فرعي',
-            },
-            passwordHint: 'اتركه فارغاً للاحتفاظ بكلمة المرور الحالية',
-            selectPermissions: 'اختر الصلاحيات',
-        },
-    };
-
-    const content = t[locale];
+    const t = useTranslations('Admin.users');
+    const locale = useLocale();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -338,25 +256,6 @@ export default function AdminUsersPage() {
         }
     };
 
-    const handleLogout = async () => {
-        const token = localStorage.getItem('token');
-
-        try {
-            await fetch('/api/auth/logout', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-        } catch (error) {
-            console.error('Logout error:', error);
-        }
-
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        router.push('/admin/login');
-    };
-
     const handlePermissionToggle = (permissionId: number) => {
         setFormData(prev => ({
             ...prev,
@@ -371,14 +270,14 @@ export default function AdminUsersPage() {
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading users...</p>
+                    <p className="text-gray-600">{t('loading')}</p>
                 </div>
             </div>
         );
     }
 
     const sidebarItems = getSidebarItems(
-        locale,
+        locale as 'en' | 'ar',
         user?.permissions || [],
         user?.role,
         pathname
@@ -387,7 +286,7 @@ export default function AdminUsersPage() {
     return (
         <div className="min-h-screen bg-gray-50 flex" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             {/* Sidebar */}
-            <Sidebar items={sidebarItems} locale={locale} />
+            <Sidebar items={sidebarItems} locale={locale as 'en' | 'ar'} />
 
             {/* Main Content Area */}
             <div className="flex-1" style={{ marginLeft: locale === 'ar' ? '0' : '16rem', marginRight: locale === 'ar' ? '16rem' : '0' }}>
@@ -395,8 +294,8 @@ export default function AdminUsersPage() {
                 <Header />
 
                 {/* Main Content */}
-                <main className="px-6 py-8">
-                    <div className="flex items-center justify-between mb-6">
+                <main className="px-6 py-8 ">
+                    <div className="flex mb-6 justify-end">
                         {!permissionDenied && (
                             <button
                                 onClick={() => handleOpenModal()}
@@ -405,7 +304,7 @@ export default function AdminUsersPage() {
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                 </svg>
-                                {content.addUser}
+                                {t('addUser')}
                             </button>
                         )}
                     </div>
@@ -417,8 +316,8 @@ export default function AdminUsersPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">{content.permissionDenied}</h3>
-                            <p className="text-gray-500">{content.contactAdmin}</p>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('permissionDenied')}</h3>
+                            <p className="text-gray-500">{t('contactAdmin')}</p>
                         </div>
                     ) : (
                         <>
@@ -435,12 +334,12 @@ export default function AdminUsersPage() {
                                         <table className="w-full">
                                             <thead className="bg-gray-50 border-b border-gray-200">
                                                 <tr>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.name}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.email}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.role}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.status}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.permissions}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{content.actions}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('name')}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('email')}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('role')}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('status')}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('permissions')}</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('actions')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-200">
@@ -449,16 +348,16 @@ export default function AdminUsersPage() {
                                                         <td className="px-4 py-3 text-gray-900 font-medium">{u.name}</td>
                                                         <td className="px-4 py-3 text-gray-600">{u.email}</td>
                                                         <td className="px-4 py-3 text-gray-600">
-                                                            {content.roles[u.role as keyof typeof content.roles]}
+                                                            {t(`roles.${u.role}`)}
                                                         </td>
                                                         <td className="px-4 py-3">
                                                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${u.isActive ? 'bg-success-100 text-success-700' : 'bg-gray-100 text-gray-700'
                                                                 }`}>
-                                                                {u.isActive ? content.active : content.inactive}
+                                                                {u.isActive ? t('active') : t('inactive')}
                                                             </span>
                                                         </td>
                                                         <td className="px-4 py-3 text-gray-600 text-sm">
-                                                            {u.permissions.length} permissions
+                                                            {u.permissions.length} {locale === 'ar' ? 'صلاحيات' : 'permissions'}
                                                         </td>
                                                         <td className="px-4 py-3">
                                                             <div className="flex gap-2">
@@ -467,7 +366,7 @@ export default function AdminUsersPage() {
                                                                     className="text-info-500 hover:text-primary-700 text-sm font-medium"
                                                                     disabled={u.id === user?.id}
                                                                 >
-                                                                    {content.edit}
+                                                                    {t('edit')}
                                                                 </button>
                                                                 {u.id !== user?.id && (
                                                                     <button
@@ -475,7 +374,7 @@ export default function AdminUsersPage() {
                                                                         className={`text-sm font-medium ${u.isActive ? 'text-danger-600 hover:text-danger-700' : 'text-success-600 hover:text-success-700'
                                                                             }`}
                                                                     >
-                                                                        {u.isActive ? content.deactivate : content.activate}
+                                                                        {u.isActive ? t('deactivate') : t('activate')}
                                                                     </button>
                                                                 )}
                                                             </div>
@@ -486,7 +385,7 @@ export default function AdminUsersPage() {
                                         </table>
                                     </div>
                                 ) : (
-                                    <p className="text-gray-500 text-center py-12">{content.noUsers}</p>
+                                    <p className="text-gray-500 text-center py-12">{t('noUsers')}</p>
                                 )}
                             </div>
                         </>
@@ -499,7 +398,7 @@ export default function AdminUsersPage() {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
                         <h3 className="text-xl font-bold text-gray-900 mb-4">
-                            {editingUser ? content.editUser : content.addUser}
+                            {editingUser ? t('editUser') : t('addUser')}
                         </h3>
 
                         {error && (
@@ -511,7 +410,7 @@ export default function AdminUsersPage() {
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {content.name}
+                                    {t('name')}
                                 </label>
                                 <input
                                     type="text"
@@ -524,7 +423,7 @@ export default function AdminUsersPage() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {content.email}
+                                    {t('email')}
                                 </label>
                                 <input
                                     type="email"
@@ -537,35 +436,35 @@ export default function AdminUsersPage() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {content.password}
+                                    {t('password')}
                                 </label>
                                 <input
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     className="input"
-                                    placeholder={editingUser ? content.passwordHint : ''}
+                                    placeholder={editingUser ? t('passwordHint') : ''}
                                     required={!editingUser}
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {content.role}
+                                    {t('role')}
                                 </label>
                                 <select
                                     value={formData.role}
                                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                     className="input"
                                 >
-                                    <option value="SUB_ADMIN">{content.roles.SUB_ADMIN}</option>
-                                    <option value="SUPER_ADMIN">{content.roles.SUPER_ADMIN}</option>
+                                    <option value="SUB_ADMIN">{t('roles.SUB_ADMIN')}</option>
+                                    <option value="SUPER_ADMIN">{t('roles.SUPER_ADMIN')}</option>
                                 </select>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {content.selectPermissions}
+                                    {t('selectPermissions')}
                                 </label>
                                 <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3">
                                     {permissions.map((permission) => (
@@ -590,7 +489,7 @@ export default function AdminUsersPage() {
                                         onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                                         className="rounded border-gray-300"
                                     />
-                                    <label className="text-sm text-gray-700">{content.active}</label>
+                                    <label className="text-sm text-gray-700">{t('active')}</label>
                                 </div>
                             )}
                         </div>
@@ -601,14 +500,14 @@ export default function AdminUsersPage() {
                                 className="btn btn-secondary flex-1"
                                 disabled={loading}
                             >
-                                {content.cancel}
+                                {t('cancel')}
                             </button>
                             <button
                                 onClick={handleSave}
                                 className="btn btn-primary flex-1"
                                 disabled={loading}
                             >
-                                {loading ? content.saving : content.save}
+                                {loading ? t('saving') : t('save')}
                             </button>
                         </div>
                     </div>

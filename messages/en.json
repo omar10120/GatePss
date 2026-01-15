@@ -356,6 +356,36 @@
                 "previous": "Previous",
                 "next": "Next"
             }
+        },
+        "users": {
+            "title": "User Management",
+            "addUser": "Add New User",
+            "editUser": "Edit User",
+            "name": "Name",
+            "email": "Email",
+            "password": "Password",
+            "role": "Role",
+            "status": "Status",
+            "permissions": "Permissions",
+            "actions": "Actions",
+            "active": "Active",
+            "inactive": "Inactive",
+            "edit": "Edit",
+            "deactivate": "Deactivate",
+            "activate": "Activate",
+            "save": "Save",
+            "cancel": "Cancel",
+            "saving": "Saving...",
+            "noUsers": "No users found",
+            "permissionDenied": "You do not have permission to view users.",
+            "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
+            "roles": {
+                "SUPER_ADMIN": "Super Admin",
+                "SUB_ADMIN": "Sub Admin"
+            },
+            "passwordHint": "Leave blank to keep current password",
+            "selectPermissions": "Select Permissions",
+            "loading": "Loading users..."
         }
     }
 }

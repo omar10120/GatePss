@@ -1,19 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 import HowtWork from '@/components/ui/HowtWork';
+import StatusCard from '@/components/ui/StatusCard';
+
 
 type DisplayStatus = 'PENDING' | 'APPROVED' | 'SO_APPROVED' | 'SO_REJECTED' | null;
 
 export default function TrackApplication() {
     const t = useTranslations('HomePage');
-    const locale = useLocale();
     const [requestNumber, setRequestNumber] = useState('');
     const [displayStatus, setDisplayStatus] = useState<DisplayStatus>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
 
     const handleCheckStatus = async () => {
         if (!requestNumber.trim()) {
@@ -47,67 +49,13 @@ export default function TrackApplication() {
         }
     };
 
-    const renderStatusMessage = () => {
+    // Map displayStatus to StatusCard format
+    const getStatusCardStatus = (): 'accepted' | 'rejected' | 'review' | null => {
         if (!displayStatus) return null;
-
-        // PENDING or APPROVED (not yet So-Approved) -> First image
-        if (displayStatus === 'PENDING' || displayStatus === 'APPROVED') {
-            return (
-                <div className="max-w-md mx-auto mt-8 p-8 bg-gray-50 rounded-xl shadow-lg">
-                    <div className="flex justify-center mb-4">
-                        <svg className="w-16 h-16 text-[#14b8a6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                    </div>
-                    <h3 className="text-xl font-bold text-[#1e40af] mb-2">
-                        The Request Application Currently
-                    </h3>
-                    <p className="text-lg text-[#1e40af]">
-                        Under Review By <span className="text-[#14b8a6]">SOHAR</span> System
-                    </p>
-                </div>
-            );
-        }
-
-        // SO_REJECTED -> Second image
-        if (displayStatus === 'SO_REJECTED') {
-            return (
-                <div className="max-w-md mx-auto mt-8 p-8 bg-pink-50 rounded-xl shadow-lg">
-                    <div className="flex justify-center mb-4">
-                        <svg className="w-16 h-16 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">
-                        The Request Application Was Rejected
-                    </h3>
-                    <p className="text-sm text-gray-700">
-                        The system informed you of the reason for the rejection via your Email, Please check it.
-                    </p>
-                </div>
-            );
-        }
-
-        // SO_APPROVED -> Third image
-        if (displayStatus === 'SO_APPROVED') {
-            return (
-                <div className="max-w-md mx-auto mt-8 p-8 bg-green-50 rounded-xl shadow-lg">
-                    <div className="flex justify-center mb-4">
-                        <svg className="w-16 h-16 text-[#14b8a6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">
-                        The Request Application Was Accepted
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                        The system informed you with the Application Acception via your Email, Please check it.
-                    </p>
-                </div>
-            );
-        }
-
-        return null;
+        if (displayStatus === 'SO_APPROVED') return 'accepted';
+        if (displayStatus === 'SO_REJECTED') return 'rejected';
+        // PENDING or APPROVED (not yet So-Approved) -> review
+        return 'review';
     };
 
     return (
@@ -153,7 +101,14 @@ export default function TrackApplication() {
                             </div>
                         )}
 
-                        {renderStatusMessage()}
+                        {(() => {
+                            const statusCardStatus = getStatusCardStatus();
+                            return statusCardStatus && (
+                                <div className="mt-8">
+                                    <StatusCard status={statusCardStatus} />
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             </section>

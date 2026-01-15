@@ -167,8 +167,8 @@ export async function POST(request: NextRequest) {
         const visitDate = new Date(dateOfVisit);
         visitDate.setHours(0, 0, 0, 0);
 
-        let validFrom = new Date(visitDate);
-        let validTo = new Date(visitDate);
+        const validFrom = new Date(visitDate);
+        const validTo = new Date(visitDate);
 
         switch (validityPeriod) {
             case '1_DAY':
