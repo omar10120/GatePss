@@ -385,7 +385,11 @@
             },
             "passwordHint": "Leave blank to keep current password",
             "selectPermissions": "Select Permissions",
-            "loading": "Loading users..."
+            "loading": "Loading users...",
+            "phoneNumber": "Phone Number",
+            "added": "Added",
+            "access": "Access",
+            "viewMore": "View more"
         }
     }
 }
