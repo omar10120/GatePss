@@ -17,6 +17,8 @@ export async function POST(request: NextRequest) {
         const applicantPhone = formData.get('telephone') as string;
         const gender = formData.get('gender') as string;
         const profession = formData.get('profession') as string;
+        const otherProfessions = formData.get('otherProfessions') as string | null;
+        const bloodType = formData.get('bloodType') as string | null;
         const passportIdNumber = formData.get('passportIdNumber') as string;
         const nationality = formData.get('nationality') as string;
         const identification = formData.get('identification') as string;
@@ -26,6 +28,7 @@ export async function POST(request: NextRequest) {
         const dateOfVisit = formData.get('dateOfVisit') as string;
         const requestType = formData.get('requestType') as string;
         const passportIdImage = formData.get('passportIdImage') as File | null;
+        const photo = formData.get('photo') as File | null;
         const passFor = formData.get('passFor') as string | null;
 
         // Validate required fields using BRD requirements
@@ -142,11 +145,13 @@ export async function POST(request: NextRequest) {
         };
 
         let imagePath: string | null = null;
+        let photoPath: string | null = null;
         let otherDoc1Path: string | null = null;
         let otherDoc2Path: string | null = null;
 
         try {
             imagePath = await uploadFile(passportIdImage, 'passport');
+            photoPath = await uploadFile(photo, 'photo');
             otherDoc1Path = await uploadFile(formData.get('otherDocuments1') as File | null, 'other1');
             otherDoc2Path = await uploadFile(formData.get('otherDocuments2') as File | null, 'other2');
         } catch (err: any) {
@@ -199,6 +204,9 @@ export async function POST(request: NextRequest) {
                     applicantPhone: applicantPhone?.trim() || null,
                     gender: gender,
                     profession: profession.trim(),
+                    otherProfessions: otherProfessions?.trim() || null,
+                    bloodType: bloodType || null,
+                    photoPath: photoPath,
                     passportIdNumber: passportIdNumber.toUpperCase().trim(),
                     passportIdImagePath: imagePath,
                     nationality: nationality.trim(),

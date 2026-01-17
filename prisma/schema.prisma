@@ -65,6 +65,9 @@ model Request {
   applicantPhone             String?       @map("applicant_phone")
   gender                     String        @map("gender") // MALE | FEMALE
   profession                 String        @map("profession")
+  otherProfessions           String?       @map("other_professions")
+  bloodType                  String?       @map("blood_type")
+  photoPath                  String?       @map("photo_path")
   passportIdNumber           String        @map("passport_id_number")
   passportIdImagePath        String?       @map("passport_id_image_path")
   nationality                String        @map("nationality")

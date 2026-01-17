@@ -212,6 +212,8 @@ export interface SoharPortConfig {
     useMock?: boolean;
     retryAttempts?: number;
     retryDelay?: number;
+    username?: string;
+    password?: string;
 }
 
 /**

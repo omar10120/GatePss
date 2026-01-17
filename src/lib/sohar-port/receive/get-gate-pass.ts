@@ -22,7 +22,11 @@ export async function getGatePass(
 
         const response = await client.request<any>({
             method: 'GET',
-            endpoint: getEndpointUrl('v1', 'GET_GATE_PASS', { ref: request.externalReference }),
+            endpoint: getEndpointUrl('v1', 'GET_GATE_PASS'),
+            params: {
+                passNumber: request.externalReference,
+                entity: 'port',
+            },
         });
 
         const result: GetGatePassResponse = {

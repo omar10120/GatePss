@@ -38,15 +38,18 @@ export class SoharPortHttpClient {
             timeout: this.config.timeout,
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-Version': this.config.version,
             },
         });
 
         // Request interceptor
         instance.interceptors.request.use(
             (config) => {
-                // Add API key to headers
-                if (this.config.apiKey) {
+                // Add Basic Auth credentials
+                if (this.config.username && this.config.password) {
+                    const credentials = Buffer.from(`${this.config.username}:${this.config.password}`).toString('base64');
+                    config.headers.Authorization = `Basic ${credentials}`;
+                } else if (this.config.apiKey) {
+                    // Fallback to Bearer token if Basic Auth not provided
                     config.headers.Authorization = `Bearer ${this.config.apiKey}`;
                 }
 

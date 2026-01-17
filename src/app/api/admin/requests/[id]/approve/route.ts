@@ -49,9 +49,12 @@ export async function POST(
                 console.warn('Failed to parse request body, continuing with empty body:', error);
             }
 
-            // Get the request
+            // Get the request with uploads
             const gateRequest = await prisma.request.findUnique({
                 where: { id: requestId },
+                include: {
+                    uploads: true,
+                },
             });
 
             if (!gateRequest) {
@@ -111,7 +114,10 @@ export async function POST(
                 purposeOfVisit: gateRequest.purposeOfVisit,
                 dateOfVisit: gateRequest.dateOfVisit.toISOString(),
                 requestType: gateRequest.requestType as any,
-                extraFields: gateRequest.passFor ? { passFor: gateRequest.passFor } : undefined,
+                extraFields: {
+                    passFor: gateRequest.passFor,
+                    gateRequest: gateRequest, // Pass full request object for mapping
+                },
             });
 
             if (!apiResponse.success) {
