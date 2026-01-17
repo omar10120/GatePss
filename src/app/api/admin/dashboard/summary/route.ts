@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
                 select: {
                     id: true,
                     requestNumber: true,
-                    applicantName: true,
+                    applicantNameEn: true,
+                    applicantNameAr: true,
                     status: true,
                     requestType: true,
                     createdAt: true,
