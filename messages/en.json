@@ -406,6 +406,45 @@
             "userNotFound": "User not found",
             "noPermissions": "No permissions assigned",
             "leaveEmptyToKeepCurrent": "Leave empty to keep current password"
+        },
+        "permits": {
+            "title": "Permits",
+            "loading": "Loading permits...",
+            "permissionDenied": "You do not have permission to view permits.",
+            "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
+            "filterBy": "Filter By",
+            "searchPlaceholder": "Search By Name, Email, ID Number",
+            "date": "Date",
+            "status": "Status",
+            "resetFilter": "Reset Filter",
+            "today": "Today",
+            "yesterday": "Yesterday",
+            "thisWeek": "This Week",
+            "thisMonth": "This Month",
+            "permitNumber": "Permit Number",
+            "holderName": "Holder Name",
+            "email": "Email",
+            "role": "Role",
+            "requestType": "Request Type",
+            "passType": "Pass Type",
+            "identification": "Identification",
+            "permit": "Permit",
+            "action": "Action",
+            "viewMore": "View more",
+            "noPermits": "No permits found",
+            "permitsInfo": "Permits Info",
+            "passStartingDate": "Pass Starting Date",
+            "soApproved": "So-Approved",
+            "downloadInfo": "Download Info",
+            "viewQRCode": "View QR Code",
+            "temporary": "Temporary",
+            "permanent": "Permanent",
+            "pagination": {
+                "showing": "Showing",
+                "of": "of",
+                "previous": "Previous",
+                "next": "Next"
+            }
         }
     }
 }

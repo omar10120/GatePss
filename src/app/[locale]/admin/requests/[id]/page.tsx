@@ -108,25 +108,6 @@ export default function RequestDetailsPage() {
             setUser(JSON.parse(userData));
         }
 
-        fetch('/api/auth/me', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    setUser(data.data.user);
-                    localStorage.setItem('user', JSON.stringify(data.data.user));
-                } else {
-                    if (data.error === 'Unauthorized' || data.error === 'Forbidden') {
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                        router.push('/admin/login');
-                    }
-                }
-            })
-            .catch(err => console.error('Error refreshing user data:', err));
 
         if (requestId) {
             fetchRequestDetails(token, requestId);

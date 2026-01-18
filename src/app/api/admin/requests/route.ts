@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
             // Parse query parameters
             const status = searchParams.get('status') as RequestStatus | null;
             const requestType = searchParams.get('requestType') as RequestType | null;
+            const passFor = searchParams.get('passFor');
             const dateFilter = searchParams.get('date'); // Frontend sends: today, yesterday, this_week, this_month
             const dateFrom = searchParams.get('dateFrom');
             const dateTo = searchParams.get('dateTo');
@@ -27,6 +28,10 @@ export async function GET(request: NextRequest) {
 
             if (requestType) {
                 where.requestType = requestType;
+            }
+
+            if (passFor) {
+                where.passFor = passFor;
             }
 
             // Handle date filter from frontend (today, yesterday, this_week, this_month)
