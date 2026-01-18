@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
         const user = await prisma.user.findUnique({
             where: { id: payload.userId },
             include: {
-                permissions: {
+                userPermissions: {
                     include: {
                         permission: true,
                     },
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Format permissions as array of strings
-        const permissions = user.permissions.map((up: any) => up.permission.key);
+        const permissions = user.userPermissions.map((up: any) => up.permission.key);
 
         return NextResponse.json({
             success: true,

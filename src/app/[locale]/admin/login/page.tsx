@@ -37,9 +37,9 @@ export default function AdminLoginPage() {
                 },
                 body: JSON.stringify({ email, password }),
             });
-
+            console.log(response);
             const data = await response.json();
-
+            console.log(data);
             if (!response.ok) {
                 throw new Error(data.message || 'Login failed');
             }
@@ -59,6 +59,7 @@ export default function AdminLoginPage() {
                 router.push('/admin/dashboard');
             }
         } catch (err) {
+            console.log(err);
             setError(err instanceof Error ? err.message : 'Invalid email or password');
         } finally {
             setLoading(false);
@@ -87,10 +88,11 @@ export default function AdminLoginPage() {
             // Store token in localStorage
             localStorage.setItem('token', data.data.token);
             localStorage.setItem('user', JSON.stringify(data.data.user));
-
+            console.log(response);
             // Redirect to dashboard
             router.push('/admin/dashboard');
         } catch (err) {
+            console.log(err);
             setError(err instanceof Error ? err.message : 'Invalid OTP code');
         } finally {
             setOtpLoading(false);

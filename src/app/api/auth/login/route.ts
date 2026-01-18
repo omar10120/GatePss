@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
         const user = await prisma.user.findUnique({
             where: { email },
             include: {
-                permissions: {
+                userPermissions: {
                     include: {
                         permission: true,
                     },
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
                 affectedEntityId: user.id,
                 userId: user.id,
                 details: JSON.stringify({ email }),
-            },
+        },
         });
 
         return NextResponse.json({

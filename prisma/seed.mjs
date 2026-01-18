@@ -56,6 +56,8 @@ async function main() {
             },
         });
     }
+    console.log(allPermissions);
+
 
     // Create a sample Sub Admin
     console.log('Creating sample Sub Admin user...');

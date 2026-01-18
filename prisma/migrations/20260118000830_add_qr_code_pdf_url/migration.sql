@@ -1,14 +1,23 @@
--- AlterTable
-ALTER TABLE `requests` ADD COLUMN `qr_code_pdf_url` VARCHAR(191) NULL;
+-- requests table change is OK
+ALTER TABLE `requests`
+ADD COLUMN `qr_code_pdf_url` VARCHAR(191) NULL;
 
--- RenameIndex
-ALTER TABLE `notifications` RENAME INDEX `notifications_user_id_fkey` TO `notifications_user_id_idx`;
+-- notifications
+ALTER TABLE `notifications`
+DROP INDEX `notifications_user_id_fkey`,
+ADD INDEX `notifications_user_id_idx` (`user_id`);
 
--- RenameIndex
-ALTER TABLE `requests` RENAME INDEX `requests_approved_by_fkey` TO `requests_approved_by_idx`;
+-- requests
+ALTER TABLE `requests`
+DROP INDEX `requests_approved_by_fkey`,
+ADD INDEX `requests_approved_by_idx` (`approved_by`);
 
--- RenameIndex
-ALTER TABLE `uploads` RENAME INDEX `uploads_request_id_fkey` TO `uploads_request_id_idx`;
+-- uploads
+ALTER TABLE `uploads`
+DROP INDEX `uploads_request_id_fkey`,
+ADD INDEX `uploads_request_id_idx` (`request_id`);
 
--- RenameIndex
-ALTER TABLE `user_permissions` RENAME INDEX `user_permissions_permission_id_fkey` TO `user_permissions_permission_id_idx`;
+-- user_permissions
+ALTER TABLE `user_permissions`
+DROP INDEX `user_permissions_permission_id_fkey`,
+ADD INDEX `user_permissions_permission_id_idx` (`permission_id`);

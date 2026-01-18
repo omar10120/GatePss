@@ -61,7 +61,7 @@ export async function requirePermission(
         const dbUser = await prisma.user.findUnique({
             where: { id: user.userId },
             include: {
-                permissions: {
+                userPermissions: {
                     include: {
                         permission: true,
                     },
@@ -76,7 +76,7 @@ export async function requirePermission(
             );
         }
 
-        const currentPermissions = dbUser.permissions.map((p: any) => p.permission.key);
+        const currentPermissions = dbUser.userPermissions.map((p: any) => p.permission.key);
 
         // Check if user has the required permission
         if (!currentPermissions.includes(requiredPermission)) {

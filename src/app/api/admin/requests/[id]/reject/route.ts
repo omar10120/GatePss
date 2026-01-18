@@ -79,7 +79,7 @@ export async function POST(
             // Send rejection email to applicant (async)
             sendRequestRejectionEmail(
                 gateRequest.applicantEmail,
-                gateRequest.applicantName,
+                gateRequest.applicantNameEn,
                 gateRequest.requestNumber,
                 rejectionReason.trim()
             ).catch(err => console.error('Failed to send rejection email:', err));

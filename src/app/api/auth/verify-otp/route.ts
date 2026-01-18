@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         const user = await prisma.user.findUnique({
             where: { email },
             include: {
-                permissions: {
+                userPermissions: {
                     include: {
                         permission: true,
                     },
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Get user permissions
-        const permissions = user.permissions.map((up: { permission: { key: string } }) => up.permission.key);
+        const permissions = user.userPermissions.map((up: { permission: { key: string } }) => up.permission.key);
 
         // Generate JWT token
         const token = generateToken({
