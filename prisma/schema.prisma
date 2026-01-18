@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,93 +7,110 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model ActivityLog {
+  id                  Int      @id @default(autoincrement())
+  timestamp           DateTime @default(now())
+  userId              Int?     @map("user_id")
+  actionType          String   @map("action_type")
+  actionPerformed     String   @map("action_performed")
+  affectedEntityType  String?  @map("affected_entity_type")
+  affectedEntityId    Int?     @map("affected_entity_id")
+  details             Json?
+  
+  user                User?    @relation(fields: [userId], references: [id])
 
-model User {
-  id            Int       @id @default(autoincrement())
-  name          String
-  email         String    @unique
-  passwordHash  String    @map("password_hash")
-  role          String    @default("SUB_ADMIN") // UserRole: SUPER_ADMIN | SUB_ADMIN
-  isActive      Boolean   @default(true) @map("is_active")
-  otpCode       String?   @map("otp_code")
-  otpExpiresAt  DateTime? @map("otp_expires_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  @@index([actionType])
+  @@index([timestamp])
+  @@index([userId])
+  @@map("activity_logs")
+}
 
-  // Relations
-  permissions        UserPermission[]
-  approvedRequests   Request[]        @relation("ApprovedBy")
-  activityLogs       ActivityLog[]
-  notifications      Notification[]
+model fqa {
+  id          Int      @id @default(autoincrement())
+  question_en String
+  question_ar String
+  answer_en   String   @db.Text
+  answer_ar   String   @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime
+}
 
-  @@map("users")
+model Notification {
+  id                  Int      @id @default(autoincrement())
+  userId              Int      @map("user_id")
+  actionType          String   @map("action_type")
+  actionPerformed     String   @map("action_performed")
+  affectedEntityType  String?  @map("affected_entity_type")
+  affectedEntityId    Int?     @map("affected_entity_id")
+  isRead              Boolean  @default(false) @map("is_read")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+model pass_types {
+  id         Int      @id @default(autoincrement())
+  name_en    String
+  name_ar    String
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime
 }
 
 model Permission {
-  id          Int    @id @default(autoincrement())
-  key         String @unique
-  description String
-
-  // Relations
-  users UserPermission[]
+  id               Int             @id @default(autoincrement())
+  key              String          @unique
+  description      String
+  userPermissions  UserPermission[]
 
   @@map("permissions")
 }
 
-model UserPermission {
-  id           Int @id @default(autoincrement())
-  userId       Int @map("user_id")
-  permissionId Int @map("permission_id")
-
-  // Relations
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, permissionId])
-  @@map("user_permissions")
-}
-
 model Request {
-  id                         Int           @id @default(autoincrement())
-  requestNumber              String        @unique @map("request_number")
-  applicantNameEn            String        @map("applicant_name_en")
-  applicantNameAr            String        @map("applicant_name_ar")
-  applicantEmail             String        @map("applicant_email")
-  applicantPhone             String?       @map("applicant_phone")
-  gender                     String        @map("gender") // MALE | FEMALE
-  profession                 String        @map("profession")
-  otherProfessions           String?       @map("other_professions")
-  bloodType                  String?       @map("blood_type")
-  photoPath                  String?       @map("photo_path")
-  passportIdNumber           String        @map("passport_id_number")
-  passportIdImagePath        String?       @map("passport_id_image_path")
-  nationality                String        @map("nationality")
-  identification             String        @map("identification")
-  organization               String        @map("organization")
-  validFrom                  DateTime      @map("valid_from")
-  validTo                    DateTime      @map("valid_to")
-  purposeOfVisit             String        @db.Text @map("purpose_of_visit")
-  dateOfVisit                DateTime      @map("date_of_visit")
-  requestType                String        @map("request_type") // RequestType: VISITOR | CONTRACTOR | EMPLOYEE | VEHICLE
-  status                     String        @default("PENDING") // RequestStatus: PENDING | APPROVED | REJECTED
-  rejectionReason            String?       @db.Text @map("rejection_reason")
-  createdAt                  DateTime      @default(now()) @map("created_at")
-  updatedAt                  DateTime      @updatedAt @map("updated_at")
-  approvedById               Int?          @map("approved_by")
-  externalReference          String?       @map("external_reference")
-  lastIntegrationStatusCode  Int?          @map("last_integration_status_code")
-  lastIntegrationStatusMessage String?     @db.Text @map("last_integration_status_message")
-  passFor                    String?       @map("pass_for")
+  id                         Int       @id @default(autoincrement())
+  requestNumber              String    @unique @map("request_number")
+  applicantNameEn            String    @map("applicant_name_en")
+  applicantNameAr            String    @map("applicant_name_ar")
+  applicantEmail             String    @map("applicant_email")
+  applicantPhone             String?   @map("applicant_phone")
+  gender                     String
+  profession                 String
+  otherProfessions           String?   @map("other_professions")
+  bloodType                  String?   @map("blood_type")
+  photoPath                  String?   @map("photo_path")
+  passportIdNumber          String    @map("passport_id_number")
+  passportIdImagePath        String?   @map("passport_id_image_path")
+  nationality                String
+  identification             String
+  organization               String
+  validFrom                  DateTime  @map("valid_from")
+  validTo                    DateTime  @map("valid_to")
+  purposeOfVisit             String    @db.Text @map("purpose_of_visit")
+  dateOfVisit                DateTime  @map("date_of_visit")
+  requestType                String    @map("request_type")
+  status                     String    @default("PENDING")
+  rejectionReason            String?   @db.Text @map("rejection_reason")
+  createdAt                  DateTime  @default(now()) @map("created_at")
+  updatedAt                  DateTime  @updatedAt @map("updated_at")
+  approvedById               Int?      @map("approved_by")
+  externalReference          String?   @map("external_reference")
+  lastIntegrationStatusCode  Int?      @map("last_integration_status_code")
+  lastIntegrationStatusMessage String? @db.Text @map("last_integration_status_message")
+  qrCodePdfUrl               String?   @map("qr_code_pdf_url")
+  passFor                    String?   @map("pass_for")
+  
+  approvedBy                 User?     @relation("ApprovedBy", fields: [approvedById], references: [id])
+  uploads                    Upload[]
 
-  // Relations
-  approvedBy User?         @relation("ApprovedBy", fields: [approvedById], references: [id])
-
-  uploads    Upload[]
-
-  @@index([status])
-  @@index([requestType])
-  @@index([dateOfVisit])
+  @@index([approvedById])
   @@index([createdAt])
+  @@index([dateOfVisit])
+  @@index([requestType])
+  @@index([status])
   @@index([validFrom])
   @@index([validTo])
   @@map("requests")
@@ -108,68 +122,41 @@ model Upload {
   fileType   String   @map("file_type")
   filePath   String   @map("file_path")
   uploadedAt DateTime @default(now()) @map("uploaded_at")
+  
+  request    Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
 
-  // Relations
-  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
-
+  @@index([requestId])
   @@map("uploads")
 }
 
-model ActivityLog {
-  id                  Int         @id @default(autoincrement())
-  timestamp           DateTime    @default(now())
-  userId              Int?        @map("user_id")
-  actionType          String      @map("action_type") // ActionType: REQUEST_MANAGEMENT | USER_MANAGEMENT | SYSTEM_INTEGRATION | AUTH
-  actionPerformed     String      @map("action_performed")
-  affectedEntityType  String?     @map("affected_entity_type")
-  affectedEntityId    Int?        @map("affected_entity_id")
-  details             Json?
+model UserPermission {
+  id           Int        @id @default(autoincrement())
+  userId       Int        @map("user_id")
+  permissionId Int        @map("permission_id")
+  
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Relations
-  user    User?    @relation(fields: [userId], references: [id])
-
-  @@index([timestamp])
-  @@index([actionType])
-  @@index([userId])
-  @@map("activity_logs")
+  @@unique([userId, permissionId])
+  @@index([permissionId])
+  @@map("user_permissions")
 }
 
-model PassType {
-  id        Int      @id @default(autoincrement())
-  nameEn    String   @map("name_en")
-  nameAr    String   @map("name_ar")
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+model User {
+  id               Int                @id @default(autoincrement())
+  name             String
+  email            String             @unique
+  passwordHash     String             @map("password_hash")
+  role             String             @default("SUB_ADMIN")
+  isActive         Boolean            @default(true) @map("is_active")
+  otpCode          String?            @map("otp_code")
+  otpExpiresAt     DateTime?          @map("otp_expires_at")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+  activityLogs     ActivityLog[]
+  notifications    Notification[]
+  approvedRequests Request[]          @relation("ApprovedBy")
+  userPermissions  UserPermission[]
 
-  @@map("pass_types")
-}
-
-model FAQ {
-  id         Int      @id @default(autoincrement())
-  questionEn String   @map("question_en")
-  questionAr String   @map("question_ar")
-  answerEn   String   @db.Text @map("answer_en")
-  answerAr   String   @db.Text @map("answer_ar")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
-
-  @@map("fqa")
-}
-
-model Notification {
-  id                Int       @id @default(autoincrement())
-  userId            Int       @map("user_id")
-  actionType        String    @map("action_type") // CREATE | UPDATE | DELETE
-  actionPerformed   String    @map("action_performed")
-  affectedEntityType String?  @map("affected_entity_type")
-  affectedEntityId  Int?      @map("affected_entity_id")
-  isRead            Boolean   @default(false) @map("is_read")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("notifications")
+  @@map("users")
 }

@@ -57,9 +57,21 @@ function mapIdentificationType(identification: string): string {
     const idMap: Record<string, string> = {
         'PASSPORT': '1',
         'ID_CARD': '2',
+        'ID': '2', // Also map "ID" to ID Card
         'RESIDENCE': '3',
     };
     return idMap[identification.toUpperCase()] || '1';
+}
+
+/**
+ * Map gender to Sohar Port format (Male/Female)
+ */
+function mapGender(gender: string): string {
+    const genderMap: Record<string, string> = {
+        'MALE': 'Male',
+        'FEMALE': 'Female',
+    };
+    return genderMap[gender.toUpperCase()] || 'Male';
 }
 
 /**
@@ -128,7 +140,7 @@ export async function createGatePass(
                 ? formatDate(gateRequest.validTo)
                 : formatDate(new Date(new Date(request.dateOfVisit).getTime() + 30 * 24 * 60 * 60 * 1000)),
             reason_for_visit: request.purposeOfVisit,
-            gender: gateRequest?.gender || 'Male',
+            gender: mapGender(gateRequest?.gender || 'MALE'),
             citizenship: gateRequest?.nationality || 'Omani',
             professions: gateRequest?.profession || 'Technical',
             other_professions: gateRequest?.otherProfessions || extraFields.otherProfessions || '',
@@ -170,12 +182,10 @@ export async function createGatePass(
                 soharPortPayload.photo_attachment = photoBase64;
                 soharPortPayload.photo = path.basename(gateRequest.photoPath);
             }
-        } else if (gateRequest?.passportIdImagePath) {
+        } else if (gateRequest?.passportIdImagePath && soharPortPayload.identification_attachment) {
             // Fallback to passport image if no separate photo
             soharPortPayload.photo = path.basename(gateRequest.passportIdImagePath);
-            if (soharPortPayload.identification_attachment) {
-                soharPortPayload.photo_attachment = soharPortPayload.identification_attachment;
-            }
+            soharPortPayload.photo_attachment = soharPortPayload.identification_attachment;
         }
 
         const response = await client.requestWithRetry<any>({

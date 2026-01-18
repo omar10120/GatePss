@@ -146,6 +146,7 @@ export async function POST(
                     externalReference: apiResponse.externalReference,
                     lastIntegrationStatusCode: apiResponse.statusCode,
                     lastIntegrationStatusMessage: apiResponse.message,
+                    qrCodePdfUrl: apiResponse.qrCodePdfUrl || null,
                 },
             });
 
