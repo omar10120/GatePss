@@ -67,26 +67,6 @@ export default function AdminDashboardPage() {
             setUser(JSON.parse(userData));
         }
 
-        // Fetch fresh user data
-        fetch('/api/auth/me', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    setUser(data.data.user);
-                    localStorage.setItem('user', JSON.stringify(data.data.user));
-                } else {
-                    if (data.error === 'Unauthorized' || data.error === 'Forbidden') {
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                        router.push('/admin/login');
-                    }
-                }
-            })
-            .catch(err => console.error('Error refreshing user data:', err));
 
         fetchDashboardData(token);
     }, []);

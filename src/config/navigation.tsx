@@ -120,8 +120,8 @@ export const getSidebarItems = (
         });
         items.push({
             label: locale === 'en' ? 'Permits' : 'التصاريح',
-            href: '/admin/requests',
-            active: currentPath?.startsWith('/admin/requests') && !currentPath?.includes('status=PENDING'),
+            href: '/admin/permits',
+            active: currentPath === '/admin/permits',
             permission: PERMISSIONS.MANAGE_REQUESTS,
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
