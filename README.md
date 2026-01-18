@@ -30,7 +30,7 @@ A comprehensive Electronic Gate Pass System for Majis Industrial Services at Soh
 
 - Node.js 22.11.0 LTS or later (Recommended)
 - MySQL 8.4 LTS (or MySQL 8.0+) installed and running
-- SMTP email account (Gmail, etc.)
+- SMTP email account (Office365 configured)
 
 ### Installation
 
@@ -54,11 +54,12 @@ Copy `.env.example` to `.env` and update with your values:
 cp .env.example .env
 ```
 
+# SMTP Configuration (Office365)
+SMTP_HOST=smtp.office365.com
 SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER="your-email@gmail.com"
-SMTP_PASSWORD="your-app-password"  # Use App Password for Gmail
-EMAIL_FROM="noreply@majis.com"
+SMTP_USER=gatepass@miscoman.com
+SMTP_PASSWORD=your-password-here
+EMAIL_FROM=gatepass@miscoman.com
 ADMIN_EMAIL_GROUP="admin@majis.com,security@majis.com"
 
 # Application URLs
@@ -450,9 +451,10 @@ SHOW DATABASES;
 
 ### Email Not Sending
 
-- For Gmail, use App Password (not regular password)
-- Enable "Less secure app access" or use OAuth2
-- Check SMTP settings and firewall
+- For Office365, ensure the account has SMTP enabled
+- Verify the password is correct (may require app-specific password if MFA is enabled)
+- Check SMTP settings: smtp.office365.com, port 587, TLS encryption
+- Ensure firewall allows outbound connections on port 587
 
 ### File Upload Issues
 

@@ -249,8 +249,31 @@ export const GatePassForm: React.FC = () => {
                             { value: 'ENGINEER', label: 'Engineer' },
                             { value: 'TECHNICIAN', label: 'Technician' },
                             { value: 'VISITOR', label: 'Visitor' },
+                            { value: 'TECHNICAL', label: 'Technical' },
+                            { value: 'MANAGER', label: 'Manager' },
+                            { value: 'ADMINISTRATOR', label: 'Administrator' },
                         ]}
                         required
+                    />
+                    <Input
+                        name="otherProfessions"
+                        label={t('fields.otherProfessions')}
+                        placeholder={t('placeholders.otherProfessions')}
+                    />
+                    <Select
+                        name="bloodType"
+                        label={t('fields.bloodType')}
+                        options={[
+                            { value: '', label: t('placeholders.select') },
+                            { value: 'O+', label: 'O+' },
+                            { value: 'O-', label: 'O-' },
+                            { value: 'A+', label: 'A+' },
+                            { value: 'A-', label: 'A-' },
+                            { value: 'B+', label: 'B+' },
+                            { value: 'B-', label: 'B-' },
+                            { value: 'AB+', label: 'AB+' },
+                            { value: 'AB-', label: 'AB-' },
+                        ]}
                     />
                     <Input
                         name="passportIdNumber"
@@ -264,6 +287,12 @@ export const GatePassForm: React.FC = () => {
                         label={t('fields.copyOfCivilId')}
                         placeholder="Choose File (PNG, JPG, PDF) max 1MB"
                         required
+                    />
+                    <FileUpload
+                        id="photo"
+                        name="photo"
+                        label={t('fields.photo')}
+                        placeholder="Choose Photo (PNG, JPG) max 1MB"
                     />
                     <FileUpload
                         id="otherDocuments1"

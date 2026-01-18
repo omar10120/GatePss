@@ -17,6 +17,8 @@ export async function POST(request: NextRequest) {
         const applicantPhone = formData.get('telephone') as string;
         const gender = formData.get('gender') as string;
         const profession = formData.get('profession') as string;
+        const otherProfessions = formData.get('otherProfessions') as string | null;
+        const bloodType = formData.get('bloodType') as string | null;
         const passportIdNumber = formData.get('passportIdNumber') as string;
         const nationality = formData.get('nationality') as string;
         const identification = formData.get('identification') as string;
@@ -26,6 +28,7 @@ export async function POST(request: NextRequest) {
         const dateOfVisit = formData.get('dateOfVisit') as string;
         const requestType = formData.get('requestType') as string;
         const passportIdImage = formData.get('passportIdImage') as File | null;
+        const photo = formData.get('photo') as File | null;
         const passFor = formData.get('passFor') as string | null;
 
         // Validate required fields using BRD requirements
@@ -142,11 +145,13 @@ export async function POST(request: NextRequest) {
         };
 
         let imagePath: string | null = null;
+        let photoPath: string | null = null;
         let otherDoc1Path: string | null = null;
         let otherDoc2Path: string | null = null;
 
         try {
             imagePath = await uploadFile(passportIdImage, 'passport');
+            photoPath = await uploadFile(photo, 'photo');
             otherDoc1Path = await uploadFile(formData.get('otherDocuments1') as File | null, 'other1');
             otherDoc2Path = await uploadFile(formData.get('otherDocuments2') as File | null, 'other2');
         } catch (err: any) {
@@ -190,27 +195,50 @@ export async function POST(request: NextRequest) {
 
         // Create request in database
         try {
+            // Check if Prisma client is properly initialized
+            if (!prisma || !prisma.request) {
+                console.error('Prisma client is out of sync. Please stop the server and run: npx prisma generate');
+                return NextResponse.json(
+                    { error: 'Server Error', message: 'Database client needs to be regenerated. Please contact administrator.' },
+                    { status: 500 }
+                );
+            }
+
+            // Build data object using camelCase to match current Prisma client
+            const requestData: any = {
+                requestNumber,
+                applicantNameEn: applicantNameEn.trim(),
+                applicantNameAr: applicantNameAr.trim(),
+                applicantEmail: applicantEmail.toLowerCase().trim(),
+                applicantPhone: applicantPhone?.trim() || null,
+                gender: gender,
+                profession: profession.trim(),
+                passportIdNumber: passportIdNumber.toUpperCase().trim(),
+                passportIdImagePath: imagePath,
+                nationality: nationality.trim(),
+                identification: identification,
+                organization: organization.trim(),
+                validFrom: validFrom,
+                validTo: validTo,
+                purposeOfVisit: purposeOfVisit.trim(),
+                dateOfVisit: new Date(dateOfVisit),
+                requestType: requestType as RequestType,
+                passFor: passFor?.trim() || null,
+            };
+
+            // Add new fields (will work after Prisma client regeneration)
+            if (otherProfessions !== null && otherProfessions !== undefined) {
+                requestData.otherProfessions = otherProfessions.trim();
+            }
+            if (bloodType) {
+                requestData.bloodType = bloodType;
+            }
+            if (photoPath) {
+                requestData.photoPath = photoPath;
+            }
+
             const newRequest = await prisma.request.create({
-                data: {
-                    requestNumber,
-                    applicantNameEn: applicantNameEn.trim(),
-                    applicantNameAr: applicantNameAr.trim(),
-                    applicantEmail: applicantEmail.toLowerCase().trim(),
-                    applicantPhone: applicantPhone?.trim() || null,
-                    gender: gender,
-                    profession: profession.trim(),
-                    passportIdNumber: passportIdNumber.toUpperCase().trim(),
-                    passportIdImagePath: imagePath,
-                    nationality: nationality.trim(),
-                    identification: identification,
-                    organization: organization.trim(),
-                    validFrom: validFrom,
-                    validTo: validTo,
-                    purposeOfVisit: purposeOfVisit.trim(),
-                    dateOfVisit: new Date(dateOfVisit),
-                    requestType: requestType as RequestType,
-                    passFor: passFor?.trim() || null,
-                },
+                data: requestData,
             });
 
             // Store other documents as uploads if they exist

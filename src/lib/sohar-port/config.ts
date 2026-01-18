@@ -10,13 +10,16 @@ import { ApiVersion, SoharPortConfig } from './types';
  * Default configuration values
  */
 export const DEFAULT_CONFIG: Required<SoharPortConfig> = {
-    baseUrl: process.env.SOHAR_PORT_API_URL || 'https://api.soharport.com',
+    baseUrl: process.env.SOHAR_PORT_API_URL || 'https://uat-api.soharportandfreezone.om',
     apiKey: process.env.SOHAR_PORT_API_KEY || '',
     version: (process.env.SOHAR_PORT_API_VERSION as ApiVersion) || 'v1',
     timeout: parseInt(process.env.SOHAR_PORT_TIMEOUT || '30000', 10),
     useMock: process.env.SOHAR_PORT_MOCK_MODE === 'true',
     retryAttempts: 3,
     retryDelay: 1000, // 1 second
+    // Basic Auth credentials
+    username: process.env.SOHAR_PORT_USERNAME || 'Majees.API',
+    password: process.env.SOHAR_PORT_PASSWORD || '',
 };
 
 /**
@@ -25,24 +28,24 @@ export const DEFAULT_CONFIG: Required<SoharPortConfig> = {
 export const API_ENDPOINTS = {
     v1: {
         // Send operations
-        CREATE_GATE_PASS: '/api/v1/gate-passes',
-        UPDATE_GATE_PASS: '/api/v1/gate-passes/:ref',
-        CANCEL_GATE_PASS: '/api/v1/gate-passes/:ref',
+        CREATE_GATE_PASS: '/api/gatepass/post',
+        UPDATE_GATE_PASS: '/api/gatepass/update',
+        CANCEL_GATE_PASS: '/api/gatepass/cancel',
 
         // Receive operations
-        GET_GATE_PASS: '/api/v1/gate-passes/:ref',
-        LIST_GATE_PASSES: '/api/v1/gate-passes',
-        GET_STATUS: '/api/v1/gate-passes/:ref/status',
+        GET_GATE_PASS: '/api/getpassdetails/get',
+        LIST_GATE_PASSES: '/api/gatepass/list',
+        GET_STATUS: '/api/gatepass/status',
     },
     v2: {
         // Future version endpoints
-        CREATE_GATE_PASS: '/api/v2/gate-passes',
-        UPDATE_GATE_PASS: '/api/v2/gate-passes/:ref',
-        CANCEL_GATE_PASS: '/api/v2/gate-passes/:ref',
-        GET_GATE_PASS: '/api/v2/gate-passes/:ref',
-        LIST_GATE_PASSES: '/api/v2/gate-passes',
-        GET_STATUS: '/api/v2/gate-passes/:ref/status',
-        BATCH_CREATE: '/api/v2/gate-passes/batch',
+        CREATE_GATE_PASS: '/api/gatepass/post',
+        UPDATE_GATE_PASS: '/api/gatepass/update',
+        CANCEL_GATE_PASS: '/api/gatepass/cancel',
+        GET_GATE_PASS: '/api/getpassdetails/get',
+        LIST_GATE_PASSES: '/api/gatepass/list',
+        GET_STATUS: '/api/gatepass/status',
+        BATCH_CREATE: '/api/gatepass/batch',
     },
 };
 
@@ -110,8 +113,8 @@ export function validateConfig(config: SoharPortConfig): void {
         if (!config.baseUrl) {
             throw new Error('SOHAR_PORT_API_URL is required when not in mock mode');
         }
-        if (!config.apiKey) {
-            throw new Error('SOHAR_PORT_API_URL is required when not in mock mode');
+        if (!config.username || !config.password) {
+            throw new Error('SOHAR_PORT_USERNAME and SOHAR_PORT_PASSWORD are required when not in mock mode');
         }
     }
 }
