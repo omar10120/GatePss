@@ -24,7 +24,7 @@ const nextConfig = {
             },
         ];
     },
-    output: 'standalone',
+    output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
 };
 
 module.exports = withNextIntl(nextConfig);

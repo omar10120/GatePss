@@ -4,49 +4,67 @@ import prisma from '@/lib/prisma';
 import { hashPassword } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
-    return requirePermission(request, 'MANAGE_USERS', async (req, user) => {
-        try {
-            const users = await prisma.user.findMany({
-                include: {
-                    permissions: {
-                        include: {
-                            permission: true,
+    try {
+        return await requirePermission(request, 'MANAGE_USERS', async (req, user) => {
+            try {
+                const users = await prisma.user.findMany({
+                    include: {
+                        userPermissions: {
+                            include: {
+                                permission: true,
+                            },
                         },
                     },
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-            });
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                });
 
-            const formattedUsers = users.map((u: any) => ({
-                id: u.id,
-                name: u.name,
-                email: u.email,
-                role: u.role,
-                isActive: u.isActive,
-                createdAt: u.createdAt,
-                updatedAt: u.updatedAt,
-                permissions: u.permissions.map((up: any) => ({
-                    id: up.permission.id,
-                    key: up.permission.key,
-                    description: up.permission.description,
-                })),
-            }));
+                const formattedUsers = users.map((u: any) => ({
+                    id: u.id,
+                    name: u.name,
+                    email: u.email,
+                    role: u.role,
+                    isActive: u.isActive,
+                    createdAt: u.createdAt,
+                    updatedAt: u.updatedAt,
+                    permissions: (u.userPermissions || [])
+                        .filter((up: any) => up.permission) // Filter out any null permissions
+                        .map((up: any) => ({
+                            id: up.permission.id,
+                            key: up.permission.key,
+                            description: up.permission.description,
+                        })),
+                }));
 
-            return NextResponse.json({
-                success: true,
-                data: formattedUsers,
-            });
+                return NextResponse.json({
+                    success: true,
+                    data: formattedUsers,
+                });
 
-        } catch (error: any) {
-            console.error('Error fetching users:', error);
-            return NextResponse.json(
-                { error: 'Internal Server Error', message: 'Failed to fetch users' },
-                { status: 500 }
-            );
-        }
-    });
+            } catch (error: any) {
+                console.error('Error fetching users:', error);
+                return NextResponse.json(
+                    {
+                        error: 'Internal Server Error',
+                        message: error.message || 'Failed to fetch users',
+                        details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+                    },
+                    { status: 500 }
+                );
+            }
+        });
+    } catch (error: any) {
+        console.error('Error in users API:', error);
+        return NextResponse.json(
+            {
+                error: 'Internal Server Error',
+                message: error.message || 'Failed to process request',
+                details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+            },
+            { status: 500 }
+        );
+    }
 }
 
 export async function POST(request: NextRequest) {
