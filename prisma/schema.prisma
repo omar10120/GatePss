@@ -138,6 +138,7 @@ model UserPermission {
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, permissionId])
+  @@index([userId])
   @@index([permissionId])
   @@map("user_permissions")
 }
