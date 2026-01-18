@@ -393,7 +393,19 @@
             "phoneNumber": "Phone Number",
             "added": "Added",
             "access": "Access",
-            "viewMore": "View more"
+            "viewMore": "View more",
+            "fullName": "Full Name of Pass Holder",
+            "enterFullName": "Enter Full Name",
+            "enterEmail": "Enter Email",
+            "enterPhoneNumber": "Enter your Phone Number",
+            "enterPassword": "Enter Password",
+            "allowedAccess": "Allowed Access",
+            "viewAllDetails": "View All Details",
+            "userCreatedSuccessfully": "Saved Successfully",
+            "userUpdatedSuccessfully": "Saved Successfully",
+            "userNotFound": "User not found",
+            "noPermissions": "No permissions assigned",
+            "leaveEmptyToKeepCurrent": "Leave empty to keep current password"
         }
     }
 }

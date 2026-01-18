@@ -5,6 +5,74 @@ import { hashPassword } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
 import { ActionType } from '@/lib/enums';
 
+// GET /api/admin/users/[id] - Get user details
+export async function GET(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
+    return requirePermission(request, 'MANAGE_USERS', async (req, user) => {
+        try {
+            const userId = parseInt(id);
+
+            if (isNaN(userId)) {
+                return NextResponse.json(
+                    { error: 'Invalid Request', message: 'Invalid user ID' },
+                    { status: 400 }
+                );
+            }
+
+            const userData = await prisma.user.findUnique({
+                where: { id: userId },
+                include: {
+                    userPermissions: {
+                        include: {
+                            permission: true,
+                        },
+                    },
+                },
+            });
+
+            if (!userData) {
+                return NextResponse.json(
+                    { error: 'Not Found', message: 'User not found' },
+                    { status: 404 }
+                );
+            }
+
+            const formattedUser = {
+                id: userData.id,
+                name: userData.name,
+                email: userData.email,
+                phoneNumber: userData.phoneNumber,
+                role: userData.role,
+                isActive: userData.isActive,
+                createdAt: userData.createdAt,
+                updatedAt: userData.updatedAt,
+                permissions: (userData.userPermissions || [])
+                    .filter((up: any) => up.permission)
+                    .map((up: any) => ({
+                        id: up.permission.id,
+                        key: up.permission.key,
+                        description: up.permission.description,
+                    })),
+            };
+
+            return NextResponse.json({
+                success: true,
+                data: formattedUser,
+            });
+
+        } catch (error: any) {
+            console.error('Error fetching user:', error);
+            return NextResponse.json(
+                { error: 'Internal Server Error', message: 'Failed to fetch user' },
+                { status: 500 }
+            );
+        }
+    });
+}
+
 // PUT /api/admin/users/[id] - Update user
 export async function PUT(
     request: NextRequest,
@@ -23,7 +91,7 @@ export async function PUT(
             }
 
             const body = await req.json();
-            const { name, email, password, role, isActive, permissionIds } = body;
+            const { name, email, phoneNumber, password, role, isActive, permissionIds } = body;
 
             // Get existing user
             const existingUser = await prisma.user.findUnique({
@@ -50,6 +118,7 @@ export async function PUT(
 
             if (name) updateData.name = name.trim();
             if (email) updateData.email = email.toLowerCase().trim();
+            if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber?.trim() || null;
             if (role) updateData.role = role;
             if (typeof isActive === 'boolean') updateData.isActive = isActive;
             if (password) {
@@ -108,6 +177,7 @@ export async function PUT(
                     id: updatedUser.id,
                     name: updatedUser.name,
                     email: updatedUser.email,
+                    phoneNumber: updatedUser.phoneNumber,
                     role: updatedUser.role,
                     isActive: updatedUser.isActive,
                 },

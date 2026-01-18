@@ -8,16 +8,16 @@ datasource db {
 }
 
 model ActivityLog {
-  id                  Int      @id @default(autoincrement())
-  timestamp           DateTime @default(now())
-  userId              Int?     @map("user_id")
-  actionType          String   @map("action_type")
-  actionPerformed     String   @map("action_performed")
-  affectedEntityType  String?  @map("affected_entity_type")
-  affectedEntityId    Int?     @map("affected_entity_id")
-  details             Json?
-  
-  user                User?    @relation(fields: [userId], references: [id])
+  id                 Int      @id @default(autoincrement())
+  timestamp          DateTime @default(now())
+  userId             Int?     @map("user_id")
+  actionType         String   @map("action_type")
+  actionPerformed    String   @map("action_performed")
+  affectedEntityType String?  @map("affected_entity_type")
+  affectedEntityId   Int?     @map("affected_entity_id")
+  details            Json?
+
+  user User? @relation(fields: [userId], references: [id])
 
   @@index([actionType])
   @@index([timestamp])
@@ -36,17 +36,17 @@ model fqa {
 }
 
 model Notification {
-  id                  Int      @id @default(autoincrement())
-  userId              Int      @map("user_id")
-  actionType          String   @map("action_type")
-  actionPerformed     String   @map("action_performed")
-  affectedEntityType  String?  @map("affected_entity_type")
-  affectedEntityId    Int?     @map("affected_entity_id")
-  isRead              Boolean  @default(false) @map("is_read")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
-  
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @map("user_id")
+  actionType         String   @map("action_type")
+  actionPerformed    String   @map("action_performed")
+  affectedEntityType String?  @map("affected_entity_type")
+  affectedEntityId   Int?     @map("affected_entity_id")
+  isRead             Boolean  @default(false) @map("is_read")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("notifications")
@@ -62,49 +62,49 @@ model pass_types {
 }
 
 model Permission {
-  id               Int             @id @default(autoincrement())
-  key              String          @unique
-  description      String
-  userPermissions  UserPermission[]
+  id              Int              @id @default(autoincrement())
+  key             String           @unique
+  description     String
+  userPermissions UserPermission[]
 
   @@map("permissions")
 }
 
 model Request {
-  id                         Int       @id @default(autoincrement())
-  requestNumber              String    @unique @map("request_number")
-  applicantNameEn            String    @map("applicant_name_en")
-  applicantNameAr            String    @map("applicant_name_ar")
-  applicantEmail             String    @map("applicant_email")
-  applicantPhone             String?   @map("applicant_phone")
-  gender                     String
-  profession                 String
-  otherProfessions           String?   @map("other_professions")
-  bloodType                  String?   @map("blood_type")
-  photoPath                  String?   @map("photo_path")
-  passportIdNumber          String    @map("passport_id_number")
-  passportIdImagePath        String?   @map("passport_id_image_path")
-  nationality                String
-  identification             String
-  organization               String
-  validFrom                  DateTime  @map("valid_from")
-  validTo                    DateTime  @map("valid_to")
-  purposeOfVisit             String    @db.Text @map("purpose_of_visit")
-  dateOfVisit                DateTime  @map("date_of_visit")
-  requestType                String    @map("request_type")
-  status                     String    @default("PENDING")
-  rejectionReason            String?   @db.Text @map("rejection_reason")
-  createdAt                  DateTime  @default(now()) @map("created_at")
-  updatedAt                  DateTime  @updatedAt @map("updated_at")
-  approvedById               Int?      @map("approved_by")
-  externalReference          String?   @map("external_reference")
-  lastIntegrationStatusCode  Int?      @map("last_integration_status_code")
-  lastIntegrationStatusMessage String? @db.Text @map("last_integration_status_message")
-  qrCodePdfUrl               String?   @map("qr_code_pdf_url")
-  passFor                    String?   @map("pass_for")
-  
-  approvedBy                 User?     @relation("ApprovedBy", fields: [approvedById], references: [id])
-  uploads                    Upload[]
+  id                           Int      @id @default(autoincrement())
+  requestNumber                String   @unique @map("request_number")
+  applicantNameEn              String   @map("applicant_name_en")
+  applicantNameAr              String   @map("applicant_name_ar")
+  applicantEmail               String   @map("applicant_email")
+  applicantPhone               String?  @map("applicant_phone")
+  gender                       String
+  profession                   String
+  otherProfessions             String?  @map("other_professions")
+  bloodType                    String?  @map("blood_type")
+  photoPath                    String?  @map("photo_path")
+  passportIdNumber             String   @map("passport_id_number")
+  passportIdImagePath          String?  @map("passport_id_image_path")
+  nationality                  String
+  identification               String
+  organization                 String
+  validFrom                    DateTime @map("valid_from")
+  validTo                      DateTime @map("valid_to")
+  purposeOfVisit               String   @map("purpose_of_visit") @db.Text
+  dateOfVisit                  DateTime @map("date_of_visit")
+  requestType                  String   @map("request_type")
+  status                       String   @default("PENDING")
+  rejectionReason              String?  @map("rejection_reason") @db.Text
+  createdAt                    DateTime @default(now()) @map("created_at")
+  updatedAt                    DateTime @updatedAt @map("updated_at")
+  approvedById                 Int?     @map("approved_by")
+  externalReference            String?  @map("external_reference")
+  lastIntegrationStatusCode    Int?     @map("last_integration_status_code")
+  lastIntegrationStatusMessage String?  @map("last_integration_status_message") @db.Text
+  qrCodePdfUrl                 String?  @map("qr_code_pdf_url")
+  passFor                      String?  @map("pass_for")
+
+  approvedBy User?    @relation("ApprovedBy", fields: [approvedById], references: [id])
+  uploads    Upload[]
 
   @@index([approvedById])
   @@index([createdAt])
@@ -122,20 +122,20 @@ model Upload {
   fileType   String   @map("file_type")
   filePath   String   @map("file_path")
   uploadedAt DateTime @default(now()) @map("uploaded_at")
-  
-  request    Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
 
   @@index([requestId])
   @@map("uploads")
 }
 
 model UserPermission {
-  id           Int        @id @default(autoincrement())
-  userId       Int        @map("user_id")
-  permissionId Int        @map("permission_id")
-  
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           Int @id @default(autoincrement())
+  userId       Int @map("user_id")
+  permissionId Int @map("permission_id")
+
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, permissionId])
   @@index([userId])
@@ -144,19 +144,20 @@ model UserPermission {
 }
 
 model User {
-  id               Int                @id @default(autoincrement())
+  id               Int              @id @default(autoincrement())
   name             String
-  email            String             @unique
-  passwordHash     String             @map("password_hash")
-  role             String             @default("SUB_ADMIN")
-  isActive         Boolean            @default(true) @map("is_active")
-  otpCode          String?            @map("otp_code")
-  otpExpiresAt     DateTime?          @map("otp_expires_at")
-  createdAt        DateTime           @default(now()) @map("created_at")
-  updatedAt        DateTime           @updatedAt @map("updated_at")
+  email            String           @unique
+  phoneNumber      String?          @map("phone_number")
+  passwordHash     String           @map("password_hash")
+  role             String           @default("SUB_ADMIN")
+  isActive         Boolean          @default(true) @map("is_active")
+  otpCode          String?          @map("otp_code")
+  otpExpiresAt     DateTime?        @map("otp_expires_at")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
   activityLogs     ActivityLog[]
   notifications    Notification[]
-  approvedRequests Request[]          @relation("ApprovedBy")
+  approvedRequests Request[]        @relation("ApprovedBy")
   userPermissions  UserPermission[]
 
   @@map("users")

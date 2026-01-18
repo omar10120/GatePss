@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from '@/i18n/navigation';
+import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import Header from '../components/Header';
@@ -23,10 +23,11 @@ interface User {
     }>;
 }
 
-interface Permission {
-    id: number;
-    key: string;
-    description: string;
+interface Pagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
 }
 
 export default function AdminUsersPage() {
@@ -34,21 +35,9 @@ export default function AdminUsersPage() {
     const pathname = usePathname();
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
-    const [permissions, setPermissions] = useState<Permission[]>([]);
+    const [pagination, setPagination] = useState<Pagination | null>(null);
     const [user, setUser] = useState<any>(null);
-    const [showModal, setShowModal] = useState(false);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        password: '',
-        role: 'SUB_ADMIN',
-        isActive: true,
-        permissionIds: [] as number[],
-    });
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-
+    const [currentPage, setCurrentPage] = useState(1);
     const [permissionDenied, setPermissionDenied] = useState(false);
     const t = useTranslations('Admin.users');
     const locale = useLocale();
@@ -62,21 +51,18 @@ export default function AdminUsersPage() {
             return;
         }
 
-        // Initial load from localStorage for speed
         if (userData) {
             setUser(JSON.parse(userData));
         }
 
+        fetchUsers(token, currentPage);
+    }, [currentPage]);
 
-        fetchUsers(token);
-        fetchPermissions(token);
-    }, []);
-
-    const fetchUsers = async (token: string) => {
+    const fetchUsers = async (token: string, page: number = 1) => {
         setLoading(true);
         setPermissionDenied(false);
         try {
-            const response = await fetch('/api/admin/users', {
+            const response = await fetch(`/api/admin/users?page=${page}&limit=10`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
@@ -92,113 +78,10 @@ export default function AdminUsersPage() {
             }
 
             const result = await response.json();
-            setUsers(result.data);
+            setUsers(result.data.users);
+            setPagination(result.data.pagination);
         } catch (error) {
             console.error('Error fetching users:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchPermissions = async (token: string) => {
-        try {
-            const response = await fetch('/api/admin/permissions', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch permissions');
-            }
-
-            const result = await response.json();
-            setPermissions(result.data);
-        } catch (error) {
-            console.error('Error fetching permissions:', error);
-        }
-    };
-
-    const handleOpenModal = (userToEdit?: User) => {
-        if (userToEdit) {
-            setEditingUser(userToEdit);
-            setFormData({
-                name: userToEdit.name,
-                email: userToEdit.email,
-                password: '',
-                role: userToEdit.role,
-                isActive: userToEdit.isActive,
-                permissionIds: userToEdit.permissions.map(p => p.id),
-            });
-        } else {
-            setEditingUser(null);
-            setFormData({
-                name: '',
-                email: '',
-                password: '',
-                role: 'SUB_ADMIN',
-                isActive: true,
-                permissionIds: [],
-            });
-        }
-        setShowModal(true);
-        setError('');
-        setSuccess('');
-    };
-
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setEditingUser(null);
-        setError('');
-    };
-
-    const handleSave = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
-        setLoading(true);
-        setError('');
-        setSuccess('');
-
-        try {
-            const url = editingUser
-                ? `/api/admin/users/${editingUser.id}`
-                : '/api/admin/users';
-
-            const method = editingUser ? 'PUT' : 'POST';
-
-            const body: any = {
-                name: formData.name,
-                email: formData.email,
-                role: formData.role,
-                isActive: formData.isActive,
-                permissionIds: formData.permissionIds,
-            };
-
-            if (formData.password || !editingUser) {
-                body.password = formData.password;
-            }
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(body),
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to save user');
-            }
-
-            setSuccess(editingUser ? 'User updated successfully!' : 'User created successfully!');
-            handleCloseModal();
-            fetchUsers(token);
-        } catch (err: any) {
-            setError(err.message);
         } finally {
             setLoading(false);
         }
@@ -232,19 +115,14 @@ export default function AdminUsersPage() {
                 });
             }
 
-            fetchUsers(token);
+            fetchUsers(token, currentPage);
         } catch (error) {
             console.error('Error toggling user status:', error);
         }
     };
 
-    const handlePermissionToggle = (permissionId: number) => {
-        setFormData(prev => ({
-            ...prev,
-            permissionIds: prev.permissionIds.includes(permissionId)
-                ? prev.permissionIds.filter(id => id !== permissionId)
-                : [...prev.permissionIds, permissionId],
-        }));
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
     };
 
     if (loading && users.length === 0) {
@@ -276,18 +154,19 @@ export default function AdminUsersPage() {
                 <Header />
 
                 {/* Main Content */}
-                <main className="px-6 py-8 ">
-                    <div className="flex mb-6 justify-end">
+                <main className="px-6 py-8">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
                         {!permissionDenied && (
-                            <button
-                                onClick={() => handleOpenModal()}
+                            <Link
+                                href="/admin/users/add"
                                 className="btn btn-primary"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                 </svg>
                                 {t('addUser')}
-                            </button>
+                            </Link>
                         )}
                     </div>
 
@@ -303,89 +182,109 @@ export default function AdminUsersPage() {
                         </div>
                     ) : (
                         <>
-                            {success && (
-                                <div className="mb-6 p-4 bg-success-50 border border-success-200 rounded-lg text-success-700">
-                                    {success}
-                                </div>
-                            )}
-
                             {/* Users Table */}
                             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                                 {users.length > 0 ? (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead className="bg-[#F3F4F6] border-b border-gray-200">
-                                                <tr>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">ID</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('name')}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('email')}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('phoneNumber')}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('password')}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('added')}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('active')}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('access')}</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('actions')}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className=" divide-y divide-gray-700 ">
-                                                {users.map((u) => {
-                                                    const formattedDate = new Date(u.createdAt).toLocaleDateString('en-US', {
-                                                        month: 'numeric',
-                                                        day: 'numeric',
-                                                        year: 'numeric'
-                                                    });
-                                                    return (
-                                                        <tr key={u.id} className="hover:bg-gray-400/50 text-gray-700">
-                                                            <td className="px-4 py-3  text-sm">{u.id}</td>
-                                                            <td className="px-4 py-3  text-sm font-medium">{u.name}</td>
-                                                            <td className="px-4 py-3  text-sm">{u.email}</td>
-                                                            <td className="px-4 py-3  text-sm">{u.phoneNumber || '-'}</td>
-                                                            <td className="px-4 py-3  text-sm">........</td>
-                                                            <td className="px-4 py-3  text-sm">{formattedDate}</td>
-                                                            <td className="px-4 py-3">
-                                                                <button
-                                                                    onClick={() => u.id !== user?.id && handleToggleActive(u.id, u.isActive)}
-                                                                    disabled={u.id === user?.id}
-                                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 ${
-                                                                        u.isActive ? 'bg-[#10B981]' : 'bg-gray-600'
-                                                                    } ${u.id === user?.id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                                                                >
-                                                                    <span
-                                                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                                                            u.isActive ? 'translate-x-6' : 'translate-x-1'
-                                                                        }`}
-                                                                    />
-                                                                </button>
-                                                            </td>
-                                                            <td className="px-4 py-3">
-                                                                <button
-                                                                    onClick={() => handleOpenModal(u)}
-                                                                    disabled={u.id === user?.id}
-                                                                    className="bg-white rounded-lg p-2 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                    title={t('edit')}
-                                                                >
-                                                                    <Image 
-                                                                        src="/images/svg/Edit 2.svg" 
-                                                                        alt="Edit" 
-                                                                        width={16}
-                                                                        height={16}
-                                                                    />
-                                                                </button>
-                                                            </td>
-                                                            <td className="px-4 py-3">
-                                                                <button
-                                                                    onClick={() => handleOpenModal(u)}
-                                                                    className="text-[#3B82F6] hover:text-[#2563EB] text-sm font-medium"
-                                                                >
-                                                                    {t('viewMore')}
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    <>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
+                                                <thead className="bg-[#F3F4F6] border-b border-gray-200">
+                                                    <tr>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">ID</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('name')}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('email')}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('phoneNumber')}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('password')}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('added')}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('active')}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('access')}</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('actions')}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-200">
+                                                    {users.map((u) => {
+                                                        const formattedDate = new Date(u.createdAt).toLocaleDateString('en-US', {
+                                                            month: 'numeric',
+                                                            day: 'numeric',
+                                                            year: 'numeric'
+                                                        });
+                                                        return (
+                                                            <tr key={u.id} className="hover:bg-gray-50 text-gray-700">
+                                                                <td className="px-4 py-3 text-sm">{u.id}</td>
+                                                                <td className="px-4 py-3 text-sm font-medium">{u.name}</td>
+                                                                <td className="px-4 py-3 text-sm">{u.email}</td>
+                                                                <td className="px-4 py-3 text-sm">{u.phoneNumber || '-'}</td>
+                                                                <td className="px-4 py-3 text-sm">••••••••</td>
+                                                                <td className="px-4 py-3 text-sm">{formattedDate}</td>
+                                                                <td className="px-4 py-3">
+                                                                    <button
+                                                                        onClick={() => u.id !== user?.id && handleToggleActive(u.id, u.isActive)}
+                                                                        disabled={u.id === user?.id}
+                                                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                                                                            u.isActive ? 'bg-[#10B981]' : 'bg-gray-300'
+                                                                        } ${u.id === user?.id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                                                    >
+                                                                        <span
+                                                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                                                                u.isActive ? 'translate-x-6' : 'translate-x-1'
+                                                                            }`}
+                                                                        />
+                                                                    </button>
+                                                                </td>
+                                                                <td className="px-4 py-3">
+                                                                    <Link
+                                                                        href={`/admin/users/${u.id}/edit`}
+                                                                        className="bg-white rounded-lg p-2 hover:bg-gray-100 transition-colors inline-block"
+                                                                        title={t('edit')}
+                                                                    >
+                                                                        <Image 
+                                                                            src="/images/svg/Edit 2.svg" 
+                                                                            alt="Edit" 
+                                                                            width={16}
+                                                                            height={16}
+                                                                        />
+                                                                    </Link>
+                                                                </td>
+                                                                <td className="px-4 py-3">
+                                                                    <Link
+                                                                        href={`/admin/users/${u.id}`}
+                                                                        className="text-[#3B82F6] hover:text-[#2563EB] text-sm font-medium"
+                                                                    >
+                                                                        {t('viewMore')}
+                                                                    </Link>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        {/* Pagination */}
+                                        {pagination && pagination.totalPages > 1 && (
+                                            <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4 px-4">
+                                                <div className="text-sm text-gray-600">
+                                                    {t('pagination.showing')} {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} {t('pagination.of')} {pagination.total} {t('pagination.results')}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handlePageChange(pagination.page - 1)}
+                                                        disabled={pagination.page === 1}
+                                                        className="btn btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {t('pagination.previous')}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handlePageChange(pagination.page + 1)}
+                                                        disabled={pagination.page === pagination.totalPages}
+                                                        className="btn btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {t('pagination.next')}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
                                 ) : (
                                     <p className="text-gray-500 text-center py-12">{t('noUsers')}</p>
                                 )}
@@ -394,127 +293,6 @@ export default function AdminUsersPage() {
                     )}
                 </main>
             </div>
-
-            {/* User Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">
-                            {editingUser ? t('editUser') : t('addUser')}
-                        </h3>
-
-                        {error && (
-                            <div className="mb-4 p-4 bg-danger-50 border border-danger-200 rounded-lg text-danger-700">
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('name')}
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="input"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('email')}
-                                </label>
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="input"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('password')}
-                                </label>
-                                <input
-                                    type="password"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="input"
-                                    placeholder={editingUser ? t('passwordHint') : ''}
-                                    required={!editingUser}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('role')}
-                                </label>
-                                <select
-                                    value={formData.role}
-                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                    className="input"
-                                >
-                                    <option value="SUB_ADMIN">{t('roles.SUB_ADMIN')}</option>
-                                    <option value="SUPER_ADMIN">{t('roles.SUPER_ADMIN')}</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('selectPermissions')}
-                                </label>
-                                <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                                    {permissions.map((permission) => (
-                                        <label key={permission.id} className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.permissionIds.includes(permission.id)}
-                                                onChange={() => handlePermissionToggle(permission.id)}
-                                                className="rounded border-gray-300"
-                                            />
-                                            <span className="text-sm text-gray-700">{permission.description}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {editingUser && (
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.isActive}
-                                        onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                                        className="rounded border-gray-300"
-                                    />
-                                    <label className="text-sm text-gray-700">{t('active')}</label>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex gap-3 mt-6">
-                            <button
-                                onClick={handleCloseModal}
-                                className="btn btn-secondary flex-1"
-                                disabled={loading}
-                            >
-                                {t('cancel')}
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                className="btn btn-primary flex-1"
-                                disabled={loading}
-                            >
-                                {loading ? t('saving') : t('save')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
