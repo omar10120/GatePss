@@ -7,7 +7,27 @@ export async function GET(request: NextRequest) {
     try {
         return await requirePermission(request, 'MANAGE_USERS', async (req, user) => {
             try {
+                const { searchParams } = new URL(req.url);
+                const page = parseInt(searchParams.get('page') || '1');
+                const limit = parseInt(searchParams.get('limit') || '10');
+                const skip = (page - 1) * limit;
+                const search = searchParams.get('search');
+
+                // Build where clause
+                const where: any = {};
+                if (search) {
+                    where.OR = [
+                        { name: { contains: search } },
+                        { email: { contains: search } },
+                    ];
+                }
+
+                // Get total count
+                const total = await prisma.user.count({ where });
+
+                // Get users with pagination
                 const users = await prisma.user.findMany({
+                    where,
                     include: {
                         userPermissions: {
                             include: {
@@ -18,12 +38,15 @@ export async function GET(request: NextRequest) {
                     orderBy: {
                         createdAt: 'desc',
                     },
+                    skip,
+                    take: limit,
                 });
 
                 const formattedUsers = users.map((u: any) => ({
                     id: u.id,
                     name: u.name,
                     email: u.email,
+                    phoneNumber: u.phoneNumber,
                     role: u.role,
                     isActive: u.isActive,
                     createdAt: u.createdAt,
@@ -39,7 +62,15 @@ export async function GET(request: NextRequest) {
 
                 return NextResponse.json({
                     success: true,
-                    data: formattedUsers,
+                    data: {
+                        users: formattedUsers,
+                        pagination: {
+                            page,
+                            limit,
+                            total,
+                            totalPages: Math.ceil(total / limit),
+                        },
+                    },
                 });
 
             } catch (error: any) {
@@ -71,7 +102,7 @@ export async function POST(request: NextRequest) {
     return requirePermission(request, 'MANAGE_USERS', async (req, user) => {
         try {
             const body = await req.json();
-            const { name, email, password, role, permissionIds } = body;
+            const { name, email, phoneNumber, password, role, permissionIds } = body;
 
             // Validate input - BRD requirements
             const errors: string[] = [];
@@ -119,6 +150,7 @@ export async function POST(request: NextRequest) {
                 data: {
                     name: name.trim(),
                     email: email.toLowerCase().trim(),
+                    phoneNumber: phoneNumber?.trim() || null,
                     passwordHash,
                     role,
                     isActive: true,
@@ -160,6 +192,7 @@ export async function POST(request: NextRequest) {
                     id: newUser.id,
                     name: newUser.name,
                     email: newUser.email,
+                    phoneNumber: newUser.phoneNumber,
                     role: newUser.role,
                     isActive: newUser.isActive,
                 },
