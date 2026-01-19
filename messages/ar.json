@@ -402,6 +402,44 @@
             "added": "تم الإضافة",
             "access": "الوصول",
             "viewMore": "عرض المزيد"
+        },
+        "settings": {
+            "title": "الإعدادات",
+            "done": "تم",
+            "passTypes": {
+                "title": "أنواع التصاريح",
+                "addNewType": "إضافة نوع جديد",
+                "id": "المعرف",
+                "passTypeEn": "نوع التصريح (إنجليزي)",
+                "passTypeAr": "نوع التصريح (عربي)",
+                "added": "تم الإضافة",
+                "active": "نشط",
+                "access": "الوصول",
+                "editPassType": "تعديل أنواع التصاريح",
+                "enterPassTypeEn": "أدخل نوع التصريح (إنجليزي)",
+                "enterPassTypeAr": "أدخل نوع التصريح (عربي)",
+                "saveAndApprove": "حفظ والموافقة",
+                "createdSuccessfully": "تم إنشاء نوع التصريح بنجاح",
+                "updatedSuccessfully": "تم حفظ التغييرات بنجاح"
+            },
+            "faq": {
+                "title": "الأسئلة الشائعة",
+                "addNew": "إضافة جديد",
+                "editFAQ": "تعديل السؤال",
+                "questionEn": "السؤال (إنجليزي)",
+                "questionAr": "السؤال (عربي)",
+                "answerEn": "الإجابة (إنجليزي)",
+                "answerAr": "الإجابة (عربي)",
+                "enterQuestionEn": "أدخل السؤال (إنجليزي)",
+                "enterQuestionAr": "أدخل السؤال (عربي)",
+                "enterAnswerEn": "أدخل الإجابة (إنجليزي)",
+                "enterAnswerAr": "أدخل الإجابة (عربي)",
+                "save": "حفظ",
+                "createdSuccessfully": "تم إنشاء السؤال بنجاح",
+                "updatedSuccessfully": "تم تحديث السؤال بنجاح",
+                "deletedSuccessfully": "تم حذف السؤال بنجاح",
+                "confirmDelete": "هل أنت متأكد من حذف هذا السؤال؟"
+            }
         }
     }
 }
