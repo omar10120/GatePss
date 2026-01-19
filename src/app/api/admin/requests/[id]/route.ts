@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
+import { createRequestNotifications } from '@/utils/notification-helper';
+import { ActionType } from '@/lib/enums';
 
 export async function GET(
     request: NextRequest,
@@ -147,6 +149,15 @@ export async function PUT(
                     }),
                 },
             });
+
+            // Create notifications for all admins (async, don't wait)
+            createRequestNotifications(
+                ActionType.REQUEST_MANAGEMENT,
+                `Edited Visitor Data on Request ${existingRequest.requestNumber}`,
+                'REQUEST',
+                requestId,
+                user.userId
+            ).catch(err => console.error('Failed to create notifications:', err));
 
             return NextResponse.json({
                 success: true,

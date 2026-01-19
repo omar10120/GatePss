@@ -3,6 +3,7 @@ import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
 import { sendRequestRejectionEmail } from '@/lib/email';
 import { ActionType } from '@/lib/enums';
+import { createRequestNotifications } from '@/utils/notification-helper';
 
 export async function POST(
     request: NextRequest,
@@ -75,6 +76,15 @@ export async function POST(
                     }),
                 },
             });
+
+            // Create notifications for all admins (async, don't wait)
+            createRequestNotifications(
+                ActionType.REQUEST_MANAGEMENT,
+                `Rejected request ${gateRequest.requestNumber}`,
+                'REQUEST',
+                requestId,
+                user.userId
+            ).catch(err => console.error('Failed to create notifications:', err));
 
             // Send rejection email to applicant (async)
             sendRequestRejectionEmail(

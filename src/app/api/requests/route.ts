@@ -279,6 +279,15 @@ export async function POST(request: NextRequest) {
                 },
             });
 
+            // Create notifications for all admins (async, don't wait)
+            const { createRequestNotifications } = await import('@/utils/notification-helper');
+            createRequestNotifications(
+                ActionType.REQUEST_MANAGEMENT,
+                `New visitors requests has been applied`,
+                'REQUEST',
+                newRequest.id
+            ).catch(err => console.error('Failed to create notifications:', err));
+
             // Send confirmation email to applicant (async, don't wait)
             sendRequestConfirmationEmail(
                 applicantEmail,
