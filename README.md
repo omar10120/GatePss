@@ -198,6 +198,14 @@ gate-pass-system/
 #### Activity Logs (Super Admin Only)
 - `GET /api/admin/logs` - View activity logs (with filters)
 
+#### Notifications (Authenticated Users)
+- `GET /api/admin/notifications` - List notifications (with filters: isRead, actionType, dateFilter, search, pagination)
+- `GET /api/admin/notifications/:id` - Get notification details
+- `PUT /api/admin/notifications/:id/read` - Mark notification as read
+- `PUT /api/admin/notifications/read-all` - Mark all notifications as read (optional: filter by actionType)
+- `DELETE /api/admin/notifications/:id` - Delete notification
+- `GET /api/admin/notifications/unread-count` - Get unread notification count (optional: filter by actionType)
+
 ## 🗄️ Database Schema
 
 ### Tables

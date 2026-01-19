@@ -62,6 +62,14 @@ Most admin endpoints require a Bearer token:
 - `GET /admin/dashboard/summary` - Key statistics
 - `GET /admin/dashboard/charts` - Visualization data
 
+#### Notifications
+- `GET /admin/notifications` - List notifications (with filters)
+- `GET /admin/notifications/:id` - Get notification details
+- `PUT /admin/notifications/:id/read` - Mark notification as read
+- `PUT /admin/notifications/read-all` - Mark all notifications as read
+- `DELETE /admin/notifications/:id` - Delete notification
+- `GET /admin/notifications/unread-count` - Get unread count
+
 ---
 
 ## Component Library

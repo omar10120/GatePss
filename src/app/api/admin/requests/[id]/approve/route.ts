@@ -5,6 +5,7 @@ import { SoharPortClient } from '@/lib/sohar-port';
 import { sendRequestApprovalEmail } from '@/lib/email';
 import { ActionType } from '@/lib/enums';
 import { formatDate } from '@/utils/helpers';
+import { createRequestNotifications } from '@/utils/notification-helper';
 
 interface ApproveRequestBody {
     updates?: {
@@ -165,6 +166,27 @@ export async function POST(
                     }),
                 },
             });
+
+            // Create notifications for all admins (async, don't wait)
+            // Notification for admin approval
+            createRequestNotifications(
+                ActionType.REQUEST_MANAGEMENT,
+                `Approved request ${gateRequest.requestNumber}`,
+                'REQUEST',
+                requestId,
+                user.userId
+            ).catch(err => console.error('Failed to create notifications:', err));
+
+            // Notification for Sohar Port approval (if successful)
+            if (apiResponse.success && apiResponse.statusCode === 200) {
+                createRequestNotifications(
+                    ActionType.SYSTEM_INTEGRATION,
+                    `Sohar Approved the request of number ${gateRequest.requestNumber}`,
+                    'REQUEST',
+                    requestId,
+                    user.userId
+                ).catch(err => console.error('Failed to create Sohar Port notifications:', err));
+            }
 
             // Send approval email to applicant (async)
             sendRequestApprovalEmail(
