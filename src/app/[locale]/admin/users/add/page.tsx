@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, usePathname, Link } from '@/i18n/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import Header from '../../components/Header';
@@ -145,27 +145,29 @@ export default function AddUserPage() {
                         </div>
                     )}
 
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="space-y-6">
+                    <div className="bg-white rounded-2xl shadow-sm p-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            {/* Full Name */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('fullName')} (En)
+                                    Full Name of Pass Holder(En)
                                 </label>
                                 <div className="relative">
                                     <input
                                         type="text"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="input pl-10"
+                                        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300 bg-white focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20 text-gray-900"
                                         placeholder={t('enterFullName')}
                                         required
                                     />
-                                    <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-gray-400 absolute right-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                 </div>
                             </div>
 
+                            {/* Email */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     {t('email')}
@@ -175,16 +177,17 @@ export default function AddUserPage() {
                                         type="email"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="input pl-10"
+                                        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300 bg-white focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20 text-gray-900"
                                         placeholder={t('enterEmail')}
                                         required
                                     />
-                                    <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-gray-400 absolute right-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
                                 </div>
                             </div>
 
+                            {/* Phone Number */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     {t('phoneNumber')}
@@ -194,15 +197,16 @@ export default function AddUserPage() {
                                         type="tel"
                                         value={formData.phoneNumber}
                                         onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                        className="input pl-10"
+                                        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300 bg-white focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20 text-gray-900"
                                         placeholder={t('enterPhoneNumber')}
                                     />
-                                    <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-gray-400 absolute right-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
                                 </div>
                             </div>
 
+                            {/* Password */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     {t('password')}
@@ -212,17 +216,14 @@ export default function AddUserPage() {
                                         type={showPassword ? 'text' : 'password'}
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                        className="input pl-10 pr-10"
+                                        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300 bg-white focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20 text-gray-900"
                                         placeholder={t('enterPassword')}
                                         required
                                     />
-                                    <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                     >
                                         {showPassword ? (
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,31 +238,33 @@ export default function AddUserPage() {
                                     </button>
                                 </div>
                             </div>
+                        </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-3">
-                                    {t('allowedAccess')}
-                                </label>
-                                <div className="border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto">
-                                    {permissions.map((permission) => (
-                                        <label key={permission.id} className="flex items-center gap-3 cursor-pointer py-2">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.permissionIds.includes(permission.id)}
-                                                onChange={() => handlePermissionToggle(permission.id)}
-                                                className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                                            />
-                                            <span className="text-sm text-gray-700">{permission.description}</span>
-                                        </label>
-                                    ))}
-                                </div>
+                        {/* Allowed Access Section */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">
+                                {t('allowedAccess')}
+                            </label>
+                            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 max-h-64 overflow-y-auto">
+                                {permissions.map((permission) => (
+                                    <label key={permission.id} className="flex items-center gap-3 cursor-pointer py-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.permissionIds.includes(permission.id)}
+                                            onChange={() => handlePermissionToggle(permission.id)}
+                                            className="w-5 h-5 rounded border-gray-300 text-[#00B09C] focus:ring-[#00B09C] focus:ring-2"
+                                        />
+                                        <span className="text-sm text-gray-700">{permission.description}</span>
+                                    </label>
+                                ))}
                             </div>
                         </div>
 
+                        {/* Save Button */}
                         <div className="mt-8 flex justify-center">
                             <button
                                 onClick={handleSave}
-                                className="btn btn-primary px-12"
+                                className="px-12 py-4 bg-[#00B09C] text-white rounded-xl font-bold hover:bg-[#008f7e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={loading}
                             >
                                 {loading ? t('saving') : t('save')}
@@ -269,7 +272,7 @@ export default function AddUserPage() {
                         </div>
                     </div>
                 </main>
-            </div>
+            </div>  
 
             {showSuccessModal && (
                 <SuccessModal

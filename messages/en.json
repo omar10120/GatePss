@@ -249,6 +249,15 @@
                 "message": "Are you sure you want to logout?",
                 "confirm": "Sign out",
                 "cancel": "Cancel"
+            },
+            "activitiesOfAction": "Activities Of Action",
+            "visits": "Visits",
+            "permits": "Permits",
+            "noData": "No data available",
+            "filter": {
+                "day": "Day",
+                "week": "Week",
+                "month": "Month"
             }
         },
         "requests": {

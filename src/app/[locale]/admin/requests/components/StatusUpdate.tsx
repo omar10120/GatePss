@@ -1,16 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
+import RejectConfirmModal from '@/components/ui/RejectConfirmModal';
 
 interface StatusUpdateProps {
     currentStatus: string;
     onUpdate: (status: 'APPROVED' | 'REJECTED' | 'PENDING', reason?: string) => Promise<void>;
     getStatusColor: (status: string) => string;
+    onRejectSuccess?: () => void;
 }
 
-export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor }: StatusUpdateProps) => {
+export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor, onRejectSuccess }: StatusUpdateProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [showRejectModal, setShowRejectModal] = useState(false);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
     const dropdownRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -37,38 +40,49 @@ export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor }: Status
     }, [isOpen]);
 
     const handleSelect = async (status: 'APPROVED' | 'REJECTED' | 'PENDING') => {
+        // Prevent editing if status is already APPROVED
+        if (currentStatus === 'APPROVED') {
+            setIsOpen(false);
+            return;
+        }
+
         if (status === currentStatus) {
             setIsOpen(false);
             return;
         }
 
-        let reason = '';
+        setIsOpen(false);
+
         if (status === 'REJECTED') {
-            const result = window.prompt("Please enter a reason for rejection (required):");
-            if (result === null) {
-                setIsOpen(false);
-                return; // Cancelled
-            }
-            if (!result.trim()) {
-                alert("Rejection reason is required.");
-                return;
-            }
-            reason = result;
+            setShowRejectModal(true);
+            return;
         }
 
-        if (confirm(`Are you sure you want to change status to ${status}?`)) {
-            setLoading(true);
-            try {
-                await onUpdate(status, reason);
-            } catch (error) {
-                console.error("Failed to update status", error);
-                alert("Failed to update status");
-            } finally {
-                setLoading(false);
-                setIsOpen(false);
+        // For APPROVED or PENDING, proceed directly
+        setLoading(true);
+        try {
+            await onUpdate(status);
+        } catch (error) {
+            console.error("Failed to update status", error);
+            alert("Failed to update status");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRejectConfirm = async (reason: string) => {
+        setShowRejectModal(false);
+        setLoading(true);
+        try {
+            await onUpdate('REJECTED', reason);
+            if (onRejectSuccess) {
+                onRejectSuccess();
             }
-        } else {
-            setIsOpen(false);
+        } catch (error) {
+            console.error("Failed to reject request", error);
+            alert("Failed to reject request");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -99,22 +113,32 @@ export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor }: Status
         </div>
     ) : null;
 
+    const isApproved = currentStatus === 'APPROVED';
+
     return (
         <>
             <div className="relative">
                 <button
                     ref={buttonRef}
-                    onClick={() => setIsOpen(!isOpen)}
-                    disabled={loading}
-                    className={`px-3 py-1 text-[12px] font-bold rounded-full ${getStatusColor(currentStatus)} flex items-center gap-1 transition-opacity ${loading ? 'opacity-50 cursor-wait' : 'hover:opacity-80'}`}
+                    onClick={() => !isApproved && setIsOpen(!isOpen)}
+                    disabled={loading || isApproved}
+                    className={`px-3 py-1 text-[12px] font-bold rounded-full ${getStatusColor(currentStatus)} flex items-center gap-1 transition-opacity ${loading || isApproved ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80 cursor-pointer'}`}
+                    title={isApproved ? 'Approved requests cannot be modified' : ''}
                 >
                     {t(`status.${currentStatus}`)}
-                    <svg className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    {!isApproved && (
+                        <svg className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    )}
                 </button>
             </div>
-            {typeof window !== 'undefined' && isOpen && createPortal(dropdownContent, document.body)}
+            {typeof window !== 'undefined' && isOpen && !isApproved && createPortal(dropdownContent, document.body)}
+            <RejectConfirmModal
+                isOpen={showRejectModal}
+                onClose={() => setShowRejectModal(false)}
+                onConfirm={handleRejectConfirm}
+            />
         </>
     );
 };

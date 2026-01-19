@@ -8,6 +8,7 @@ import Header from '../components/Header';
 import { useLocale, useTranslations } from 'next-intl';
 import { TableFilter } from '../components/TableFilter';
 import { StatusUpdate } from './components/StatusUpdate';
+import RejectSuccessModal from '@/components/ui/RejectSuccessModal';
 
 interface Request {
     id: number;
@@ -66,6 +67,7 @@ export default function AdminRequestsPage() {
     });
 
     const [permissionDenied, setPermissionDenied] = useState(false);
+    const [showRejectSuccessModal, setShowRejectSuccessModal] = useState(false);
 
     // Helper function to check if user has a specific permission
     const hasPermission = (permissionKey: string) => {
@@ -321,6 +323,7 @@ export default function AdminRequestsPage() {
                                                                     currentStatus={request.status}
                                                                     getStatusColor={getStatusColor}
                                                                     onUpdate={(newStatus, rejectionReason) => handleStatusUpdate(request.id, newStatus, rejectionReason)}
+                                                                    onRejectSuccess={() => setShowRejectSuccessModal(true)}
                                                                 />
                                                             </td>
                                                             <td className="px-6 py-4">
@@ -376,6 +379,12 @@ export default function AdminRequestsPage() {
                     )}
                 </main>
             </div>
+
+            <RejectSuccessModal
+                isOpen={showRejectSuccessModal}
+                onClose={() => setShowRejectSuccessModal(false)}
+                message="The Request Was Successfully Rejected"
+            />
         </div>
     );
 }
