@@ -100,15 +100,6 @@ export default function TrackApplication() {
                                 <p className="text-red-600 text-sm">{error}</p>
                             </div>
                         )}
-
-                        {(() => {
-                            const statusCardStatus = getStatusCardStatus();
-                            return statusCardStatus && (
-                                <div className="mt-8">
-                                    <StatusCard status={statusCardStatus} />
-                                </div>
-                            );
-                        })()}
                     </div>
                 </div>
             </section>
@@ -116,6 +107,28 @@ export default function TrackApplication() {
             {/* How It Works Section */}
             <HowtWork />
 
+            {/* Status Card Modal */}
+            {(() => {
+                const statusCardStatus = getStatusCardStatus();
+                if (!statusCardStatus) return null;
+
+                return (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-3xl max-w-5xl w-full p-8 md:p-16 relative">
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setDisplayStatus(null)}
+                                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <StatusCard status={statusCardStatus} />
+                        </div>
+                    </div>
+                );
+            })()}
         </div>
     );
 }

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 
 interface StatusUpdateProps {
@@ -10,19 +11,30 @@ interface StatusUpdateProps {
 export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor }: StatusUpdateProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
     const t = useTranslations('Admin.dashboard');
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
+                buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
 
+        if (isOpen && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect();
+            setDropdownPosition({
+                top: rect.bottom + window.scrollY + 4,
+                left: rect.left + window.scrollX,
+            });
+        }
+
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [isOpen]);
 
     const handleSelect = async (status: 'APPROVED' | 'REJECTED' | 'PENDING') => {
         if (status === currentStatus) {
@@ -60,38 +72,49 @@ export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor }: Status
         }
     };
 
-    return (
-        <div className="relative" ref={dropdownRef}>
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                disabled={loading}
-                className={`px-3 py-1 text-[12px] font-bold rounded-full ${getStatusColor(currentStatus)} flex items-center gap-1 transition-opacity ${loading ? 'opacity-50 cursor-wait' : 'hover:opacity-80'}`}
-            >
-                {t(`status.${currentStatus}`)}
-                <svg className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-
-            {isOpen && (
-                <div className="absolute top-full left-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-100 z-50 overflow-hidden">
-                    <div className="py-1">
-                        {['APPROVED', 'REJECTED', 'PENDING'].map((status) => (
-                            <button
-                                key={status}
-                                onClick={() => handleSelect(status as any)}
-                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 ${currentStatus === status ? 'bg-gray-50 font-medium' : ''}`}
-                            >
-                                <span className={`w-2 h-2 rounded-full ${status === 'APPROVED' ? 'bg-green-500' :
-                                        status === 'REJECTED' ? 'bg-red-500' :
-                                            'bg-yellow-500'
-                                    }`}></span>
-                                {t(`status.${status}`)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
+    const dropdownContent = isOpen ? (
+        <div
+            ref={dropdownRef}
+            className="fixed w-36 bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-[9999]"
+            style={{
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+            }}
+        >
+            <div className="py-1">
+                {['APPROVED', 'REJECTED', 'PENDING'].map((status) => (
+                    <button
+                        key={status}
+                        onClick={() => handleSelect(status as any)}
+                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 ${currentStatus === status ? 'bg-gray-50 font-medium' : ''}`}
+                    >
+                        <span className={`w-2 h-2 rounded-full ${status === 'APPROVED' ? 'bg-green-500' :
+                                status === 'REJECTED' ? 'bg-red-500' :
+                                    'bg-yellow-500'
+                            }`}></span>
+                        {t(`status.${status}`)}
+                    </button>
+                ))}
+            </div>
         </div>
+    ) : null;
+
+    return (
+        <>
+            <div className="relative">
+                <button
+                    ref={buttonRef}
+                    onClick={() => setIsOpen(!isOpen)}
+                    disabled={loading}
+                    className={`px-3 py-1 text-[12px] font-bold rounded-full ${getStatusColor(currentStatus)} flex items-center gap-1 transition-opacity ${loading ? 'opacity-50 cursor-wait' : 'hover:opacity-80'}`}
+                >
+                    {t(`status.${currentStatus}`)}
+                    <svg className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+            </div>
+            {typeof window !== 'undefined' && isOpen && createPortal(dropdownContent, document.body)}
+        </>
     );
 };

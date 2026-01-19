@@ -284,10 +284,10 @@ export default function AdminRequestsPage() {
                                 onReset={handleResetFilters}
                             />
 
-                            <div className="bg-white rounded-[12px] border border-gray-100 overflow-hidden shadow-sm">
+                            <div className="bg-white rounded-[12px] border border-gray-100 shadow-sm" style={{ overflow: 'visible' }}>
                                 {requests.length > 0 ? (
                                     <>
-                                        <div className="overflow-x-auto">
+                                        <div className="overflow-x-auto" style={{ overflowY: 'visible' }}>
                                             <table className="w-full">
                                                 <thead className="bg-[#F9F9F9] border-b border-gray-100">
                                                     <tr>
@@ -302,7 +302,7 @@ export default function AdminRequestsPage() {
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-100">
                                                     {requests.map((request) => (
-                                                        <tr key={request.id} className="hover:bg-gray-50/50 transition-colors">
+                                                        <tr key={request.id} className="hover:bg-gray-50/50 transition-colors relative">
                                                             <td className="px-6 py-4">
                                                                 <Link href={`/admin/requests/${request.id}`} className="text-[#00B09C] hover:text-[#008f7e] font-bold text-[14px]">
                                                                     {request.requestNumber}
@@ -316,7 +316,7 @@ export default function AdminRequestsPage() {
                                                             <td className="px-6 py-4 text-[#747474] text-[14px]">
                                                                 {new Date(request.dateOfVisit).toLocaleDateString()}
                                                             </td>
-                                                            <td className="px-6 py-4">
+                                                            <td className="px-6 py-4 relative overflow-visible">
                                                                 <StatusUpdate
                                                                     currentStatus={request.status}
                                                                     getStatusColor={getStatusColor}

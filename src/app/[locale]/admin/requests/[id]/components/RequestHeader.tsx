@@ -26,7 +26,7 @@ export const RequestHeader: React.FC<RequestHeaderProps> = ({ requestNumber, sta
                 Request <span className="text-[#005068]">{requestNumber}</span>
             </h1>
 
-            <span className={`px-4 py-2 rounded-[8px] text-sm font-medium ${getStatusColor(status)}`}>
+            <span className={`px-4 py-2 rounded-[8px] text-sm font-medium z-index:10      ${getStatusColor(status)}`}>
                 {statusLabel}
             </span>
         </div>
