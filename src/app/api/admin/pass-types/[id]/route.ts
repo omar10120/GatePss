@@ -4,11 +4,12 @@ import prisma from '@/lib/prisma';
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id: idParam } = await params;
         return await requirePermission(request, 'MANAGE_SETTINGS', async (req) => {
-            const id = parseInt(params.id);
+            const id = parseInt(idParam);
             const body = await req.json();
             const { name_en, name_ar, is_active } = body;
 
@@ -51,11 +52,12 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id: idParam } = await params;
         return await requirePermission(request, 'MANAGE_SETTINGS', async () => {
-            const id = parseInt(params.id);
+            const id = parseInt(idParam);
 
             await prisma.pass_types.delete({
                 where: { id },
