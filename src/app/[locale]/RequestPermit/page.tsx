@@ -15,7 +15,7 @@ export default function RequestPermit() {
 
             <main className="py-10 md:py-20 px-4">
                 <div className="container mx-auto">
-                    {/* Hero Section */}
+                    {/* Hero Section */}    
                     <section className="py-16 bg-white text-center">
                         <div className="container mx-auto px-4">
                             <h1 className="text-[38px] leading-[45px] font-medium text-[#0666A3] mb-3 font-['Rubik'] capitalize">

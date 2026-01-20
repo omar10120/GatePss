@@ -148,9 +148,9 @@ export default function PassTypes() {
 
     return (
         <>
-            <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+            <div>
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-gray-900">{t('title')}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900">{t('title')}</h3>
                     <button
                         onClick={handleAddNew}
                         className="px-6 py-2 bg-[#00B09C] text-white rounded-lg font-medium hover:bg-[#008f7e] transition-colors"
@@ -159,21 +159,21 @@ export default function PassTypes() {
                     </button>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="bg-gray-50 rounded-3xl p-6 overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('id')}</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('passTypeEn')}</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('passTypeAr')}</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('added')}</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('active')}</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">{t('access')}</th>
+                            <tr>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('id')}</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('passTypeEn')}</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('passTypeAr')}</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('added')}</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('active')}</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('access')}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {passTypes.map((passType) => (
-                                <tr key={passType.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                <tr key={passType.id} className="border-b border-gray-200 last:border-b-0">
                                     <td className="px-6 py-4 text-sm text-gray-900">{passType.id}</td>
                                     <td className="px-6 py-4 text-sm text-gray-900">{passType.name_en}</td>
                                     <td className="px-6 py-4 text-sm text-gray-900">{passType.name_ar}</td>
@@ -195,7 +195,7 @@ export default function PassTypes() {
                                     <td className="px-6 py-4">
                                         <button
                                             onClick={() => handleEdit(passType)}
-                                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                                            className="text-[#00B09C] hover:text-[#008f7e] transition-colors"
                                         >
                                             <Image
                                                 src="/images/svg/Edit 2.svg"

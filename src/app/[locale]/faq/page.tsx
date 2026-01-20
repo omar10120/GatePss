@@ -1,18 +1,48 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-
+import { useState, useEffect } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import FAQAccordion from '@/components/ui/FAQAccordion';
+
+interface FAQ {
+    id: number;
+    question_en: string;
+    question_ar: string;
+    answer_en: string;
+    answer_ar: string;
+    created_at: string;
+}
 
 export default function FAQPage() {
     const t = useTranslations('HomePage.faqPage');
+    const locale = useLocale();
+    const [faqs, setFaqs] = useState<FAQ[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchFAQs();
+    }, []);
+
+    const fetchFAQs = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/faq');
+            if (!response.ok) {
+                throw new Error('Failed to fetch FAQs');
+            }
+            const result = await response.json();
+            setFaqs(result.data || []);
+        } catch (error) {
+            console.error('Error fetching FAQs:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-white">
-
-
             <main className="py-20 px-4">
-                <div className="container mx-auto">``
+                <div className="container mx-auto">
                     {/* Header Section */}
                     <div className="text-center mb-16">
                         <div className="flex justify-center mb-6">
@@ -30,11 +60,15 @@ export default function FAQPage() {
                         </p>
                     </div>
 
-                    <FAQAccordion />
+                    {loading ? (
+                        <div className="flex items-center justify-center h-64">
+                            <div className="w-8 h-8 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin"></div>
+                        </div>
+                    ) : (
+                        <FAQAccordion faqs={faqs} locale={locale as 'en' | 'ar'} />
+                    )}
                 </div>
             </main>
-
-
         </div>
     );
 }

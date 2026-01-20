@@ -458,6 +458,7 @@
         "settings": {
             "title": "Settings",
             "done": "Done",
+            "back": "Back",
             "passTypes": {
                 "title": "Pass Types",
                 "addNewType": "Add New Type",
@@ -477,9 +478,13 @@
             "faq": {
                 "title": "FAQ",
                 "addNew": "Add New",
+                "addQuestion": "Add Question",
                 "editFAQ": "Edit FAQ",
                 "questionEn": "Question (English)",
                 "questionAr": "Question (Arabic)",
+                "questionTitleEn": "Question Title (En)",
+                "questionTitleAr": "Question Title (Ar)",
+                "replyTitleEn": "ReplyTitle (En)",
                 "answerEn": "Answer (English)",
                 "answerAr": "Answer (Arabic)",
                 "enterQuestionEn": "Enter Question (English)",
@@ -487,10 +492,30 @@
                 "enterAnswerEn": "Enter Answer (English)",
                 "enterAnswerAr": "Enter Answer (Arabic)",
                 "save": "Save",
+                "back": "Back",
+                "back_to_faq": "Back To Faq",
                 "createdSuccessfully": "FAQ Created Successfully",
                 "updatedSuccessfully": "FAQ Updated Successfully",
                 "deletedSuccessfully": "FAQ Deleted Successfully",
                 "confirmDelete": "Are you sure you want to delete this FAQ?"
+            }
+       
+        },
+        "notifications": {
+            "title": "Notifications",
+            "loading": "Loading notifications...",
+            "emptyTitle": "No Notifications Yet",
+            "emptyDescription": "You don't have any notifications yet.",
+            "selectAll": "Select all",
+            "delete": "Delete",
+            "deleteOneConfirm": "Are you sure you want to delete this notification?",
+            "deleteManyConfirm": "Are you sure you want to delete {count} notification(s)?",
+            "viewIt": "View It",
+            "time": {
+                "seconds": "{value}s ago",
+                "minutes": "{value}m ago",
+                "hours": "{value}h ago",
+                "days": "{value}d ago"
             }
         }
     }

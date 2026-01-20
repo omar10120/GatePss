@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import SuccessModal from '@/components/ui/SuccessModal';
 
 interface FAQ {
@@ -18,16 +17,29 @@ export default function FAQ() {
     const t = useTranslations('Admin.settings.faq');
     const [faqs, setFaqs] = useState<FAQ[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showModal, setShowModal] = useState(false);
+    const [showForm, setShowForm] = useState(false);
     const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
     const [formData, setFormData] = useState({
         question_en: '',
         question_ar: '',
         answer_en: '',
         answer_ar: '',
     });
+
+    const toggleExpand = (id: number) => {
+        setExpandedIds(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    };
 
     useEffect(() => {
         fetchFAQs();
@@ -61,7 +73,7 @@ export default function FAQ() {
     const handleAddNew = () => {
         setEditingFAQ(null);
         setFormData({ question_en: '', question_ar: '', answer_en: '', answer_ar: '' });
-        setShowModal(true);
+        setShowForm(true);
     };
 
     const handleEdit = (faq: FAQ) => {
@@ -72,7 +84,13 @@ export default function FAQ() {
             answer_en: faq.answer_en,
             answer_ar: faq.answer_ar,
         });
-        setShowModal(true);
+        setShowForm(true);
+    };
+
+    const handleCancel = () => {
+        setShowForm(false);
+        setEditingFAQ(null);
+        setFormData({ question_en: '', question_ar: '', answer_en: '', answer_ar: '' });
     };
 
     const handleSave = async () => {
@@ -99,39 +117,15 @@ export default function FAQ() {
                 throw new Error(error.message || 'Failed to save FAQ');
             }
 
-            setShowModal(false);
+            setShowForm(false);
+            setEditingFAQ(null);
+            setFormData({ question_en: '', question_ar: '', answer_en: '', answer_ar: '' });
             setSuccessMessage(editingFAQ ? t('updatedSuccessfully') : t('createdSuccessfully'));
             setShowSuccessModal(true);
             fetchFAQs();
-        } catch (error: any) {
-            alert(error.message || 'Failed to save FAQ');
-        }
-    };
-
-    const handleDelete = async (id: number) => {
-        if (!confirm(t('confirmDelete'))) return;
-
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
-        try {
-            const response = await fetch(`/api/admin/faq/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete FAQ');
-            }
-
-            setSuccessMessage(t('deletedSuccessfully'));
-            setShowSuccessModal(true);
-            fetchFAQs();
         } catch (error) {
-            console.error('Error deleting FAQ:', error);
-            alert('Failed to delete FAQ');
+            const errorMessage = error instanceof Error ? error.message : 'Failed to save FAQ';
+            alert(errorMessage);
         }
     };
 
@@ -143,136 +137,196 @@ export default function FAQ() {
         );
     }
 
-    return (
-        <>
-            <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-gray-900">{t('title')}</h3>
+    // Show form as a page
+    if (showForm) {
+        return (
+            <>
+                <div>
+                    {/* Back Button */}
                     <button
-                        onClick={handleAddNew}
-                        className="px-6 py-2 bg-[#00B09C] text-white rounded-lg font-medium hover:bg-[#008f7e] transition-colors"
+                        onClick={handleCancel}
+                        className="mb-6 text-gray-600 hover:text-gray-900 flex items-center gap-2"
                     >
-                        {t('addNew')}
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        {t('back_to_faq')}
                     </button>
-                </div>
 
-                <div className="space-y-4">
-                    {faqs.map((faq) => (
-                        <div key={faq.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex-1">
-                                    <h4 className="text-lg font-semibold text-gray-900 mb-2">{faq.question_en}</h4>
-                                    <p className="text-sm text-gray-600 mb-2">{faq.question_ar}</p>
-                                    <p className="text-sm text-gray-700">{faq.answer_en}</p>
-                                    <p className="text-sm text-gray-700 mt-2">{faq.answer_ar}</p>
-                                </div>
-                                <div className="flex gap-2 ml-4">
-                                    <button
-                                        onClick={() => handleEdit(faq)}
-                                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                                    >
-                                        <Image
-                                            src="/images/svg/Edit 2.svg"
-                                            alt="Edit"
-                                            width={20}
-                                            height={20}
-                                        />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(faq.id)}
-                                        className="text-red-400 hover:text-red-600 transition-colors"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                    {/* Page Title */}
+                    <h3 className="text-2xl font-bold text-gray-900 mb-8">
+                        {editingFAQ ? t('editFAQ') : t('addQuestion')}
+                    </h3>
 
-            {/* Add/Edit Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl max-w-2xl w-full p-8 relative max-h-[90vh] overflow-y-auto">
-                        <button
-                            onClick={() => setShowModal(false)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-
-                        <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                            {editingFAQ ? t('editFAQ') : t('addNew')}
-                        </h3>
-
+                    {/* Form */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        {/* Left Column */}
                         <div className="space-y-4">
+                            {/* Question Title (Ar) */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('questionEn')}
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.question_en}
-                                    onChange={(e) => setFormData({ ...formData, question_en: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20"
-                                    placeholder={t('enterQuestionEn')}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('questionAr')}
+                                    {t('questionTitleAr')}
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.question_ar}
                                     onChange={(e) => setFormData({ ...formData, question_ar: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20"
-                                    placeholder={t('enterQuestionAr')}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20 focus:outline-none"
+                                    placeholder="Primary Title"
                                 />
                             </div>
 
+                            {/* Question Title (En) - Textarea (for Arabic answer) */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('answerEn')}
-                                </label>
-                                <textarea
-                                    value={formData.answer_en}
-                                    onChange={(e) => setFormData({ ...formData, answer_en: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20"
-                                    rows={4}
-                                    placeholder={t('enterAnswerEn')}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('answerAr')}
+                                    {t('questionTitleEn')}
                                 </label>
                                 <textarea
                                     value={formData.answer_ar}
                                     onChange={(e) => setFormData({ ...formData, answer_ar: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20"
-                                    rows={4}
-                                    placeholder={t('enterAnswerAr')}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20 focus:outline-none resize-none"
+                                    rows={8}
+                                    placeholder="Molestie scelerisque urna etiam scelerisque. Diam elit est pretium posuere. Ultricies pulvinar nisi pulvinar malesuada. Gravida felis vitae habitasse ut. Sed egestas est sodales amet velit nunc leo. Nunc risus aliquet sit consequat hendrerit aliquam ultricies nisl. Lacus et sagittis id mauris curabitur sed."
                                 />
                             </div>
                         </div>
 
+                        {/* Right Column */}
+                        <div className="space-y-4">
+                            {/* Question Title (En) */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    {t('questionTitleEn')}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.question_en}
+                                    onChange={(e) => setFormData({ ...formData, question_en: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20 focus:outline-none"
+                                    placeholder="Primary Title"
+                                />
+                            </div>
+
+                            {/* Reply Title (En) - Textarea */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    {t('replyTitleEn')}
+                                </label>
+                                <textarea
+                                    value={formData.answer_en}
+                                    onChange={(e) => setFormData({ ...formData, answer_en: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20 focus:outline-none resize-none"
+                                    rows={8}
+                                    placeholder="Molestie scelerisque urna etiam scelerisque. Diam elit est pretium posuere. Ultricies pulvinar nisi pulvinar malesuada. Gravida felis vitae habitasse ut. Sed egestas est sodales amet velit nunc leo. Nunc risus aliquet sit consequat hendrerit aliquam ultricies nisl. Lacus et sagittis id mauris curabitur sed."
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Save Button */}
+                    <div className="mt-8">
                         <button
                             onClick={handleSave}
-                            className="mt-6 w-full px-6 py-3 bg-[#00B09C] text-white rounded-xl font-bold text-lg hover:bg-[#008f7e] transition-colors"
+                            className="w-full px-6 py-4 bg-[#00B09C] text-white rounded-xl font-bold text-lg hover:bg-[#008f7e] transition-colors"
                         >
                             {t('save')}
                         </button>
                     </div>
                 </div>
-            )}
+
+                {showSuccessModal && (
+                    <SuccessModal
+                        message={successMessage}
+                        onClose={() => setShowSuccessModal(false)}
+                    />
+                )}
+            </>
+        );
+    }
+
+    return (
+        <>
+            <div>
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-2xl font-bold text-gray-900">{t('title')}</h3>
+                    <button
+                        onClick={handleAddNew}
+                        className="px-6 py-2 bg-[#00B09C] text-white rounded-lg font-medium hover:bg-[#008f7e] transition-colors"
+                    >
+                        {t('addQuestion')}
+                    </button>
+                </div>
+
+                <div className="space-y-4">
+                    {faqs.map((faq, index) => {
+                        const isExpanded = expandedIds.has(faq.id);
+                        const faqNumber = String(index + 1).padStart(2, '0');
+                        
+                        return (
+                            <div
+                                key={faq.id}
+                                className={`rounded-xl transition-all ${
+                                    isExpanded ? 'bg-gray-100 p-6' : 'bg-white p-4'
+                                }`}
+                            >
+                                <div className="flex items-start gap-4">
+                                    {/* Blue Number Badge */}
+                                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <span className="text-white text-sm font-bold">{faqNumber}</span>
+                                    </div>
+
+                                    {/* Question and Answer */}
+                                    <div className="flex-1">
+                                        <h4 className="text-base font-medium text-gray-900 mb-2">
+                                            {faq.question_en}
+                                        </h4>
+                                        {isExpanded && (
+                                            <div className="mt-3 space-y-2">
+                                                <p className="text-sm text-gray-600 leading-relaxed">
+                                                    {faq.answer_en}
+                                                </p>
+                                                {faq.answer_ar && (
+                                                    <p className="text-sm text-gray-600 leading-relaxed">
+                                                        {faq.answer_ar}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Action Icons */}
+                                    <div className="flex gap-2 flex-shrink-0">
+                                        {/* Edit Icon - Green Circle */}
+                                        <button
+                                            onClick={() => handleEdit(faq)}
+                                            className="w-8 h-8 bg-[#00B09C] rounded-full flex items-center justify-center hover:bg-[#008f7e] transition-colors"
+                                        >
+                                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+
+                                        {/* Collapse/Expand Icon - Blue Circle */}
+                                        <button
+                                            onClick={() => toggleExpand(faq.id)}
+                                            className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
+                                        >
+                                            <svg
+                                                className={`w-4 h-4 text-white transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
 
             {showSuccessModal && (
                 <SuccessModal

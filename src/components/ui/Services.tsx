@@ -19,7 +19,7 @@ export default function Services() {
                 {/* CTA Button */}
                 <div className="text-center py-6">
                     <Link
-                        href="/RequestPermit"
+                        href={`/${locale}/RequestPermit`}
                         className="inline-flex items-center justify-center gap-2 text-white px-12 py-4 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                         style={{ backgroundColor: '#14b8a6' }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d9488'}

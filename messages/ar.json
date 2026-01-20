@@ -406,6 +406,7 @@
         "settings": {
             "title": "الإعدادات",
             "done": "تم",
+            "back": "رجوع",
             "passTypes": {
                 "title": "أنواع التصاريح",
                 "addNewType": "إضافة نوع جديد",
@@ -425,9 +426,13 @@
             "faq": {
                 "title": "الأسئلة الشائعة",
                 "addNew": "إضافة جديد",
+                "addQuestion": "إضافة سؤال",
                 "editFAQ": "تعديل السؤال",
                 "questionEn": "السؤال (إنجليزي)",
                 "questionAr": "السؤال (عربي)",
+                "questionTitleEn": "عنوان السؤال (إنجليزي)",
+                "questionTitleAr": "عنوان السؤال (عربي)",
+                "replyTitleEn": "عنوان الرد (إنجليزي)",
                 "answerEn": "الإجابة (إنجليزي)",
                 "answerAr": "الإجابة (عربي)",
                 "enterQuestionEn": "أدخل السؤال (إنجليزي)",
@@ -435,10 +440,30 @@
                 "enterAnswerEn": "أدخل الإجابة (إنجليزي)",
                 "enterAnswerAr": "أدخل الإجابة (عربي)",
                 "save": "حفظ",
+                "back": "رجوع",
+                "back_to_faq": "العودة للأسئلة الشائعة",
                 "createdSuccessfully": "تم إنشاء السؤال بنجاح",
                 "updatedSuccessfully": "تم تحديث السؤال بنجاح",
                 "deletedSuccessfully": "تم حذف السؤال بنجاح",
                 "confirmDelete": "هل أنت متأكد من حذف هذا السؤال؟"
+            }
+      
+        },
+        "notifications": {
+            "title": "الإشعارات",
+            "loading": "جاري تحميل الإشعارات...",
+            "emptyTitle": "لا توجد إشعارات بعد",
+            "emptyDescription": "ليس لديك أي إشعارات حتى الآن.",
+            "selectAll": "تحديد الكل",
+            "delete": "حذف",
+            "deleteOneConfirm": "هل أنت متأكد أنك تريد حذف هذا الإشعار؟",
+            "deleteManyConfirm": "هل أنت متأكد أنك تريد حذف {count} من الإشعارات؟",
+            "viewIt": "عرض",
+            "time": {
+                "seconds": "منذ {value} ثانية",
+                "minutes": "منذ {value} دقيقة",
+                "hours": "منذ {value} ساعة",
+                "days": "منذ {value} يوم"
             }
         }
     }

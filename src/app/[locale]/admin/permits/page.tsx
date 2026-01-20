@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
@@ -51,6 +52,7 @@ export default function PermitsPage() {
         page: 1,
     });
     const [permissionDenied, setPermissionDenied] = useState(false);
+    const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -105,15 +107,41 @@ export default function PermitsPage() {
         }
     };
 
-    const handleViewPermitQR = (permit: Permit) => {
+    const handleViewPermitQR = async (permit: Permit) => {
         setSelectedPermit(permit);
         setShowModal(true);
+        setQrDataUrl(null);
+
+        try {
+            const qrPayload = JSON.stringify({
+                id: permit.id,
+                externalReference: permit.externalReference || permit.requestNumber,
+                applicantName: permit.applicantNameEn,
+                validFrom: permit.validFrom,
+                validTo: permit.validTo,
+            });
+
+            const dataUrl = await QRCode.toDataURL(qrPayload, {
+                margin: 1,
+                width: 256,
+            });
+
+            setQrDataUrl(dataUrl);
+        } catch (error) {
+            console.error('Error generating QR code:', error);
+        }
     };
 
     const handleDownloadInfo = () => {
-        if (selectedPermit?.qrCodePdfUrl) {
-            window.open(selectedPermit.qrCodePdfUrl, '_blank');
-        }
+        if (!qrDataUrl || !selectedPermit) return;
+
+        const link = document.createElement('a');
+        link.href = qrDataUrl;
+        const fileName = `permit-${selectedPermit.externalReference || selectedPermit.requestNumber || selectedPermit.id}-qr.png`;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const handleFilterChange = (key: string, value: string) => {
@@ -339,18 +367,22 @@ export default function PermitsPage() {
                                 </span>
                             </div>
 
-                            {selectedPermit.qrCodePdfUrl && (
+                            {selectedPermit && (
                                 <div className="flex justify-center my-6">
                                     <div className="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center p-4">
-                                        {/* QR Code - if it's a PDF URL, we might need to extract the QR code image */}
-                                        {/* For now, showing a placeholder. In production, you'd extract the QR code from the PDF */}
                                         <div className="w-full h-full bg-white rounded flex items-center justify-center border-2 border-dashed border-gray-300">
-                                            <div className="text-center">
-                                                <svg className="w-24 h-24 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                                                </svg>
-                                                <p className="text-xs text-gray-500 mt-2">QR Code</p>
-                                            </div>
+                                            {qrDataUrl ? (
+                                                <img
+                                                    src={qrDataUrl}
+                                                    alt="Permit QR Code"
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            ) : (
+                                                <div className="text-center">
+                                                    <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-2"></div>
+                                                    <p className="text-xs text-gray-500 mt-2">{t('loading')}</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -359,7 +391,7 @@ export default function PermitsPage() {
                             <button
                                 onClick={handleDownloadInfo}
                                 className="w-full btn btn-primary mt-6"
-                                disabled={!selectedPermit.qrCodePdfUrl}
+                                disabled={!qrDataUrl}
                             >
                                 {t('downloadInfo')}
                             </button>

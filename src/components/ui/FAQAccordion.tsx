@@ -1,45 +1,52 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 
-interface FAQItem {
-    id: string;
-    question: string;
-    answer: string;
+interface FAQ {
+    id: number;
+    question_en: string;
+    question_ar: string;
+    answer_en: string;
+    answer_ar: string;
+    created_at: string;
 }
 
-export default function FAQAccordion() {
-    const t = useTranslations('HomePage.assistance.faqs');
-    const [openId, setOpenId] = useState<string | null>('item1');
+interface FAQAccordionProps {
+    faqs: FAQ[];
+    locale: 'en' | 'ar';
+}
 
-    const faqItems: FAQItem[] = [
-        { id: 'item1', question: t('item1.q'), answer: t('item1.a') },
-        { id: 'item2', question: t('item2.q'), answer: t('item2.a') },
-        { id: 'item3', question: t('item3.q'), answer: t('item3.a') },
-        { id: 'item4', question: t('item4.q'), answer: t('item4.a') },
-        { id: 'item5', question: t('item5.q'), answer: t('item5.a') },
-        { id: 'item6', question: t('item6.q'), answer: t('item6.a') },
-    ];
+export default function FAQAccordion({ faqs, locale }: FAQAccordionProps) {
+    const [openId, setOpenId] = useState<number | null>(faqs.length > 0 ? faqs[0].id : null);
 
-    const toggleItem = (id: string) => {
+    const toggleItem = (id: number) => {
         setOpenId(openId === id ? null : id);
     };
 
+    if (faqs.length === 0) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-gray-500">No FAQs available at the moment.</p>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-4 max-w-5xl mx-auto">
-            {faqItems.map((item, index) => {
-                const isOpen = openId === item.id;
+            {faqs.map((faq, index) => {
+                const isOpen = openId === faq.id;
                 const number = (index + 1).toString().padStart(2, '0');
+                const question = locale === 'ar' ? faq.question_ar : faq.question_en;
+                const answer = locale === 'ar' ? faq.answer_ar : faq.answer_en;
 
                 return (
                     <div
-                        key={item.id}
+                        key={faq.id}
                         className={`rounded-xl transition-all duration-300 overflow-hidden ${isOpen ? 'bg-[#1e3a5f] text-white shadow-lg' : 'bg-white text-gray-900 border border-gray-100 hover:border-teal-200'
                             }`}
                     >
                         <button
-                            onClick={() => toggleItem(item.id)}
+                            onClick={() => toggleItem(faq.id)}
                             className="w-full px-6 py-5 flex items-center justify-between text-start gap-4 transition-colors"
                         >
                             <div className="flex items-center gap-4">
@@ -47,7 +54,7 @@ export default function FAQAccordion() {
                                     {number}.
                                 </span>
                                 <span className="text-lg font-bold">
-                                    {item.question}
+                                    {question}
                                 </span>
                             </div>
 
@@ -65,7 +72,7 @@ export default function FAQAccordion() {
                         >
                             <div className="px-6 pb-6 pt-0 border-t border-white/10 mt-2">
                                 <p className={`leading-relaxed ${isOpen ? 'text-gray-200' : 'text-gray-600'}`}>
-                                    {item.answer}
+                                    {answer}
                                 </p>
                             </div>
                         </div>
