@@ -8,15 +8,18 @@ interface DocumentCardProps {
 }
 
 export const DocumentCard: React.FC<DocumentCardProps> = ({ title, imageUrl, onView }) => {
+    
+    const src = imageUrl;
+
     return (
         <div className="bg-white rounded-[8px] p-4 border border-gray-100 mb-6 font-['Rubik']">
             <h3 className="text-[#3E4259] text-[16px] font-normal mb-4">{title}</h3>
 
             <div className="bg-[#FAF9FB] rounded-[8px] p-6 flex justify-center items-center relative min-h-[160px]">
-                {imageUrl ? (
+                {src ? (
                     <div className="relative w-full max-w-[280px] h-[160px] cursor-pointer group" onClick={onView}>
                         <img
-                            src={imageUrl}
+                            src={src}
                             alt={title}
                             className="w-full h-full object-contain rounded-md"
                         />

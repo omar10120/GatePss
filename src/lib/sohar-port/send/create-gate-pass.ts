@@ -1,9 +1,4 @@
-/**
- * Sohar Port API Integration - Send Operations (Outbound)
- * Create Gate Pass
- * 
- * This file handles sending gate pass creation requests to Sohar Port.
- */
+
 
 import { SoharPortHttpClient } from '../client';
 import { CreateGatePassRequest, CreateGatePassResponse } from '../types';
@@ -12,13 +7,21 @@ import { logSuccess, logError } from '../utils/logger';
 import { readFile } from 'fs/promises';
 import path from 'path';
 
-/**
- * Convert file to base64 string
- */
+
 async function fileToBase64(filePath: string): Promise<string | null> {
     try {
         if (!filePath) return null;
         
+        if (filePath.startsWith('data:')) {
+           
+            const base64Match = filePath.match(/base64,(.+)$/);
+            if (base64Match && base64Match[1]) {
+                return base64Match[1];
+            }
+            return null;
+        }
+        
+        // Regular file path - read from file system (local development)
         const fullPath = path.join(process.cwd(), 'public', filePath);
         const fileBuffer = await readFile(fullPath);
         return fileBuffer.toString('base64');

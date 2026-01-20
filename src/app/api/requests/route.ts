@@ -116,13 +116,13 @@ export async function POST(request: NextRequest) {
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
 
-            // Validate file size (5MB max)
+      
             const maxSize = parseInt(process.env.MAX_FILE_SIZE || '5242880');
             if (buffer.length > maxSize) {
                 throw new Error(`File ${file.name} size exceeds 5MB limit`);
             }
 
-            // Validate file type
+          
             const allowedTypes = ['jpg', 'jpeg', 'png', 'pdf'];
             const fileExt = file.name.split('.').pop()?.toLowerCase().trim();
 
@@ -130,18 +130,41 @@ export async function POST(request: NextRequest) {
                 throw new Error(`Only JPG, PNG, and PDF files are allowed for ${file.name}`);
             }
 
-            // Create upload directory if it doesn't exist
-            const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'passports');
-            await mkdir(uploadDir, { recursive: true });
+          
+            const isVercel = !!process.env.VERCEL;
 
-            // Generate unique filename
-            const timestamp = Date.now();
-            const filename = `${prefix}_${timestamp}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-            const filepath = path.join(uploadDir, filename);
+            if (isVercel) {
+               
+                const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
+                const base64 = buffer.toString('base64');
+                const dataUrl = `data:${mimeType};base64,${base64}`;
+                
+              
+                return dataUrl;
+            } else {
+            
+                try {
+                 
+                    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'passports');
+                    await mkdir(uploadDir, { recursive: true });
 
-            // Save file
-            await writeFile(filepath, buffer);
-            return `/uploads/passports/${filename}`;
+                 
+                    const timestamp = Date.now();
+                    const filename = `${prefix}_${timestamp}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+                    const filepath = path.join(uploadDir, filename);
+
+                   
+                    await writeFile(filepath, buffer);
+                    return `/uploads/passports/${filename}`;
+                } catch (fsError: any) {
+                  
+                    console.warn('File system write failed, falling back to base64:', fsError.message);
+                    const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
+                    const base64 = buffer.toString('base64');
+                    const dataUrl = `data:${mimeType};base64,${base64}`;
+                    return dataUrl;
+                }
+            }
         };
 
         let imagePath: string | null = null;
@@ -168,7 +191,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Calculate valid_from and valid_to based on validityPeriod and dateOfVisit
+   
         const visitDate = new Date(dateOfVisit);
         visitDate.setHours(0, 0, 0, 0);
 
@@ -190,12 +213,12 @@ export async function POST(request: NextRequest) {
         }
         validTo.setHours(23, 59, 59, 999);
 
-        // Generate request number
+       
         const requestNumber = generateRequestNumber();
 
-        // Create request in database
+       
         try {
-            // Check if Prisma client is properly initialized
+     
             if (!prisma || !prisma.request) {
                 console.error('Prisma client is out of sync. Please stop the server and run: npx prisma generate');
                 return NextResponse.json(
@@ -226,7 +249,7 @@ export async function POST(request: NextRequest) {
                 passFor: passFor?.trim() || null,
             };
 
-            // Add new fields (will work after Prisma client regeneration)
+       
             if (otherProfessions !== null && otherProfessions !== undefined) {
                 requestData.otherProfessions = otherProfessions.trim();
             }
@@ -262,7 +285,6 @@ export async function POST(request: NextRequest) {
                 });
             }
 
-            // Log the request creation
             await prisma.activityLog.create({
                 data: {
                     actionType: ActionType.REQUEST_MANAGEMENT,
@@ -279,7 +301,6 @@ export async function POST(request: NextRequest) {
                 },
             });
 
-            // Create notifications for all admins (async, don't wait)
             const { createRequestNotifications } = await import('@/utils/notification-helper');
             createRequestNotifications(
                 ActionType.REQUEST_MANAGEMENT,
@@ -288,14 +309,12 @@ export async function POST(request: NextRequest) {
                 newRequest.id
             ).catch(err => console.error('Failed to create notifications:', err));
 
-            // Send confirmation email to applicant (async, don't wait)
             sendRequestConfirmationEmail(
                 applicantEmail,
                 applicantNameEn,
                 requestNumber
             ).catch(err => console.error('Failed to send confirmation email:', err));
 
-            // Send notification to admins (async, don't wait)
             sendAdminNotificationEmail(
                 requestNumber,
                 applicantNameEn,
@@ -316,7 +335,7 @@ export async function POST(request: NextRequest) {
             console.error('Database error:', dbError);
             console.error('Database error message:', dbError?.message);
             console.error('Database error code:', dbError?.code);
-            throw dbError; // Re-throw to be caught by outer catch
+            throw dbError; 
         }
 
 

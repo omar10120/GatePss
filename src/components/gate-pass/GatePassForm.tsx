@@ -3,9 +3,7 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Input, Select } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
 import { FileUpload } from '@/components/ui/FileUpload';
-import Image from 'next/image';
 
 import { SuccessfullDialog } from '../ui/SuccessfullDialog';
 
@@ -13,6 +11,7 @@ export const GatePassForm: React.FC = () => {
     const t = useTranslations('GatePassPage');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [errors, setErrors] = useState<string[]>([]);
     const [success, setSuccess] = useState('');
     const [confirmed, setConfirmed] = useState(false);
     const [createdRequestNumber, setCreatedRequestNumber] = useState<string | null>(null);
@@ -35,9 +34,9 @@ export const GatePassForm: React.FC = () => {
 
         setLoading(true);
         setError('');
+        setErrors([]);
         setSuccess('');
         setCreatedRequestNumber(null);
-
 
         try {
             const response = await fetch('/api/requests', {
@@ -46,23 +45,27 @@ export const GatePassForm: React.FC = () => {
             });
 
             const data = await response.json();
-            console.log('Response data:', data);
 
             if (!response.ok) {
-                // If there are validation errors, format them nicely
+                // If there are validation errors array, display them
                 if (data.errors && Array.isArray(data.errors)) {
-                    throw new Error(data.errors.join(', '));
+                    setErrors(data.errors);
+                    setError(data.message || 'Please fix the following errors:');
+                    return;
                 }
-                throw new Error(data.message || 'Failed to submit request');
+                // Single error message
+                setError(data.message || 'Failed to submit request');
+                return;
             }
 
+            // Success
             setSuccess('true');
-            setCreatedRequestNumber(data.data.requestNumber);
+            setCreatedRequestNumber(data.data?.requestNumber || null);
             (e.target as HTMLFormElement).reset();
             setConfirmed(false);
         } catch (err: any) {
             console.error('Submission error:', err);
-            setError(err.message || 'An error occurred while submitting your request');
+            setError(err.message || 'An error occurred while submitting your request. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -75,6 +78,7 @@ export const GatePassForm: React.FC = () => {
         setCreatedRequestNumber(null);
         setConfirmed(false);
         setError('');
+        setErrors([]);
     };
 
     if (success) {
@@ -88,9 +92,16 @@ export const GatePassForm: React.FC = () => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-12">
-            {error && (
+            {(error || errors.length > 0) && (
                 <div className="p-4 bg-danger-50 border border-danger-200 rounded-2xl text-danger-700 animate-fade-in text-sm font-medium font-['Rubik']">
-                    {error}
+                    {error && <p className="mb-2 font-semibold">{error}</p>}
+                    {errors.length > 0 && (
+                        <ul className="list-disc list-inside space-y-1">
+                            {errors.map((err, index) => (
+                                <li key={index} className="text-sm">{err}</li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             )}
 
