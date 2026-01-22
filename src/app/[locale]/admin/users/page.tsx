@@ -233,7 +233,7 @@ export default function AdminUsersPage() {
                                                                 </td>
                                                                 <td className="px-4 py-3">
                                                                     <Link
-                                                                        href={`/admin/users/${u.id}`}
+                                                                        href={`/admin/users/${u.id}?edit=true`}
                                                                         className="bg-white rounded-lg p-2 hover:bg-gray-100 transition-colors inline-block"
                                                                         title={t('edit')}
                                                                     >

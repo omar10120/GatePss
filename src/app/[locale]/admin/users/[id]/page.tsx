@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, usePathname, useParams } from 'next/navigation';
+import { useRouter, usePathname, useParams, useSearchParams } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
@@ -34,10 +34,11 @@ export default function ViewUserPage() {
     const router = useRouter();
     const pathname = usePathname();
     const params = useParams();
+    const searchParams = useSearchParams();
     const userId = params?.id as string;
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [isEditMode, setIsEditMode] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(searchParams.get('edit') === 'true');
     const [userData, setUserData] = useState<User | null>(null);
     const [permissions, setPermissions] = useState<Permission[]>([]);
     const [currentUser, setCurrentUser] = useState<any>(null);
