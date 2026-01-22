@@ -9,9 +9,9 @@ export default function RequestPermit() {
     return (
         <section id="request-permit" className="py-20 px-4 bg-white">
             <div className="container mx-auto">
-                <div className='flex flex-col p-8 md:p-16 lg:p-24 mx-auto rounded-3xl justify-center items-center gap-8 text-center'>
-                    <h1 className='text-4xl md:text-6xl lg:text-7xl text-blue-900 font-bold leading-tight'>{t('services.GetFast')}</h1>
-                    <p className='text-lg md:text-xl text-gray-600 max-w-2xl'>{t('services.GetFastDescription')}</p>
+                <div className='flex flex-col p-8 md:p-16 lg:p-24 mx-auto rounded-3xl justify-center items-center gap-6 md:gap-8 text-center'>
+                    <h1 className='text-3xl md:text-4xl lg:text-5xl font-medium leading-tight capitalize' style={{ color: '#0666A3' }}>{t('services.title')}</h1>
+                    <p className='text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto' style={{ color: '#1F1F1F' }}>{t('services.subtitle')}</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 w-full max-w-7xl mx-auto mb-8">
                         {[
                             {
@@ -151,27 +151,27 @@ export default function RequestPermit() {
                         ].map(({ key, title, icon, describtion }) => (
                             <div
                                 key={key}
-                                className="bg-white rounded-full px-4 py-2 border border-gray-200 hover:shadow-md transition-all flex flex items-center gap-4 "
+                                className="bg-white rounded-full px-4 md:px-6 py-2 md:py-3 border hover:shadow-md transition-all flex items-center gap-3 md:gap-4"
+                                style={{ borderColor: '#00B09C', borderWidth: '0.5px' }}
                             >
                                 <div className="flex-shrink-0">
                                     {icon}
                                 </div>
-                                <h4 className="font-semibold text-gray-800 text-base flex-1">
+                                <h4 className="font-normal text-sm md:text-base md:text-lg flex-1" style={{ color: '#4C4C4C' }}>
                                     {title}
                                 </h4>
-
                             </div>
                         ))}
 
                     </div>
                     <Link
-                        href={`/${locale}/ApplicationNumber`}
-                        className="inline-flex items-center justify-center gap-2 text-white px-12 py-4 rounded-full font-bold text-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 "
-                        style={{ backgroundColor: '#14b8a6' }}
+                        href={`/${locale}/RequestPermit`}
+                        className="inline-flex items-center justify-center gap-2 text-white px-8 md:px-12 py-3 md:py-4 rounded-full font-medium text-lg md:text-xl lg:text-2xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                        style={{ backgroundColor: '#00B09C' }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d9488'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#14b8a6'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B09C'}
                     >
-                        {t('actions.trackApplication')}
+                        {t('actions.requestPermit')}
                     </Link>
 
 
