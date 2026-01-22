@@ -200,7 +200,10 @@
             "telephoneHolder": "Telephone of Pass Holder",
             "emailHolder": "Email of Pass Holder",
             "typeIdPassport": "Type ID Or Passport Number of Pass Holder",
-            "chooseFile": "Choose File (PNG, JPG, PDF) max 1MB"
+            "chooseFile": "Choose File (PNG, JPG, PDF) max 1MB",
+            "choosePhoto": "Choose Photo (PNG, JPG) max 1MB",
+            "chooseOtherDocuments1": "Choose File (PNG, JPG, PDF) max 1MB",
+            "chooseOtherDocuments2": "Choose File (PNG, JPG, PDF) max 1MB"
         },
         "confirmation": "I Confirm That I Have Reviewed All Information And Attachments In This Request, And I Am Fully Responsible For All Information That Contains.",
         "submit": "Submit The Permit",
