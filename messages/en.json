@@ -258,7 +258,17 @@
                 "day": "Day",
                 "week": "Week",
                 "month": "Month"
-            }
+            },
+            "tableHeaders": {
+                "id": "ID",
+                "fullName": "Full Name",
+                "email": "Email",
+                "role": "Role",
+                "visitType": "Visit Type",
+                "visitDate": "Visit Date",
+                "date": "Date"
+            },
+            "work": "Work"
         },
         "requests": {
             "title": "Gate Pass Requests",

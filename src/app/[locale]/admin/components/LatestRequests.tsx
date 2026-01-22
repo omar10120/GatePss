@@ -34,7 +34,7 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests }) => {
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === f ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-600'
                                 }`}
                         >
-                            {f}
+                            {t(`filter.${f.toLowerCase()}`)}
                         </button>
                     ))}
                     <div className="bg-gray-100 p-2 rounded-lg ml-2 cursor-pointer hover:bg-gray-200 transition-colors">
@@ -49,13 +49,13 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests }) => {
                 <table className="w-full">
                     <thead>
                         <tr className="border-b border-gray-50">
-                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">ID</th>
-                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">Full Name</th>
-                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">Email</th>
-                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">Role</th>
-                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">Visit Type</th>
-                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">Visit Date</th>
-                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">Date</th>
+                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">{t('tableHeaders.id')}</th>
+                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">{t('tableHeaders.fullName')}</th>
+                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">{t('tableHeaders.email')}</th>
+                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">{t('tableHeaders.role')}</th>
+                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">{t('tableHeaders.visitType')}</th>
+                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">{t('tableHeaders.visitDate')}</th>
+                            <th className="text-left py-4 text-xs font-semibold text-[#8E8E93] uppercase tracking-wider px-2">{t('tableHeaders.date')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
@@ -77,7 +77,7 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests }) => {
                                         <span className="text-sm text-gray-900">{t(`types.${request.requestType}`)}</span>
                                     </td>
                                     <td className="py-4 px-2">
-                                        <span className="text-sm text-gray-900">Work</span>
+                                        <span className="text-sm text-gray-900">{t('work')}</span>
                                     </td>
                                     <td className="py-4 px-2">
                                         <span className="text-sm text-gray-900">{new Date(request.createdAt).toLocaleDateString().replace(/\//g, '\\')}</span>
