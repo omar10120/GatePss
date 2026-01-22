@@ -378,10 +378,10 @@ export default function PermitsPage() {
                                                     className="w-full h-full object-contain"
                                                 />
                                             ) : (
-                                                <div className="text-center">
+                                            <div className="text-center">
                                                     <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-2"></div>
                                                     <p className="text-xs text-gray-500 mt-2">{t('loading')}</p>
-                                                </div>
+                                            </div>
                                             )}
                                         </div>
                                     </div>

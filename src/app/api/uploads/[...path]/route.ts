@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
 
-/**
- * Serve uploaded files
- * Handles both file system paths (local) and base64 data (Vercel)
- */
+
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ path: string[] }> }

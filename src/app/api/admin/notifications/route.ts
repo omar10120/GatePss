@@ -4,20 +4,7 @@ import prisma from '@/lib/prisma';
 import { ActionType } from '@/lib/enums';
 import { getNotificationNavigationUrl } from '@/utils/notifications';
 
-/**
- * GET /api/admin/notifications
- * List notifications for the authenticated user with filters
- * 
- * Query Parameters:
- * - isRead: boolean (true/false) - Filter by read status
- * - actionType: string - Filter by action type (REQUEST_MANAGEMENT, USER_MANAGEMENT, SYSTEM_INTEGRATION)
- * - dateFilter: string - Filter by date (today, yesterday, this_week, this_month)
- * - dateFrom: string - Start date (ISO format)
- * - dateTo: string - End date (ISO format)
- * - search: string - Search in action performed
- * - page: number - Page number (default: 1)
- * - limit: number - Items per page (default: 20)
- */
+
 export async function GET(request: NextRequest) {
     try {
         return await requireAuth(request, async (req, user) => {
