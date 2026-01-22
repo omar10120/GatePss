@@ -91,7 +91,7 @@ export const GatePassForm: React.FC = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-12">
+        <form onSubmit={handleSubmit} className="space-y-12 px-4 sm:px-6 md:px-8 lg:px-10 py-6 md:py-8">
             {(error || errors.length > 0) && (
                 <div className="p-4 bg-danger-50 border border-danger-200 rounded-2xl text-danger-700 animate-fade-in text-sm font-medium font-['Rubik']">
                     {error && <p className="mb-2 font-semibold">{error}</p>}
@@ -321,12 +321,13 @@ export const GatePassForm: React.FC = () => {
             </section>
 
             {/* Confirmation and Submit Section */}
-            <div className="flex flex-col items-center gap-10 pt-10 w-full">
+            <div className="flex flex-col items-center gap-6 md:gap-10 pt-6 md:pt-10 w-full">
 
                 {/* Checkbox Wrapper - Aligned to the start/left */}
-                <label className="flex items-center gap-3 cursor-pointer group w-full max-w-4xl self-start">
+                <label htmlFor="confirmation-checkbox" className="flex items-center gap-3 cursor-pointer group w-full max-w-4xl self-start">
                     <div className="relative flex items-center mt-1">
                         <input
+                            id="confirmation-checkbox"
                             type="checkbox"
                             className="peer h-6 w-6 cursor-pointer appearance-none rounded border-2 border-[#00B09C] checked:bg-[#00B09C] transition-all"
                             checked={confirmed}
