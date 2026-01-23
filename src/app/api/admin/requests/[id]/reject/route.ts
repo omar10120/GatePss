@@ -83,7 +83,8 @@ export async function POST(
                 `Rejected request ${gateRequest.requestNumber}`,
                 'REQUEST',
                 requestId,
-                user.userId
+                user.userId,
+                `تم رفض الطلب ${gateRequest.requestNumber}`
             ).catch(err => console.error('Failed to create notifications:', err));
 
             // Send rejection email to applicant (async)
