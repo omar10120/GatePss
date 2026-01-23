@@ -65,7 +65,7 @@ export default function Navbar() {
 
                         {/* Contact Button */}
                         <Link
-                            href="#contact"
+                            href={`/${locale}/contact-us`}
                             className="flex items-center gap-2 bg-info-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shadow-md hover:shadow-lg"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

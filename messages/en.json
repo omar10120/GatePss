@@ -176,8 +176,40 @@
                 "experience": "Years of experience",
                 "title": "About us",
                 "description": "To be a global supplier of innovative water solutions enhancing values to our stakeholders.",
-                "section1": "Majis Industrial Services was established in 2006 with the business vision, “To be a global supplier of innovative water solutions enhancing value to our stakeholders”. Majis supplies sustainable eco-friendly water solutions to clients in Sohar Industrial Port Area (SIPA), Sohar Free Zone (SFZ) and Sohar Industrial City (SIC). ",
-                "section2": "Majis’ continued efforts in pursuing operational excellence, maximizing the utilization of the available capacity and maintaining excellent relationships with stakeholders."
+                "section1": "Majis Industrial Services was established in 2006 with the business vision, \"To be a global supplier of innovative water solutions enhancing value to our stakeholders\". Majis supplies sustainable eco-friendly water solutions to clients in Sohar Industrial Port Area (SIPA), Sohar Free Zone (SFZ) and Sohar Industrial City (SIC). ",
+                "section2": "Majis' continued efforts in pursuing operational excellence, maximizing the utilization of the available capacity and maintaining excellent relationships with stakeholders."
+            }
+        },
+        "contactUs": {
+            "title": "Contact Us",
+            "subtitle": "Tell us, how we can help you?",
+            "fields": {
+                "fullName": "Full Name of Pass Holder(En)",
+                "email": "Email",
+                "passType": "Pass Type",
+                "phoneNumber": "Phone Number",
+                "message": "Message"
+            },
+            "placeholders": {
+                "fullName": "Enter your full name",
+                "email": "Enter your Email",
+                "selectPassType": "-- Select Pass Type --",
+                "phoneNumber": "Enter your Phone Number",
+                "message": "Type your Message"
+            },
+            "sendButton": "Send",
+            "submitting": "Sending...",
+            "successMessage": "Your message has been sent successfully!",
+            "successTitle": "Your Message Sent Successfully",
+            "done": "Done",
+            "errorMessage": "Failed to send message. Please try again.",
+            "errors": {
+                "fullNameRequired": "Full name is required",
+                "emailRequired": "Email is required",
+                "invalidEmail": "Please enter a valid email address",
+                "passTypeRequired": "Pass type is required",
+                "phoneRequired": "Phone number is required",
+                "messageRequired": "Message is required"
             }
         }
     },
