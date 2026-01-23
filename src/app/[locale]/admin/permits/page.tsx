@@ -163,6 +163,39 @@ export default function PermitsPage() {
         });
     };
 
+    const handleViewMore = async (permit: Permit) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            router.push('/admin/login');
+            return;
+        }
+
+        // Check Sohar status and update before navigating (if externalReference exists)
+        if (permit.externalReference) {
+            try {
+                const response = await fetch(`/api/admin/requests/${permit.id}/check-sohar-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    // Refresh permits list to show updated status (async, don't wait)
+                    fetchPermits(token).catch(err => console.error('Error refreshing permits:', err));
+                }
+            } catch (error) {
+                console.error('Error checking Sohar status:', error);
+                // Continue to navigate even if status check fails
+            }
+        }
+
+        // Navigate to request details page
+        router.push(`/admin/requests/${permit.id}`);
+    };
+
     if (loading && permits.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -282,12 +315,12 @@ export default function PermitsPage() {
                                                                     )}
                                                                 </td>
                                                                 <td className="px-4 py-3">
-                                                                    <Link
-                                                                        href={`/admin/requests/${permit.id}`}
+                                                                    <button
+                                                                        onClick={() => handleViewMore(permit)}
                                                                         className="text-[#3B82F6] hover:text-[#2563EB] text-sm font-medium"
                                                                     >
                                                                         {t('viewMore')}
-                                                                    </Link>
+                                                                    </button>
                                                                 </td>
                                                             </tr>
                                                         );
