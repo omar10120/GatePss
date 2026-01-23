@@ -290,3 +290,81 @@ export async function sendOTPEmail(
         html,
     });
 }
+
+export async function sendContactFormEmail(
+    fullName: string,
+    email: string,
+    passType: string,
+    phoneNumber: string,
+    message: string,
+    adminEmails: string[]
+): Promise<void> {
+    if (adminEmails.length === 0) {
+        console.warn('⚠️ No admin emails provided for contact form notification');
+        return;
+    }
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #00B09C 0%, #0d9488 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+        .info-box { background: white; padding: 20px; border-left: 4px solid #00B09C; margin: 20px 0; border-radius: 4px; }
+        .info-row { margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+        .info-label { font-weight: bold; color: #374151; display: inline-block; min-width: 150px; }
+        .info-value { color: #6b7280; }
+        .message-box { background: #f3f4f6; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 3px solid #00B09C; }
+        .footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>📧 New Contact Form Submission</h1>
+        </div>
+        <div class="content">
+          <p>A new contact form has been submitted through the website.</p>
+          <div class="info-box">
+            <div class="info-row">
+              <span class="info-label">Full Name:</span>
+              <span class="info-value">${fullName}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Email:</span>
+              <span class="info-value"><a href="mailto:${email}">${email}</a></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Phone Number:</span>
+              <span class="info-value"><a href="tel:${phoneNumber}">${phoneNumber}</a></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Pass Type:</span>
+              <span class="info-value">${passType}</span>
+            </div>
+          </div>
+          <div class="message-box">
+            <strong>Message:</strong>
+            <p style="margin: 10px 0 0 0; white-space: pre-wrap;">${message}</p>
+          </div>
+          <p style="margin-top: 20px; color: #6b7280; font-size: 14px;">
+            <strong>Submitted:</strong> ${new Date().toLocaleString()}
+          </p>
+        </div>
+        <div class="footer">
+          <p>This is an automated notification from the Gate Pass System.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+    await sendEmail({
+        to: adminEmails,
+        subject: `New Contact Form Submission from ${fullName}`,
+        html,
+    });
+}
