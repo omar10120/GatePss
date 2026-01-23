@@ -14,6 +14,7 @@ interface Notification {
     userId: number;
     actionType: string;
     actionPerformed: string;
+    actionPerformedAr?: string;
     affectedEntityType: string | null;
     affectedEntityId: number | null;
     isRead: boolean;
@@ -262,6 +263,13 @@ export default function NotificationsPage() {
         }
     };
 
+    const getNotificationMessage = (notification: Notification): string => {
+        if (locale === 'ar' && notification.actionPerformedAr) {
+            return notification.actionPerformedAr;
+        }
+        return notification.actionPerformed;
+    };
+
     const sidebarItems = getSidebarItems(
         locale as 'en' | 'ar',
         user?.permissions || [],
@@ -402,7 +410,7 @@ export default function NotificationsPage() {
 
                                                     <div className="flex-1 min-w-0">
                                                         <p className="text-gray-900 font-medium">
-                                                            {notification.actionPerformed}
+                                                            {getNotificationMessage(notification)}
                                                         </p>
                                                         <p className="text-gray-500 text-sm mt-1">
                                                             {formatTimeAgo(notification.createdAt)}

@@ -40,6 +40,7 @@ model Notification {
   userId             Int      @map("user_id")
   actionType         String   @map("action_type")
   actionPerformed    String   @map("action_performed")
+  actionPerformedAr  String?  @map("action_performed_ar")
   affectedEntityType String?  @map("affected_entity_type")
   affectedEntityId   Int?     @map("affected_entity_id")
   isRead             Boolean  @default(false) @map("is_read")

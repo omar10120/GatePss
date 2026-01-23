@@ -113,11 +113,16 @@ export async function GET(request: NextRequest) {
                     notification.affectedEntityId
                 );
 
+                // Access actionPerformedAr using bracket notation to avoid TypeScript error
+                // until Prisma client is regenerated
+                const actionPerformedAr = (notification as any).actionPerformedAr;
+
                 return {
                     id: notification.id,
                     userId: notification.userId,
                     actionType: notification.actionType,
                     actionPerformed: notification.actionPerformed,
+                    actionPerformedAr: actionPerformedAr || null,
                     affectedEntityType: notification.affectedEntityType,
                     affectedEntityId: notification.affectedEntityId,
                     isRead: notification.isRead,

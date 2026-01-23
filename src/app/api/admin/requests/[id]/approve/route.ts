@@ -174,7 +174,8 @@ export async function POST(
                 `Approved request ${gateRequest.requestNumber}`,
                 'REQUEST',
                 requestId,
-                user.userId
+                user.userId,
+                `تم الموافقة على الطلب ${gateRequest.requestNumber}`
             ).catch(err => console.error('Failed to create notifications:', err));
 
             // Notification for Sohar Port approval (if successful)
@@ -184,7 +185,8 @@ export async function POST(
                     `Sohar Approved the request of number ${gateRequest.requestNumber}`,
                     'REQUEST',
                     requestId,
-                    user.userId
+                    user.userId,
+                    `وافق صُحار على الطلب رقم ${gateRequest.requestNumber}`
                 ).catch(err => console.error('Failed to create Sohar Port notifications:', err));
             }
 

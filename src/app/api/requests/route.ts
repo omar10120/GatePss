@@ -306,7 +306,9 @@ export async function POST(request: NextRequest) {
                 ActionType.REQUEST_MANAGEMENT,
                 `New visitors requests has been applied`,
                 'REQUEST',
-                newRequest.id
+                newRequest.id,
+                undefined,
+                'تم تقديم طلب زوار جديد'
             ).catch(err => console.error('Failed to create notifications:', err));
 
             sendRequestConfirmationEmail(

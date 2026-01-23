@@ -153,10 +153,11 @@ export async function PUT(
             // Create notifications for all admins (async, don't wait)
             createRequestNotifications(
                 ActionType.REQUEST_MANAGEMENT,
-                `Edited Visitor Data on Request ${existingRequest.requestNumber}`,
+                `Updated request ${existingRequest.requestNumber}`,
                 'REQUEST',
                 requestId,
-                user.userId
+                user.userId,
+                `تم تحديث الطلب ${existingRequest.requestNumber}`
             ).catch(err => console.error('Failed to create notifications:', err));
 
             return NextResponse.json({
