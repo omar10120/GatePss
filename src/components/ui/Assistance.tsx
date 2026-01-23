@@ -1,14 +1,50 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
+interface FAQ {
+    id: number;
+    question_en: string;
+    question_ar: string;
+    answer_en: string;
+    answer_ar: string;
+    created_at: string;
+}
+
 export default function Assistance() {
     const t = useTranslations('HomePage');
     const locale = useLocale();
-    const [activeFaq, setActiveFaq] = useState<number | null>(0);
+    const [faqs, setFaqs] = useState<FAQ[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+    useEffect(() => {
+        fetchFAQs();
+    }, []);
+
+    const fetchFAQs = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/faq');
+            if (!response.ok) {
+                throw new Error('Failed to fetch FAQs');
+            }
+            const result = await response.json();
+            const fetchedFaqs = result.data || [];
+            setFaqs(fetchedFaqs);
+            // Set first FAQ as active if available
+            if (fetchedFaqs.length > 0) {
+                setActiveFaq(fetchedFaqs[0].id);
+            }
+        } catch (error) {
+            console.error('Error fetching FAQs:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <section id="assistance" className="py-20 px-4 bg-white">
@@ -25,47 +61,60 @@ export default function Assistance() {
                 <div className="grid lg:grid-cols-12 gap-12 items-start">
                     {/* FAQ Section */}
                     <div className="lg:col-span-7 space-y-4">
-                        {[1, 2, 3, 4, 5, 6].map((num) => {
-                            const index = num - 1;
-                            const isActive = activeFaq === index;
-                            return (
-                                <div
-                                    key={index}
-                                    className={`rounded-xl transition-all duration-300 overflow-hidden ${isActive ? 'bg-slate-900 shadow-lg' : 'bg-white border border-gray-100 hover:border-blue-200'
-                                        }`}
-                                >
-                                    <button
-                                        onClick={() => setActiveFaq(isActive ? null : index)}
-                                        className="w-full text-start px-6 py-6 flex items-center justify-between group"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <span className={`text-2xl font-bold ${isActive ? 'text-blue-400' : 'text-blue-300 group-hover:text-blue-400'
-                                                }`}>
-                                                {num.toString().padStart(2, '0')}.
-                                            </span>
-                                            <span className={`text-lg font-bold ${isActive ? 'text-white' : 'text-gray-800'
-                                                }`}>
-                                                {t(`assistance.faqs.item${num}.q`)}
-                                            </span>
-                                        </div>
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-blue-400 text-white' : 'bg-blue-100 text-blue-500 group-hover:bg-blue-200'
-                                            }`}>
-                                            <svg className={`w-5 h-5 transition-transform ${isActive ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </div>
-                                    </button>
+                        {loading ? (
+                            <div className="flex items-center justify-center h-64">
+                                <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                            </div>
+                        ) : faqs.length === 0 ? (
+                            <div className="text-center py-12">
+                                <p className="text-gray-500">{t('assistance.noFaqs') || 'No FAQs available at the moment.'}</p>
+                            </div>
+                        ) : (
+                            faqs.map((faq, index) => {
+                                const isActive = activeFaq === faq.id;
+                                const number = (index + 1).toString().padStart(2, '0');
+                                const question = locale === 'ar' ? faq.question_ar : faq.question_en;
+                                const answer = locale === 'ar' ? faq.answer_ar : faq.answer_en;
+
+                                return (
                                     <div
-                                        className={`transition-all duration-300 ease-in-out ${isActive ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                                        key={faq.id}
+                                        className={`rounded-xl transition-all duration-300 overflow-hidden ${isActive ? 'bg-slate-900 shadow-lg' : 'bg-white border border-gray-100 hover:border-blue-200'
                                             }`}
                                     >
-                                        <div className="px-6 pb-6 pt-2 text-gray-300 leading-relaxed ps-[3.5rem]">
-                                            {t(`assistance.faqs.item${num}.a`)}
+                                        <button
+                                            onClick={() => setActiveFaq(isActive ? null : faq.id)}
+                                            className="w-full text-start px-6 py-6 flex items-center justify-between group"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <span className={`text-2xl font-bold ${isActive ? 'text-blue-400' : 'text-blue-300 group-hover:text-blue-400'
+                                                    }`}>
+                                                    {number}.
+                                                </span>
+                                                <span className={`text-lg font-bold ${isActive ? 'text-white' : 'text-gray-800'
+                                                    }`}>
+                                                    {question}
+                                                </span>
+                                            </div>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-blue-400 text-white' : 'bg-blue-100 text-blue-500 group-hover:bg-blue-200'
+                                                }`}>
+                                                <svg className={`w-5 h-5 transition-transform ${isActive ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                        </button>
+                                        <div
+                                            className={`transition-all duration-300 ease-in-out ${isActive ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                                                }`}
+                                        >
+                                            <div className="px-6 pb-6 pt-2 text-gray-300 leading-relaxed ps-[3.5rem]">
+                                                {answer}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        )}
                     </div>
 
                     {/* Support Card */}
