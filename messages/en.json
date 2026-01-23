@@ -112,7 +112,8 @@
                     "q": "What should I do if my permit is rejected?",
                     "a": "If your permit is rejected, you will receive an email with the reason for rejection. You can correct the issues and resubmit your application."
                 }
-            }
+            },
+            "noFaqs": "No FAQs found"
         },
         "footer": {
             "technicalSupport": "Technical Support",
