@@ -236,17 +236,17 @@ export default function PermitsPage() {
                                             <table className="w-full">
                                                 <thead className="bg-[#F3F4F6] border-b border-gray-200">
                                                     <tr>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">ID</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('permitNumber')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('date')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('holderName')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('email')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('role')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('requestType')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('passType')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('identification')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('permit')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('action')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">ID</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('permitNumber')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('date')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('holderName')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('email')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('role')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('requestType')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('passType')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('identification')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('permit')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('action')}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-200">

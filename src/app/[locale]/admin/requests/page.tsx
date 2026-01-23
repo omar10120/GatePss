@@ -293,13 +293,13 @@ export default function AdminRequestsPage() {
                                             <table className="w-full">
                                                 <thead className="bg-[#F9F9F9] border-b border-gray-100">
                                                     <tr>
-                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.requestNumber')}</th>
-                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.applicant')}</th>
-                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.email')}</th>
-                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.type')}</th>
-                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.visitDate')}</th>
-                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.status')}</th>
-                                                        <th className="px-6 py-4 text-left text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.actions')}</th>
+                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.requestNumber')}</th>
+                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.applicant')}</th>
+                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.email')}</th>
+                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.type')}</th>
+                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.visitDate')}</th>
+                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.status')}</th>
+                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.actions')}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-100">

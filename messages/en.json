@@ -490,6 +490,7 @@
             "noUsers": "No users found",
             "permissionDenied": "You do not have permission to view users.",
             "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
+            "id": "ID",
             "roles": {
                 "SUPER_ADMIN": "Super Admin",
                 "SUB_ADMIN": "Sub Admin"

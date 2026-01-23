@@ -187,18 +187,18 @@ export default function AdminUsersPage() {
                                 {users.length > 0 ? (
                                     <>
                                         <div className="overflow-x-auto">
-                                            <table className="w-full">
-                                                <thead className="bg-[#F3F4F6] border-b border-gray-200">
+                                            <table className="w-full ">
+                                                <thead className="bg-[#F3F4F6] border-b border-gray-200  ">
                                                     <tr>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">ID</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('name')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('email')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('phoneNumber')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('password')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('added')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('active')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('access')}</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('actions')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('id')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('name')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('email')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('phoneNumber')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('password')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('added')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('active')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('access')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('actions')}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-200">
