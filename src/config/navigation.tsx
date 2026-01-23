@@ -109,8 +109,7 @@ export const getSidebarItems = (
         items.push({
             label: locale === 'en' ? 'New Requests' : 'طلبات جديدة',
             href: '/admin/requests?status=PENDING',
-            active: false, // Will be determined in Sidebar component
-
+            // active will be determined in Sidebar component based on pathname and query params
             permission: PERMISSIONS.MANAGE_REQUESTS,
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 interface SidebarItem {
     label: string;
@@ -18,6 +19,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ items, locale = 'en' }) => {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     return (
         <aside
@@ -49,15 +51,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, locale = 'en' }) => {
                         const queryString = item.href.includes('?') ? item.href.split('?')[1] : '';
 
                         // Check pathname match
-                        if (pathname === basePath || pathname?.startsWith(basePath + '/')) {
+                        // If there's a query string, match exact pathname only
+                        // Otherwise, match pathname or sub-paths
+                        const pathMatches = queryString 
+                            ? pathname === basePath 
+                            : (pathname === basePath || pathname?.startsWith(basePath + '/'));
+                        
+                        if (pathMatches) {
                             // If there's a query string in href, check if current URL has matching params
-                            if (queryString && typeof window !== 'undefined') {
+                            if (queryString) {
                                 const params = new URLSearchParams(queryString);
-                                const currentParams = new URLSearchParams(window.location.search);
                                 // Check if all params in href match current URL params
                                 let allParamsMatch = true;
                                 for (const [key, value] of params.entries()) {
-                                    if (currentParams.get(key) !== value) {
+                                    if (searchParams.get(key) !== value) {
                                         allParamsMatch = false;
                                         break;
                                     }
