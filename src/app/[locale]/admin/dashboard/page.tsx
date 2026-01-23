@@ -12,6 +12,7 @@ import { LatestRequests } from '../components/LatestRequests';
 import { VisitorsApplicationsCard } from '../components/VisitorsApplicationsCard';
 import { ActivitiesOfAction } from '../components/ActivitiesOfAction';
 import Header from '../components/Header';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface DashboardData {
     summary: {
@@ -45,13 +46,7 @@ export default function AdminDashboardPage() {
     const [user, setUser] = useState<any>(null);
     const [permissionDenied, setPermissionDenied] = useState(false);
     const t = useTranslations('Admin.dashboard');
-
-    // Helper function to check if user has a specific permission
-    const hasPermission = (permissionKey: string) => {
-        if (!user) return false;
-        if (user.role === 'SUPER_ADMIN') return true;
-        return user.permissions?.includes(permissionKey) || false;
-    };
+    const { hasPermission } = usePermissions(user);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -148,7 +143,10 @@ export default function AdminDashboardPage() {
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                                 {/* Latest Requests */}
                                 <div className="lg:col-span-2">
-                                    <LatestRequests requests={data?.recentRequests} />
+                                    <LatestRequests 
+                                        requests={data?.recentRequests} 
+                                        user={user}
+                                    />
                                 </div>
 
                                 {/* Visitors Applications Card */}

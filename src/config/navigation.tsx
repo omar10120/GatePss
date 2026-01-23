@@ -2,6 +2,7 @@ import React from 'react';
 import { NavItem } from '@/components/layout/Navigation';
 
 export const PERMISSIONS = {
+    VIEW_DASHBOARD: 'VIEW_DASHBOARD',
     MANAGE_REQUESTS: 'MANAGE_REQUESTS',
     MANAGE_USERS: 'MANAGE_USERS',
     VIEW_LOGS: 'VIEW_LOGS',
@@ -11,11 +12,13 @@ export type PermissionKey = typeof PERMISSIONS[keyof typeof PERMISSIONS];
 
 export const PERMISSION_LABELS = {
     en: {
+        [PERMISSIONS.VIEW_DASHBOARD]: 'View Dashboard',
         [PERMISSIONS.MANAGE_REQUESTS]: 'Manage Requests',
         [PERMISSIONS.MANAGE_USERS]: 'Manage Users',
         [PERMISSIONS.VIEW_LOGS]: 'View Activity Logs',
     },
     ar: {
+        [PERMISSIONS.VIEW_DASHBOARD]: 'عرض لوحة التحكم',
         [PERMISSIONS.MANAGE_REQUESTS]: 'إدارة الطلبات',
         [PERMISSIONS.MANAGE_USERS]: 'إدارة المستخدمين',
         [PERMISSIONS.VIEW_LOGS]: 'عرض سجل النشاط',

@@ -616,6 +616,11 @@
                 "hours": "{value}h ago",
                 "days": "{value}d ago"
             }
+        },
+        "unauthorized": {
+            "title": "Unauthorized Access",
+            "message": "You don't have permission to access this page. You will be redirected to the dashboard shortly.",
+            "goToDashboard": "Go to Dashboard"
         }
     }
 }

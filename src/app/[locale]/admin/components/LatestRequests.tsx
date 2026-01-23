@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PERMISSIONS } from '@/config/navigation';
 
 interface Request {
     id: number;
@@ -16,11 +18,13 @@ interface Request {
 
 interface LatestRequestsProps {
     requests: Request[] | undefined;
+    user?: any;
 }
 
-export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests }) => {
+export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }) => {
     const t = useTranslations('Admin.dashboard');
     const [filter, setFilter] = useState<'Day' | 'Week' | 'Month'>('Day');
+    const { hasPermission } = usePermissions(user);
 
     return (
         <div className="bg-white rounded-3xl p-6 shadow-sm mb-8 border border-gray-100">
@@ -97,11 +101,13 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests }) => {
                     </tbody>
                 </table>
             </div>
-            <div className="mt-6">
-                <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 text-sm font-medium flex items-center justify-center py-2 border border-dashed border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
-                    {t('viewAll')} →
-                </Link>
-            </div>
+            {hasPermission(PERMISSIONS.MANAGE_REQUESTS) && (
+                <div className="mt-6">
+                    <Link href="/admin/requests" className="text-info-500 hover:text-primary-700 text-sm font-medium flex items-center justify-center py-2 border border-dashed border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
+                        {t('viewAll')} →
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };
