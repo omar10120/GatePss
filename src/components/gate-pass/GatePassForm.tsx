@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import React, { useState } from 'react';
 import { Input, Select } from '@/components/ui/Input';
 import { FileUpload } from '@/components/ui/FileUpload';
 import enMessages from '../../../messages/en.json';
@@ -9,47 +8,133 @@ import arMessages from '../../../messages/ar.json';
 
 import { SuccessfullDialog } from '../ui/SuccessfullDialog';
 
+interface FieldErrors {
+    [key: string]: string;
+}
+
 export const GatePassForm: React.FC = () => {
-    const t = useTranslations('GatePassPage');
-    
-    // Helper function to get bilingual text
-    const getBilingual = (key: string): string => {
-        const enText = (enMessages.GatePassPage as any)?.[key.split('.')[0]]?.[key.split('.').slice(1).join('.')] || '';
-        const arText = (arMessages.GatePassPage as any)?.[key.split('.')[0]]?.[key.split('.').slice(1).join('.')] || '';
-        
-        if (!enText && !arText) return '';
-        if (!enText) return arText;
-        if (!arText) return enText;
-        return `${enText} / ${arText}`;
-    };
-    
     // Helper for nested keys
     const getBilingualNested = (path: string[]): string => {
-        let enValue: any = enMessages.GatePassPage;
-        let arValue: any = arMessages.GatePassPage;
-        
-        for (const key of path) {
-            enValue = enValue?.[key];
-            arValue = arValue?.[key];
+        try {
+            let enValue: any = enMessages.GatePassPage;
+            let arValue: any = arMessages.GatePassPage;
+            
+            for (const key of path) {
+                if (enValue && typeof enValue === 'object') {
+                    enValue = enValue[key];
+                } else {
+                    enValue = undefined;
+                }
+                
+                if (arValue && typeof arValue === 'object') {
+                    arValue = arValue[key];
+                } else {
+                    arValue = undefined;
+                }
+            }
+            
+            const enText = typeof enValue === 'string' ? enValue : '';
+            const arText = typeof arValue === 'string' ? arValue : '';
+            
+            if (!enText && !arText) return '';
+            if (!enText) return arText;
+            if (!arText) return enText;
+            return `${enText} / ${arText}`;
+        } catch (error) {
+            console.error('Error getting bilingual text:', path, error);
+            return '';
         }
-        
-        const enText = typeof enValue === 'string' ? enValue : '';
-        const arText = typeof arValue === 'string' ? arValue : '';
-        
-        if (!enText && !arText) return '';
-        if (!enText) return arText;
-        if (!arText) return enText;
-        return `${enText} / ${arText}`;
     };
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [errors, setErrors] = useState<string[]>([]);
+    const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
     const [success, setSuccess] = useState('');
     const [confirmed, setConfirmed] = useState(false);
     const [createdRequestNumber, setCreatedRequestNumber] = useState<string | null>(null);
 
+    const getFieldLabel = (name: string): string => {
+        const fieldMap: { [key: string]: string } = {
+            'requestType': 'passType',
+            'dateOfVisit': 'passStartingDate',
+            'applicantName': 'fullNameEn',
+            'applicantEmail': 'email',
+            'passportIdImage': 'copyOfCivilId',
+            'passportIdNumber': 'idPassportNumber',
+        };
+        const fieldKey = fieldMap[name] || name;
+        return getBilingualNested(['fields', fieldKey]) || name;
+    };
+
+    const validateField = (name: string, value: string | File | null, required: boolean = true): string => {
+        if (required) {
+            if (!value || (typeof value === 'string' && value.trim() === '') || (value instanceof File && value.size === 0)) {
+                const fieldLabel = getFieldLabel(name);
+                return `${fieldLabel} ${getBilingualNested(['errors', 'required'])}`;
+            }
+        }
+        return '';
+    };
+
+    const validateForm = (formData: FormData): boolean => {
+        const newFieldErrors: FieldErrors = {};
+        let isValid = true;
+
+        // Required fields validation
+        const requiredFields = [
+            { name: 'requestType', value: formData.get('requestType') },
+            { name: 'nationality', value: formData.get('nationality') },
+            { name: 'identification', value: formData.get('identification') },
+            { name: 'organization', value: formData.get('organization') },
+            { name: 'dateOfVisit', value: formData.get('dateOfVisit') },
+            { name: 'validityPeriod', value: formData.get('validityPeriod') },
+            { name: 'passFor', value: formData.get('passFor') },
+            { name: 'purposeOfVisit', value: formData.get('purposeOfVisit') },
+            { name: 'applicantName', value: formData.get('applicantName') },
+            { name: 'fullNameAr', value: formData.get('fullNameAr') },
+            { name: 'telephone', value: formData.get('telephone') },
+            { name: 'applicantEmail', value: formData.get('applicantEmail') },
+            { name: 'gender', value: formData.get('gender') },
+            { name: 'profession', value: formData.get('profession') },
+            { name: 'passportIdNumber', value: formData.get('passportIdNumber') },
+        ];
+
+        requiredFields.forEach(({ name, value }) => {
+            const error = validateField(name, value as string, true);
+            if (error) {
+                newFieldErrors[name] = error;
+                isValid = false;
+            }
+        });
+
+        // Email validation
+        const email = formData.get('applicantEmail') as string;
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            newFieldErrors['applicantEmail'] = getBilingualNested(['errors', 'invalidEmail']);
+            isValid = false;
+        }
+
+        // File validation
+        const passportIdImage = formData.get('passportIdImage') as File | null;
+        if (!passportIdImage || passportIdImage.size === 0) {
+            newFieldErrors['passportIdImage'] = getBilingualNested(['errors', 'passportIdRequired']);
+            isValid = false;
+        }
+
+        setFieldErrors(newFieldErrors);
+        return isValid;
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        
+        // Clear previous errors
+        setError('');
+        setErrors([]);
+        setFieldErrors({});
+
+        // Validate confirmation
         if (!confirmed) {
             setError(getBilingualNested(['errors', 'confirmRequired']));
             return;
@@ -57,16 +142,24 @@ export const GatePassForm: React.FC = () => {
 
         const formData = new FormData(e.currentTarget);
 
-        // Validate required file upload manually (since hidden inputs can't use required attribute)
-        const passportIdImage = formData.get('passportIdImage') as File | null;
-        if (!passportIdImage || passportIdImage.size === 0) {
-            setError(getBilingualNested(['errors', 'passportIdRequired']));
+        // Validate all fields
+        if (!validateForm(formData)) {
+            setError(getBilingualNested(['errors', 'fixErrors']));
+            // Scroll to first error after state update
+            setTimeout(() => {
+                const firstErrorField = Object.keys(fieldErrors)[0];
+                if (firstErrorField) {
+                    const element = document.querySelector(`[name="${firstErrorField}"]`);
+                    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
             return;
         }
 
         setLoading(true);
         setError('');
         setErrors([]);
+        setFieldErrors({});
         setSuccess('');
         setCreatedRequestNumber(null);
 
@@ -123,12 +216,17 @@ export const GatePassForm: React.FC = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-12 px-4 sm:px-6 md:px-8 lg:px-10 py-6 md:py-8">
+        <form onSubmit={handleSubmit} className="space-y-8 px-4 sm:px-6 md:px-8 lg:px-10 py-6 md:py-8 max-w-7xl mx-auto">
             {(error || errors.length > 0) && (
-                <div className="p-4 bg-danger-50 border border-danger-200 rounded-2xl text-danger-700 animate-fade-in text-sm font-medium font-['Rubik']">
-                    {error && <p className="mb-2 font-semibold">{error}</p>}
+                <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-lg text-red-700 animate-fade-in text-sm font-medium font-['Rubik'] shadow-sm">
+                    {error && <p className="mb-2 font-semibold flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        {error}
+                    </p>}
                     {errors.length > 0 && (
-                        <ul className="list-disc list-inside space-y-1">
+                        <ul className="list-disc list-inside space-y-1 ml-2">
                             {errors.map((err, index) => (
                                 <li key={index} className="text-sm">{err}</li>
                             ))}
@@ -138,14 +236,19 @@ export const GatePassForm: React.FC = () => {
             )}
 
             {/* Pass Permit Info Section */}
-            <section>
-                <h3 className="text-[#00B09C] font-normal mb-6 text-[14px] capitalize font-['Rubik'] leading-[21px]">
-                    {getBilingualNested(['sections', 'passPermitInfo'])}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-[28px]">
+            <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                    <div className="w-1 h-8 bg-[#00B09C] rounded-full"></div>
+                    <h3 className=" font-semibold text-lg md:text-xl capitalize font-['Rubik']">
+                        {getBilingualNested(['sections', 'passPermitInfo'])}
+                    </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 ">
+
                     <Select
                         name="requestType"
                         label={getBilingualNested(['fields', 'passType'])}
+                        error={fieldErrors.requestType}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'selectPassType']) },
                             { value: 'VISITOR', label: getBilingualNested(['options', 'visitorPass']) },
@@ -158,6 +261,7 @@ export const GatePassForm: React.FC = () => {
                     <Select
                         name="nationality"
                         label={getBilingualNested(['fields', 'nationality'])}
+                        error={fieldErrors.nationality}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
                             { value: 'OMAN', label: getBilingualNested(['options', 'omani']) },
@@ -168,6 +272,8 @@ export const GatePassForm: React.FC = () => {
                     <Select
                         name="identification"
                         label={getBilingualNested(['fields', 'identification'])}
+                        error={fieldErrors.identification}
+                        
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
                             { value: 'ID', label: getBilingualNested(['options', 'idCard']) },
@@ -178,14 +284,19 @@ export const GatePassForm: React.FC = () => {
                     <Input
                         name="organization"
                         label={getBilingualNested(['fields', 'organization'])}
-                        placeholder={getBilingualNested(['placeholders', 'typeOrganization'])}
+                        value="مجيس للخدمات الصناعية / Majis Industrial Services"
+                        readOnly
+                        className="bg-gray-50 cursor-not-allowed"
+                        error={fieldErrors.organization}
                         required
                     />
+                  
                     <Input
                         name="dateOfVisit"
                         type="date"
                         label={getBilingualNested(['fields', 'passStartingDate'])}
                         placeholder={getBilingualNested(['placeholders', 'selectDate'])}
+                        error={fieldErrors.dateOfVisit}
                         required
                         rightIcon={
                             <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,6 +307,7 @@ export const GatePassForm: React.FC = () => {
                     <Select
                         name="validityPeriod"
                         label={getBilingualNested(['fields', 'validityPeriod'])}
+                        error={fieldErrors.validityPeriod}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'selectDate']) },
                             { value: '1_DAY', label: getBilingualNested(['options', 'oneDay']) },
@@ -207,6 +319,7 @@ export const GatePassForm: React.FC = () => {
                     <Select
                         name="passFor"
                         label={getBilingualNested(['fields', 'passFor'])}
+                        error={fieldErrors.passFor}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'selectBeneficiary']) },
                             { value: 'SELF', label: getBilingualNested(['options', 'self']) },
@@ -218,21 +331,26 @@ export const GatePassForm: React.FC = () => {
                         name="purposeOfVisit"
                         label={getBilingualNested(['fields', 'purposeOfVisit'])}
                         placeholder={getBilingualNested(['placeholders', 'typePurpose'])}
+                        error={fieldErrors.purposeOfVisit}
                         required
                     />
                 </div>
             </section>
 
             {/* Pass Holder Info Section */}
-            <section>
-                <h3 className="text-[#00B09C] font-normal mb-6 text-[14px] capitalize font-['Rubik'] leading-[21px]">
-                    {getBilingualNested(['sections', 'passHolderInfo'])}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-[28px]">
+            <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                    <div className="w-1 h-8 bg-[#00B09C] rounded-full"></div>
+                    <h3 className=" font-semibold text-lg md:text-xl capitalize font-['Rubik']">
+                        {getBilingualNested(['sections', 'passHolderInfo'])}
+                    </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 text-gray-900">
                     <Input
                         name="applicantName"
                         label={getBilingualNested(['fields', 'fullNameEn'])}
                         placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
+                        error={fieldErrors.applicantName}
                         required
                         rightIcon={
                             <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,6 +362,7 @@ export const GatePassForm: React.FC = () => {
                         name="fullNameAr"
                         label={getBilingualNested(['fields', 'fullNameAr'])}
                         placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
+                        error={fieldErrors.fullNameAr}
                         required
                         rightIcon={
                             <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,6 +374,7 @@ export const GatePassForm: React.FC = () => {
                         name="telephone"
                         label={getBilingualNested(['fields', 'telephone'])}
                         placeholder={getBilingualNested(['placeholders', 'telephoneHolder'])}
+                        error={fieldErrors.telephone}
                         required
                         rightIcon={
                             <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,6 +387,7 @@ export const GatePassForm: React.FC = () => {
                         type="email"
                         label={getBilingualNested(['fields', 'email'])}
                         placeholder={getBilingualNested(['placeholders', 'emailHolder'])}
+                        error={fieldErrors.applicantEmail}
                         required
                         rightIcon={
                             <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,6 +398,7 @@ export const GatePassForm: React.FC = () => {
                     <Select
                         name="gender"
                         label={getBilingualNested(['fields', 'gender'])}
+                        error={fieldErrors.gender}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
                             { value: 'MALE', label: getBilingualNested(['options', 'male']) },
@@ -287,6 +409,7 @@ export const GatePassForm: React.FC = () => {
                     <Select
                         name="profession"
                         label={getBilingualNested(['fields', 'profession'])}
+                        error={fieldErrors.profession}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
                             { value: 'ENGINEER', label: getBilingualNested(['options', 'engineer']) },
@@ -322,15 +445,21 @@ export const GatePassForm: React.FC = () => {
                         name="passportIdNumber"
                         label={getBilingualNested(['fields', 'idPassportNumber'])}
                         placeholder={getBilingualNested(['placeholders', 'typeIdPassport'])}
+                        error={fieldErrors.passportIdNumber}
                         required
                     />
-                    <FileUpload
-                        id="passportIdImage"
-                        name="passportIdImage"
-                        label={getBilingualNested(['fields', 'copyOfCivilId'])}
-                        placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
-                        required
-                    />
+                    <div className="w-full">
+                        <FileUpload
+                            id="passportIdImage"
+                            name="passportIdImage"
+                            label={getBilingualNested(['fields', 'copyOfCivilId'])}
+                            placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
+                            required
+                        />
+                        {fieldErrors.passportIdImage && (
+                            <p className="mt-1.5 text-[12px] text-danger-600 font-medium font-['Rubik']">{fieldErrors.passportIdImage}</p>
+                        )}
+                    </div>
                     <FileUpload
                         id="photo"
                         name="photo"
@@ -353,7 +482,7 @@ export const GatePassForm: React.FC = () => {
             </section>
 
             {/* Confirmation and Submit Section */}
-            <div className="flex flex-col items-center gap-6 md:gap-10 pt-6 md:pt-10 w-full">
+            <div className="flex flex-col items-center gap-6 md:gap-10 pt-6 md:pt-10 w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
 
                 {/* Checkbox Wrapper - Aligned to the start/left */}
                 <label htmlFor="confirmation-checkbox" className="flex items-center gap-3 cursor-pointer group w-full max-w-4xl self-start">

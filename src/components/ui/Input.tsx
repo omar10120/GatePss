@@ -39,9 +39,10 @@ export const Input: React.FC<InputProps> = ({
                 )}
                 <input
                     id={inputId}
+                    style={{ color: '#111827' }}
                     className={`
                         flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] px-4 py-4 
-                        text-[14px] font-['Rubik'] placeholder:text-[#747474] 
+                        text-[14px] font-['Rubik'] text-gray-900 placeholder:text-[#747474] 
                         focus:outline-none focus:ring-2 focus:ring-[#00B09C]/20 focus:border-[#00B09C] 
                         transition-all disabled:cursor-not-allowed disabled:opacity-50
                         ${hasError ? "border-danger-500 focus:ring-danger-500/20 focus:border-danger-500" : ""}
@@ -97,9 +98,10 @@ export const Select: React.FC<SelectProps> = ({
             <div className="relative">
                 <select
                     id={selectId}
+                    style={{ color: '#111827' }}
                     className={`
                         flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] px-4 py-4 
-                        text-[14px] font-['Rubik'] text-[#747474] appearance-none
+                        text-[14px] font-['Rubik'] text-gray-900 appearance-none
                         focus:outline-none focus:ring-2 focus:ring-[#00B09C]/20 focus:border-[#00B09C] 
                         transition-all disabled:cursor-not-allowed disabled:opacity-50
                         ${hasError ? "border-danger-500 focus:ring-danger-500/20 focus:border-danger-500" : ""}
@@ -108,7 +110,11 @@ export const Select: React.FC<SelectProps> = ({
                     {...props}
                 >
                     {options.map((option) => (
-                        <option key={option.value} value={option.value}>
+                        <option 
+                            key={option.value} 
+                            value={option.value} 
+                            
+                        >
                             {option.label}
                         </option>
                     ))}
