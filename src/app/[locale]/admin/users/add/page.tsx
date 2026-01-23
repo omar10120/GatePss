@@ -105,13 +105,37 @@ export default function AddUserPage() {
 
     const fetchPermissions = async (token: string) => {
         try {
-            // Get permissions from localStorage
+            // Get permissions from localStorage (full Permission objects with id, key, description)
             const storedPermissions = localStorage.getItem('permissions');
             
             if (storedPermissions) {
-                const permissions = JSON.parse(storedPermissions);
-                setPermissions(permissions);
-                return;
+                try {
+                    const permissions = JSON.parse(storedPermissions);
+                    if (Array.isArray(permissions) && permissions.length > 0) {
+                        setPermissions(permissions);
+                        return;
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing stored permissions:', parseError);
+                }
+            }
+
+            // If not found in localStorage, fetch from API
+            const response = await fetch('/api/admin/permissions', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch permissions');
+            }
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                // Store permissions in localStorage for future use
+                localStorage.setItem('permissions', JSON.stringify(result.data));
+                setPermissions(result.data);
             }
         } catch (error) {
             console.error('Error fetching permissions:', error);
