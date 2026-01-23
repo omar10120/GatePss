@@ -13,7 +13,7 @@ export default function Hero() {
                 <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                     style={{
-                        backgroundImage: 'url(https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1920&q=80)',
+                        backgroundImage: 'url(/images/hero.jpg)',
                     }}
                 >
                     <div className="absolute inset-0 bg-blue-900/60"></div>
@@ -24,12 +24,12 @@ export default function Hero() {
             <div className="relative z-10 container mx-auto px-4 lg:px-6 text-center text-white">
                 <div className="max-w-4xl mx-auto">
                     {/* Main Title */}
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium mb-6 leading-tight capitalize">
                         {t('hero.title')}
                     </h1>
 
                     {/* Subtitle */}
-                    <p className="text-4xl md:text-5xl text-blue-100 mb-12 max-w-2xl mx-auto">
+                    <p className="text-xl md:text-2xl lg:text-3xl text-white mb-12 max-w-2xl mx-auto">
                         {t('hero.subtitle')}
                     </p>
 

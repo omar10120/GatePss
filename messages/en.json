@@ -7,8 +7,8 @@
             "MAJIS": "MAJIS Web"
         },
         "hero": {
-            "title": "Get A Fast-Track Entry Permit",
-            "subtitle": "Perfect for urgent travel needs or busy schedules"
+            "title": "Electronic Gate Pass System",
+            "subtitle": "Secure, fast, and fully integrated visitor access management for Majis Industrial Services."
         },
         "categories": {
             "visitors": "Visitors",
@@ -35,6 +35,30 @@
             "step3": {
                 "title": "3. Receive Digital Permit",
                 "description": "Approved applicants receive a QR-coded permit by email"
+            }
+        },
+        "applyForSpecificPermit": {
+            "title": "Apply For A Specific Permit",
+            "subtitle": "Dedicated to ensuring compliance with regulations and simplifying the application journey for a variety of permit types.",
+            "visitors": {
+                "title": "Visitors",
+                "description": "Focused on simplifying the application process and ensuring compliance for a smooth experience."
+            },
+            "subContractor": {
+                "title": "Sub Contractor",
+                "description": "Focused on simplifying the application process and ensuring compliance for a smooth experience."
+            },
+            "vehicles": {
+                "title": "Vehicles",
+                "description": "Focused on simplifying the application process and ensuring compliance for a smooth experience."
+            },
+            "employees": {
+                "title": "Employees",
+                "description": "Focused on simplifying the application process and ensuring compliance for a smooth experience."
+            },
+            "driverPass": {
+                "title": "Driver Pass",
+                "description": "Focused on simplifying the application process and ensuring compliance for a smooth experience."
             }
         },
         "services": {
