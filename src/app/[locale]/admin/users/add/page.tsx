@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
-import { getSidebarItems } from '@/config/navigation';
+import { getSidebarItems, PERMISSIONS } from '@/config/navigation';
 import Header from '../../components/Header';
 import { useTranslations, useLocale } from 'next-intl';
 import SuccessModal from '@/components/ui/SuccessModal';
@@ -21,6 +21,7 @@ export default function AddUserPage() {
     const [permissions, setPermissions] = useState<Permission[]>([]);
     const [user, setUser] = useState<any>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [checkingAuth, setCheckingAuth] = useState(true);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -34,35 +35,84 @@ export default function AddUserPage() {
     const locale = useLocale();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const userData = localStorage.getItem('user');
+        const checkAuthAndPermissions = async () => {
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('user');
 
-        if (!token) {
-            router.push('/admin/login');
-            return;
-        }
+            if (!token) {
+                router.push('/admin/login');
+                return;
+            }
 
-        if (userData) {
-            setUser(JSON.parse(userData));
-        }
+            let currentUser: any = null;
 
-        fetchPermissions(token);
-    }, []);
+            if (userData) {
+                try {
+                    currentUser = JSON.parse(userData);
+                    setUser(currentUser);
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                    router.push('/admin/login');
+                    return;
+                }
+            } else {
+                // Fetch user data from API
+                try {
+                    const response = await fetch('/api/auth/me', {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+
+                    if (!response.ok) {
+                        router.push('/admin/login');
+                        return;
+                    }
+
+                    const data = await response.json();
+                    if (data.success) {
+                        currentUser = data.data.user;
+                        localStorage.setItem('user', JSON.stringify(currentUser));
+                        setUser(currentUser);
+                    } else {
+                        router.push('/admin/login');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    router.push('/admin/login');
+                    return;
+                }
+            }
+
+            // Check if user has MANAGE_USERS permission
+            const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
+            const userPermissions = currentUser.permissions || [];
+            const hasManageUsersPermission = isSuperAdmin || userPermissions.includes(PERMISSIONS.MANAGE_USERS);
+
+            if (!hasManageUsersPermission) {
+                // User doesn't have required permission - redirect to unauthorized page
+                router.push('/admin/unauthorized');
+                return;
+            }
+
+            setCheckingAuth(false);
+            fetchPermissions(token);
+        };
+
+        checkAuthAndPermissions();
+    }, [router]);
 
     const fetchPermissions = async (token: string) => {
         try {
-            const response = await fetch('/api/admin/permissions', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch permissions');
+            // Get permissions from localStorage
+            const storedPermissions = localStorage.getItem('permissions');
+            
+            if (storedPermissions) {
+                const permissions = JSON.parse(storedPermissions);
+                setPermissions(permissions);
+                return;
             }
-
-            const result = await response.json();
-            setPermissions(result.data);
         } catch (error) {
             console.error('Error fetching permissions:', error);
         }
@@ -128,6 +178,17 @@ export default function AddUserPage() {
         user?.role,
         pathname
     );
+
+    if (checkingAuth) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 flex" dir={locale === 'ar' ? 'rtl' : 'ltr'}>

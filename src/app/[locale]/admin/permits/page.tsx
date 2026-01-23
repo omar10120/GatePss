@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import QRCode from 'qrcode';
 import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
@@ -113,6 +112,9 @@ export default function PermitsPage() {
         setQrDataUrl(null);
 
         try {
+            // Dynamically import QRCode for browser compatibility
+            const QRCode = (await import('qrcode')).default;
+            
             const qrPayload = JSON.stringify({
                 id: permit.id,
                 externalReference: permit.externalReference || permit.requestNumber,
