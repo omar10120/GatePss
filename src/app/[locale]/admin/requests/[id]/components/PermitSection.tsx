@@ -6,9 +6,10 @@ interface PermitSectionProps {
     // You might pass a real QR code URL or generated image here
     title: string;
     subtitle?: string;
+    qrCodePdfUrl?: string;
 }
 
-export const PermitSection: React.FC<PermitSectionProps> = ({ status, requestType, title, subtitle }) => {
+export const PermitSection: React.FC<PermitSectionProps> = ({ status, requestType, title, subtitle, qrCodePdfUrl }) => {
 
     // Example logic handling
     if (status === 'REJECTED') {
@@ -21,6 +22,8 @@ export const PermitSection: React.FC<PermitSectionProps> = ({ status, requestTyp
     }
 
     return (
+  <>
+        {status === 'APPROVED' && (
         <div className="bg-[#FAF9FB] rounded-[12px] p-6 mt-8 border border-gray-100 font-['Rubik']">
             <div className="flex justify-between items-center mb-4">
                 <div>
@@ -47,12 +50,17 @@ export const PermitSection: React.FC<PermitSectionProps> = ({ status, requestTyp
             </div>
 
             {/* QR/Permit Preview Area - Placeholder for now as per image */}
+         
             <div className="bg-white rounded-[8px] h-[300px] w-full flex items-center justify-center border border-dashed border-gray-200">
                 <div className="text-center">
                     {/* You would render the actual permit HTML/Image here */}
-                    <p className="text-gray-400">Permit Preview / QR Code</p>
+                        <p className="text-gray-400">Permit Preview / QR Code</p>
+                    </div>
                 </div>
-            </div>
+            
         </div>
+        )}
+  </>
+        
     );
 };
