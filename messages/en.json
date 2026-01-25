@@ -224,6 +224,7 @@
         },
         "fields": {
             "passType": "Pass Type",
+            "requestType": "Request Type",
             "nationality": "Nationality",
             "identification": "Identification",
             "organization": "Organization \\ Host Organization",
@@ -268,7 +269,12 @@
             "submissionFailed": "Failed to submit request",
             "fixErrors": "Please fix the following errors:",
             "required": "is required",
-            "invalidEmail": "Please enter a valid email address"
+            "invalidEmail": "Please enter a valid email address",
+            "validPhoneRequired": "Valid phone number is required (minimum 8 characters)",
+            "validPassportIdRequired": "Valid passport/ID number is required (6-20 alphanumeric characters)",
+            "purposeOfVisitRequired": "Purpose of visit is required (minimum 10 characters)",
+            "validPassTypeRequired": "Valid pass type is required",
+            "validRequestTypeRequired": "Valid request type is required (VISITOR, CONTRACTOR, EMPLOYEE, or VEHICLE)"
         },
         "options": {
             "visitorPass": "Visitor Pass",
@@ -373,7 +379,14 @@
                 "visitDate": "Visit Date",
                 "status": "Status",
                 "actions": "Actions",
-                "createdAt": "Created At"
+                "createdAt": "Created At",
+                "date": "Date",
+                "idNumber": "ID Number",
+                "holderName": "Holder Name",
+                "telephone": "Telephone",
+                "passType": "Pass Type",
+                "passFor": "Pass For",
+                "uploaded": "Uploaded"
             },
             "viewDetails": "View Details",
             "noResults": "No requests found",

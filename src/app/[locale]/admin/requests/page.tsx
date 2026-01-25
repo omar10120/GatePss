@@ -20,6 +20,7 @@ interface Request {
     gender: string;
     profession: string;
     passportIdNumber: string;
+    passportIdImagePath?: string | null;
     nationality: string;
     identification: string;
     organization: string;
@@ -216,6 +217,34 @@ export default function AdminRequestsPage() {
         }
     };
 
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const year = date.getFullYear();
+        return `${month}\\${day}\\${year}`;
+    };
+
+    const getPassTypeLabel = (passFor: string | null | undefined) => {
+        if (!passFor) return '-';
+        return passFor === 'TEMPORARY' ? 'Temporary' : passFor === 'PERMANENT' ? 'Permanent' : passFor;
+    };
+
+    const getPassForLabel = (requestType: string) => {
+        return dt(`types.${requestType}`) || requestType;
+    };
+
+    const getImageUrl = (imagePath: string | null | undefined) => {
+        if (!imagePath) return null;
+        if (imagePath.startsWith('data:')) {
+            return imagePath;
+        }
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+        return `/api/uploads/${imagePath}`;
+    };
+
     const handleFilterChange = (key: string, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
     };
@@ -290,56 +319,72 @@ export default function AdminRequestsPage() {
                                 {requests.length > 0 ? (
                                     <>
                                         <div className="overflow-x-auto" style={{ overflowY: 'visible' }}>
-                                            <table className="w-full">
+                                            <table className="w-full min-w-[1200px]">
                                                 <thead className="bg-[#F9F9F9] border-b border-gray-100">
                                                     <tr>
-                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.requestNumber')}</th>
-                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.applicant')}</th>
-                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.email')}</th>
-                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.type')}</th>
-                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.visitDate')}</th>
-                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.status')}</th>
-                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.createdAt')}</th>
-                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.actions')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">ID</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.date')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden md:table-cell">{t('columns.idNumber')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.holderName')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">{t('columns.telephone')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">{t('columns.email')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden md:table-cell">{t('columns.passType')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">{t('columns.passFor')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden md:table-cell">{t('columns.visitDate')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">{t('columns.uploaded')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.status')}</th>
+                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.actions')}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-100">
-                                                    {requests.map((request) => (
-                                                        <tr key={request.id} className="hover:bg-gray-50/50 transition-colors relative">
-                                                            <td className="px-6 py-4">
-                                                                <Link href={`/admin/requests/${request.id}`} className="text-[#00B09C] hover:text-[#008f7e] font-bold text-[14px]">
-                                                                    {request.requestNumber}
-                                                                </Link>
-                                                            </td>
-                                                            <td className="px-6 py-4 text-[#222222] font-bold text-[14px]">{request.applicantNameEn}</td>
-                                                            <td className="px-6 py-4 text-[#747474] text-[14px]">{request.applicantEmail}</td>
-                                                            <td className="px-6 py-4 text-[#747474] text-[14px]">
-                                                                {dt(`types.${request.requestType}`)}
-                                                            </td>
-                                                            <td className="px-6 py-4 text-[#747474] text-[14px]">
-                                                                {new Date(request.dateOfVisit).toLocaleDateString()}
-                                                            </td>
-                                                            <td className="px-6 py-4 relative overflow-visible">
-                                                                <StatusUpdate
-                                                                    currentStatus={request.status}
-                                                                    getStatusColor={getStatusColor}
-                                                                    onUpdate={(newStatus, rejectionReason) => handleStatusUpdate(request.id, newStatus, rejectionReason)}
-                                                                    onRejectSuccess={() => setShowRejectSuccessModal(true)}
-                                                                />
-                                                            </td>
-                                                            <td className="px-6 py-4 text-[#747474] text-[14px]">
-                                                                {new Date(request.createdAt).toLocaleDateString()}
-                                                            </td>
-                                                            <td className="px-6 py-4">
-                                                                <Link
-                                                                    href={`/admin/requests/${request.id}`}
-                                                                    className="text-[#00B09C] hover:text-[#008f7e] text-[14px] font-bold"
-                                                                >
-                                                                    {t('viewDetails')}
-                                                                </Link>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
+                                                    {requests.map((request) => {
+                                                        const imageUrl = getImageUrl(request.passportIdImagePath);
+                                                        return (
+                                                            <tr key={request.id} className="hover:bg-gray-50/50 transition-colors relative">
+                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center">{request.id}</td>
+                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center whitespace-nowrap">{formatDate(request.createdAt)}</td>
+                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden md:table-cell">{request.passportIdNumber}</td>
+                                                                <td className="px-3 md:px-6 py-4 text-[#222222] font-bold text-[14px]">{request.applicantNameEn}</td>
+                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden lg:table-cell">{request.applicantPhone || '-'}</td>
+                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden lg:table-cell truncate max-w-[150px]">{request.applicantEmail}</td>
+                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden md:table-cell">{getPassTypeLabel(request.passFor)}</td>
+                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden lg:table-cell">{getPassForLabel(request.requestType)}</td>
+                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden md:table-cell whitespace-nowrap">{formatDate(request.dateOfVisit)}</td>
+                                                                <td className="px-3 md:px-6 py-4 text-center hidden lg:table-cell">
+                                                                    {imageUrl ? (
+                                                                        <div className="flex justify-center">
+                                                                            <img
+                                                                                src={imageUrl}
+                                                                                alt="Uploaded document"
+                                                                                className="w-10 h-10 md:w-12 md:h-12 object-cover rounded border border-gray-200"
+                                                                                onError={(e) => {
+                                                                                    (e.target as HTMLImageElement).style.display = 'none';
+                                                                                }}
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <span className="text-gray-400">-</span>
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-3 md:px-6 py-4 relative overflow-visible">
+                                                                    <StatusUpdate
+                                                                        currentStatus={request.status}
+                                                                        getStatusColor={getStatusColor}
+                                                                        onUpdate={(newStatus, rejectionReason) => handleStatusUpdate(request.id, newStatus, rejectionReason)}
+                                                                        onRejectSuccess={() => setShowRejectSuccessModal(true)}
+                                                                    />
+                                                                </td>
+                                                                <td className="px-3 md:px-6 py-4">
+                                                                    <Link
+                                                                        href={`/admin/requests/${request.id}`}
+                                                                        className="text-[#00B09C] hover:text-[#008f7e] text-[14px] font-bold whitespace-nowrap"
+                                                                    >
+                                                                        {t('viewDetails')}
+                                                                    </Link>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
                                                 </tbody>
                                             </table>
                                         </div>

@@ -224,6 +224,7 @@
         },
         "fields": {
             "passType": "نوع التصريح",
+            "requestType": "نوع الطلب",
             "nationality": "الجنسية",
             "identification": "الهوية",
             "organization": "المنظمة / المنظمة المضيفة",
@@ -268,7 +269,12 @@
             "submissionFailed": "فشل إرسال الطلب",
             "fixErrors": "يرجى إصلاح الأخطاء التالية:",
             "required": "مطلوب",
-            "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صحيح"
+            "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صحيح",
+            "validPhoneRequired": "رقم هاتف صحيح مطلوب (8 أحرف على الأقل)",
+            "validPassportIdRequired": "رقم هوية/جواز سفر صحيح مطلوب (6-20 حرفًا أبجديًا رقميًا)",
+            "purposeOfVisitRequired": "الغرض من الزيارة مطلوب (10 أحرف على الأقل)",
+            "validPassTypeRequired": "نوع تصريح صحيح مطلوب",
+            "validRequestTypeRequired": "نوع طلب صحيح مطلوب (زائر، مقاول، موظف، أو مركبة)"
         },
         "options": {
             "visitorPass": "تصريح زائر",
@@ -373,7 +379,14 @@
                 "visitDate": "تاريخ الزيارة",
                 "status": "الحالة",
                 "actions": "الإجراءات",
-                "createdAt": "تاريخ الإنشاء"
+                "createdAt": "تاريخ الإنشاء",
+                "date": "التاريخ",
+                "idNumber": "رقم الهوية",
+                "holderName": "اسم الحامل",
+                "telephone": "الهاتف",
+                "passType": "نوع التصريح",
+                "passFor": "التصريح لـ",
+                "uploaded": "تم الرفع"
             },
             "viewDetails": "عرض التفاصيل",
             "noResults": "لم يتم العثور على طلبات",
