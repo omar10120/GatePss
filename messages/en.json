@@ -306,7 +306,10 @@
         "step2_title": "2. Review & Approval",
         "step2_desc": "Majis team validates and processes your request",
         "step3_title": "3. Receive Digital Permit",
-        "step3_desc": "Approved applicants receive a QR-coded permit by email"
+        "step3_desc": "Approved applicants receive a QR-coded permit by email",
+        "columns":{
+            "requestNumber": "Request Number "
+        }
     },
     "Admin": {
         "dashboard": {

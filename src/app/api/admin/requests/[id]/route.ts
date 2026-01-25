@@ -110,12 +110,7 @@ export async function PUT(
                 );
             }
 
-            if (existingRequest.status !== 'PENDING') {
-                return NextResponse.json(
-                    { error: 'Invalid Operation', message: 'Only pending requests can be edited' },
-                    { status: 400 }
-                );
-            }
+            // Allow editing for all statuses (removed restriction)
 
             // Update allowed fields
             const updateData: any = {};
@@ -127,8 +122,14 @@ export async function PUT(
             if (body.passportIdNumber) updateData.passportIdNumber = body.passportIdNumber.toUpperCase().trim();
             if (body.purposeOfVisit) updateData.purposeOfVisit = body.purposeOfVisit.trim();
             if (body.dateOfVisit) updateData.dateOfVisit = new Date(body.dateOfVisit);
+            if (body.validFrom) updateData.validFrom = new Date(body.validFrom);
+            if (body.validTo) updateData.validTo = new Date(body.validTo);
             if (body.requestType) updateData.requestType = body.requestType;
             if (body.passFor !== undefined) updateData.passFor = body.passFor?.trim() || null;
+            if (body.nationality) updateData.nationality = body.nationality.trim();
+            if (body.identification) updateData.identification = body.identification.trim();
+            if (body.gender) updateData.gender = body.gender.trim();
+            if (body.profession) updateData.profession = body.profession.trim();
 
             const updatedRequest = await prisma.request.update({
                 where: { id: requestId },

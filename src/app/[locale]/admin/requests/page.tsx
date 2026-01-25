@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
@@ -69,6 +69,7 @@ export default function AdminRequestsPage() {
 
     const [permissionDenied, setPermissionDenied] = useState(false);
     const [showRejectSuccessModal, setShowRejectSuccessModal] = useState(false);
+    const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
     // Helper function to check if user has a specific permission
     const hasPermission = (permissionKey: string) => {
@@ -94,7 +95,7 @@ export default function AdminRequestsPage() {
         fetchRequests(token);
     }, [filters]);
 
-    const fetchRequests = async (token: string) => {
+    const fetchRequests = async (token: string): Promise<void> => {
         setLoading(true);
         setPermissionDenied(false);
         try {
@@ -114,6 +115,7 @@ export default function AdminRequestsPage() {
 
             if (response.status === 403) {
                 setPermissionDenied(true);
+                setLoading(false);
                 return;
             }
 
@@ -145,7 +147,9 @@ export default function AdminRequestsPage() {
 
     const handleStatusUpdate = async (id: number, status: 'APPROVED' | 'REJECTED' | 'PENDING', rejectionReason?: string) => {
         const token = localStorage.getItem('token');
-        if (!token) return;
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
 
         try {
             let endpoint = '';
@@ -159,7 +163,7 @@ export default function AdminRequestsPage() {
             } else {
                 // If we want to support setting back to pending, we might need an endpoint or just return
                 console.warn('Setting to PENDING not fully supported yet via simplified API');
-                return;
+                throw new Error('Setting to PENDING is not supported');
             }
 
             const response = await fetch(endpoint, {
@@ -176,12 +180,12 @@ export default function AdminRequestsPage() {
                 throw new Error(errorData.message || 'Failed to update status');
             }
 
-            // Refresh the list to reflect changes (or optimistically update)
-            fetchRequests(token);
+            // Refresh the list to reflect changes
+            await fetchRequests(token);
 
         } catch (error: any) {
             console.error('Error updating status:', error);
-            alert(error.message || 'Failed to update status');
+            throw error; // Re-throw so StatusUpdate component can handle it
         }
     };
 
@@ -263,6 +267,18 @@ export default function AdminRequestsPage() {
         });
     };
 
+    const toggleRowExpansion = (requestId: number) => {
+        setExpandedRows(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(requestId)) {
+                newSet.delete(requestId);
+            } else {
+                newSet.add(requestId);
+            }
+            return newSet;
+        });
+    };
+
     if (loading && requests.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -319,70 +335,118 @@ export default function AdminRequestsPage() {
                                 {requests.length > 0 ? (
                                     <>
                                         <div className="overflow-x-auto" style={{ overflowY: 'visible' }}>
-                                            <table className="w-full min-w-[1200px]">
+                                            <table className="w-full min-w-[400px]">
                                                 <thead className="bg-[#F9F9F9] border-b border-gray-100">
                                                     <tr>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">ID</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.date')}</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden md:table-cell">{t('columns.idNumber')}</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.holderName')}</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">{t('columns.telephone')}</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">{t('columns.email')}</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden md:table-cell">{t('columns.passType')}</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">{t('columns.passFor')}</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden md:table-cell">{t('columns.visitDate')}</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">{t('columns.uploaded')}</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.status')}</th>
-                                                        <th className="px-3 md:px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.actions')}</th>
+                                                        <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap w-12"></th>
+                                                        <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">ID</th>
+                                                        <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.holderName')}</th>
+                                                        <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.status')}</th>
+                                                        <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.actions')}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-100">
                                                     {requests.map((request) => {
                                                         const imageUrl = getImageUrl(request.passportIdImagePath);
+                                                        const isExpanded = expandedRows.has(request.id);
                                                         return (
-                                                            <tr key={request.id} className="hover:bg-gray-50/50 transition-colors relative">
-                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center">{request.id}</td>
-                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center whitespace-nowrap">{formatDate(request.createdAt)}</td>
-                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden md:table-cell">{request.passportIdNumber}</td>
-                                                                <td className="px-3 md:px-6 py-4 text-[#222222] font-bold text-[14px]">{request.applicantNameEn}</td>
-                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden lg:table-cell">{request.applicantPhone || '-'}</td>
-                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden lg:table-cell truncate max-w-[150px]">{request.applicantEmail}</td>
-                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden md:table-cell">{getPassTypeLabel(request.passFor)}</td>
-                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden lg:table-cell">{getPassForLabel(request.requestType)}</td>
-                                                                <td className="px-3 md:px-6 py-4 text-[#747474] text-[14px] text-center hidden md:table-cell whitespace-nowrap">{formatDate(request.dateOfVisit)}</td>
-                                                                <td className="px-3 md:px-6 py-4 text-center hidden lg:table-cell">
-                                                                    {imageUrl ? (
+                                                            <React.Fragment key={request.id}>
+                                                                <tr className="hover:bg-gray-50/50 transition-colors relative">
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
+                                                                        <button
+                                                                            onClick={() => toggleRowExpansion(request.id)}
+                                                                            className="p-1 hover:bg-gray-100 rounded transition-colors"
+                                                                            aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+                                                                        >
+                                                                            <svg
+                                                                                className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                                                                fill="none"
+                                                                                stroke="currentColor"
+                                                                                viewBox="0 0 24 24"
+                                                                            >
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    </td>
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#747474] text-[12px] sm:text-[14px] text-center">{request.id}</td>
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#222222] font-bold text-[12px] sm:text-[14px]">{request.applicantNameEn}</td>
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 relative overflow-visible">
                                                                         <div className="flex justify-center">
-                                                                            <img
-                                                                                src={imageUrl}
-                                                                                alt="Uploaded document"
-                                                                                className="w-10 h-10 md:w-12 md:h-12 object-cover rounded border border-gray-200"
-                                                                                onError={(e) => {
-                                                                                    (e.target as HTMLImageElement).style.display = 'none';
+                                                                            <StatusUpdate
+                                                                                currentStatus={request.status}
+                                                                                getStatusColor={getStatusColor}
+                                                                                onUpdate={async (newStatus, rejectionReason) => {
+                                                                                    try {
+                                                                                        await handleStatusUpdate(request.id, newStatus, rejectionReason);
+                                                                                    } catch (error: any) {
+                                                                                        console.error('Status update error:', error);
+                                                                                        throw error; // Re-throw to let StatusUpdate handle it
+                                                                                    }
                                                                                 }}
+                                                                                onRejectSuccess={() => setShowRejectSuccessModal(true)}
+                                                                                onEdit={() => router.push(`/admin/requests/${request.id}?edit=true`)}
                                                                             />
                                                                         </div>
-                                                                    ) : (
-                                                                        <span className="text-gray-400">-</span>
-                                                                    )}
-                                                                </td>
-                                                                <td className="px-3 md:px-6 py-4 relative overflow-visible">
-                                                                    <StatusUpdate
-                                                                        currentStatus={request.status}
-                                                                        getStatusColor={getStatusColor}
-                                                                        onUpdate={(newStatus, rejectionReason) => handleStatusUpdate(request.id, newStatus, rejectionReason)}
-                                                                        onRejectSuccess={() => setShowRejectSuccessModal(true)}
-                                                                    />
-                                                                </td>
-                                                                <td className="px-3 md:px-6 py-4">
-                                                                    <Link
-                                                                        href={`/admin/requests/${request.id}`}
-                                                                        className="text-[#00B09C] hover:text-[#008f7e] text-[14px] font-bold whitespace-nowrap"
-                                                                    >
-                                                                        {t('viewDetails')}
-                                                                    </Link>
-                                                                </td>
-                                                            </tr>
+                                                                    </td>
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4">
+                                                                        <Link
+                                                                            href={`/admin/requests/${request.id}`}
+                                                                            className="text-[#00B09C] hover:text-[#008f7e] text-[12px] sm:text-[14px] font-bold whitespace-nowrap"
+                                                                        >
+                                                                            {t('viewDetails')}
+                                                                        </Link>
+                                                                    </td>
+                                                                </tr>
+                                                                {isExpanded && (
+                                                                    <tr className="bg-gray-50/30">
+                                                                        <td colSpan={5} className="px-4 sm:px-6 md:px-8 py-4">
+                                                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                                                                                <div>
+                                                                                    <span className="font-semibold text-gray-700">{t('columns.date')}: </span>
+                                                                                    <span className="text-gray-600">{formatDate(request.createdAt)}</span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <span className="font-semibold text-gray-700">{t('columns.idNumber')}: </span>
+                                                                                    <span className="text-gray-600">{request.passportIdNumber}</span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <span className="font-semibold text-gray-700">{t('columns.telephone')}: </span>
+                                                                                    <span className="text-gray-600">{request.applicantPhone || '-'}</span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <span className="font-semibold text-gray-700">{t('columns.email')}: </span>
+                                                                                    <span className="text-gray-600 break-all">{request.applicantEmail}</span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <span className="font-semibold text-gray-700">{t('columns.passType')}: </span>
+                                                                                    <span className="text-gray-600">{getPassTypeLabel(request.passFor)}</span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <span className="font-semibold text-gray-700">{t('columns.passFor')}: </span>
+                                                                                    <span className="text-gray-600">{getPassForLabel(request.requestType)}</span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <span className="font-semibold text-gray-700">{t('columns.visitDate')}: </span>
+                                                                                    <span className="text-gray-600">{formatDate(request.dateOfVisit)}</span>
+                                                                                </div>
+                                                                                {imageUrl && (
+                                                                                    <div className="sm:col-span-2 lg:col-span-3">
+                                                                                        <span className="font-semibold text-gray-700 block mb-2">{t('columns.uploaded')}: </span>
+                                                                                        <img
+                                                                                            src={imageUrl}
+                                                                                            alt="Uploaded document"
+                                                                                            className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded border border-gray-200"
+                                                                                            onError={(e) => {
+                                                                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                                                            }}
+                                                                                        />
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </React.Fragment>
                                                         );
                                                     })}
                                                 </tbody>

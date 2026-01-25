@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import Header from '../../components/Header';
@@ -72,6 +72,7 @@ interface UserData {
 export default function RequestDetailsPage() {
     const router = useRouter();
     const params = useParams();
+    const searchParams = useSearchParams();
     const requestId = params.id as string;
     const locale = useLocale();
     const isRtl = locale === 'ar';
@@ -87,6 +88,8 @@ export default function RequestDetailsPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [permissionDenied, setPermissionDenied] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editData, setEditData] = useState<Partial<RequestDetails>>({});
 
     // Helper function to check if user has a specific permission
     const hasPermission = (permissionKey: string) => {
@@ -112,7 +115,11 @@ export default function RequestDetailsPage() {
         if (requestId) {
             fetchRequestDetails(token, requestId);
         }
-    }, [requestId]);
+
+        // Check if edit mode is enabled from URL
+        const editParam = searchParams.get('edit');
+        setIsEditMode(editParam === 'true');
+    }, [requestId, searchParams]);
 
     const fetchRequestDetails = async (token: string, id: string) => {
         setLoading(true);
@@ -135,11 +142,120 @@ export default function RequestDetailsPage() {
 
             const result = await response.json();
             setRequest(result.data);
+            setEditData(result.data); // Initialize edit data with current request data
         } catch (error) {
             console.error('Error fetching request details:', error);
             setError('Failed to load request details');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
+        const token = localStorage.getItem('token');
+        if (!token || !request) return;
+
+        setProcessing(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            // Prepare update data - only include fields that have changed
+            const updatePayload: any = {};
+            
+            if (editData.applicantNameEn && editData.applicantNameEn !== request.applicantNameEn) {
+                updatePayload.applicantNameEn = editData.applicantNameEn;
+            }
+            if (editData.applicantNameAr && editData.applicantNameAr !== request.applicantNameAr) {
+                updatePayload.applicantNameAr = editData.applicantNameAr;
+            }
+            if (editData.applicantEmail && editData.applicantEmail !== request.applicantEmail) {
+                updatePayload.applicantEmail = editData.applicantEmail;
+            }
+            if (editData.applicantPhone !== undefined && editData.applicantPhone !== request.applicantPhone) {
+                updatePayload.applicantPhone = editData.applicantPhone;
+            }
+            if (editData.passportIdNumber && editData.passportIdNumber !== request.passportIdNumber) {
+                updatePayload.passportIdNumber = editData.passportIdNumber;
+            }
+            if (editData.purposeOfVisit && editData.purposeOfVisit !== request.purposeOfVisit) {
+                updatePayload.purposeOfVisit = editData.purposeOfVisit;
+            }
+            if (editData.requestType && editData.requestType !== request.requestType) {
+                updatePayload.requestType = editData.requestType;
+            }
+            if (editData.passFor !== undefined && editData.passFor !== request.passFor) {
+                updatePayload.passFor = editData.passFor;
+            }
+            if (editData.nationality && editData.nationality !== request.nationality) {
+                updatePayload.nationality = editData.nationality;
+            }
+            if (editData.identification && editData.identification !== request.identification) {
+                updatePayload.identification = editData.identification;
+            }
+            if (editData.gender && editData.gender !== request.gender) {
+                updatePayload.gender = editData.gender;
+            }
+            if (editData.profession && editData.profession !== request.profession) {
+                updatePayload.profession = editData.profession;
+            }
+            if (editData.dateOfVisit) {
+                updatePayload.dateOfVisit = editData.dateOfVisit;
+            }
+            if (editData.validFrom) {
+                updatePayload.validFrom = editData.validFrom;
+            }
+            if (editData.validTo) {
+                updatePayload.validTo = editData.validTo;
+            }
+
+            if (Object.keys(updatePayload).length === 0) {
+                setError('No changes to save');
+                setProcessing(false);
+                return;
+            }
+
+            const response = await fetch(`/api/admin/requests/${requestId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatePayload),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to update request');
+            }
+
+            setSuccess('Request updated successfully!');
+            setIsEditMode(false);
+            // Remove edit query parameter from URL
+            router.replace(`/admin/requests/${requestId}`);
+            fetchRequestDetails(token, requestId);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const handleCancel = () => {
+        if (request) {
+            setEditData(request); // Reset to original data
+        }
+        setIsEditMode(false);
+        router.replace(`/admin/requests/${requestId}`);
+    };
+
+    const toggleEditMode = () => {
+        if (isEditMode) {
+            handleCancel();
+        } else {
+            setIsEditMode(true);
+            router.replace(`/admin/requests/${requestId}?edit=true`);
         }
     };
 
@@ -218,13 +334,13 @@ export default function RequestDetailsPage() {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'APPROVED':
-                return 'bg-success-100 text-success-700';
+                return 'bg-[#DCFCE7] text-[#166534]'; // Green
             case 'REJECTED':
-                return 'bg-danger-100 text-danger-700';
+                return 'bg-[#FEE2E2] text-[#991B1B]'; // Red
             case 'PENDING':
-                return 'bg-warning-100 text-warning-700';
+                return 'bg-[#FEF3C7] text-[#92400E]'; // Yellow/Orange
             default:
-                return 'bg-gray-100 text-gray-700';
+                return 'bg-[#F3F4F6] text-[#374151]'; // Gray
         }
     };
 
@@ -285,25 +401,78 @@ export default function RequestDetailsPage() {
                         <div className="animate-fade-in font-['Rubik']">
                             {/* Header Section */}
                             <div className="bg-white rounded-[16px] p-6 shadow-sm mb-6">
-                                <RequestHeader
-                                    requestNumber={request.requestNumber}
-                                    status={request.status}
-                                    statusLabel={dt(`status.${request.status}`)}
-                                />
+                                <div className="flex items-center justify-between mb-8">
+                                    <RequestHeader
+                                        requestNumber={request.requestNumber}
+                                    />
+                                    <div className="flex items-center gap-3">
+                                        <span className={`px-4 py-2 rounded-[8px] text-sm font-medium ${getStatusColor(request.status)}`}>
+                                            {dt(`status.${request.status}`)}
+                                        </span>
+                                        <button
+                                            onClick={toggleEditMode}
+                                            className={`px-4 py-1 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                                                isEditMode
+                                                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                                            }`}
+                                            disabled={processing}
+                                        >
+                                            {isEditMode ? (
+                                                <>
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    Cancel
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                    Edit
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {isEditMode && (
+                                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-blue-800 text-sm font-medium">Edit mode enabled. Make your changes and click Save.</p>
+                                            <button
+                                                onClick={handleSave}
+                                                disabled={processing}
+                                                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {processing ? 'Saving...' : 'Save Changes'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {(error || success) && (
+                                    <div className={`mb-4 p-4 rounded-lg ${error ? 'bg-red-50 border border-red-200 text-red-800' : 'bg-green-50 border border-green-200 text-green-800'}`}>
+                                        {error || success}
+                                    </div>
+                                )}
 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                     {/* Left Column: Info Sections */}
                                     <div className="border-r border-gray-100 pr-0 lg:pr-8">
                                         <InfoSection
                                             title={t('passPermitInfo') || "Pass Permit Info"}
+                                            isEditable={isEditMode}
+                                            onChange={(fieldName, value) => setEditData(prev => ({ ...prev, [fieldName]: value }))}
                                             data={[
-                                                { label: t('fields.passType') || "Pass Type", value: dt(`types.${request.requestType}`) },
-                                                { label: t('fields.nationality') || "Nationality", value: request.nationality },
-                                                { label: t('fields.identification') || "Identification", value: request.identification },
-                                                { label: t('fields.passStartingDate') || "Pass Starting Date", value: new Date(request.validFrom).toLocaleDateString() },
-                                                { label: t('fields.validityPeriod') || "Validity Period", value: new Date(request.validTo).toLocaleDateString() },
-                                                { label: t('fields.passFor') || "Pass For", value: request.passFor || 'Self' },
-                                                { label: t('fields.purposeOfVisit') || "Purpose of visit", value: request.purposeOfVisit },
+                                                { label: t('fields.passType') || "Pass Type", value: dt(`types.${isEditMode ? (editData.requestType || request.requestType) : request.requestType}`), fieldName: 'requestType' },
+                                                { label: t('fields.nationality') || "Nationality", value: isEditMode ? (editData.nationality || request.nationality) : request.nationality, fieldName: 'nationality' },
+                                                { label: t('fields.identification') || "Identification", value: isEditMode ? (editData.identification || request.identification) : request.identification, fieldName: 'identification' },
+                                                { label: t('fields.passStartingDate') || "Pass Starting Date", value: isEditMode ? (editData.validFrom ? new Date(editData.validFrom).toLocaleDateString() : new Date(request.validFrom).toLocaleDateString()) : new Date(request.validFrom).toLocaleDateString() },
+                                                { label: t('fields.validityPeriod') || "Validity Period", value: isEditMode ? (editData.validTo ? new Date(editData.validTo).toLocaleDateString() : new Date(request.validTo).toLocaleDateString()) : new Date(request.validTo).toLocaleDateString() },
+                                                { label: t('fields.passFor') || "Pass For", value: isEditMode ? (editData.passFor || request.passFor || 'Self') : (request.passFor || 'Self'), fieldName: 'passFor' },
+                                                { label: t('fields.purposeOfVisit') || "Purpose of visit", value: isEditMode ? (editData.purposeOfVisit || request.purposeOfVisit) : request.purposeOfVisit, fieldName: 'purposeOfVisit' },
                                                 { label: t('fields.organization') || "Organization Host", value: request.organization },
                                             ]}
                                         />
@@ -312,14 +481,16 @@ export default function RequestDetailsPage() {
 
                                         <InfoSection
                                             title={t('passHolderInfo') || "Pass Holder Info"}
+                                            isEditable={isEditMode}
+                                            onChange={(fieldName, value) => setEditData(prev => ({ ...prev, [fieldName]: value }))}
                                             data={[
-                                                { label: t('fields.holderNameEn') || "Holder Name(En)", value: request.applicantNameEn },
-                                                { label: t('fields.holderNameAr') || "Holder Name(Ar)", value: request.applicantNameAr },
-                                                { label: t('fields.telephone') || "Telephone", value: request.applicantPhone || '-' },
-                                                { label: t('fields.email') || "Email", value: request.applicantEmail },
-                                                { label: t('fields.gender') || "Gender", value: request.gender },
-                                                { label: t('fields.profession') || "Profession", value: request.profession },
-                                                { label: t('fields.idPassportNumber') || "ID Or Passport Number", value: request.passportIdNumber },
+                                                { label: t('fields.holderNameEn') || "Holder Name(En)", value: isEditMode ? (editData.applicantNameEn || request.applicantNameEn) : request.applicantNameEn, fieldName: 'applicantNameEn' },
+                                                { label: t('fields.holderNameAr') || "Holder Name(Ar)", value: isEditMode ? (editData.applicantNameAr || request.applicantNameAr) : request.applicantNameAr, fieldName: 'applicantNameAr' },
+                                                { label: t('fields.telephone') || "Telephone", value: isEditMode ? (editData.applicantPhone || request.applicantPhone || '-') : (request.applicantPhone || '-'), fieldName: 'applicantPhone' },
+                                                { label: t('fields.email') || "Email", value: isEditMode ? (editData.applicantEmail || request.applicantEmail) : request.applicantEmail, fieldName: 'applicantEmail' },
+                                                { label: t('fields.gender') || "Gender", value: isEditMode ? (editData.gender || request.gender) : request.gender, fieldName: 'gender' },
+                                                { label: t('fields.profession') || "Profession", value: isEditMode ? (editData.profession || request.profession) : request.profession, fieldName: 'profession' },
+                                                { label: t('fields.idPassportNumber') || "ID Or Passport Number", value: isEditMode ? (editData.passportIdNumber || request.passportIdNumber) : request.passportIdNumber, fieldName: 'passportIdNumber' },
                                             ]}
                                         />
                                     </div>
