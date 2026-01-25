@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Input, Select } from '@/components/ui/Input';
+import { Textarea } from '../ui/Textarea';
 import { FileUpload } from '@/components/ui/FileUpload';
 import enMessages from '../../../messages/en.json';
 import arMessages from '../../../messages/ar.json';
@@ -327,11 +328,12 @@ export const GatePassForm: React.FC = () => {
                         ]}
                         required
                     />
-                    <Input
+                    <Textarea
                         name="purposeOfVisit"
                         label={getBilingualNested(['fields', 'purposeOfVisit'])}
                         placeholder={getBilingualNested(['placeholders', 'typePurpose'])}
                         error={fieldErrors.purposeOfVisit}
+                        rows={4}
                         required
                     />
                 </div>
