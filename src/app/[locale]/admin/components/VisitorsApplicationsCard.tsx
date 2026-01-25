@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { useTranslations } from 'next-intl';
 
 interface VisitorsApplicationsCardProps {
     data: {
@@ -12,7 +11,6 @@ interface VisitorsApplicationsCardProps {
 }
 
 export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> = ({ data }) => {
-    const t = useTranslations('Admin.dashboard');
 
     // Matching image values if data is not sufficient or for visual matching
     const total = data?.total || 500;
@@ -21,7 +19,7 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
 
     // SVG Donut Chart Calculation
     const size = 200;
-    const strokeWidth = 25;
+    const strokeWidth = 40;
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
 
@@ -53,11 +51,11 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
                         cy={size / 2}
                         r={radius}
                         fill="transparent"
-                        stroke="#14B8A6"
+                        stroke="#00B09C"
                         strokeWidth={strokeWidth}
                         strokeDasharray={circumference}
                         strokeDashoffset={approvedOffset}
-                        strokeLinecap="round"
+                        strokeLinecap="butt"
                     />
                     {/* Rejected Segment (Red) */}
                     <circle
@@ -65,11 +63,11 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
                         cy={size / 2}
                         r={radius}
                         fill="transparent"
-                        stroke="#F43F5E"
+                        stroke="#FF5757"
                         strokeWidth={strokeWidth}
                         strokeDasharray={circumference}
                         strokeDashoffset={rejectedOffset}
-                        strokeLinecap="round"
+                        strokeLinecap="butt"
                         transform={`rotate(${approvedPercentage * 3.6}, ${size / 2}, ${size / 2})`}
                     />
                 </svg>
@@ -81,12 +79,12 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
 
             <div className="flex gap-8 mt-auto w-full justify-center">
                 <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-4 bg-[#14B8A6] rounded-full"></div>
+                    <div className="w-1.5 h-4 bg-[#00B09C] rounded-full"></div>
                     <span className="text-sm font-bold text-gray-900">{approved}</span>
                     <span className="text-xs text-[#8E8E93]">Approved</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-4 bg-[#F43F5E] rounded-full"></div>
+                    <div className="w-1.5 h-4 bg-[#FF5757] rounded-full"></div>
                     <span className="text-sm font-bold text-gray-900">{rejected}</span>
                     <span className="text-xs text-[#8E8E93]">Rejected</span>
                 </div>

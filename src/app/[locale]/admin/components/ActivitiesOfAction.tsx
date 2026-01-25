@@ -118,6 +118,35 @@ export const ActivitiesOfAction: React.FC = () => {
     const visitsPoints = getPoints(chartData, (point) => point.approved + point.pending + point.rejected);
     const permitsPoints = getPoints(chartData, (point) => point.approved);
 
+    // Set default hovered point to average/middle position
+    useEffect(() => {
+        if (chartData.length > 0) {
+            const middleIndex = Math.floor(chartData.length / 2);
+            const middleData = chartData[middleIndex];
+            
+            if (middleData) {
+                // Calculate position for middle point
+                const maxValue = Math.max(...chartData.map(p => p.approved + p.pending + p.rejected), 1);
+                const width = 1000;
+                const height = 200;
+                const padding = 20;
+                const chartHeight = height - padding * 2;
+                const stepX = (width - padding * 2) / Math.max(chartData.length - 1, 1);
+                
+                const x = padding + middleIndex * stepX;
+                const value = middleData.approved + middleData.pending + middleData.rejected;
+                const y = height - padding - (value / maxValue) * chartHeight;
+                
+                setHoveredPoint({ 
+                    x, 
+                    y, 
+                    data: middleData, 
+                    type: 'visits' 
+                });
+            }
+        }
+    }, [chartData]);
+
     return (
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-8">
             <div className="flex justify-between items-center mb-12">
@@ -179,12 +208,12 @@ export const ActivitiesOfAction: React.FC = () => {
                                 />
                             )}
 
-                            {/* Permits Line (Green) - Approved Requests */}
+                            {/* Permits Line (Teal) - Approved Requests */}
                             {permitsPath && (
                                 <path
                                     d={permitsPath}
                                     fill="none"
-                                    stroke="#34D399"
+                                    stroke="#00B09C"
                                     strokeWidth="3"
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -203,7 +232,19 @@ export const ActivitiesOfAction: React.FC = () => {
                                     strokeWidth="2"
                                     className="cursor-pointer hover:r-7 transition-all"
                                     onMouseEnter={() => setHoveredPoint({ x: point.x, y: point.y, data: point.data, type: 'visits' })}
-                                    onMouseLeave={() => setHoveredPoint(null)}
+                                    onMouseLeave={() => {
+                                        // Reset to middle point when leaving
+                                        const middleIndex = Math.floor(chartData.length / 2);
+                                        const middlePoint = visitsPoints[middleIndex];
+                                        if (middlePoint) {
+                                            setHoveredPoint({ 
+                                                x: middlePoint.x, 
+                                                y: middlePoint.y, 
+                                                data: middlePoint.data, 
+                                                type: 'visits' 
+                                            });
+                                        }
+                                    }}
                                 />
                             ))}
 
@@ -214,12 +255,24 @@ export const ActivitiesOfAction: React.FC = () => {
                                     cx={point.x}
                                     cy={point.y}
                                     r="5"
-                                    fill="#34D399"
+                                    fill="#00B09C"
                                     stroke="white"
                                     strokeWidth="2"
                                     className="cursor-pointer hover:r-7 transition-all"
                                     onMouseEnter={() => setHoveredPoint({ x: point.x, y: point.y, data: point.data, type: 'permits' })}
-                                    onMouseLeave={() => setHoveredPoint(null)}
+                                    onMouseLeave={() => {
+                                        // Reset to middle point when leaving
+                                        const middleIndex = Math.floor(chartData.length / 2);
+                                        const middlePoint = visitsPoints[middleIndex];
+                                        if (middlePoint) {
+                                            setHoveredPoint({ 
+                                                x: middlePoint.x, 
+                                                y: middlePoint.y, 
+                                                data: middlePoint.data, 
+                                                type: 'visits' 
+                                            });
+                                        }
+                                    }}
                                 />
                             ))}
                         </svg>
@@ -249,10 +302,22 @@ export const ActivitiesOfAction: React.FC = () => {
                     </div>
 
                     {/* X-Axis Labels */}
-                    <div className="flex justify-between px-2">
+                    <div className="flex justify-between px-2 mb-6">
                         {months.map((month, index) => (
                             <span key={`${month}-${index}`} className="text-xs font-medium text-[#8E8E93]">{month}</span>
                         ))}
+                    </div>
+
+                    {/* Legend */}
+                    <div className="flex items-center justify-center gap-8">
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-1 bg-[#1E40AF] rounded-full"></div>
+                            <span className="text-sm font-medium text-gray-900">{t('visits')}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-1 bg-[#00B09C] rounded-full"></div>
+                            <span className="text-sm font-medium text-gray-900">{t('permits')}</span>
+                        </div>
                     </div>
                 </>
             )}
