@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input, Select } from '@/components/ui/Input';
 import { Textarea } from '../ui/Textarea';
 import { FileUpload } from '@/components/ui/FileUpload';
 import enMessages from '../../../messages/en.json';
 import arMessages from '../../../messages/ar.json';
+import { useLocale } from 'next-intl';
 
 import { SuccessfullDialog } from '../ui/SuccessfullDialog';
 
@@ -13,7 +14,37 @@ interface FieldErrors {
     [key: string]: string;
 }
 
+interface PassType {
+    id: number;
+    name_en: string;
+    name_ar: string;
+    is_active: boolean;
+}
+
 export const GatePassForm: React.FC = () => {
+    const locale = useLocale();
+    const [passTypes, setPassTypes] = useState<PassType[]>([]);
+    const [loadingPassTypes, setLoadingPassTypes] = useState(true);
+
+    // Fetch pass types from database
+    useEffect(() => {
+        const fetchPassTypes = async () => {
+            try {
+                const response = await fetch('/api/pass-types');
+                if (response.ok) {
+                    const result = await response.json();
+                    setPassTypes(result.data || []);
+                }
+            } catch (error) {
+                console.error('Error fetching pass types:', error);
+            } finally {
+                setLoadingPassTypes(false);
+            }
+        };
+
+        fetchPassTypes();
+    }, []);
+
     // Helper for nested keys
     const getBilingualNested = (path: string[]): string => {
         try {
@@ -252,12 +283,17 @@ export const GatePassForm: React.FC = () => {
                         error={fieldErrors.requestType}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'selectPassType']) },
-                            { value: 'VISITOR', label: getBilingualNested(['options', 'visitorPass']) },
-                            { value: 'CONTRACTOR', label: getBilingualNested(['options', 'contractorPass']) },
-                            { value: 'EMPLOYEE', label: getBilingualNested(['options', 'employeePass']) },
-                            { value: 'VEHICLE', label: getBilingualNested(['options', 'vehiclePass']) },
+                            ...passTypes
+                                .filter(pt => pt.is_active)
+                                .map((pt) => ({
+                                    value: pt.id.toString(),
+                                    label: locale === 'ar' 
+                                        ? pt.name_ar 
+                                        : `${pt.name_en}${pt.name_ar ? ` / ${pt.name_ar}` : ''}`,
+                                })),
                         ]}
                         required
+                        disabled={loadingPassTypes}
                     />
                     <Select
                         name="nationality"
