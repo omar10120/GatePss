@@ -190,13 +190,6 @@ export const GatePassForm: React.FC = () => {
             isValid = false;
         }
 
-        // Other Documents 1 validation (required)
-        const otherDocuments1 = formData.get('otherDocuments1') as File | null;
-        if (!otherDocuments1 || otherDocuments1.size === 0) {
-            const fieldLabel = getFieldLabel('otherDocuments1');
-            newFieldErrors['otherDocuments1'] = `${fieldLabel} ${getBilingualNested(['errors', 'required'])}`;
-            isValid = false;
-        }
 
         setFieldErrors(newFieldErrors);
         return isValid;
@@ -567,16 +560,12 @@ export const GatePassForm: React.FC = () => {
                         label={getBilingualNested(['fields', 'photo'])}
                         placeholder={getBilingualNested(['placeholders', 'choosePhoto'])}
                     />
-                    <div className="w-full">
-                        <FileUpload
-                            id="otherDocuments1"
-                            name="otherDocuments1"
-                            label={getBilingualNested(['fields', 'otherDocuments1'])}
-                            placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
-                            required
-                            error={fieldErrors.otherDocuments1}
-                        />
-                    </div>
+                    <FileUpload
+                        id="otherDocuments1"
+                        name="otherDocuments1"
+                        label={getBilingualNested(['fields', 'otherDocuments1'])}
+                        placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
+                    />
                     <FileUpload
                         id="otherDocuments2"
                         name="otherDocuments2"
