@@ -14,6 +14,7 @@ export default function AdminLoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showOTPModal, setShowOTPModal] = useState(false);
     const [otpLoading, setOtpLoading] = useState(false);
+    const [otpError, setOtpError] = useState('');
     const [userEmail, setUserEmail] = useState('');
     const t = useTranslations('HomePage.login');
     const locale = useLocale();
@@ -68,6 +69,7 @@ export default function AdminLoginPage() {
 
     const handleVerifyOTP = async (otp: string) => {
         setOtpLoading(true);
+        setOtpError('');
         setError('');
 
         try {
@@ -93,7 +95,8 @@ export default function AdminLoginPage() {
             router.push('/admin/dashboard');
         } catch (err) {
             console.log(err);
-            setError(err instanceof Error ? err.message : 'Invalid OTP code');
+            const errorMessage = err instanceof Error ? err.message : 'Invalid OTP code';
+            setOtpError(errorMessage);
         } finally {
             setOtpLoading(false);
         }
@@ -101,6 +104,7 @@ export default function AdminLoginPage() {
 
     const handleResendOTP = async () => {
         setOtpLoading(true);
+        setOtpError('');
         setError('');
 
         try {
@@ -118,9 +122,10 @@ export default function AdminLoginPage() {
                 throw new Error(data.message || 'Failed to resend OTP');
             }
 
-            setError('');
+            setOtpError('');
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to resend OTP');
+            const errorMessage = err instanceof Error ? err.message : 'Failed to resend OTP';
+            setOtpError(errorMessage);
         } finally {
             setOtpLoading(false);
         }
@@ -129,6 +134,7 @@ export default function AdminLoginPage() {
     const handleCloseOTPModal = () => {
         setShowOTPModal(false);
         setUserEmail('');
+        setOtpError('');
         setError('');
     };
 
@@ -296,6 +302,7 @@ export default function AdminLoginPage() {
                         onVerify={handleVerifyOTP}
                         onResend={handleResendOTP}
                         onClose={handleCloseOTPModal}
+                        error={otpError}
                     />
                 </div>
             )}

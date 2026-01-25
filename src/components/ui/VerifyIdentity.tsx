@@ -8,9 +8,10 @@ interface VerifyIdentityProps {
     onResend: () => void;
     onClose: () => void;
     isLoading?: boolean;
+    error?: string;
 }
 
-export default function VerifyIdentity({ onVerify, onResend, onClose, isLoading }: VerifyIdentityProps) {
+export default function VerifyIdentity({ onVerify, onResend, onClose, isLoading, error }: VerifyIdentityProps) {
     const t = useTranslations('HomePage.login.verify');
     const [otp, setOtp] = useState(['', '', '', '']);
     const [timer, setTimer] = useState(60);
@@ -91,9 +92,16 @@ export default function VerifyIdentity({ onVerify, onResend, onClose, isLoading 
                 <h2 className="text-3xl font-extrabold text-[#1e3a5f] mb-4">
                     {t('title')}
                 </h2>
-                <p className="text-gray-400 text-lg mb-10 max-w-sm">
+                <p className="text-gray-400 text-lg mb-6 max-w-sm">
                     {t('subtitle')}
                 </p>
+
+                {/* Error Message */}
+                {error && (
+                    <div className="mb-6 w-full p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                        {error}
+                    </div>
+                )}
 
                 {/* OTP Inputs */}
                 <div className="flex gap-4 mb-10">
