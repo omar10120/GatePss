@@ -34,53 +34,74 @@ export async function GET(request: NextRequest) {
                 where.passFor = passFor;
             }
 
-            // Handle date filter from frontend (today, yesterday, this_week, this_month)
+            // Handle date filter from frontend
             if (dateFilter && !dateFrom && !dateTo) {
-                const now = new Date();
-                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                let startDate: Date;
-                let endDate: Date = new Date(today);
-                endDate.setHours(23, 59, 59, 999);
+                // Check if dateFilter is a YYYY-MM-DD format (from date picker)
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                if (dateRegex.test(dateFilter)) {
+                    // Handle specific date selection (YYYY-MM-DD format)
+                    const selectedDate = new Date(dateFilter);
+                    const startDate = new Date(selectedDate);
+                    startDate.setHours(0, 0, 0, 0);
+                    const endDate = new Date(selectedDate);
+                    endDate.setHours(23, 59, 59, 999);
 
-                switch (dateFilter) {
-                    case 'today':
-                        startDate = new Date(today);
-                        startDate.setHours(0, 0, 0, 0);
-                        break;
-                    case 'yesterday':
-                        startDate = new Date(today);
-                        startDate.setDate(startDate.getDate() - 1);
-                        startDate.setHours(0, 0, 0, 0);
-                        endDate = new Date(today);
-                        endDate.setHours(0, 0, 0, 0);
-                        endDate.setMilliseconds(-1);
-                        break;
-                    case 'this_week':
-                        startDate = new Date(today);
-                        startDate.setDate(startDate.getDate() - startDate.getDay());
-                        startDate.setHours(0, 0, 0, 0);
-                        break;
-                    case 'this_month':
-                        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                        startDate.setHours(0, 0, 0, 0);
-                        break;
-                    default:
-                        startDate = new Date(today);
-                        startDate.setHours(0, 0, 0, 0);
+                    where.createdAt = {
+                        gte: startDate,
+                        lte: endDate,
+                    };
+                } else {
+                    // Handle predefined filters (today, yesterday, this_week, this_month)
+                    const now = new Date();
+                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    let startDate: Date;
+                    let endDate: Date = new Date(today);
+                    endDate.setHours(23, 59, 59, 999);
+
+                    switch (dateFilter) {
+                        case 'today':
+                            startDate = new Date(today);
+                            startDate.setHours(0, 0, 0, 0);
+                            break;
+                        case 'yesterday':
+                            startDate = new Date(today);
+                            startDate.setDate(startDate.getDate() - 1);
+                            startDate.setHours(0, 0, 0, 0);
+                            endDate = new Date(today);
+                            endDate.setHours(0, 0, 0, 0);
+                            endDate.setMilliseconds(-1);
+                            break;
+                        case 'this_week':
+                            startDate = new Date(today);
+                            startDate.setDate(startDate.getDate() - startDate.getDay());
+                            startDate.setHours(0, 0, 0, 0);
+                            break;
+                        case 'this_month':
+                            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                            startDate.setHours(0, 0, 0, 0);
+                            break;
+                        default:
+                            startDate = new Date(today);
+                            startDate.setHours(0, 0, 0, 0);
+                    }
+
+                    where.createdAt = {
+                        gte: startDate,
+                        lte: endDate,
+                    };
                 }
-
-                where.dateOfVisit = {
-                    gte: startDate,
-                    lte: endDate,
-                };
             } else if (dateFrom || dateTo) {
                 // Handle explicit dateFrom/dateTo parameters
-                where.dateOfVisit = {};
+                where.createdAt = {};
                 if (dateFrom) {
-                    where.dateOfVisit.gte = new Date(dateFrom);
+                    const fromDate = new Date(dateFrom);
+                    fromDate.setHours(0, 0, 0, 0);
+                    where.createdAt.gte = fromDate;
                 }
                 if (dateTo) {
-                    where.dateOfVisit.lte = new Date(dateTo);
+                    const toDate = new Date(dateTo);
+                    toDate.setHours(23, 59, 59, 999);
+                    where.createdAt.lte = toDate;
                 }
             }
 

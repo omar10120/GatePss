@@ -372,7 +372,8 @@
                 "type": "Type",
                 "visitDate": "Visit Date",
                 "status": "Status",
-                "actions": "Actions"
+                "actions": "Actions",
+                "createdAt": "Created At"
             },
             "viewDetails": "View Details",
             "noResults": "No requests found",

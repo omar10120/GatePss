@@ -299,6 +299,7 @@ export default function AdminRequestsPage() {
                                                         <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.type')}</th>
                                                         <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.visitDate')}</th>
                                                         <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.status')}</th>
+                                                        <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.createdAt')}</th>
                                                         <th className="px-6 py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider">{t('columns.actions')}</th>
                                                     </tr>
                                                 </thead>
@@ -325,6 +326,9 @@ export default function AdminRequestsPage() {
                                                                     onUpdate={(newStatus, rejectionReason) => handleStatusUpdate(request.id, newStatus, rejectionReason)}
                                                                     onRejectSuccess={() => setShowRejectSuccessModal(true)}
                                                                 />
+                                                            </td>
+                                                            <td className="px-6 py-4 text-[#747474] text-[14px]">
+                                                                {new Date(request.createdAt).toLocaleDateString()}
                                                             </td>
                                                             <td className="px-6 py-4">
                                                                 <Link
