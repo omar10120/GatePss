@@ -57,24 +57,57 @@ export async function GET(request: NextRequest) {
                 take: limit,
             });
 
+            // Extract all request numbers from logs and batch fetch request IDs
+            const requestNumbers = new Set<string>();
+            logs.forEach((log) => {
+                const requestNumberMatch = log.actionPerformed.match(/GP-(\d+)/);
+                if (requestNumberMatch) {
+                    requestNumbers.add(`GP-${requestNumberMatch[1]}`);
+                }
+            });
+
+            // Batch fetch request IDs
+            const requests = requestNumbers.size > 0
+                ? await prisma.request.findMany({
+                      where: { requestNumber: { in: Array.from(requestNumbers) } },
+                      select: { id: true, requestNumber: true },
+                  })
+                : [];
+
+            const requestNumberToIdMap = new Map(
+                requests.map((req) => [req.requestNumber, req.id])
+            );
+
             // Format response to match frontend expectations
-            const formattedLogs = logs.map((log) => ({
-                id: log.id,
-                timestamp: log.timestamp.toISOString(),
-                userId: log.userId,
-                actionType: log.actionType,
-                actionPerformed: log.actionPerformed,
-                affectedEntityType: log.affectedEntityType,
-                affectedEntityId: log.affectedEntityId,
-                details: log.details,
-                user: log.user
-                    ? {
-                          id: log.user.id,
-                          name: log.user.name,
-                          email: log.user.email,
-                      }
-                    : null,
-            }));
+            const formattedLogs = logs.map((log) => {
+                let requestId: number | null = null;
+                
+                // Extract request number from action text and get ID from map
+                const requestNumberMatch = log.actionPerformed.match(/GP-(\d+)/);
+                if (requestNumberMatch) {
+                    const requestNumber = `GP-${requestNumberMatch[1]}`;
+                    requestId = requestNumberToIdMap.get(requestNumber) || null;
+                }
+                
+                return {
+                    id: log.id,
+                    timestamp: log.timestamp.toISOString(),
+                    userId: log.userId,
+                    actionType: log.actionType,
+                    actionPerformed: log.actionPerformed,
+                    affectedEntityType: log.affectedEntityType,
+                    affectedEntityId: log.affectedEntityId || requestId, // Use requestId if affectedEntityId is null
+                    details: log.details,
+                    requestId, // Add requestId to response
+                    user: log.user
+                        ? {
+                              id: log.user.id,
+                              name: log.user.name,
+                              email: log.user.email,
+                          }
+                        : null,
+                };
+            });
 
             return NextResponse.json({
                 success: true,

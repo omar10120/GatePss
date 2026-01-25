@@ -17,6 +17,7 @@ interface ActivityLog {
     affectedEntityType: string | null;
     affectedEntityId: number | null;
     details: string | null;
+    requestId?: number | null;
     user: {
         id: number;
         name: string;
@@ -233,7 +234,27 @@ export default function AdminActivityPage() {
                                                                 </span>
                                                             </td>
                                                             <td className="px-4 py-3 text-gray-900">
-                                                                {log.actionPerformed}
+                                                                {(() => {
+                                                                    // Extract request number from action text
+                                                                    const requestNumberMatch = log.actionPerformed.match(/GP-(\d+)/);
+                                                                    if (requestNumberMatch && log.requestId) {
+                                                                        const requestNumber = `GP-${requestNumberMatch[1]}`;
+                                                                        const parts = log.actionPerformed.split(requestNumber);
+                                                                        return (
+                                                                            <>
+                                                                                {parts[0]}
+                                                                                <Link 
+                                                                                    href={`/admin/requests/${log.requestId}`}
+                                                                                    className="text-[#00B09C] hover:text-[#008f7e] font-bold"
+                                                                                >
+                                                                                    {requestNumber}
+                                                                                </Link>
+                                                                                {parts[1]}
+                                                                            </>
+                                                                        );
+                                                                    }
+                                                                    return log.actionPerformed;
+                                                                })()}
                                                             </td>
                                                         </tr>
                                                     ))}
