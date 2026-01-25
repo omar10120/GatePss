@@ -28,7 +28,7 @@ export const SuccessfullDialog: React.FC<SuccessfullDialogProps> = ({ requestNum
             {/* Request Number Subtitle */}
             {requestNumber && (
                 <p className="text-[#747474] text-lg font-['Rubik'] mb-8">
-                    Request Number: <span className="font-semibold text-[#00B09C]">{requestNumber}</span>
+                    {t('columns.requestNumber')}: <span className="font-semibold text-[#00B09C]">{requestNumber}</span>
                 </p>
             )}
 

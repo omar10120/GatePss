@@ -50,6 +50,31 @@ body[dir="rtl"] {
   direction: rtl;
 }
 
+/* Hide native date picker icon and style custom date input */
+input[type="date"].date-input-custom {
+  position: relative;
+}
+
+input[type="date"].date-input-custom::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+input[type="date"].date-input-custom::-webkit-inner-spin-button,
+input[type="date"].date-input-custom::-webkit-clear-button {
+  display: none;
+  -webkit-appearance: none;
+}
+
+input[type="date"].date-input-custom {
+  color-scheme: light;
+}
+
+/* Firefox */
+input[type="date"].date-input-custom::-moz-calendar-picker-indicator {
+  display: none;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;

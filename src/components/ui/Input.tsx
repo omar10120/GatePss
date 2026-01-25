@@ -48,12 +48,45 @@ export const Input: React.FC<InputProps> = ({
                         ${hasError ? "border-danger-500 focus:ring-danger-500/20 focus:border-danger-500" : ""}
                         ${leftIcon ? "pl-12" : ""}
                         ${rightIcon ? "pr-12" : ""}
+                        ${props.type === 'date' ? "date-input-custom" : ""}
                         ${className}
                     `.trim()}
                     {...props}
                 />
                 {rightIcon && (
-                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                    <div 
+                        className={`absolute inset-y-0 right-0 pr-4 flex items-center ${props.type === 'date' ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'pointer-events-none'}`}
+                        onClick={props.type === 'date' ? (e) => {
+                            e.preventDefault();
+                            const input = document.getElementById(inputId) as HTMLInputElement;
+                            if (input) {
+                                // Try modern showPicker API first
+                                if (input.showPicker && typeof input.showPicker === 'function') {
+                                    input.showPicker();
+                                } else {
+                                    // Fallback: focus and click
+                                    input.focus();
+                                    input.click();
+                                }
+                            }
+                        } : undefined}
+                        role={props.type === 'date' ? 'button' : undefined}
+                        tabIndex={props.type === 'date' ? 0 : undefined}
+                        onKeyDown={props.type === 'date' ? (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                const input = document.getElementById(inputId) as HTMLInputElement;
+                                if (input) {
+                                    if (input.showPicker && typeof input.showPicker === 'function') {
+                                        input.showPicker();
+                                    } else {
+                                        input.focus();
+                                        input.click();
+                                    }
+                                }
+                            }
+                        } : undefined}
+                    >
                         {rightIcon}
                     </div>
                 )}
