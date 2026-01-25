@@ -274,7 +274,8 @@
             "validPassportIdRequired": "رقم هوية/جواز سفر صحيح مطلوب (6-20 حرفًا أبجديًا رقميًا)",
             "purposeOfVisitRequired": "الغرض من الزيارة مطلوب (10 أحرف على الأقل)",
             "validPassTypeRequired": "نوع تصريح صحيح مطلوب",
-            "validRequestTypeRequired": "نوع طلب صحيح مطلوب (زائر، مقاول، موظف، أو مركبة)"
+            "validRequestTypeRequired": "نوع طلب صحيح مطلوب (زائر، مقاول، موظف، أو مركبة)",
+            "invalidDate": "يرجى اختيار تاريخ صحيح (لا يمكن أن يكون في الماضي)"
         },
         "options": {
             "visitorPass": "تصريح زائر",

@@ -120,7 +120,6 @@ export const GatePassForm: React.FC = () => {
             { name: 'nationality', value: formData.get('nationality') },
             { name: 'identification', value: formData.get('identification') },
             { name: 'organization', value: formData.get('organization') },
-            { name: 'dateOfVisit', value: formData.get('dateOfVisit') },
             { name: 'validityPeriod', value: formData.get('validityPeriod') },
             { name: 'passFor', value: formData.get('passFor') },
             { name: 'applicantName', value: formData.get('applicantName') },
@@ -137,6 +136,24 @@ export const GatePassForm: React.FC = () => {
                 isValid = false;
             }
         });
+
+        // Date of Visit validation (required and must not be in the past)
+        const dateOfVisit = formData.get('dateOfVisit') as string;
+        if (!dateOfVisit || dateOfVisit.trim() === '') {
+            const fieldLabel = getFieldLabel('dateOfVisit');
+            newFieldErrors['dateOfVisit'] = `${fieldLabel} ${getBilingualNested(['errors', 'required'])}`;
+            isValid = false;
+        } else {
+            const selectedDate = new Date(dateOfVisit);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
+            selectedDate.setHours(0, 0, 0, 0);
+            
+            if (selectedDate < today) {
+                newFieldErrors['dateOfVisit'] = getBilingualNested(['errors', 'invalidDate']);
+                isValid = false;
+            }
+        }
 
         // Pass Type validation (from database)
         const passTypeId = formData.get('passTypeId') as string;
@@ -392,6 +409,28 @@ export const GatePassForm: React.FC = () => {
                         placeholder={getBilingualNested(['placeholders', 'selectDate'])}
                         error={fieldErrors.dateOfVisit}
                         required
+                        onChange={(e) => {
+                            const selectedDate = e.target.value;
+                            if (selectedDate) {
+                                const date = new Date(selectedDate);
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+                                date.setHours(0, 0, 0, 0);
+                                
+                                if (date < today) {
+                                    setFieldErrors(prev => ({
+                                        ...prev,
+                                        dateOfVisit: getBilingualNested(['errors', 'invalidDate'])
+                                    }));
+                                } else {
+                                    setFieldErrors(prev => {
+                                        const newErrors = { ...prev };
+                                        delete newErrors.dateOfVisit;
+                                        return newErrors;
+                                    });
+                                }
+                            }
+                        }}
                         rightIcon={
                             <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

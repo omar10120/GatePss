@@ -274,7 +274,8 @@
             "validPassportIdRequired": "Valid passport/ID number is required (6-20 alphanumeric characters)",
             "purposeOfVisitRequired": "Purpose of visit is required (minimum 10 characters)",
             "validPassTypeRequired": "Valid pass type is required",
-            "validRequestTypeRequired": "Valid request type is required (VISITOR, CONTRACTOR, EMPLOYEE, or VEHICLE)"
+            "validRequestTypeRequired": "Valid request type is required (VISITOR, CONTRACTOR, EMPLOYEE, or VEHICLE)",
+            "invalidDate": "Please select a valid date (cannot be in the past)"
         },
         "options": {
             "visitorPass": "Visitor Pass",
