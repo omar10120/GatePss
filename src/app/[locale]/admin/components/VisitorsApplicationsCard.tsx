@@ -11,11 +11,10 @@ interface VisitorsApplicationsCardProps {
 }
 
 export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> = ({ data }) => {
-
-    // Matching image values if data is not sufficient or for visual matching
-    const total = data?.total || 500;
-    const approved = data?.approved || 370;
-    const rejected = data?.rejected || 50;
+    // Use real data from database, default to 0 if not available
+    const total = data?.total || 0;
+    const approved = data?.approved || 0;
+    const rejected = data?.rejected || 0;
 
     // SVG Donut Chart Calculation
     const size = 200;
@@ -23,8 +22,9 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
 
-    const approvedPercentage = (approved / total) * 100;
-    const rejectedPercentage = (rejected / total) * 100;
+    // Calculate percentages, handle division by zero
+    const approvedPercentage = total > 0 ? (approved / total) * 100 : 0;
+    const rejectedPercentage = total > 0 ? (rejected / total) * 100 : 0;
 
     const approvedOffset = circumference - (approvedPercentage / 100) * circumference;
     const rejectedOffset = circumference - (rejectedPercentage / 100) * circumference;
