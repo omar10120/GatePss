@@ -420,6 +420,7 @@ export const GatePassForm: React.FC = () => {
                             { value: 'TECHNICAL', label: getBilingualNested(['options', 'technical']) },
                             { value: 'MANAGER', label: getBilingualNested(['options', 'manager']) },
                             { value: 'ADMINISTRATOR', label: getBilingualNested(['options', 'administrator']) },
+                            { value: 'OTHER', label: getBilingualNested(['options', 'other']) },
                         ]}
                         required
                     />
