@@ -33,9 +33,13 @@ interface RequestDetails {
     purposeOfVisit: string;
     dateOfVisit: string;
     requestType: string;
+    passTypeId: number | null;
     status: string;
     rejectionReason: string | null;
     passFor: string | null;
+    otherProfessions: string | null;
+    bloodType: string | null;
+    validityPeriod: string | null;
     createdAt: string;
     updatedAt: string;
     approvedById: number | null;
@@ -61,6 +65,13 @@ interface RequestDetails {
     }>;
 }
 
+interface PassType {
+    id: number;
+    name_en: string;
+    name_ar: string;
+    is_active: boolean;
+}
+
 interface UserData {
     id: number;
     name: string;
@@ -78,6 +89,7 @@ export default function RequestDetailsPage() {
     const isRtl = locale === 'ar';
     const t = useTranslations('Admin.requestDetails');
     const dt = useTranslations('Admin.dashboard');
+    const gt = useTranslations('GatePassPage');
 
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
@@ -90,6 +102,7 @@ export default function RequestDetailsPage() {
     const [permissionDenied, setPermissionDenied] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editData, setEditData] = useState<Partial<RequestDetails>>({});
+    const [passTypes, setPassTypes] = useState<PassType[]>([]);
 
     // Helper function to check if user has a specific permission
     const hasPermission = (permissionKey: string) => {
@@ -120,6 +133,23 @@ export default function RequestDetailsPage() {
         const editParam = searchParams.get('edit');
         setIsEditMode(editParam === 'true');
     }, [requestId, searchParams]);
+
+    // Fetch pass types from database
+    useEffect(() => {
+        const fetchPassTypes = async () => {
+            try {
+                const response = await fetch('/api/pass-types');
+                if (response.ok) {
+                    const result = await response.json();
+                    setPassTypes(result.data || []);
+                }
+            } catch (error) {
+                console.error('Error fetching pass types:', error);
+            }
+        };
+
+        fetchPassTypes();
+    }, []);
 
     // Initialize editData when request is loaded and entering edit mode
     useEffect(() => {
@@ -223,6 +253,21 @@ export default function RequestDetailsPage() {
             }
             if (editData.validTo) {
                 updatePayload.validTo = editData.validTo;
+            }
+            if (editData.passTypeId !== undefined && editData.passTypeId !== request.passTypeId) {
+                updatePayload.passTypeId = editData.passTypeId ? Number(editData.passTypeId) : null;
+            }
+            if (editData.dateOfVisit !== undefined && editData.dateOfVisit !== request.dateOfVisit) {
+                updatePayload.dateOfVisit = editData.dateOfVisit;
+            }
+            if (editData.validityPeriod !== undefined && editData.validityPeriod !== request.validityPeriod) {
+                updatePayload.validityPeriod = editData.validityPeriod;
+            }
+            if (editData.otherProfessions !== undefined && editData.otherProfessions !== request.otherProfessions) {
+                updatePayload.otherProfessions = editData.otherProfessions;
+            }
+            if (editData.bloodType !== undefined && editData.bloodType !== request.bloodType) {
+                updatePayload.bloodType = editData.bloodType;
             }
 
             if (Object.keys(updatePayload).length === 0) {
@@ -422,8 +467,8 @@ export default function RequestDetailsPage() {
                             {/* Header Section */}
                             <div className="bg-white rounded-[16px] p-6 shadow-sm mb-6">
                                 <div className="flex items-center justify-between mb-8">
-                                    <RequestHeader
-                                        requestNumber={request.requestNumber}
+                                <RequestHeader
+                                    requestNumber={request.requestNumber}
                                     />
                                     <div className="flex items-center gap-3">
                                         <span className={`px-4 py-2 rounded-[8px] text-sm font-medium ${getStatusColor(request.status)}`}>
@@ -485,17 +530,109 @@ export default function RequestDetailsPage() {
                                             title={t('passPermitInfo') || "Pass Permit Info"}
                                             isEditable={isEditMode}
                                             onChange={(fieldName, value) => {
-                                                setEditData(prev => ({ ...prev, [fieldName]: value }));
+                                                // Convert passTypeId to number if it's a select field
+                                                if (fieldName === 'passTypeId') {
+                                                    setEditData(prev => ({ ...prev, [fieldName]: value ? Number(value) : null }));
+                                                } else {
+                                                    setEditData(prev => ({ ...prev, [fieldName]: value }));
+                                                }
                                             }}
                                             data={[
-                                                { label: t('fields.passType') || "Pass Type", value: isEditMode ? (editData.requestType !== undefined ? editData.requestType : request.requestType) : dt(`types.${request.requestType}`), fieldName: 'requestType' },
-                                                { label: t('fields.nationality') || "Nationality", value: isEditMode ? (editData.nationality !== undefined ? editData.nationality : request.nationality) : request.nationality, fieldName: 'nationality' },
-                                                { label: t('fields.identification') || "Identification", value: isEditMode ? (editData.identification !== undefined ? editData.identification : request.identification) : request.identification, fieldName: 'identification' },
-                                                { label: t('fields.passStartingDate') || "Pass Starting Date", value: isEditMode ? (editData.validFrom ? new Date(editData.validFrom).toLocaleDateString() : new Date(request.validFrom).toLocaleDateString()) : new Date(request.validFrom).toLocaleDateString() },
-                                                { label: t('fields.validityPeriod') || "Validity Period", value: isEditMode ? (editData.validTo ? new Date(editData.validTo).toLocaleDateString() : new Date(request.validTo).toLocaleDateString()) : new Date(request.validTo).toLocaleDateString() },
-                                                { label: t('fields.passFor') || "Pass For", value: isEditMode ? (editData.passFor !== undefined ? (editData.passFor || 'Self') : (request.passFor || 'Self')) : (request.passFor || 'Self'), fieldName: 'passFor' },
-                                                { label: t('fields.purposeOfVisit') || "Purpose of visit", value: isEditMode ? (editData.purposeOfVisit !== undefined ? editData.purposeOfVisit : request.purposeOfVisit) : request.purposeOfVisit, fieldName: 'purposeOfVisit' },
-                                                { label: t('fields.organization') || "Organization Host", value: request.organization },
+                                                { 
+                                                    label: gt('fields.passType') || "Pass Type", 
+                                                    value: isEditMode 
+                                                        ? (editData.passTypeId !== undefined ? editData.passTypeId?.toString() : request.passTypeId?.toString() || '') 
+                                                        : (request.passTypeId && passTypes.find(pt => pt.id === request.passTypeId) 
+                                                            ? (locale === 'ar' ? passTypes.find(pt => pt.id === request.passTypeId)!.name_ar : passTypes.find(pt => pt.id === request.passTypeId)!.name_en)
+                                                            : 'N/A'), 
+                                                    fieldName: 'passTypeId',
+                                                    fieldType: 'select',
+                                                    options: [
+                                                        { value: '', label: gt('placeholders.selectPassType') || 'Select Pass Type' },
+                                                        ...passTypes.filter(pt => pt.is_active).map(pt => ({
+                                                            value: pt.id.toString(),
+                                                            label: locale === 'ar' ? pt.name_ar : `${pt.name_en}${pt.name_ar ? ` / ${pt.name_ar}` : ''}`
+                                                        }))
+                                                    ]
+                                                },
+                                                { 
+                                                    label: gt('fields.requestType') || "Request Type", 
+                                                    value: isEditMode ? (editData.requestType !== undefined ? editData.requestType : request.requestType) : request.requestType, 
+                                                    fieldName: 'requestType',
+                                                    fieldType: 'select',
+                                                    options: [
+                                                        { value: '', label: gt('placeholders.select') || 'Select' },
+                                                        { value: 'VISITOR', label: 'VISITOR' },
+                                                        { value: 'CONTRACTOR', label: 'CONTRACTOR' },
+                                                        { value: 'EMPLOYEE', label: 'EMPLOYEE' },
+                                                        { value: 'VEHICLE', label: 'VEHICLE' }
+                                                    ]
+                                                },
+                                                { 
+                                                    label: gt('fields.nationality') || "Nationality", 
+                                                    value: isEditMode ? (editData.nationality !== undefined ? editData.nationality : request.nationality) : request.nationality, 
+                                                    fieldName: 'nationality',
+                                                    fieldType: 'select',
+                                                    options: [
+                                                        { value: '', label: gt('placeholders.select') || 'Select' },
+                                                        { value: 'OMAN', label: gt('options.omani') || 'Omani' },
+                                                        { value: 'OTHER', label: gt('options.other') || 'Other' }
+                                                    ]
+                                                },
+                                                { 
+                                                    label: gt('fields.identification') || "Identification", 
+                                                    value: isEditMode ? (editData.identification !== undefined ? editData.identification : request.identification) : request.identification, 
+                                                    fieldName: 'identification',
+                                                    fieldType: 'select',
+                                                    options: [
+                                                        { value: '', label: gt('placeholders.select') || 'Select' },
+                                                        { value: 'ID', label: gt('options.idCard') || 'ID Card' },
+                                                        { value: 'PASSPORT', label: gt('options.passport') || 'Passport' }
+                                                    ]
+                                                },
+                                                { 
+                                                    label: gt('fields.organization') || "Organization Host", 
+                                                    value: request.organization 
+                                                },
+                                                { 
+                                                    label: gt('fields.passStartingDate') || "Pass Starting Date", 
+                                                    value: isEditMode ? (editData.dateOfVisit !== undefined ? editData.dateOfVisit : request.dateOfVisit) : new Date(request.dateOfVisit).toLocaleDateString(), 
+                                                    fieldName: 'dateOfVisit',
+                                                    fieldType: 'date'
+                                                },
+                                                { 
+                                                    label: gt('fields.validityPeriod') || "Validity Period", 
+                                                    value: isEditMode 
+                                                        ? (editData.validityPeriod !== undefined ? editData.validityPeriod : request.validityPeriod || '') 
+                                                        : (request.validityPeriod === '1_DAY' ? gt('options.oneDay') || '1 Day' :
+                                                           request.validityPeriod === '1_WEEK' ? gt('options.oneWeek') || '1 Week' :
+                                                           request.validityPeriod === '1_MONTH' ? gt('options.oneMonth') || '1 Month' : request.validityPeriod || '-'), 
+                                                    fieldName: 'validityPeriod',
+                                                    fieldType: 'select',
+                                                    options: [
+                                                        { value: '', label: gt('placeholders.selectDate') || 'Select Date' },
+                                                        { value: '1_DAY', label: gt('options.oneDay') || '1 Day' },
+                                                        { value: '1_WEEK', label: gt('options.oneWeek') || '1 Week' },
+                                                        { value: '1_MONTH', label: gt('options.oneMonth') || '1 Month' }
+                                                    ]
+                                                },
+                                                { 
+                                                    label: gt('fields.passFor') || "Pass For", 
+                                                    value: isEditMode ? (editData.passFor !== undefined ? (editData.passFor || 'SELF') : (request.passFor || 'SELF')) : (request.passFor === 'SELF' ? gt('options.self') || 'Self' : request.passFor === 'OTHER' ? gt('options.other') || 'Other' : request.passFor || 'Self'), 
+                                                    fieldName: 'passFor',
+                                                    fieldType: 'select',
+                                                    options: [
+                                                        { value: '', label: gt('placeholders.selectBeneficiary') || 'Select Beneficiary' },
+                                                        { value: 'SELF', label: gt('options.self') || 'Self' },
+                                                        { value: 'OTHER', label: gt('options.other') || 'Other' }
+                                                    ]
+                                                },
+                                                { 
+                                                    label: gt('fields.purposeOfVisit') || "Purpose of visit", 
+                                                    value: isEditMode ? (editData.purposeOfVisit !== undefined ? editData.purposeOfVisit : request.purposeOfVisit) : request.purposeOfVisit, 
+                                                    fieldName: 'purposeOfVisit',
+                                                    fieldType: 'textarea'
+                                                },
                                             ]}
                                         />
 
@@ -505,16 +642,88 @@ export default function RequestDetailsPage() {
                                             title={t('passHolderInfo') || "Pass Holder Info"}
                                             isEditable={isEditMode}
                                             onChange={(fieldName, value) => {
-                                                setEditData(prev => ({ ...prev, [fieldName]: value }));
+                                                // Convert passTypeId to number if it's a select field
+                                                if (fieldName === 'passTypeId') {
+                                                    setEditData(prev => ({ ...prev, [fieldName]: value ? Number(value) : null }));
+                                                } else {
+                                                    setEditData(prev => ({ ...prev, [fieldName]: value }));
+                                                }
                                             }}
                                             data={[
-                                                { label: t('fields.holderNameEn') || "Holder Name(En)", value: isEditMode ? (editData.applicantNameEn !== undefined ? editData.applicantNameEn : request.applicantNameEn) : request.applicantNameEn, fieldName: 'applicantNameEn' },
-                                                { label: t('fields.holderNameAr') || "Holder Name(Ar)", value: isEditMode ? (editData.applicantNameAr !== undefined ? editData.applicantNameAr : request.applicantNameAr) : request.applicantNameAr, fieldName: 'applicantNameAr' },
-                                                { label: t('fields.telephone') || "Telephone", value: isEditMode ? (editData.applicantPhone !== undefined ? (editData.applicantPhone || '-') : (request.applicantPhone || '-')) : (request.applicantPhone || '-'), fieldName: 'applicantPhone' },
-                                                { label: t('fields.email') || "Email", value: isEditMode ? (editData.applicantEmail !== undefined ? editData.applicantEmail : request.applicantEmail) : request.applicantEmail, fieldName: 'applicantEmail' },
-                                                { label: t('fields.gender') || "Gender", value: isEditMode ? (editData.gender !== undefined ? editData.gender : request.gender) : request.gender, fieldName: 'gender' },
-                                                { label: t('fields.profession') || "Profession", value: isEditMode ? (editData.profession !== undefined ? editData.profession : request.profession) : request.profession, fieldName: 'profession' },
-                                                { label: t('fields.idPassportNumber') || "ID Or Passport Number", value: isEditMode ? (editData.passportIdNumber !== undefined ? editData.passportIdNumber : request.passportIdNumber) : request.passportIdNumber, fieldName: 'passportIdNumber' },
+                                                { 
+                                                    label: gt('fields.fullNameEn') || "Holder Name(En)", 
+                                                    value: isEditMode ? (editData.applicantNameEn !== undefined ? editData.applicantNameEn : request.applicantNameEn) : request.applicantNameEn, 
+                                                    fieldName: 'applicantNameEn' 
+                                                },
+                                                { 
+                                                    label: gt('fields.fullNameAr') || "Holder Name(Ar)", 
+                                                    value: isEditMode ? (editData.applicantNameAr !== undefined ? editData.applicantNameAr : request.applicantNameAr) : request.applicantNameAr, 
+                                                    fieldName: 'applicantNameAr' 
+                                                },
+                                                { 
+                                                    label: gt('fields.telephone') || "Telephone", 
+                                                    value: isEditMode ? (editData.applicantPhone !== undefined ? (editData.applicantPhone || '-') : (request.applicantPhone || '-')) : (request.applicantPhone || '-'), 
+                                                    fieldName: 'applicantPhone' 
+                                                },
+                                                { 
+                                                    label: gt('fields.email') || "Email", 
+                                                    value: isEditMode ? (editData.applicantEmail !== undefined ? editData.applicantEmail : request.applicantEmail) : request.applicantEmail, 
+                                                    fieldName: 'applicantEmail' 
+                                                },
+                                                { 
+                                                    label: gt('fields.gender') || "Gender", 
+                                                    value: isEditMode ? (editData.gender !== undefined ? editData.gender : request.gender) : (request.gender === 'MALE' ? gt('options.male') || 'Male' : request.gender === 'FEMALE' ? gt('options.female') || 'Female' : request.gender), 
+                                                    fieldName: 'gender',
+                                                    fieldType: 'select',
+                                                    options: [
+                                                        { value: '', label: gt('placeholders.select') || 'Select' },
+                                                        { value: 'MALE', label: gt('options.male') || 'Male' },
+                                                        { value: 'FEMALE', label: gt('options.female') || 'Female' }
+                                                    ]
+                                                },
+                                                { 
+                                                    label: gt('fields.profession') || "Profession", 
+                                                    value: isEditMode ? (editData.profession !== undefined ? editData.profession : request.profession) : request.profession, 
+                                                    fieldName: 'profession',
+                                                    fieldType: 'select',
+                                                    options: [
+                                                        { value: '', label: gt('placeholders.select') || 'Select' },
+                                                        { value: 'ENGINEER', label: gt('options.engineer') || 'Engineer' },
+                                                        { value: 'TECHNICIAN', label: gt('options.technician') || 'Technician' },
+                                                        { value: 'VISITOR', label: gt('options.visitor') || 'Visitor' },
+                                                        { value: 'TECHNICAL', label: gt('options.technical') || 'Technical' },
+                                                        { value: 'MANAGER', label: gt('options.manager') || 'Manager' },
+                                                        { value: 'ADMINISTRATOR', label: gt('options.administrator') || 'Administrator' },
+                                                        { value: 'OTHER', label: gt('options.other') || 'Other' }
+                                                    ]
+                                                },
+                                                { 
+                                                    label: gt('fields.otherProfessions') || "Other Professions", 
+                                                    value: isEditMode ? (editData.otherProfessions !== undefined ? editData.otherProfessions : request.otherProfessions || '') : (request.otherProfessions || '-'), 
+                                                    fieldName: 'otherProfessions' 
+                                                },
+                                                { 
+                                                    label: gt('fields.bloodType') || "Blood Type", 
+                                                    value: isEditMode ? (editData.bloodType !== undefined ? editData.bloodType : request.bloodType || '') : (request.bloodType || '-'), 
+                                                    fieldName: 'bloodType',
+                                                    fieldType: 'select',
+                                                    options: [
+                                                        { value: '', label: gt('placeholders.select') || 'Select' },
+                                                        { value: 'O+', label: 'O+' },
+                                                        { value: 'O-', label: 'O-' },
+                                                        { value: 'A+', label: 'A+' },
+                                                        { value: 'A-', label: 'A-' },
+                                                        { value: 'B+', label: 'B+' },
+                                                        { value: 'B-', label: 'B-' },
+                                                        { value: 'AB+', label: 'AB+' },
+                                                        { value: 'AB-', label: 'AB-' }
+                                                    ]
+                                                },
+                                                { 
+                                                    label: gt('fields.idPassportNumber') || "ID Or Passport Number", 
+                                                    value: isEditMode ? (editData.passportIdNumber !== undefined ? editData.passportIdNumber : request.passportIdNumber) : request.passportIdNumber, 
+                                                    fieldName: 'passportIdNumber' 
+                                                },
                                             ]}
                                         />
                                     </div>
