@@ -10,12 +10,13 @@ interface InfoRowProps {
 
 const InfoRow: React.FC<InfoRowProps> = ({ label, value, isEditable, fieldName, onChange }) => {
     if (isEditable && fieldName && onChange) {
+        const inputValue = typeof value === 'string' ? value : (value ? String(value) : '');
         return (
             <div className="flex justify-between items-start py-1">
                 <span className="text-[#3E4259] font-medium text-[14px] md:text-[16px] w-1/2">{label} :</span>
                 <input
                     type="text"
-                    value={value as string || ''}
+                    value={inputValue}
                     onChange={(e) => onChange(fieldName, e.target.value)}
                     className="text-[#3E4259] font-normal text-[14px] md:text-[16px] w-1/2 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />

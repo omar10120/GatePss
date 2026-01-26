@@ -121,6 +121,16 @@ export default function RequestDetailsPage() {
         setIsEditMode(editParam === 'true');
     }, [requestId, searchParams]);
 
+    // Initialize editData when request is loaded and entering edit mode
+    useEffect(() => {
+        if (request && isEditMode) {
+            // Only initialize if editData is empty or doesn't have the same id
+            if (Object.keys(editData).length === 0 || editData.id !== request.id) {
+                setEditData({ ...request });
+            }
+        }
+    }, [request, isEditMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const fetchRequestDetails = async (token: string, id: string) => {
         setLoading(true);
         setPermissionDenied(false);
@@ -142,7 +152,13 @@ export default function RequestDetailsPage() {
 
             const result = await response.json();
             setRequest(result.data);
-            setEditData(result.data); // Initialize edit data with current request data
+            // Only initialize editData if not in edit mode (to preserve user changes)
+            if (!isEditMode) {
+                setEditData({ ...result.data });
+            } else {
+                // If in edit mode, merge with existing editData to preserve user changes
+                setEditData(prev => ({ ...result.data, ...prev }));
+            }
         } catch (error) {
             console.error('Error fetching request details:', error);
             setError('Failed to load request details');
@@ -244,7 +260,7 @@ export default function RequestDetailsPage() {
 
     const handleCancel = () => {
         if (request) {
-            setEditData(request); // Reset to original data
+            setEditData({ ...request }); // Reset to original data
         }
         setIsEditMode(false);
         router.replace(`/admin/requests/${requestId}`);
@@ -254,6 +270,10 @@ export default function RequestDetailsPage() {
         if (isEditMode) {
             handleCancel();
         } else {
+            // Initialize editData with current request data when entering edit mode
+            if (request) {
+                setEditData({ ...request });
+            }
             setIsEditMode(true);
             router.replace(`/admin/requests/${requestId}?edit=true`);
         }
@@ -464,15 +484,17 @@ export default function RequestDetailsPage() {
                                         <InfoSection
                                             title={t('passPermitInfo') || "Pass Permit Info"}
                                             isEditable={isEditMode}
-                                            onChange={(fieldName, value) => setEditData(prev => ({ ...prev, [fieldName]: value }))}
+                                            onChange={(fieldName, value) => {
+                                                setEditData(prev => ({ ...prev, [fieldName]: value }));
+                                            }}
                                             data={[
-                                                { label: t('fields.passType') || "Pass Type", value: dt(`types.${isEditMode ? (editData.requestType || request.requestType) : request.requestType}`), fieldName: 'requestType' },
-                                                { label: t('fields.nationality') || "Nationality", value: isEditMode ? (editData.nationality || request.nationality) : request.nationality, fieldName: 'nationality' },
-                                                { label: t('fields.identification') || "Identification", value: isEditMode ? (editData.identification || request.identification) : request.identification, fieldName: 'identification' },
+                                                { label: t('fields.passType') || "Pass Type", value: isEditMode ? (editData.requestType !== undefined ? editData.requestType : request.requestType) : dt(`types.${request.requestType}`), fieldName: 'requestType' },
+                                                { label: t('fields.nationality') || "Nationality", value: isEditMode ? (editData.nationality !== undefined ? editData.nationality : request.nationality) : request.nationality, fieldName: 'nationality' },
+                                                { label: t('fields.identification') || "Identification", value: isEditMode ? (editData.identification !== undefined ? editData.identification : request.identification) : request.identification, fieldName: 'identification' },
                                                 { label: t('fields.passStartingDate') || "Pass Starting Date", value: isEditMode ? (editData.validFrom ? new Date(editData.validFrom).toLocaleDateString() : new Date(request.validFrom).toLocaleDateString()) : new Date(request.validFrom).toLocaleDateString() },
                                                 { label: t('fields.validityPeriod') || "Validity Period", value: isEditMode ? (editData.validTo ? new Date(editData.validTo).toLocaleDateString() : new Date(request.validTo).toLocaleDateString()) : new Date(request.validTo).toLocaleDateString() },
-                                                { label: t('fields.passFor') || "Pass For", value: isEditMode ? (editData.passFor || request.passFor || 'Self') : (request.passFor || 'Self'), fieldName: 'passFor' },
-                                                { label: t('fields.purposeOfVisit') || "Purpose of visit", value: isEditMode ? (editData.purposeOfVisit || request.purposeOfVisit) : request.purposeOfVisit, fieldName: 'purposeOfVisit' },
+                                                { label: t('fields.passFor') || "Pass For", value: isEditMode ? (editData.passFor !== undefined ? (editData.passFor || 'Self') : (request.passFor || 'Self')) : (request.passFor || 'Self'), fieldName: 'passFor' },
+                                                { label: t('fields.purposeOfVisit') || "Purpose of visit", value: isEditMode ? (editData.purposeOfVisit !== undefined ? editData.purposeOfVisit : request.purposeOfVisit) : request.purposeOfVisit, fieldName: 'purposeOfVisit' },
                                                 { label: t('fields.organization') || "Organization Host", value: request.organization },
                                             ]}
                                         />
@@ -482,15 +504,17 @@ export default function RequestDetailsPage() {
                                         <InfoSection
                                             title={t('passHolderInfo') || "Pass Holder Info"}
                                             isEditable={isEditMode}
-                                            onChange={(fieldName, value) => setEditData(prev => ({ ...prev, [fieldName]: value }))}
+                                            onChange={(fieldName, value) => {
+                                                setEditData(prev => ({ ...prev, [fieldName]: value }));
+                                            }}
                                             data={[
-                                                { label: t('fields.holderNameEn') || "Holder Name(En)", value: isEditMode ? (editData.applicantNameEn || request.applicantNameEn) : request.applicantNameEn, fieldName: 'applicantNameEn' },
-                                                { label: t('fields.holderNameAr') || "Holder Name(Ar)", value: isEditMode ? (editData.applicantNameAr || request.applicantNameAr) : request.applicantNameAr, fieldName: 'applicantNameAr' },
-                                                { label: t('fields.telephone') || "Telephone", value: isEditMode ? (editData.applicantPhone || request.applicantPhone || '-') : (request.applicantPhone || '-'), fieldName: 'applicantPhone' },
-                                                { label: t('fields.email') || "Email", value: isEditMode ? (editData.applicantEmail || request.applicantEmail) : request.applicantEmail, fieldName: 'applicantEmail' },
-                                                { label: t('fields.gender') || "Gender", value: isEditMode ? (editData.gender || request.gender) : request.gender, fieldName: 'gender' },
-                                                { label: t('fields.profession') || "Profession", value: isEditMode ? (editData.profession || request.profession) : request.profession, fieldName: 'profession' },
-                                                { label: t('fields.idPassportNumber') || "ID Or Passport Number", value: isEditMode ? (editData.passportIdNumber || request.passportIdNumber) : request.passportIdNumber, fieldName: 'passportIdNumber' },
+                                                { label: t('fields.holderNameEn') || "Holder Name(En)", value: isEditMode ? (editData.applicantNameEn !== undefined ? editData.applicantNameEn : request.applicantNameEn) : request.applicantNameEn, fieldName: 'applicantNameEn' },
+                                                { label: t('fields.holderNameAr') || "Holder Name(Ar)", value: isEditMode ? (editData.applicantNameAr !== undefined ? editData.applicantNameAr : request.applicantNameAr) : request.applicantNameAr, fieldName: 'applicantNameAr' },
+                                                { label: t('fields.telephone') || "Telephone", value: isEditMode ? (editData.applicantPhone !== undefined ? (editData.applicantPhone || '-') : (request.applicantPhone || '-')) : (request.applicantPhone || '-'), fieldName: 'applicantPhone' },
+                                                { label: t('fields.email') || "Email", value: isEditMode ? (editData.applicantEmail !== undefined ? editData.applicantEmail : request.applicantEmail) : request.applicantEmail, fieldName: 'applicantEmail' },
+                                                { label: t('fields.gender') || "Gender", value: isEditMode ? (editData.gender !== undefined ? editData.gender : request.gender) : request.gender, fieldName: 'gender' },
+                                                { label: t('fields.profession') || "Profession", value: isEditMode ? (editData.profession !== undefined ? editData.profession : request.profession) : request.profession, fieldName: 'profession' },
+                                                { label: t('fields.idPassportNumber') || "ID Or Passport Number", value: isEditMode ? (editData.passportIdNumber !== undefined ? editData.passportIdNumber : request.passportIdNumber) : request.passportIdNumber, fieldName: 'passportIdNumber' },
                                             ]}
                                         />
                                     </div>
