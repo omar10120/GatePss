@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken, extractTokenFromHeader } from '@/lib/auth';
+import { TokenExpiredError } from 'jsonwebtoken';
 
 export async function GET(request: NextRequest) {
     try {
@@ -13,7 +14,22 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const payload = verifyToken(token);
+        let payload: ReturnType<typeof verifyToken>;
+        try {
+            payload = verifyToken(token);
+        } catch (error) {
+            if (error instanceof TokenExpiredError) {
+                // Return 401 with specific error code for client-side handling
+                return NextResponse.json(
+                    { error: 'Unauthorized', message: 'Session expired. Please login again.', code: 'TOKEN_EXPIRED' },
+                    { status: 401 }
+                );
+            }
+            return NextResponse.json(
+                { error: 'Unauthorized', message: 'Invalid token' },
+                { status: 401 }
+            );
+        }
 
         if (!payload) {
             return NextResponse.json(

@@ -53,13 +53,11 @@ export const useAuth = () => {
 
             // Fetch fresh user data
             try {
-                const response = await fetch('/api/auth/me', {
+                const data = await fetch('/api/auth/me', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                });
-
-                const data = await response.json();
+                }).then(res => res.json());
 
                 if (data.success) {
                     const user = data.data.user;
@@ -83,7 +81,16 @@ export const useAuth = () => {
                 }
             } catch (error) {
                 console.error('Error refreshing user data:', error);
-                setAuthState((prev) => ({ ...prev, loading: false }));
+                // If it's a token expiration, apiFetch will handle redirect
+                // Just update state here
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                setAuthState({
+                    user: null,
+                    token: null,
+                    loading: false,
+                    isAuthenticated: false,
+                });
             }
         };
 

@@ -1,4 +1,4 @@
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt, { SignOptions, TokenExpiredError } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 
@@ -29,6 +29,10 @@ export function verifyToken(token: string): JWTPayload | null {
     try {
         return jwt.verify(token, JWT_SECRET) as JWTPayload;
     } catch (error: unknown) {
+        if (error instanceof TokenExpiredError) {
+            // Re-throw expired token error so it can be handled by middleware/routes
+            throw error;
+        }
         console.error('Token verification failed:', error);
         return null;
     }

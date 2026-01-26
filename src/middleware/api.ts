@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken, extractTokenFromHeader, JWTPayload } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { TokenExpiredError } from 'jsonwebtoken';
 
 export interface AuthenticatedRequest extends NextRequest {
     user?: JWTPayload;
@@ -14,17 +15,46 @@ export async function authenticate(request: NextRequest): Promise<JWTPayload | n
         return null;
     }
 
-    const payload = verifyToken(token);
-    return payload;
+    try {
+        const payload = verifyToken(token);
+        return payload;
+    } catch (error) {
+        if (error instanceof TokenExpiredError) {
+            // Return null to trigger redirect in requireAuth
+            return null;
+        }
+        return null;
+    }
 }
 
 export async function requireAuth(
     request: NextRequest,
     handler: (req: NextRequest, user: JWTPayload) => Promise<NextResponse>
 ): Promise<NextResponse> {
+    const authHeader = request.headers.get('authorization');
+    const token = extractTokenFromHeader(authHeader);
+    let isExpired = false;
+
+    if (token) {
+        try {
+            verifyToken(token);
+        } catch (error) {
+            if (error instanceof TokenExpiredError) {
+                isExpired = true;
+            }
+        }
+    }
+
     const user = await authenticate(request);
 
     if (!user) {
+        // If token was expired, return 401 with specific error code
+        if (isExpired) {
+            return NextResponse.json(
+                { error: 'Unauthorized', message: 'Session expired. Please login again.', code: 'TOKEN_EXPIRED' },
+                { status: 401 }
+            );
+        }
         return NextResponse.json(
             { error: 'Unauthorized', message: 'Authentication required' },
             { status: 401 }

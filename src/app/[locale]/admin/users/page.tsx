@@ -68,6 +68,17 @@ export default function AdminUsersPage() {
                 },
             });
 
+            // Handle 401 - token expired, redirect to login
+            if (response.status === 401) {
+                const data = await response.json().catch(() => ({}));
+                if (data.code === 'TOKEN_EXPIRED' || data.message?.includes('expired')) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = `/${locale}/admin/login`;
+                    return;
+                }
+            }
+
             if (response.status === 403) {
                 setPermissionDenied(true);
                 return;
