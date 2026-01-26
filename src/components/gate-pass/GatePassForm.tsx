@@ -70,7 +70,7 @@ export const GatePassForm: React.FC = () => {
             
             if (!enText && !arText) return '';
             if (!enText) return arText;
-            if (!arText) return enText;
+            if (!arText) return enText; 
             return `${enText} / ${arText}`;
         } catch (error) {
             console.error('Error getting bilingual text:', path, error);
@@ -205,6 +205,65 @@ export const GatePassForm: React.FC = () => {
             const fieldLabel = getFieldLabel('passportIdImage');
             newFieldErrors['passportIdImage'] = `${fieldLabel} ${getBilingualNested(['errors', 'required'])}`;
             isValid = false;
+        } else {
+            // Validate passport ID image size (max 5MB)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (passportIdImage.size > maxSize) {
+                newFieldErrors['passportIdImage'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 5MB limit';
+                isValid = false;
+            }
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+            if (!allowedTypes.includes(passportIdImage.type)) {
+                newFieldErrors['passportIdImage'] = getBilingualNested(['errors', 'invalidFileType']) || 'Only JPG, PNG, and PDF files are allowed';
+                isValid = false;
+            }
+        }
+
+        // Photo validation (optional but if provided, validate it)
+        const photo = formData.get('photo') as File | null;
+        if (photo && photo.size > 0) {
+            // Validate photo size (max 5MB)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (photo.size > maxSize) {
+                newFieldErrors['photo'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 5MB limit';
+                isValid = false;
+            }
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+            if (!allowedTypes.includes(photo.type)) {
+                newFieldErrors['photo'] = getBilingualNested(['errors', 'invalidFileType']) || 'Only JPG, PNG, and PDF files are allowed';
+                isValid = false;
+            }
+        }
+
+        // Other Documents validation (optional but if provided, validate them)
+        const otherDocuments1 = formData.get('otherDocuments1') as File | null;
+        if (otherDocuments1 && otherDocuments1.size > 0) {
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (otherDocuments1.size > maxSize) {
+                newFieldErrors['otherDocuments1'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 5MB limit';
+                isValid = false;
+            }
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+            if (!allowedTypes.includes(otherDocuments1.type)) {
+                newFieldErrors['otherDocuments1'] = getBilingualNested(['errors', 'invalidFileType']) || 'Only JPG, PNG, and PDF files are allowed';
+                isValid = false;
+            }
+        }
+
+        const otherDocuments2 = formData.get('otherDocuments2') as File | null;
+        if (otherDocuments2 && otherDocuments2.size > 0) {
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (otherDocuments2.size > maxSize) {
+                newFieldErrors['otherDocuments2'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 5MB limit';
+                isValid = false;
+            }
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+            if (!allowedTypes.includes(otherDocuments2.type)) {
+                newFieldErrors['otherDocuments2'] = getBilingualNested(['errors', 'invalidFileType']) || 'Only JPG, PNG, and PDF files are allowed';
+                isValid = false;
+            }
         }
 
 
