@@ -103,6 +103,7 @@ export default function RequestDetailsPage() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editData, setEditData] = useState<Partial<RequestDetails>>({});
     const [passTypes, setPassTypes] = useState<PassType[]>([]);
+    const [files, setFiles] = useState<{ [key: string]: File | null }>({});
 
     // Helper function to check if user has a specific permission
     const hasPermission = (permissionKey: string) => {
@@ -270,20 +271,57 @@ export default function RequestDetailsPage() {
                 updatePayload.bloodType = editData.bloodType;
             }
 
-            if (Object.keys(updatePayload).length === 0) {
+            // Check if there are files to upload
+            const hasFiles = Object.values(files).some(file => file !== null);
+            
+            if (Object.keys(updatePayload).length === 0 && !hasFiles) {
                 setError('No changes to save');
                 setProcessing(false);
                 return;
             }
 
-            const response = await fetch(`/api/admin/requests/${requestId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updatePayload),
-            });
+            // If there are files, use FormData, otherwise use JSON
+            let response: Response;
+            if (hasFiles) {
+                const formData = new FormData();
+                
+                // Add all text fields to FormData
+                Object.keys(updatePayload).forEach(key => {
+                    const value = updatePayload[key];
+                    if (value !== null && value !== undefined) {
+                        if (value instanceof Date) {
+                            formData.append(key, value.toISOString());
+                        } else {
+                            formData.append(key, String(value));
+                        }
+                    }
+                });
+                
+                // Add files to FormData
+                Object.keys(files).forEach(key => {
+                    const file = files[key];
+                    if (file) {
+                        formData.append(key, file);
+                    }
+                });
+
+                response = await fetch(`/api/admin/requests/${requestId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
+            } else {
+                response = await fetch(`/api/admin/requests/${requestId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatePayload),
+                });
+            }
 
             const result = await response.json();
 
@@ -731,20 +769,65 @@ export default function RequestDetailsPage() {
                                     {/* Right Column: Documents */}
                                     <div>
                                         <DocumentCard
-                                            title={t('fields.passportIdNumber') || "Passport/ID Number"}
+                                            title={gt('fields.copyOfCivilId') || "Copy of Civil ID"}
                                             imageUrl={request.passportIdImagePath}
+                                            isEditable={isEditMode}
+                                            fieldName="passportIdImage"
+                                            onChange={(fieldName, file) => {
+                                                setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                            }}
                                         />
 
-                                        {/* Display Other Documents if available */}
+                                        {/* Photo */}
+                                        <DocumentCard
+                                            title={gt('fields.photo') || "Photo"}
+                                            imageUrl={request.uploads.find(u => u.fileType === 'PHOTO')?.filePath || null}
+                                            isEditable={isEditMode}
+                                            fieldName="photo"
+                                            onChange={(fieldName, file) => {
+                                                setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                            }}
+                                        />
+
+                                        {/* Other Documents */}
                                         {request.uploads
                                             .filter(u => u.fileType.startsWith('OTHER'))
                                             .map((upload, idx) => (
                                                 <DocumentCard
                                                     key={upload.id}
-                                                    title={`${t('fields.otherDocuments') || "Other Documents"} ${idx + 1}`}
+                                                    title={`${gt('fields.otherDocuments1') || "Other Documents"} ${idx + 1}`}
                                                     imageUrl={upload.filePath}
+                                                    isEditable={isEditMode}
+                                                    fieldName={idx === 0 ? 'otherDocuments1' : 'otherDocuments2'}
+                                                    onChange={(fieldName, file) => {
+                                                        setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                                    }}
                                                 />
                                             ))}
+                                        
+                                        {/* Add empty slots for other documents if they don't exist */}
+                                        {isEditMode && request.uploads.filter(u => u.fileType.startsWith('OTHER')).length === 0 && (
+                                            <>
+                                                <DocumentCard
+                                                    title={`${gt('fields.otherDocuments1') || "Other Documents"} 1`}
+                                                    imageUrl={null}
+                                                    isEditable={isEditMode}
+                                                    fieldName="otherDocuments1"
+                                                    onChange={(fieldName, file) => {
+                                                        setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                                    }}
+                                                />
+                                                <DocumentCard
+                                                    title={`${gt('fields.otherDocuments2') || "Other Documents"} 2`}
+                                                    imageUrl={null}
+                                                    isEditable={isEditMode}
+                                                    fieldName="otherDocuments2"
+                                                    onChange={(fieldName, file) => {
+                                                        setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                                    }}
+                                                />
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
