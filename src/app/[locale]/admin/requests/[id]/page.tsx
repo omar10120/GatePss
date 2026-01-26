@@ -104,6 +104,11 @@ export default function RequestDetailsPage() {
     const [editData, setEditData] = useState<Partial<RequestDetails>>({});
     const [passTypes, setPassTypes] = useState<PassType[]>([]);
     const [files, setFiles] = useState<{ [key: string]: File | null }>({});
+    const [imageModal, setImageModal] = useState<{ isOpen: boolean; imageUrl: string | null; title: string }>({
+        isOpen: false,
+        imageUrl: null,
+        title: ''
+    });
 
     // Helper function to check if user has a specific permission
     const hasPermission = (permissionKey: string) => {
@@ -776,6 +781,15 @@ export default function RequestDetailsPage() {
                                             onChange={(fieldName, file) => {
                                                 setFiles(prev => ({ ...prev, [fieldName]: file }));
                                             }}
+                                            onView={() => {
+                                                if (request.passportIdImagePath) {
+                                                    setImageModal({
+                                                        isOpen: true,
+                                                        imageUrl: request.passportIdImagePath,
+                                                        title: gt('fields.copyOfCivilId') || "Copy of Civil ID"
+                                                    });
+                                                }
+                                            }}
                                         />
 
                                         {/* Photo */}
@@ -786,6 +800,16 @@ export default function RequestDetailsPage() {
                                             fieldName="photo"
                                             onChange={(fieldName, file) => {
                                                 setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                            }}
+                                            onView={() => {
+                                                const photoUrl = request.uploads.find(u => u.fileType === 'PHOTO')?.filePath;
+                                                if (photoUrl) {
+                                                    setImageModal({
+                                                        isOpen: true,
+                                                        imageUrl: photoUrl,
+                                                        title: gt('fields.photo') || "Photo"
+                                                    });
+                                                }
                                             }}
                                         />
 
@@ -801,6 +825,15 @@ export default function RequestDetailsPage() {
                                                     fieldName={idx === 0 ? 'otherDocuments1' : 'otherDocuments2'}
                                                     onChange={(fieldName, file) => {
                                                         setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                                    }}
+                                                    onView={() => {
+                                                        if (upload.filePath) {
+                                                            setImageModal({
+                                                                isOpen: true,
+                                                                imageUrl: upload.filePath,
+                                                                title: `${gt('fields.otherDocuments1') || "Other Documents"} ${idx + 1}`
+                                                            });
+                                                        }
                                                     }}
                                                 />
                                             ))}
@@ -889,6 +922,46 @@ export default function RequestDetailsPage() {
                         </div>
                     )
                 }
+
+                {/* Image Modal */}
+                {imageModal.isOpen && imageModal.imageUrl && (
+                    <div 
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+                        onClick={() => setImageModal({ isOpen: false, imageUrl: null, title: '' })}
+                    >
+                        <div 
+                            className="relative w-[80vw] h-[80vh] max-w-[90vw] max-h-[90vh] bg-white rounded-lg overflow-hidden shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setImageModal({ isOpen: false, imageUrl: null, title: '' })}
+                                className="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+                                aria-label="Close"
+                            >
+                                <svg className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+
+                            {/* Title */}
+                            {imageModal.title && (
+                                <div className="absolute top-4 left-4 z-10 bg-white px-4 py-2 rounded-lg shadow-lg">
+                                    <h3 className="text-lg font-semibold text-gray-900">{imageModal.title}</h3>
+                                </div>
+                            )}
+
+                            {/* Image */}
+                            <div className="w-full h-full flex items-center justify-center p-4">
+                                <img
+                                    src={imageModal.imageUrl}
+                                    alt={imageModal.title}
+                                    className="max-w-full max-h-full object-contain"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div >
     );

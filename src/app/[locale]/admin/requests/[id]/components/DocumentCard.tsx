@@ -127,7 +127,13 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                                 alt={title}
                                 className="w-full h-full object-contain rounded-md"
                             />
-                            <div className="absolute bottom-2 right-2 p-1 bg-gray-100 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div 
+                                className="absolute bottom-2 right-2 p-2 bg-white rounded-md shadow-md opacity-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (onView) onView();
+                                }}
+                            >
                                 <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 4l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                 </svg>
@@ -153,7 +159,13 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                         />
 
                         {/* Expand Icon */}
-                        <div className="absolute bottom-2 right-2 p-1 bg-gray-100 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div 
+                            className="absolute bottom-2 right-2 p-2 bg-white rounded-md shadow-md opacity-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (onView) onView();
+                            }}
+                        >
                             <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 4l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                             </svg>
