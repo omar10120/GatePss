@@ -450,18 +450,7 @@ export const GatePassForm: React.FC = () => {
                         ]}
                         required
                     />
-                    <Select
-                        name="identification"
-                        label={getBilingualNested(['fields', 'identification'])}
-                        error={fieldErrors.identification}
-                        
-                        options={[
-                            { value: '', label: getBilingualNested(['placeholders', 'select']) },
-                            { value: 'ID', label: getBilingualNested(['options', 'idCard']) },
-                            { value: 'PASSPORT', label: getBilingualNested(['options', 'passport']) },
-                        ]}
-                        required
-                    />
+             
                     <div className="w-full">
                         <label className="block text-sm font-medium text-gray-700 mb-2 font-['Rubik']">
                             {getBilingualNested(['fields', 'organization'])}
@@ -657,6 +646,18 @@ export const GatePassForm: React.FC = () => {
                             { value: 'AB+', label: 'AB+' },
                             { value: 'AB-', label: 'AB-' },
                         ]}
+                    />
+                    <Select
+                        name="identification"
+                        label={getBilingualNested(['fields', 'identification'])}
+                        error={fieldErrors.identification}
+                        
+                        options={[
+                            { value: '', label: getBilingualNested(['placeholders', 'select']) },
+                            { value: 'ID', label: getBilingualNested(['options', 'idCard']) },
+                            { value: 'PASSPORT', label: getBilingualNested(['options', 'passport']) },
+                        ]}
+                        required
                     />
                     <Input
                         name="passportIdNumber"
