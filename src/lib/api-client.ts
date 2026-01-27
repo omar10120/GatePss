@@ -146,7 +146,26 @@ export async function apiFetch<T = any>(
         } catch {
             errorData = {};
         }
-        throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`);
+        
+        // Prioritize message over error field, and provide fallback
+        const errorMessage = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
+        
+        // Create error with additional context
+        const error = new Error(errorMessage) as Error & { 
+            code?: string; 
+            statusCode?: number;
+            details?: any;
+        };
+        
+        if (errorData.code) {
+            error.code = errorData.code;
+        }
+        error.statusCode = response.status;
+        if (errorData.details) {
+            error.details = errorData.details;
+        }
+        
+        throw error;
     }
 
     const result = await response.json();

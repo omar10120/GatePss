@@ -47,9 +47,20 @@ export async function POST(
             });
 
             if (!soharResponse.success) {
+                // Determine appropriate HTTP status code based on Sohar Port response
+                const httpStatus = soharResponse.statusCode === 404 ? 404 : 500;
+                const errorMessage = soharResponse.error || soharResponse.message || 'Failed to get status from Sohar Port';
+                
                 return NextResponse.json(
-                    { error: 'Sohar Port Error', message: soharResponse.error || 'Failed to get status from Sohar Port' },
-                    { status: 500 }
+                    { 
+                        error: 'Sohar Port Error', 
+                        message: errorMessage,
+                        details: {
+                            externalReference: gateRequest.externalReference,
+                            statusCode: soharResponse.statusCode,
+                        }
+                    },
+                    { status: httpStatus }
                 );
             }
 

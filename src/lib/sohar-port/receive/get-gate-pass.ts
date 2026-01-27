@@ -15,7 +15,7 @@
  */
 
 import { SoharPortHttpClient } from '../client';
-import { GetGatePassRequest, GetGatePassResponse, GatePassStatus } from '../types';
+import { GetGatePassRequest, GetGatePassResponse, GatePassStatus, SoharPortNotFoundError } from '../types';
 import { getEndpointUrl } from '../config';
 import { logSuccess, logError } from '../utils/logger';
 
@@ -97,7 +97,20 @@ export async function getGatePass(
 
         // Handle different error types
         const statusCode = error.statusCode || error.response?.status || 500;
-        const errorMessage = error.message || error.response?.data?.message || 'Failed to retrieve gate pass from Sohar Port';
+        
+        // Provide more descriptive error messages
+        let errorMessage: string;
+        if (error instanceof SoharPortNotFoundError) {
+            errorMessage = `Gate pass not found in Sohar Port system. The pass number "${request.externalReference}" does not exist or has been removed.`;
+        } else {
+            const rawMessage = error.message || error.response?.data?.message || 'Failed to retrieve gate pass from Sohar Port';
+            // If the message is just "NOT_FOUND", provide more context
+            if (rawMessage === 'NOT_FOUND' || rawMessage.toUpperCase() === 'NOT_FOUND') {
+                errorMessage = `Gate pass not found in Sohar Port system. The pass number "${request.externalReference}" does not exist or has been removed.`;
+            } else {
+                errorMessage = rawMessage;
+            }
+        }
 
         return {
             success: false,

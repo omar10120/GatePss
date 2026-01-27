@@ -36,15 +36,6 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
 
             <div className="relative mb-8">
                 <svg width={size} height={size} className="transform -rotate-90">
-                    {/* Background Circle */}
-                    <circle
-                        cx={size / 2}
-                        cy={size / 2}
-                        r={radius}
-                        fill="transparent"
-                        stroke="#F2F2F7"
-                        strokeWidth={strokeWidth}
-                    />
                     {/* Approved Segment (Teal) */}
                     <circle
                         cx={size / 2}
@@ -54,8 +45,11 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
                         stroke="#00B09C"
                         strokeWidth={strokeWidth}
                         strokeDasharray={circumference}
-                        strokeDashoffset={approvedOffset}
+                        strokeDashoffset={0}
                         strokeLinecap="butt"
+                        style={{
+                            transition: 'stroke-dashoffset 0.7s cubic-bezier(.71,.63,.31,.99)',
+                        }}
                     />
                     {/* Rejected Segment (Red) */}
                     <circle
@@ -66,9 +60,12 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
                         stroke="#FF5757"
                         strokeWidth={strokeWidth}
                         strokeDasharray={circumference}
-                        strokeDashoffset={rejectedOffset}
+                        strokeDashoffset={circumference - (rejectedPercentage / 100) * circumference}
                         strokeLinecap="butt"
                         transform={`rotate(${approvedPercentage * 3.6}, ${size / 2}, ${size / 2})`}
+                        style={{
+                            transition: 'stroke-dashoffset 0.7s cubic-bezier(.71,.63,.31,.99), transform 0.7s cubic-bezier(.71,.63,.31,.99)'
+                        }}
                     />
                 </svg>
                 {/* Center Hole Shadow Effect */}

@@ -134,8 +134,13 @@ export default function PermitsPage() {
                 });
                 // Refresh permits list to show updated status (async, don't wait)
                 fetchPermits().catch(err => console.error('Error refreshing permits:', err));
-            } catch (error) {
-                console.error('Error checking Sohar status:', error);
+            } catch (error: any) {
+                // Handle 404 errors gracefully - pass might not exist in Sohar Port yet
+                if (error?.statusCode === 404) {
+                    console.warn('Gate pass not found in Sohar Port system:', error.message);
+                } else {
+                    console.error('Error checking Sohar status:', error);
+                }
                 // Continue to navigate even if status check fails
                 // apiFetch handles 401 (token expiration) automatically with redirect
             }
