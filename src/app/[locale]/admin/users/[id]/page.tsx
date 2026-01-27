@@ -9,6 +9,7 @@ import Header from '../../components/Header';
 import { useTranslations, useLocale } from 'next-intl';
 import SuccessModal from '@/components/ui/SuccessModal';
 import Image from 'next/image';
+import { apiFetch } from '@/lib/api-client';
 
 interface User {
     id: number;
@@ -68,61 +69,40 @@ export default function ViewUserPage() {
             setCurrentUser(JSON.parse(userData));
         }
 
-        fetchUser(token);
-        fetchPermissions(token);
+        fetchUser();
+        fetchPermissions();
     }, [userId]);
 
-    const fetchUser = async (token: string) => {
+    const fetchUser = async () => {
         try {
-            const response = await fetch(`/api/admin/users/${userId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch user');
-            }
-
-            const result = await response.json();
-            setUserData(result.data);
+            const result = await apiFetch<User>(`/api/admin/users/${userId}`);
+            setUserData(result);
             setFormData({
-                name: result.data.name,
-                email: result.data.email,
-                phoneNumber: result.data.phoneNumber || '',
+                name: result.name,
+                email: result.email,
+                phoneNumber: result.phoneNumber || '',
                 password: '',
-                permissionIds: (result.data.permissions || []).map((p: any) => p.id),
+                permissionIds: (result.permissions || []).map((p: any) => p.id),
             });
         } catch (error) {
             console.error('Error fetching user:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchPermissions = async (token: string) => {
+    const fetchPermissions = async () => {
         try {
-            const response = await fetch('/api/admin/permissions', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch permissions');
-            }
-
-            const result = await response.json();
-            setPermissions(result.data);
+            const result = await apiFetch<Permission[]>(`/api/admin/permissions`);
+            setPermissions(result);
         } catch (error) {
             console.error('Error fetching permissions:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         }
     };
 
     const handleSave = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         setSaving(true);
         setError('');
 
@@ -138,26 +118,17 @@ export default function ViewUserPage() {
                 body.password = formData.password;
             }
 
-            const response = await fetch(`/api/admin/users/${userId}`, {
+            const result = await apiFetch<User>(`/api/admin/users/${userId}`, {
                 method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(body),
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to update user');
-            }
-
-            setUserData(result.data);
+            setUserData(result);
             setIsEditMode(false);
             setShowSuccessModal(true);
         } catch (err: any) {
-            setError(err.message);
+            setError(err.message || 'Failed to update user');
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setSaving(false);
         }

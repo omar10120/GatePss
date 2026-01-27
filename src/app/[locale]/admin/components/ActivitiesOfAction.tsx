@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { apiFetch } from '@/lib/api-client';
 
 interface ChartDataPoint {
     date: string;
@@ -19,28 +20,17 @@ export const ActivitiesOfAction: React.FC = () => {
 
     useEffect(() => {
         const fetchChartData = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         setLoading(true);
         try {
             const days = filter === 'Day' ? 7 : filter === 'Week' ? 30 : 365;
-            const response = await fetch(`/api/admin/dashboard/charts?days=${days}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch chart data');
-            }
-
-            const result = await response.json();
+            const result = await apiFetch<{ success: boolean; data: { lineChart: ChartDataPoint[] } }>(`/api/admin/dashboard/charts?days=${days}`);
+            
             if (result.success && result.data?.lineChart) {
                 setChartData(result.data.lineChart);
             }
         } catch (error) {
             console.error('Error fetching chart data:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }

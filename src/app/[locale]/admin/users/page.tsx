@@ -7,6 +7,7 @@ import { getSidebarItems } from '@/config/navigation';
 import Header from '../components/Header';
 import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
+import { apiFetch } from '@/lib/api-client';
 
 interface User {
     id: number;
@@ -55,80 +56,51 @@ export default function AdminUsersPage() {
             setUser(JSON.parse(userData));
         }
 
-        fetchUsers(token, currentPage);
+        fetchUsers(currentPage);
     }, [currentPage]);
 
-    const fetchUsers = async (token: string, page: number = 1) => {
+    const fetchUsers = async (page: number = 1) => {
         setLoading(true);
         setPermissionDenied(false);
         try {
-            const response = await fetch(`/api/admin/users?page=${page}&limit=10`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            // Handle 401 - token expired, redirect to login
-            if (response.status === 401) {
-                const data = await response.json().catch(() => ({}));
-                if (data.code === 'TOKEN_EXPIRED' || data.message?.includes('expired')) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = `/${locale}/admin/login`;
-                    return;
-                }
-            }
-
-            if (response.status === 403) {
-                setPermissionDenied(true);
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch users');
-            }
-
-            const result = await response.json();
-            setUsers(result.data.users);
-            setPagination(result.data.pagination);
-        } catch (error) {
+            const result = await apiFetch<{ users: User[]; pagination: Pagination }>(`/api/admin/users?page=${page}&limit=10`);
+            
+            setUsers(result.users || []);
+            setPagination(result.pagination);
+        } catch (error: any) {
             console.error('Error fetching users:', error);
+            // Check if it's a permission error (403)
+            if (error.message?.includes('Forbidden') || error.message?.includes('permission')) {
+                setPermissionDenied(true);
+            }
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }
     };
 
     const handleToggleActive = async (userId: number, currentStatus: boolean) => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         try {
             if (!currentStatus) {
                 // Reactivate user
                 const userToUpdate = users.find(u => u.id === userId);
                 if (!userToUpdate) return;
 
-                await fetch(`/api/admin/users/${userId}`, {
+                await apiFetch(`/api/admin/users/${userId}`, {
                     method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify({ ...userToUpdate, isActive: true }),
                 });
             } else {
                 // Deactivate user
-                await fetch(`/api/admin/users/${userId}`, {
+                await apiFetch(`/api/admin/users/${userId}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
                 });
             }
 
-            fetchUsers(token, currentPage);
+            fetchUsers(currentPage);
         } catch (error) {
             console.error('Error toggling user status:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         }
     };
 

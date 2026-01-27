@@ -27,7 +27,9 @@ export async function GET(request: NextRequest) {
 
                 // Get users with pagination
                 const users = await prisma.user.findMany({
-                    where,
+                    where {
+                        not equal login user
+                    },
                     include: {
                         userPermissions: {
                             include: {

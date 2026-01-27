@@ -7,6 +7,7 @@ import { getSidebarItems } from '@/config/navigation';
 import Header from '../components/Header';
 import { TableFilter } from '../components/TableFilter';
 import { useLocale, useTranslations } from 'next-intl';
+import { apiFetch } from '@/lib/api-client';
 
 interface ActivityLog {
     id: number;
@@ -71,10 +72,10 @@ export default function AdminActivityPage() {
             setUser(JSON.parse(userData));
         }
 
-        fetchLogs(token);
+        fetchLogs();
     }, [filters]);
 
-    const fetchLogs = async (token: string) => {
+    const fetchLogs = async () => {
         setLoading(true);
         setPermissionDenied(false);
         try {
@@ -84,26 +85,16 @@ export default function AdminActivityPage() {
             params.append('page', filters.page.toString());
             params.append('limit', '50');
 
-            const response = await fetch(`/api/admin/logs?${params}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (response.status === 403) {
-                setPermissionDenied(true);
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch logs');
-            }
-
-            const result = await response.json();
-            setLogs(result.data.logs);
-            setPagination(result.data.pagination);
-        } catch (error) {
+            const result = await apiFetch<{ logs: any[]; pagination: any }>(`/api/admin/logs?${params}`);
+            setLogs(result.logs || []);
+            setPagination(result.pagination);
+        } catch (error: any) {
             console.error('Error fetching logs:', error);
+            // Check if it's a permission error (403)
+            if (error.message?.includes('Forbidden') || error.message?.includes('permission')) {
+                setPermissionDenied(true);
+            }
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }

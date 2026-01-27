@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import SuccessModal from '@/components/ui/SuccessModal';
+import { apiFetch } from '@/lib/api-client';
 
 interface FAQ {
     id: number;
@@ -46,25 +47,13 @@ export default function FAQ() {
     }, []);
 
     const fetchFAQs = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         setLoading(true);
         try {
-            const response = await fetch('/api/admin/faq', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch FAQs');
-            }
-
-            const result = await response.json();
-            setFaqs(result.data);
+            const result = await apiFetch<FAQ[]>(`/api/admin/faq`);
+            setFaqs(result);
         } catch (error) {
             console.error('Error fetching FAQs:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }
@@ -94,28 +83,16 @@ export default function FAQ() {
     };
 
     const handleSave = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         try {
             const url = editingFAQ
                 ? `/api/admin/faq/${editingFAQ.id}`
                 : '/api/admin/faq';
             const method = editingFAQ ? 'PUT' : 'POST';
 
-            const response = await fetch(url, {
+            await apiFetch(url, {
                 method,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(formData),
             });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to save FAQ');
-            }
 
             setShowForm(false);
             setEditingFAQ(null);
@@ -123,9 +100,10 @@ export default function FAQ() {
             setSuccessMessage(editingFAQ ? t('updatedSuccessfully') : t('createdSuccessfully'));
             setShowSuccessModal(true);
             fetchFAQs();
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to save FAQ';
+        } catch (error: any) {
+            const errorMessage = error.message || 'Failed to save FAQ';
             alert(errorMessage);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         }
     };
 

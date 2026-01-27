@@ -9,6 +9,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { TableFilter } from '../components/TableFilter';
 import { StatusUpdate } from './components/StatusUpdate';
 import RejectSuccessModal from '@/components/ui/RejectSuccessModal';
+import { apiFetch } from '@/lib/api-client';
 
 interface Request {
     id: number;
@@ -92,10 +93,10 @@ export default function AdminRequestsPage() {
             setUser(JSON.parse(userData));
         }
 
-        fetchRequests(token);
+        fetchRequests();
     }, [filters]);
 
-    const fetchRequests = async (token: string): Promise<void> => {
+    const fetchRequests = async (): Promise<void> => {
         setLoading(true);
         setPermissionDenied(false);
         try {
@@ -107,50 +108,27 @@ export default function AdminRequestsPage() {
             params.append('page', filters.page.toString());
             params.append('limit', '20');
 
-            const response = await fetch(`/api/admin/requests?${params}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (response.status === 403) {
-                setPermissionDenied(true);
-                setLoading(false);
-                return;
-            }
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: 'Failed to fetch requests' }));
-                throw new Error(errorData.message || errorData.error || 'Failed to fetch requests');
-            }
-
-            const result = await response.json();
+            const result = await apiFetch<{ requests: any[]; pagination: any }>(`/api/admin/requests?${params}`);
 
             // Handle successful response with empty data
-            if (result.success && result.data) {
-                setRequests(result.data.requests || []);
-                setPagination(result.data.pagination || null);
-            } else {
-                // If response is not in expected format, set empty state
-                setRequests([]);
-                setPagination(null);
-            }
+            setRequests(result.requests || []);
+            setPagination(result.pagination || null);
         } catch (error: any) {
             console.error('Error fetching requests:', error);
+            // Check if it's a permission error (403)
+            if (error.message?.includes('Forbidden') || error.message?.includes('permission')) {
+                setPermissionDenied(true);
+            }
             // Set empty state on error so UI can still render
             setRequests([]);
             setPagination(null);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }
     };
 
     const handleStatusUpdate = async (id: number, status: 'APPROVED' | 'REJECTED' | 'PENDING', rejectionReason?: string) => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No authentication token found');
-        }
-
         try {
             let endpoint = '';
             let body = {};
@@ -166,41 +144,29 @@ export default function AdminRequestsPage() {
                 throw new Error('Setting to PENDING is not supported');
             }
 
-            const response = await fetch(endpoint, {
+            await apiFetch(endpoint, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(body),
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || 'Failed to update status');
-            }
-
             // Refresh the list to reflect changes
-            await fetchRequests(token);
+            await fetchRequests();
 
         } catch (error: any) {
             console.error('Error updating status:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
             throw error; // Re-throw so StatusUpdate component can handle it
         }
     };
 
     const handleLogout = async () => {
-        const token = localStorage.getItem('token');
-
         try {
-            await fetch('/api/auth/logout', {
+            await apiFetch('/api/auth/logout', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
             });
         } catch (error) {
             console.error('Logout error:', error);
+            // Continue with logout even if API call fails
         }
 
         localStorage.removeItem('token');

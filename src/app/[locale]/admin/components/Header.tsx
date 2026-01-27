@@ -4,6 +4,7 @@ import { useRouter } from '@/i18n/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { LogoutConfirm } from '@/components/ui/LogoutConfirm';
 import Image from 'next/image';
+import { apiFetch } from '@/lib/api-client';
 
 interface User {
     name?: string;
@@ -45,17 +46,13 @@ export default function Header() {
     }, [isDropdownOpen]);
 
     const handleLogout = async () => {
-        const token = localStorage.getItem('token');
-
         try {
-            await fetch('/api/auth/logout', {
+            await apiFetch('/api/auth/logout', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
             });
         } catch (error) {
             console.error('Logout error:', error);
+            // Continue with logout even if API call fails
         }
 
         localStorage.removeItem('token');
