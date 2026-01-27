@@ -335,8 +335,8 @@ export default function AdminRequestsPage() {
                                                                         </button>
                                                                     </td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#747474] text-[12px] sm:text-[14px] text-center">{request.id}</td>
-                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#222222] font-bold text-[12px] sm:text-[14px]">{request.applicantNameEn}</td>
-                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 relative overflow-visible">
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#222222] font-bold text-[12px] sm:text-[14px] text-center">{request.applicantNameEn}</td>
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 relative overflow-visible text-center">
                                                                         <div className="flex justify-center">
                                                                             <StatusUpdate
                                                                                 currentStatus={request.status}
@@ -354,7 +354,7 @@ export default function AdminRequestsPage() {
                                                                             />
                                                                         </div>
                                                                     </td>
-                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4">
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
                                                                         <Link
                                                                             href={`/admin/requests/${request.id}`}
                                                                             className="text-[#00B09C] hover:text-[#008f7e] text-[12px] sm:text-[14px] font-bold whitespace-nowrap"

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -9,11 +9,14 @@ import { PERMISSIONS } from '@/config/navigation';
 interface Request {
     id: number;
     requestNumber: string;
-    applicantName: string;
+    applicantName?: string;
+    applicantNameEn?: string;
+    applicantNameAr?: string;
+    applicantEmail?: string;
     status: string;
     requestType: string;
     createdAt: string;
-    email?: string; // Adding optional email if available
+    email?: string;
 }
 
 interface LatestRequestsProps {
@@ -26,25 +29,63 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
     const [filter, setFilter] = useState<'Day' | 'Week' | 'Month'>('Day');
     const { hasPermission } = usePermissions(user);
 
+    // Filter requests based on selected time period
+    const filteredRequests = useMemo(() => {
+        if (!requests || requests.length === 0) return [];
+
+        const now = new Date();
+        const filterDate = new Date();
+
+        switch (filter) {
+            case 'Day':
+                filterDate.setHours(0, 0, 0, 0);
+                break;
+            case 'Week':
+                filterDate.setDate(now.getDate() - 7);
+                filterDate.setHours(0, 0, 0, 0);
+                break;
+            case 'Month':
+                filterDate.setMonth(now.getMonth() - 1);
+                filterDate.setHours(0, 0, 0, 0);
+                break;
+        }
+
+        return requests.filter((request) => {
+            const requestDate = new Date(request.createdAt);
+            return requestDate >= filterDate && requestDate <= now;
+        });
+    }, [requests, filter]);
+
     return (
         <div className="bg-white rounded-3xl p-6 shadow-sm mb-8 border border-gray-100">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-gray-900">{t('recent')}</h3>
-                <div className="flex items-center gap-2 bg-gray-50 p-1 rounded-xl">
+                {/* Filters UI to match given image */}
+                <div className="flex items-center bg-gray-50 p-1 rounded-xl">
                     {(['Day', 'Week', 'Month'] as const).map((f) => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === f ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-600'
+                            className={`px-4 h-8 rounded-lg text-sm font-medium transition-all
+                                ${filter === f
+                                    ? 'bg-white shadow-sm text-gray-900 font-semibold'
+                                    : 'bg-gray-50 text-gray-400 hover:text-gray-600 font-normal'
                                 }`}
+                            style={{
+                                minWidth: 52,
+                                ...(filter === f ? { border: 'none' } : {})
+                            }}
                         >
                             {t(`filter.${f.toLowerCase()}`)}
                         </button>
                     ))}
-                    <div className="bg-gray-100 p-2 rounded-lg ml-2 cursor-pointer hover:bg-gray-200 transition-colors">
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                    {/* Calendar icon - only visual, not interactive, to match the image */}
+                    <div className="ml-2 flex items-center bg-inherit">
+                        <div className="bg-gray-100 p-1.5 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors flex items-center justify-center">
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -63,34 +104,41 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                        {requests && requests.length > 0 ? (
-                            requests.map((request) => (
-                                <tr key={request.id} className="hover:bg-gray-50/50 transition-colors group">
-                                    <td className="py-4 px-2">
-                                        <span className="text-sm text-gray-900">{request.requestNumber.slice(-3)}</span>
-                                    </td>
-                                    <td className="py-4 px-2">
-                                        <div className="flex items-center">
-                                            <span className="text-sm font-medium text-gray-900">{request.applicantName}</span>
-                                        </div>
-                                    </td>
-                                    <td className="py-4 px-2">
-                                        <span className="text-sm text-[#8E8E93]">{request.email || 'majis@gmail.com'}</span>
-                                    </td>
-                                    <td className="py-4 px-2">
-                                        <span className="text-sm text-gray-900">{t(`types.${request.requestType}`)}</span>
-                                    </td>
-                                    <td className="py-4 px-2">
-                                        <span className="text-sm text-gray-900">{t('work')}</span>
-                                    </td>
-                                    <td className="py-4 px-2">
-                                        <span className="text-sm text-gray-900">{new Date(request.createdAt).toLocaleDateString().replace(/\//g, '\\')}</span>
-                                    </td>
-                                    <td className="py-4 px-2 text-right">
-                                        <span className="text-sm text-gray-900">{new Date(request.createdAt).toLocaleDateString().replace(/\//g, '\\')}</span>
-                                    </td>
-                                </tr>
-                            ))
+                        {filteredRequests && filteredRequests.length > 0 ? (
+                            filteredRequests.map((request) => {
+                                // Handle both applicantName formats (direct or from applicantNameEn/Ar)
+                                const applicantName = request.applicantName || request.applicantNameEn || request.applicantNameAr || '';
+                                // Handle email from API (applicantEmail) or direct email field
+                                const email = request.email || request.applicantEmail || '';
+                                
+                                return (
+                                    <tr key={request.id} className="hover:bg-gray-50/50 transition-colors group">
+                                        <td className="py-4 px-2">
+                                            <span className="text-sm text-gray-900">{request.requestNumber.slice(-3)}</span>
+                                        </td>
+                                        <td className="py-4 px-2">
+                                            <div className="flex items-center">
+                                                <span className="text-sm font-medium text-gray-900">{applicantName}</span>
+                                            </div>
+                                        </td>
+                                        <td className="py-4 px-2">
+                                            <span className="text-sm text-[#8E8E93]">{email || 'majis@gmail.com'}</span>
+                                        </td>
+                                        <td className="py-4 px-2">
+                                            <span className="text-sm text-gray-900">{t(`types.${request.requestType}`)}</span>
+                                        </td>
+                                        <td className="py-4 px-2">
+                                            <span className="text-sm text-gray-900">{t('work')}</span>
+                                        </td>
+                                        <td className="py-4 px-2">
+                                            <span className="text-sm text-gray-900">{new Date(request.createdAt).toLocaleDateString().replace(/\//g, '\\')}</span>
+                                        </td>
+                                        <td className="py-4 px-2 text-right">
+                                            <span className="text-sm text-gray-900">{new Date(request.createdAt).toLocaleDateString().replace(/\//g, '\\')}</span>
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         ) : (
                             <tr>
                                 <td colSpan={7} className="py-10 text-center text-gray-400">

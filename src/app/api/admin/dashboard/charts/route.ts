@@ -24,23 +24,32 @@ export async function GET(request: NextRequest) {
                 select: {
                     createdAt: true,
                     status: true,
+                    externalReference: true,
                 },
             });
 
             // Group by date
-            const dateMap = new Map<string, { approved: number; rejected: number; pending: number }>();
+            const dateMap = new Map<string, { approved: number; adminApproved: number; rejected: number; pending: number }>();
 
             requests.forEach(req => {
                 const dateKey = req.createdAt.toISOString().split('T')[0];
 
                 if (!dateMap.has(dateKey)) {
-                    dateMap.set(dateKey, { approved: 0, rejected: 0, pending: 0 });
+                    dateMap.set(dateKey, { approved: 0, adminApproved: 0, rejected: 0, pending: 0 });
                 }
 
                 const stats = dateMap.get(dateKey)!;
-                if (req.status === 'APPROVED') stats.approved++;
-                else if (req.status === 'REJECTED') stats.rejected++;
-                else if (req.status === 'PENDING') stats.pending++;
+                if (req.status === 'APPROVED') {
+                    stats.approved++;
+                    // Admin-approved = approved without externalReference (not sent to Sohar yet)
+                    if (!req.externalReference) {
+                        stats.adminApproved++;
+                    }
+                } else if (req.status === 'REJECTED') {
+                    stats.rejected++;
+                } else if (req.status === 'PENDING') {
+                    stats.pending++;
+                }
             });
 
             // Convert to array format for charts
@@ -48,6 +57,7 @@ export async function GET(request: NextRequest) {
                 .map(([date, stats]) => ({
                     date,
                     approved: stats.approved,
+                    adminApproved: stats.adminApproved,
                     rejected: stats.rejected,
                     pending: stats.pending,
                 }))

@@ -7,33 +7,35 @@ import { apiFetch } from '@/lib/api-client';
 interface ChartDataPoint {
     date: string;
     approved: number;
+    adminApproved: number;
     rejected: number;
     pending: number;
 }
 
 export const ActivitiesOfAction: React.FC = () => {
     const t = useTranslations('Admin.dashboard');
-    const [filter, setFilter] = useState<'Day' | 'Week' | 'Month'>('Day');
+    const [filter, setFilter] = useState<'Day' | 'Week' | 'Month'>('Week');
     const [loading, setLoading] = useState(true);
     const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-    const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; data: ChartDataPoint; type: 'visits' | 'permits' } | null>(null);
+    const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; data: ChartDataPoint; type: 'requests' | 'permits' } | null>(null);
 
     useEffect(() => {
         const fetchChartData = async () => {
-        setLoading(true);
-        try {
-            const days = filter === 'Day' ? 7 : filter === 'Week' ? 30 : 365;
-            const result = await apiFetch<{ lineChart: ChartDataPoint[]; pieChart: any[]; typeChart: any[] }>(`/api/admin/dashboard/charts?days=${days}`);
-            
-            if (result?.lineChart) {
-                setChartData(result.lineChart);
+            setLoading(true);
+            try {
+                // Fix filter days: Day = 1, Week = 7, Month = 30
+                const days = filter === 'Day' ? 1 : filter === 'Week' ? 7 : 30;
+                const result = await apiFetch<{ lineChart: ChartDataPoint[]; pieChart: any[]; typeChart: any[] }>(`/api/admin/dashboard/charts?days=${days}`);
+                
+                if (result?.lineChart) {
+                    setChartData(result.lineChart);
+                }
+            } catch (error) {
+                console.error('Error fetching chart data:', error);
+                // apiFetch handles 401 (token expiration) automatically with redirect
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Error fetching chart data:', error);
-            // apiFetch handles 401 (token expiration) automatically with redirect
-        } finally {
-            setLoading(false);
-        }
         };
 
         fetchChartData();
@@ -66,8 +68,10 @@ export const ActivitiesOfAction: React.FC = () => {
         return path;
     };
 
-    const visitsPath = generatePath(chartData, (point) => point.approved + point.pending + point.rejected);
-    const permitsPath = generatePath(chartData, (point) => point.approved);
+    // Line 1: All Requests (total requests)
+    const requestsPath = generatePath(chartData, (point) => point.approved + point.pending + point.rejected);
+    // Line 2: Admin-Approved Only (approved without externalReference, not Sohar-approved)
+    const adminApprovedPath = generatePath(chartData, (point) => point.adminApproved);
 
     // Get month labels based on data
     const getMonthLabels = () => {
@@ -105,8 +109,10 @@ export const ActivitiesOfAction: React.FC = () => {
         });
     };
 
-    const visitsPoints = getPoints(chartData, (point) => point.approved + point.pending + point.rejected);
-    const permitsPoints = getPoints(chartData, (point) => point.approved);
+    // Points for all requests line
+    const requestsPoints = getPoints(chartData, (point) => point.approved + point.pending + point.rejected);
+    // Points for admin-approved line
+    const adminApprovedPoints = getPoints(chartData, (point) => point.adminApproved);
 
     // Set default hovered point to average/middle position
     useEffect(() => {
@@ -115,7 +121,7 @@ export const ActivitiesOfAction: React.FC = () => {
             const middleData = chartData[middleIndex];
             
             if (middleData) {
-                // Calculate position for middle point
+                // Calculate position for middle point (use requests line)
                 const maxValue = Math.max(...chartData.map(p => p.approved + p.pending + p.rejected), 1);
                 const width = 1000;
                 const height = 200;
@@ -131,7 +137,7 @@ export const ActivitiesOfAction: React.FC = () => {
                     x, 
                     y, 
                     data: middleData, 
-                    type: 'visits' 
+                    type: 'requests' 
                 });
             }
         }
@@ -186,10 +192,10 @@ export const ActivitiesOfAction: React.FC = () => {
                                 />
                             ))}
 
-                            {/* Visits Line (Blue) - Total Requests */}
-                            {visitsPath && (
+                            {/* Requests Line (Blue) - All Requests */}
+                            {requestsPath && (
                                 <path
-                                    d={visitsPath}
+                                    d={requestsPath}
                                     fill="none"
                                     stroke="#1E40AF"
                                     strokeWidth="3"
@@ -198,10 +204,10 @@ export const ActivitiesOfAction: React.FC = () => {
                                 />
                             )}
 
-                            {/* Permits Line (Teal) - Approved Requests */}
-                            {permitsPath && (
+                            {/* Permits Line (Teal) - Admin-Approved Only */}
+                            {adminApprovedPath && (
                                 <path
-                                    d={permitsPath}
+                                    d={adminApprovedPath}
                                     fill="none"
                                     stroke="#00B09C"
                                     strokeWidth="3"
@@ -210,10 +216,10 @@ export const ActivitiesOfAction: React.FC = () => {
                                 />
                             )}
 
-                            {/* Interactive Points for Visits */}
-                            {visitsPoints.map((point, index) => (
+                            {/* Interactive Points for Requests */}
+                            {requestsPoints.map((point, index) => (
                                 <circle
-                                    key={`visits-${index}`}
+                                    key={`requests-${index}`}
                                     cx={point.x}
                                     cy={point.y}
                                     r="5"
@@ -221,25 +227,25 @@ export const ActivitiesOfAction: React.FC = () => {
                                     stroke="white"
                                     strokeWidth="2"
                                     className="cursor-pointer hover:r-7 transition-all"
-                                    onMouseEnter={() => setHoveredPoint({ x: point.x, y: point.y, data: point.data, type: 'visits' })}
+                                    onMouseEnter={() => setHoveredPoint({ x: point.x, y: point.y, data: point.data, type: 'requests' })}
                                     onMouseLeave={() => {
                                         // Reset to middle point when leaving
                                         const middleIndex = Math.floor(chartData.length / 2);
-                                        const middlePoint = visitsPoints[middleIndex];
+                                        const middlePoint = requestsPoints[middleIndex];
                                         if (middlePoint) {
                                             setHoveredPoint({ 
                                                 x: middlePoint.x, 
                                                 y: middlePoint.y, 
                                                 data: middlePoint.data, 
-                                                type: 'visits' 
+                                                type: 'requests' 
                                             });
                                         }
                                     }}
                                 />
                             ))}
 
-                            {/* Interactive Points for Permits */}
-                            {permitsPoints.map((point, index) => (
+                            {/* Interactive Points for Admin-Approved */}
+                            {adminApprovedPoints.map((point, index) => (
                                 <circle
                                     key={`permits-${index}`}
                                     cx={point.x}
@@ -253,13 +259,13 @@ export const ActivitiesOfAction: React.FC = () => {
                                     onMouseLeave={() => {
                                         // Reset to middle point when leaving
                                         const middleIndex = Math.floor(chartData.length / 2);
-                                        const middlePoint = visitsPoints[middleIndex];
+                                        const middlePoint = requestsPoints[middleIndex];
                                         if (middlePoint) {
                                             setHoveredPoint({ 
                                                 x: middlePoint.x, 
                                                 y: middlePoint.y, 
                                                 data: middlePoint.data, 
-                                                type: 'visits' 
+                                                type: 'requests' 
                                             });
                                         }
                                     }}
@@ -282,9 +288,9 @@ export const ActivitiesOfAction: React.FC = () => {
                                     {new Date(hoveredPoint.data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                 </p>
                                 <p className="text-xs font-bold text-gray-900">
-                                    {hoveredPoint.type === 'visits' 
-                                        ? `${hoveredPoint.data.approved + hoveredPoint.data.pending + hoveredPoint.data.rejected} ${t('visits')}`
-                                        : `${hoveredPoint.data.approved} ${t('permits')}`
+                                    {hoveredPoint.type === 'requests' 
+                                        ? `${hoveredPoint.data.approved + hoveredPoint.data.pending + hoveredPoint.data.rejected} ${t('requests')}`
+                                        : `${hoveredPoint.data.adminApproved} ${t('permits')}`
                                     }
                                 </p>
                             </div>
@@ -302,7 +308,7 @@ export const ActivitiesOfAction: React.FC = () => {
                     <div className="flex items-center justify-center gap-8">
                         <div className="flex items-center gap-2">
                             <div className="w-4 h-1 bg-[#1E40AF] rounded-full"></div>
-                            <span className="text-sm font-medium text-gray-900">{t('visits')}</span>
+                            <span className="text-sm font-medium text-gray-900">{t('requests')}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="w-4 h-1 bg-[#00B09C] rounded-full"></div>
