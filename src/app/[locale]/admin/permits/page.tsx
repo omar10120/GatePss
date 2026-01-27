@@ -52,7 +52,6 @@ export default function PermitsPage() {
         page: 1,
     });
     const [permissionDenied, setPermissionDenied] = useState(false);
-    const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -97,44 +96,16 @@ export default function PermitsPage() {
         }
     };
 
-    const handleViewPermitQR = async (permit: Permit) => {
+    const handleViewPermitQR = (permit: Permit) => {
         setSelectedPermit(permit);
         setShowModal(true);
-        setQrDataUrl(null);
-
-        try {
-            // Dynamically import QRCode for browser compatibility
-            const QRCode = (await import('qrcode')).default;
-            
-            const qrPayload = JSON.stringify({
-                id: permit.id,
-                externalReference: permit.externalReference || permit.requestNumber,
-                applicantName: permit.applicantNameEn,
-                validFrom: permit.validFrom,
-                validTo: permit.validTo,
-            });
-
-            const dataUrl = await QRCode.toDataURL(qrPayload, {
-                margin: 1,
-                width: 256,
-            });
-
-            setQrDataUrl(dataUrl);
-        } catch (error) {
-            console.error('Error generating QR code:', error);
-        }
     };
 
     const handleDownloadInfo = () => {
-        if (!qrDataUrl || !selectedPermit) return;
+        if (!selectedPermit?.qrCodePdfUrl) return;
 
-        const link = document.createElement('a');
-        link.href = qrDataUrl;
-        const fileName = `permit-${selectedPermit.externalReference || selectedPermit.requestNumber || selectedPermit.id}-qr.png`;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Open PDF URL from Sohar in a new tab
+        window.open(selectedPermit.qrCodePdfUrl, '_blank');
     };
 
     const handleFilterChange = (key: string, value: string) => {
@@ -380,31 +351,10 @@ export default function PermitsPage() {
                                 </span>
                             </div>
 
-                            {selectedPermit && (
-                                <div className="flex justify-center my-6">
-                                    <div className="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center p-4">
-                                        <div className="w-full h-full bg-white rounded flex items-center justify-center border-2 border-dashed border-gray-300">
-                                            {qrDataUrl ? (
-                                                <img
-                                                    src={qrDataUrl}
-                                                    alt="Permit QR Code"
-                                                    className="w-full h-full object-contain"
-                                                />
-                                            ) : (
-                                            <div className="text-center">
-                                                    <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-2"></div>
-                                                    <p className="text-xs text-gray-500 mt-2">{t('loading')}</p>
-                                            </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
                             <button
                                 onClick={handleDownloadInfo}
                                 className="w-full btn btn-primary mt-6"
-                                disabled={!qrDataUrl}
+                                disabled={!selectedPermit?.qrCodePdfUrl}
                             >
                                 {t('downloadInfo')}
                             </button>
