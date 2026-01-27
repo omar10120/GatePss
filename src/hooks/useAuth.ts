@@ -54,10 +54,10 @@ export const useAuth = () => {
 
             // Fetch fresh user data
             try {
-                const data = await apiFetch<{ success: boolean; data: { user: User } }>('/api/auth/me');
+                const data = await apiFetch<{ user: User }>('/api/auth/me');
 
-                if (data.success) {
-                    const user = data.data.user;
+                if (data.user) {
+                    const user = data.user;
                     localStorage.setItem('user', JSON.stringify(user));
                     setAuthState({
                         user,

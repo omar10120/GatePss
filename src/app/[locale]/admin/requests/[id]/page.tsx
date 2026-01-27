@@ -145,8 +145,8 @@ export default function RequestDetailsPage() {
     useEffect(() => {
         const fetchPassTypes = async () => {
             try {
-                const result = await apiFetch<{ data: any[] }>('/api/pass-types');
-                setPassTypes(result.data || []);
+                const result = await apiFetch<any[]>('/api/pass-types');
+                setPassTypes(result || []);
             } catch (error) {
                 console.error('Error fetching pass types:', error);
             }
@@ -169,14 +169,16 @@ export default function RequestDetailsPage() {
         setLoading(true);
         setPermissionDenied(false);
         try {
-            const result = await apiFetch<{ data: any }>(`/api/admin/requests/${id}`);
-            setRequest(result.data);
+            console.log('fetching request details: ' + id);
+            const result = await apiFetch<RequestDetails>(`/api/admin/requests/${id}`);
+            console.log('request details: ' + JSON.stringify(result));
+            setRequest(result);
             // Only initialize editData if not in edit mode (to preserve user changes)
             if (!isEditMode) {
-                setEditData({ ...result.data });
+                setEditData({ ...result });
             } else {
                 // If in edit mode, merge with existing editData to preserve user changes
-                setEditData(prev => ({ ...result.data, ...prev }));
+                setEditData(prev => ({ ...result, ...prev }));
             }
         } catch (error: any) {
             console.error('Error fetching request details:', error);
