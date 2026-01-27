@@ -125,6 +125,54 @@ export async function PUT(
                 updateData.passwordHash = await hashPassword(password);
             }
 
+            // Validate permissions if provided
+            if (permissionIds && Array.isArray(permissionIds) && permissionIds.length > 0) {
+                // If not SUPER_ADMIN, verify that user can assign these permissions
+                if (user.role !== 'SUPER_ADMIN') {
+                    // Get current user's permissions from database
+                    const dbUser = await prisma.user.findUnique({
+                        where: { id: user.userId },
+                        include: {
+                            userPermissions: {
+                                include: {
+                                    permission: true,
+                                },
+                            },
+                        },
+                    });
+
+                    if (!dbUser) {
+                        return NextResponse.json(
+                            { error: 'Unauthorized', message: 'User not found' },
+                            { status: 401 }
+                        );
+                    }
+
+                    // Get permission IDs that the current user has
+                    const userPermissionIds = dbUser.userPermissions.map((up: any) => up.permission.id);
+
+                    // Validate that all requested permissions are in user's permissions
+                    const requestedPermissionIds = permissionIds.map((pid: any) => 
+                        typeof pid === 'string' ? parseInt(pid) : pid
+                    );
+
+                    const invalidPermissions = requestedPermissionIds.filter(
+                        (pid: number) => !userPermissionIds.includes(pid)
+                    );
+
+                    if (invalidPermissions.length > 0) {
+                        return NextResponse.json(
+                            { 
+                                error: 'Forbidden', 
+                                message: 'You can only assign permissions that you have',
+                                invalidPermissions 
+                            },
+                            { status: 403 }
+                        );
+                    }
+                }
+            }
+
             // Use transaction for atomic updates
             const updatedUser = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
                 // Update user details
