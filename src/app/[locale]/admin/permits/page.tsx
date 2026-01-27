@@ -7,6 +7,7 @@ import { getSidebarItems } from '@/config/navigation';
 import Header from '../components/Header';
 import { useLocale, useTranslations } from 'next-intl';
 import { TableFilter } from '../components/TableFilter';
+import { apiFetch } from '@/lib/api-client';
 
 interface Permit {
     id: number;
@@ -66,10 +67,10 @@ export default function PermitsPage() {
             setUser(JSON.parse(userData));
         }
 
-        fetchPermits(token);
+        fetchPermits();
     }, [filters]);
 
-    const fetchPermits = async (token: string) => {
+    const fetchPermits = async () => {
         setLoading(true);
         setPermissionDenied(false);
         try {
@@ -81,26 +82,16 @@ export default function PermitsPage() {
             params.append('page', filters.page.toString());
             params.append('limit', '10');
 
-            const response = await fetch(`/api/admin/requests?${params}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (response.status === 403) {
-                setPermissionDenied(true);
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch permits');
-            }
-
-            const result = await response.json();
-            setPermits(result.data.requests || []);
-            setPagination(result.data.pagination || null);
-        } catch (error) {
+            const result = await apiFetch<{ requests: any[]; pagination: any }>(`/api/admin/requests?${params}`);
+            setPermits(result.requests || []);
+            setPagination(result.pagination || null);
+        } catch (error: any) {
             console.error('Error fetching permits:', error);
+            // Check if it's a permission error (403)
+            if (error.message?.includes('Forbidden') || error.message?.includes('permission')) {
+                setPermissionDenied(true);
+            }
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }
@@ -164,31 +155,18 @@ export default function PermitsPage() {
     };
 
     const handleViewMore = async (permit: Permit) => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            router.push('/admin/login');
-            return;
-        }
-
         // Check Sohar status and update before navigating (if externalReference exists)
         if (permit.externalReference) {
             try {
-                const response = await fetch(`/api/admin/requests/${permit.id}/check-sohar-status`, {
+                await apiFetch(`/api/admin/requests/${permit.id}/check-sohar-status`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
                 });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    // Refresh permits list to show updated status (async, don't wait)
-                    fetchPermits(token).catch(err => console.error('Error refreshing permits:', err));
-                }
+                // Refresh permits list to show updated status (async, don't wait)
+                fetchPermits().catch(err => console.error('Error refreshing permits:', err));
             } catch (error) {
                 console.error('Error checking Sohar status:', error);
                 // Continue to navigate even if status check fails
+                // apiFetch handles 401 (token expiration) automatically with redirect
             }
         }
 

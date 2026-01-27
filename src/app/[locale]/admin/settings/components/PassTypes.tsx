@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import SuccessModal from '@/components/ui/SuccessModal';
+import { apiFetch } from '@/lib/api-client';
 
 interface PassType {
     id: number;
@@ -32,25 +33,13 @@ export default function PassTypes() {
     }, []);
 
     const fetchPassTypes = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         setLoading(true);
         try {
-            const response = await fetch('/api/admin/pass-types', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch pass types');
-            }
-
-            const result = await response.json();
-            setPassTypes(result.data);
+            const result = await apiFetch<PassType[]>(`/api/admin/pass-types`);
+            setPassTypes(result);
         } catch (error) {
             console.error('Error fetching pass types:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }
@@ -73,28 +62,16 @@ export default function PassTypes() {
     };
 
     const handleSave = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         try {
             const url = editingPassType
                 ? `/api/admin/pass-types/${editingPassType.id}`
                 : '/api/admin/pass-types';
             const method = editingPassType ? 'PUT' : 'POST';
 
-            const response = await fetch(url, {
+            await apiFetch(url, {
                 method,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(formData),
             });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to save pass type');
-            }
 
             setShowModal(false);
             setSuccessMessage(editingPassType ? t('updatedSuccessfully') : t('createdSuccessfully'));
@@ -102,34 +79,25 @@ export default function PassTypes() {
             fetchPassTypes();
         } catch (error: any) {
             alert(error.message || 'Failed to save pass type');
+            // apiFetch handles 401 (token expiration) automatically with redirect
         }
     };
 
     const handleToggleActive = async (id: number, currentStatus: boolean) => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         try {
-            const response = await fetch(`/api/admin/pass-types/${id}`, {
+            await apiFetch(`/api/admin/pass-types/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
                     ...passTypes.find(pt => pt.id === id),
                     is_active: !currentStatus,
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to update pass type');
-            }
-
             fetchPassTypes();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error toggling active status:', error);
-            alert('Failed to update pass type');
+            alert(error.message || 'Failed to update pass type');
+            // apiFetch handles 401 (token expiration) automatically with redirect
         }
     };
 

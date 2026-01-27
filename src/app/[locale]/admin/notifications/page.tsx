@@ -8,6 +8,7 @@ import Header from '../components/Header';
 import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import { getNotificationIconType } from '@/utils/notifications';
+import { apiFetch } from '@/lib/api-client';
 
 interface Notification {
     id: number;
@@ -59,11 +60,11 @@ export default function NotificationsPage() {
             setUser(JSON.parse(userData));
         }
 
-        fetchNotifications(token);
+        fetchNotifications();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filters]);
 
-    const fetchNotifications = async (token: string) => {
+    const fetchNotifications = async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams();
@@ -73,23 +74,14 @@ export default function NotificationsPage() {
             params.append('page', filters.page.toString());
             params.append('limit', '50');
 
-            const response = await fetch(`/api/admin/notifications?${params}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch notifications');
-            }
-
-            const data = await response.json();
+            const data = await apiFetch<{ success: boolean; data: { notifications: Notification[] } }>(`/api/admin/notifications?${params}`);
             if (data.success) {
                 setNotifications(data.data.notifications);
                 groupNotificationsByDate(data.data.notifications);
             }
         } catch (error) {
             console.error('Error fetching notifications:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }
@@ -135,52 +127,38 @@ export default function NotificationsPage() {
     };
 
     const handleMarkAsRead = async (id: number) => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         try {
-            const response = await fetch(`/api/admin/notifications/${id}/read`, {
+            await apiFetch(`/api/admin/notifications/${id}/read`, {
                 method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
             });
 
-            if (response.ok) {
-                const updated = notifications.map(n =>
-                    n.id === id ? { ...n, isRead: true } : n
-                );
-                setNotifications(updated);
-                groupNotificationsByDate(updated);
-            }
+            const updated = notifications.map(n =>
+                n.id === id ? { ...n, isRead: true } : n
+            );
+            setNotifications(updated);
+            groupNotificationsByDate(updated);
         } catch (error) {
             console.error('Error marking notification as read:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         }
     };
 
     const handleDelete = async (id: number) => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         if (!confirm(t('deleteOneConfirm'))) {
             return;
         }
 
         try {
-            const response = await fetch(`/api/admin/notifications/${id}`, {
+            await apiFetch(`/api/admin/notifications/${id}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
             });
 
-            if (response.ok) {
-                const updated = notifications.filter(n => n.id !== id);
-                setNotifications(updated);
-                groupNotificationsByDate(updated);
-            }
+            const updated = notifications.filter(n => n.id !== id);
+            setNotifications(updated);
+            groupNotificationsByDate(updated);
         } catch (error) {
             console.error('Error deleting notification:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         }
     };
 
@@ -206,9 +184,6 @@ export default function NotificationsPage() {
     const handleDeleteSelected = async () => {
         if (selectedNotifications.length === 0) return;
 
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         if (!confirm(t('deleteManyConfirm', { count: selectedNotifications.length }))) {
             return;
         }
@@ -216,11 +191,8 @@ export default function NotificationsPage() {
         try {
             await Promise.all(
                 selectedNotifications.map(id =>
-                    fetch(`/api/admin/notifications/${id}`, {
+                    apiFetch(`/api/admin/notifications/${id}`, {
                         method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                        },
                     })
                 )
             );
@@ -231,6 +203,7 @@ export default function NotificationsPage() {
             setSelectedNotifications([]);
         } catch (error) {
             console.error('Error deleting notifications:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         }
     };
 

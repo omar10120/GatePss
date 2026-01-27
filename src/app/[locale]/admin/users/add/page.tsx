@@ -7,6 +7,7 @@ import { getSidebarItems, PERMISSIONS } from '@/config/navigation';
 import Header from '../../components/Header';
 import { useTranslations, useLocale } from 'next-intl';
 import SuccessModal from '@/components/ui/SuccessModal';
+import { apiFetch } from '@/lib/api-client';
 
 interface Permission {
     id: number;
@@ -58,18 +59,8 @@ export default function AddUserPage() {
             } else {
                 // Fetch user data from API
                 try {
-                    const response = await fetch('/api/auth/me', {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-
-                    if (!response.ok) {
-                        router.push('/admin/login');
-                        return;
-                    }
-
-                    const data = await response.json();
+                    const data = await apiFetch<{ success: boolean; data: { user: any } }>('/api/auth/me');
+                    
                     if (data.success) {
                         currentUser = data.data.user;
                         localStorage.setItem('user', JSON.stringify(currentUser));
@@ -80,6 +71,7 @@ export default function AddUserPage() {
                     }
                 } catch (error) {
                     console.error('Error fetching user data:', error);
+                    // apiFetch handles 401 (token expiration) automatically with redirect
                     router.push('/admin/login');
                     return;
                 }
@@ -97,13 +89,13 @@ export default function AddUserPage() {
             }
 
             setCheckingAuth(false);
-            fetchPermissions(token);
+            fetchPermissions();
         };
 
         checkAuthAndPermissions();
     }, [router]);
 
-    const fetchPermissions = async (token: string) => {
+    const fetchPermissions = async () => {
         try {
             // Get permissions from localStorage (full Permission objects with id, key, description)
             const storedPermissions = localStorage.getItem('permissions');
@@ -121,31 +113,18 @@ export default function AddUserPage() {
             }
 
             // If not found in localStorage, fetch from API
-            const response = await fetch('/api/admin/permissions', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch permissions');
-            }
-
-            const result = await response.json();
-            if (result.success && result.data) {
-                // Store permissions in localStorage for future use
-                localStorage.setItem('permissions', JSON.stringify(result.data));
-                setPermissions(result.data);
-            }
+            const result = await apiFetch<Permission[]>(`/api/admin/permissions`);
+            
+            // Store permissions in localStorage for future use
+            localStorage.setItem('permissions', JSON.stringify(result));
+            setPermissions(result);
         } catch (error) {
             console.error('Error fetching permissions:', error);
+            // apiFetch handles 401 (token expiration) automatically with redirect
         }
     };
 
     const handleSave = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         setLoading(true);
         setError('');
 
@@ -159,24 +138,15 @@ export default function AddUserPage() {
                 permissionIds: formData.permissionIds,
             };
 
-            const response = await fetch('/api/admin/users', {
+            await apiFetch('/api/admin/users', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(body),
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to create user');
-            }
-
             setShowSuccessModal(true);
         } catch (err: any) {
-            setError(err.message);
+            setError(err.message || 'Failed to create user');
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }

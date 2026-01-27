@@ -13,6 +13,7 @@ import { RequestHeader } from './components/RequestHeader';
 import { InfoSection } from './components/InfoSection';
 import { DocumentCard } from './components/DocumentCard';
 import { PermitSection } from './components/PermitSection';
+import { apiFetch, authenticatedFetch } from '@/lib/api-client';
 
 interface RequestDetails {
     id: number;
@@ -132,7 +133,7 @@ export default function RequestDetailsPage() {
 
 
         if (requestId) {
-            fetchRequestDetails(token, requestId);
+            fetchRequestDetails(requestId);
         }
 
         // Check if edit mode is enabled from URL
@@ -144,11 +145,8 @@ export default function RequestDetailsPage() {
     useEffect(() => {
         const fetchPassTypes = async () => {
             try {
-                const response = await fetch('/api/pass-types');
-                if (response.ok) {
-                    const result = await response.json();
-                    setPassTypes(result.data || []);
-                }
+                const result = await apiFetch<{ data: any[] }>('/api/pass-types');
+                setPassTypes(result.data || []);
             } catch (error) {
                 console.error('Error fetching pass types:', error);
             }
@@ -167,26 +165,11 @@ export default function RequestDetailsPage() {
         }
     }, [request, isEditMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const fetchRequestDetails = async (token: string, id: string) => {
+    const fetchRequestDetails = async (id: string) => {
         setLoading(true);
         setPermissionDenied(false);
         try {
-            const response = await fetch(`/api/admin/requests/${id}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (response.status === 403) {
-                setPermissionDenied(true);
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch request details');
-            }
-
-            const result = await response.json();
+            const result = await apiFetch<{ data: any }>(`/api/admin/requests/${id}`);
             setRequest(result.data);
             // Only initialize editData if not in edit mode (to preserve user changes)
             if (!isEditMode) {
@@ -195,17 +178,22 @@ export default function RequestDetailsPage() {
                 // If in edit mode, merge with existing editData to preserve user changes
                 setEditData(prev => ({ ...result.data, ...prev }));
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching request details:', error);
-            setError('Failed to load request details');
+            // Check if it's a permission error (403)
+            if (error.message?.includes('Forbidden') || error.message?.includes('permission')) {
+                setPermissionDenied(true);
+            } else {
+                setError('Failed to load request details');
+            }
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }
     };
 
     const handleSave = async () => {
-        const token = localStorage.getItem('token');
-        if (!token || !request) return;
+        if (!request) return;
 
         setProcessing(true);
         setError('');
@@ -285,8 +273,7 @@ export default function RequestDetailsPage() {
                 return;
             }
 
-            // If there are files, use FormData, otherwise use JSON
-            let response: Response;
+            // If there are files, use FormData with authenticatedFetch, otherwise use apiFetch
             if (hasFiles) {
                 const formData = new FormData();
                 
@@ -310,37 +297,30 @@ export default function RequestDetailsPage() {
                     }
                 });
 
-                response = await fetch(`/api/admin/requests/${requestId}`, {
+                const response = await authenticatedFetch(`/api/admin/requests/${requestId}`, {
                     method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
                     body: formData,
                 });
+
+                if (!response.ok) {
+                    const result = await response.json().catch(() => ({}));
+                    throw new Error(result.message || 'Failed to update request');
+                }
             } else {
-                response = await fetch(`/api/admin/requests/${requestId}`, {
+                await apiFetch(`/api/admin/requests/${requestId}`, {
                     method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify(updatePayload),
                 });
-            }
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to update request');
             }
 
             setSuccess('Request updated successfully!');
             setIsEditMode(false);
             // Remove edit query parameter from URL
             router.replace(`/admin/requests/${requestId}`);
-            fetchRequestDetails(token, requestId);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
+            fetchRequestDetails(requestId);
+        } catch (err: any) {
+            setError(err.message || 'An error occurred');
+            // apiFetch/authenticatedFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setProcessing(false);
         }
@@ -368,32 +348,20 @@ export default function RequestDetailsPage() {
     };
 
     const handleApprove = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         setProcessing(true);
         setError('');
         setSuccess('');
 
         try {
-            const response = await fetch(`/api/admin/requests/${requestId}/approve`, {
+            await apiFetch(`/api/admin/requests/${requestId}/approve`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to approve request');
-            }
-
             setSuccess('Request approved successfully!');
-            fetchRequestDetails(token, requestId);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
+            fetchRequestDetails(requestId);
+        } catch (err: any) {
+            setError(err.message || 'An error occurred');
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setProcessing(false);
         }
@@ -405,35 +373,23 @@ export default function RequestDetailsPage() {
             return;
         }
 
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         setProcessing(true);
         setError('');
         setSuccess('');
 
         try {
-            const response = await fetch(`/api/admin/requests/${requestId}/reject`, {
+            await apiFetch(`/api/admin/requests/${requestId}/reject`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({ rejectionReason }),
             });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to reject request');
-            }
 
             setSuccess('Request rejected successfully!');
             setShowRejectModal(false);
             setRejectionReason('');
-            fetchRequestDetails(token, requestId);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
+            fetchRequestDetails(requestId);
+        } catch (err: any) {
+            setError(err.message || 'An error occurred');
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setProcessing(false);
         }
