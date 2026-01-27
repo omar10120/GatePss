@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, usePathname, Link } from '@/i18n/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import { useTranslations, useLocale } from 'next-intl';
@@ -13,6 +13,8 @@ import { VisitorsApplicationsCard } from '../components/VisitorsApplicationsCard
 import { ActivitiesOfAction } from '../components/ActivitiesOfAction';
 import Header from '../components/Header';
 import { usePermissions } from '@/hooks/usePermissions';
+import { isTokenValid } from '@/lib/auth-client';
+import { apiFetch } from '@/lib/api-client';
 
 interface DashboardData {
     summary: {
@@ -52,8 +54,8 @@ export default function AdminDashboardPage() {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
 
-        if (!token) {
-            router.push('/admin/login');
+        if (!token || !isTokenValid(token)) {
+            window.location.href = `/${locale}/admin/login`;
             return;
         }
 
@@ -62,33 +64,27 @@ export default function AdminDashboardPage() {
             setUser(JSON.parse(userData));
         }
 
-
-        fetchDashboardData(token);
+        fetchDashboardData();
     }, []);
 
-    const fetchDashboardData = async (token: string) => {
+    const fetchDashboardData = async () => {
         setLoading(true);
         setPermissionDenied(false);
         try {
-            const response = await fetch('/api/admin/dashboard/summary', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
+            const result = await apiFetch<{ summary: DashboardData['summary']; byType: DashboardData['byType']; recentRequests: DashboardData['recentRequests'] }>('/api/admin/dashboard/summary');
+            
+            setData({
+                summary: result.summary,
+                byType: result.byType,
+                recentRequests: result.recentRequests,
             });
-
-            if (response.status === 403) {
-                setPermissionDenied(true);
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch dashboard data');
-            }
-
-            const result = await response.json();
-            setData(result.data);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching dashboard data:', error);
+            // Check if it's a permission error (403)
+            if (error.message?.includes('Forbidden') || error.message?.includes('permission')) {
+                setPermissionDenied(true);
+            }
+            // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setLoading(false);
         }

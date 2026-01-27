@@ -112,7 +112,15 @@ export async function apiFetch<T = any>(
 
     // Handle 401 Unauthorized - token expired or invalid
     if (response.status === 401) {
-        const data = await response.json().catch(() => ({}));
+        let errorData: any = {};
+        try {
+            // Clone response to read body without consuming original
+            const clonedResponse = response.clone();
+            errorData = await clonedResponse.json().catch(() => ({}));
+        } catch {
+            // If JSON parsing fails, use empty object
+            errorData = {};
+        }
         
         // Clear token and redirect to login
         if (typeof window !== 'undefined') {
@@ -122,12 +130,23 @@ export async function apiFetch<T = any>(
             window.location.href = `/${locale}/admin/login`;
         }
         
-        throw new Error(data.message || 'Session expired. Please login again.');
+        const errorMessage = errorData.message || errorData.error || 'Session expired. Please login again.';
+        const error = new Error(errorMessage) as Error & { code?: string };
+        if (errorData.code) {
+            error.code = errorData.code;
+        }
+        throw error;
     }
 
     if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+        let errorData: any = {};
+        try {
+            const clonedResponse = response.clone();
+            errorData = await clonedResponse.json().catch(() => ({}));
+        } catch {
+            errorData = {};
+        }
+        throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`);
     }
 
     const result = await response.json();

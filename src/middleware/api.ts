@@ -33,33 +33,44 @@ export async function requireAuth(
 ): Promise<NextResponse> {
     const authHeader = request.headers.get('authorization');
     const token = extractTokenFromHeader(authHeader);
-    let isExpired = false;
 
-    if (token) {
-        try {
-            verifyToken(token);
-        } catch (error) {
-            if (error instanceof TokenExpiredError) {
-                isExpired = true;
-            }
-        }
-    }
-
-    const user = await authenticate(request);
-
-    if (!user) {
-        // If token was expired, return 401 with specific error code
-        if (isExpired) {
-            return NextResponse.json(
-                { error: 'Unauthorized', message: 'Session expired. Please login again.', code: 'TOKEN_EXPIRED' },
-                { status: 401 }
-            );
-        }
+    if (!token) {
         return NextResponse.json(
             { error: 'Unauthorized', message: 'Authentication required' },
             { status: 401 }
         );
     }
+
+    // Verify token once to check expiration status
+    let isExpired = false;
+    let payload: JWTPayload | null = null;
+
+    try {
+        payload = verifyToken(token);
+    } catch (error) {
+        if (error instanceof TokenExpiredError) {
+            isExpired = true;
+        }
+        // For other errors, payload remains null
+    }
+
+    // If token is expired, return with specific error code
+    if (isExpired) {
+        return NextResponse.json(
+            { error: 'Unauthorized', message: 'Session expired. Please login again.', code: 'TOKEN_EXPIRED' },
+            { status: 401 }
+        );
+    }
+
+    // If token is invalid or payload is null
+    if (!payload) {
+        return NextResponse.json(
+            { error: 'Unauthorized', message: 'Authentication required' },
+            { status: 401 }
+        );
+    }
+
+    const user = payload;
 
     // Check if user is still active
     const dbUser = await prisma.user.findUnique({
