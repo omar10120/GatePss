@@ -4,7 +4,8 @@
             "home": "Home",
             "services": "Roles",
             "about": "About us",
-            "MAJIS": "MAJIS Web"
+            "MAJIS": "MAJIS Web",
+            "howItWorks": "How It Works"
         },
         "hero": {
             "title": "Electronic Gate Pass System",
@@ -24,6 +25,9 @@
         "howItWorks": {
             "title": "How It Works",
             "subtitle": "To ensures a smooth process for your business needs",
+            "processFlow": "Go to the form → Add your request → Receive email notification → Check status in Track Application page →",
+            "trackApplication": "Track your application status",
+            "videoPlaceholder": "Video will be provided here",
             "step1": {
                 "title": "1. Submit Application",
                 "description": "Fill out required details and upload documents"

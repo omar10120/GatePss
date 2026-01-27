@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter, usePathname } from '@/i18n/navigation';
 import LanguageSelector from "@/components/ui/LanguageSelector"
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,8 +9,6 @@ import Link from 'next/link';
 export default function Navbar() {
     const t = useTranslations('HomePage');
     const locale = useLocale();
-    const router = useRouter();
-    const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 
@@ -34,6 +31,9 @@ export default function Navbar() {
                         </Link>
                         <Link href="#services" className="text-gray-700 hover:text-info-500 font-medium transition-colors">
                             {t('nav.services')}
+                        </Link>
+                        <Link href={`/${locale}/how-it-works`} className="text-gray-700 hover:text-info-500 font-medium transition-colors">
+                            {t('nav.howItWorks')}
                         </Link>
                         <Link href={`/${locale}/about`} className="text-gray-700 hover:text-info-500 font-medium transition-colors">
                             {t('nav.about')}
@@ -87,7 +87,10 @@ export default function Navbar() {
                         <Link href="#services" className="text-gray-700 hover:text-info-500 font-medium transition-colors py-2">
                             {t('nav.services')}
                         </Link>
-                        <Link href="#about" className="text-gray-700 hover:text-info-500 font-medium transition-colors py-2">
+                        <Link href={`/${locale}/how-it-works`} className="text-gray-700 hover:text-info-500 font-medium transition-colors py-2">
+                            {t('nav.howItWorks')}
+                        </Link>
+                        <Link href={`/${locale}/about`} className="text-gray-700 hover:text-info-500 font-medium transition-colors py-2">
                             {t('nav.about')}
                         </Link>
                     </nav>

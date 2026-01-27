@@ -1,8 +1,9 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
-
-export default function Footer() {
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useLocale } from 'next-intl';
+export default function HowtWork() {
     const t = useTranslations('HomePage');
     const locale = useLocale();
 
@@ -14,6 +15,34 @@ export default function Footer() {
                     <div className="text-center mb-12 md:mb-16">
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium mb-4 capitalize" style={{ color: '#0666A3' }}>{t('howItWorks.title')}</h2>
                         <p className="text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto" style={{ color: '#1F1F1F' }}>{t('howItWorks.subtitle')}</p>
+                    </div>
+
+                    {/* Process Flow Text */}
+                    <div className="mb-12 md:mb-16 max-w-4xl mx-auto">
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                            <p className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed text-center font-['Rubik']">
+                                    {t('howItWorks.processFlow')}
+                             
+                            </p>
+                            <p className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed text-center font-['Rubik']">
+                                <Link href={`/${locale}/ApplicationNumber`} className="text-blue-500 hover:text-blue-700">
+                                    {t('howItWorks.trackApplication')}
+                                </Link>
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Video Section */}
+                    <div className="mb-12 md:mb-16 max-w-5xl mx-auto">
+                        <div className="bg-gray-200 rounded-2xl shadow-sm border border-gray-300 p-6 md:p-8 lg:p-12 aspect-video flex items-center justify-center">
+                            <div className="text-center">
+                                <svg className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <p className="text-gray-500 text-sm md:text-base font-['Rubik']">{t('howItWorks.videoPlaceholder')}</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
