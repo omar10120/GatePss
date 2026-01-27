@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { PERMISSIONS } from '@/config/navigation';
+import { apiFetch } from '@/lib/api-client';
 
 // Route to permission mapping
 const ROUTE_PERMISSIONS: Record<string, string> = {
@@ -42,18 +43,8 @@ export function useRouteProtection() {
             } else {
                 // Fetch user data from API
                 try {
-                    const response = await fetch('/api/auth/me', {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-
-                    if (!response.ok) {
-                        router.push('/admin/login');
-                        return;
-                    }
-
-                    const data = await response.json();
+                    const data = await apiFetch<{ success: boolean; data: { user: any } }>('/api/auth/me');
+                    
                     if (data.success) {
                         currentUser = data.data.user;
                         localStorage.setItem('user', JSON.stringify(currentUser));
@@ -64,7 +55,11 @@ export function useRouteProtection() {
                     }
                 } catch (error) {
                     console.error('Error fetching user data:', error);
-                    router.push('/admin/login');
+                    // apiFetch handles 401 (token expiration) automatically with redirect
+                    // Only redirect here if it's not a 401 (which would have already redirected)
+                    if (error instanceof Error && !error.message.includes('Session expired')) {
+                        router.push('/admin/login');
+                    }
                     return;
                 }
             }

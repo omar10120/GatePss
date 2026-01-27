@@ -91,7 +91,7 @@ export default function ViewUserPage() {
                 email: result.data.email,
                 phoneNumber: result.data.phoneNumber || '',
                 password: '',
-                permissionIds: result.data.permissions.map((p: any) => p.id),
+                permissionIds: (result.data.permissions || []).map((p: any) => p.id),
             });
         } catch (error) {
             console.error('Error fetching user:', error);
@@ -179,7 +179,7 @@ export default function ViewUserPage() {
                 email: userData.email,
                 phoneNumber: userData.phoneNumber || '',
                 password: '',
-                permissionIds: userData.permissions.map(p => p.id),
+                permissionIds: (userData.permissions || []).map(p => p.id),
             });
         }
         setIsEditMode(false);
@@ -384,7 +384,7 @@ export default function ViewUserPage() {
                             </label>
                             <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
                                 {isEditMode ? (
-                                    permissions.map((permission) => (
+                                    (permissions || []).map((permission) => (
                                         <label key={permission.id} className="flex items-center gap-3 cursor-pointer py-2">
                                             <input
                                                 type="checkbox"
@@ -396,8 +396,8 @@ export default function ViewUserPage() {
                                         </label>
                                     ))
                                 ) : (
-                                    userData?.permissions.length > 0 ? (
-                                        userData.permissions.map((permission) => (
+                                    (userData?.permissions || []).length > 0 ? (
+                                        (userData.permissions || []).map((permission) => (
                                             <div key={permission.id} className="flex items-center gap-3 py-2">
                                                 <div className="w-5 h-5 rounded bg-[#00B09C] flex items-center justify-center">
                                                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

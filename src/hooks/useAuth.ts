@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiFetch } from '@/lib/api-client';
 
 export interface User {
     id: number;
@@ -53,11 +54,7 @@ export const useAuth = () => {
 
             // Fetch fresh user data
             try {
-                const data = await fetch('/api/auth/me', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }).then(res => res.json());
+                const data = await apiFetch<{ success: boolean; data: { user: User } }>('/api/auth/me');
 
                 if (data.success) {
                     const user = data.data.user;
@@ -81,7 +78,7 @@ export const useAuth = () => {
                 }
             } catch (error) {
                 console.error('Error refreshing user data:', error);
-                // If it's a token expiration, apiFetch will handle redirect
+                // apiFetch handles 401 (token expiration) automatically with redirect
                 // Just update state here
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
