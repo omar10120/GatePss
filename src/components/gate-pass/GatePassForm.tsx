@@ -85,6 +85,9 @@ export const GatePassForm: React.FC = () => {
     const [success, setSuccess] = useState('');
     const [confirmed, setConfirmed] = useState(false);
     const [createdRequestNumber, setCreatedRequestNumber] = useState<string | null>(null);
+    const [organizationValue, setOrganizationValue] = useState('');
+    
+    const ORGANIZATION_PREFIX = 'مجيس للخدمات الصناعية / Majis Industrial Services';
 
     const getFieldLabel = (name: string): string => {
         const fieldMap: { [key: string]: string } = {
@@ -286,6 +289,13 @@ export const GatePassForm: React.FC = () => {
         }
 
         const formData = new FormData(e.currentTarget);
+        
+        // Combine organization prefix with user input
+        const userOrgInput = organizationValue.trim();
+        const fullOrganization = userOrgInput 
+            ? `${ORGANIZATION_PREFIX} + ${userOrgInput}`
+            : ORGANIZATION_PREFIX;
+        formData.set('organization', fullOrganization);
 
         // Validate all fields
         if (!validateForm(formData)) {
@@ -339,6 +349,7 @@ export const GatePassForm: React.FC = () => {
             setSuccess('true');
             setCreatedRequestNumber(data.data?.requestNumber || null);
             (e.target as HTMLFormElement).reset();
+            setOrganizationValue('');
             setConfirmed(false);
         } catch (err: any) {
             console.error('Submission error:', err);
@@ -451,15 +462,27 @@ export const GatePassForm: React.FC = () => {
                         ]}
                         required
                     />
-                    <Input
-                        name="organization"
-                        label={getBilingualNested(['fields', 'organization'])}
-                        value="مجيس للخدمات الصناعية / Majis Industrial Services"
-                        readOnly
-                        className="bg-gray-50 cursor-not-allowed"
-                        error={fieldErrors.organization}
-                        required
-                    />
+                    <div className="w-full">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-['Rubik']">
+                            {getBilingualNested(['fields', 'organization'])}
+                            <span className="text-red-500 ml-1">*</span>
+                        </label>
+                        <div className="relative flex ">
+                            <div className="flex-1">
+                                <Input
+                                    name="organization"
+                                    value={organizationValue}
+                                    onChange={(e) => setOrganizationValue(e.target.value)}
+                                    placeholder={getBilingualNested(['placeholders', 'typeOrganization']) || 'Type organization name'}
+                                    error={fieldErrors.organization}
+                                    required
+                                />
+                            </div>
+                        </div>
+                        {fieldErrors.organization && (
+                            <p className="mt-1 text-sm text-red-600 font-['Rubik']">{fieldErrors.organization}</p>
+                        )}
+                    </div>
                   
                     <Input
                         name="dateOfVisit"
