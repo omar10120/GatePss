@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api-client';
 
 interface UseFetchOptions {
     onSuccess?: (data: any) => void;
@@ -24,22 +25,11 @@ export const useFetch = <T = any>(
             setError(null);
 
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(url, {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : '',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                setData(result.data || result);
+                const result = await apiFetch(url);
+                setData(result);
 
                 if (onSuccess) {
-                    onSuccess(result.data || result);
+                    onSuccess(result);
                 }
             } catch (err) {
                 const error = err instanceof Error ? err : new Error('Unknown error');
@@ -63,22 +53,11 @@ export const useFetch = <T = any>(
         setError(null);
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(url, {
-                headers: {
-                    Authorization: token ? `Bearer ${token}` : '',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            setData(result.data || result);
+            const result = await apiFetch(url);
+            setData(result);
 
             if (onSuccess) {
-                onSuccess(result.data || result);
+                onSuccess(result);
             }
         } catch (err) {
             const error = err instanceof Error ? err : new Error('Unknown error');
