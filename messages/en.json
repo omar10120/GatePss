@@ -313,6 +313,7 @@
     },
     "Admin": {
         "dashboard": {
+            "profile": "Profile",
             "title": "Dashboard",
             "welcome": "Welcome back",
             "logout": "Logout",

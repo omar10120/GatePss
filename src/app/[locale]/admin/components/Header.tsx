@@ -1,12 +1,13 @@
 import LanguageSelector from '@/components/ui/LanguageSelector'
 import React, { useState, useEffect, useRef } from 'react'
-import { useRouter } from '@/i18n/navigation';
+import { useRouter, Link } from '@/i18n/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { LogoutConfirm } from '@/components/ui/LogoutConfirm';
 import Image from 'next/image';
 import { apiFetch } from '@/lib/api-client';
 
 interface User {
+    id?: number;
     name?: string;
     email?: string;
     role?: string;
@@ -99,6 +100,15 @@ export default function Header() {
 
                                 {isDropdownOpen && (
                                     <div className={`absolute ${locale === 'ar' ? 'left-0' : 'right-0'} top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50`}>
+                                        <Link href={`/admin/users/${user?.id}?edit=true`}>
+                                            <button className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center gap-3 text-gray-700">
+                                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A10.97 10.97 0 0012 20c2.364 0 4.553-.736 6.379-1.984C17.157 16.01 14.705 15 12 15s-5.157 1.01-6.879 2.804z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12a5 5 0 100-10 5 5 0 000 10z"/>
+                                                </svg>
+                                                <span>{t('profile')}</span>
+                                            </button>
+                                        </Link>
                                         <button
                                             onClick={() => {
                                                 setIsDropdownOpen(false);

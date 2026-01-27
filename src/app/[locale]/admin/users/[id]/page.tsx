@@ -94,7 +94,26 @@ export default function ViewUserPage() {
 
     const fetchPermissions = async () => {
         try {
+            // Get permissions from localStorage first (for performance)
+            const storedPermissions = localStorage.getItem('permissions');
+            
+            if (storedPermissions) {
+                try {
+                    const permissions = JSON.parse(storedPermissions);
+                    if (Array.isArray(permissions) && permissions.length > 0) {
+                        setPermissions(permissions);
+                        return;
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing stored permissions:', parseError);
+                }
+            }
+
+            // If not found in localStorage, fetch from API
             const result = await apiFetch<Permission[]>(`/api/admin/permissions`);
+            
+            // Store permissions in localStorage for future use
+            localStorage.setItem('permissions', JSON.stringify(result));
             setPermissions(result);
         } catch (error) {
             console.error('Error fetching permissions:', error);
