@@ -43,10 +43,10 @@ export function useRouteProtection() {
             } else {
                 // Fetch user data from API
                 try {
-                    const data = await apiFetch<{ success: boolean; data: { user: any } }>('/api/auth/me');
+                    const data = await apiFetch<{ user: any }>('/api/auth/me');
                     
-                    if (data.success) {
-                        currentUser = data.data.user;
+                    if (data.user) {
+                        currentUser = data.user;
                         localStorage.setItem('user', JSON.stringify(currentUser));
                         setUser(currentUser);
                     } else {

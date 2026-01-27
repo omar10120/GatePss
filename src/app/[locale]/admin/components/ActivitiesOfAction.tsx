@@ -23,10 +23,10 @@ export const ActivitiesOfAction: React.FC = () => {
         setLoading(true);
         try {
             const days = filter === 'Day' ? 7 : filter === 'Week' ? 30 : 365;
-            const result = await apiFetch<{ success: boolean; data: { lineChart: ChartDataPoint[] } }>(`/api/admin/dashboard/charts?days=${days}`);
+            const result = await apiFetch<{ lineChart: ChartDataPoint[]; pieChart: any[]; typeChart: any[] }>(`/api/admin/dashboard/charts?days=${days}`);
             
-            if (result.success && result.data?.lineChart) {
-                setChartData(result.data.lineChart);
+            if (result?.lineChart) {
+                setChartData(result.lineChart);
             }
         } catch (error) {
             console.error('Error fetching chart data:', error);

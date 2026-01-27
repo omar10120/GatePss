@@ -74,10 +74,10 @@ export default function NotificationsPage() {
             params.append('page', filters.page.toString());
             params.append('limit', '50');
 
-            const data = await apiFetch<{ success: boolean; data: { notifications: Notification[] } }>(`/api/admin/notifications?${params}`);
-            if (data.success) {
-                setNotifications(data.data.notifications);
-                groupNotificationsByDate(data.data.notifications);
+            const data = await apiFetch<{ notifications: Notification[]; pagination: any }>(`/api/admin/notifications?${params}`);
+            if (data.notifications) {
+                setNotifications(data.notifications);
+                groupNotificationsByDate(data.notifications);
             }
         } catch (error) {
             console.error('Error fetching notifications:', error);
