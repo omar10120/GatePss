@@ -82,9 +82,9 @@ model Request {
   profession                   String
   otherProfessions             String?  @map("other_professions")
   bloodType                    String?  @map("blood_type")
-  photoPath                    String?  @map("photo_path") @db.Text
+  photoPath                    String?  @map("photo_path") @db.LongText
   passportIdNumber             String   @map("passport_id_number")
-  passportIdImagePath          String?  @map("passport_id_image_path") @db.Text
+  passportIdImagePath          String?  @map("passport_id_image_path") @db.LongText
   nationality                  String
   identification               String
   organization                 String
@@ -121,7 +121,7 @@ model Upload {
   id         Int      @id @default(autoincrement())
   requestId  Int      @map("request_id")
   fileType   String   @map("file_type")
-  filePath   String   @map("file_path")
+  filePath   String   @map("file_path") @db.LongText
   uploadedAt DateTime @default(now()) @map("uploaded_at")
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
