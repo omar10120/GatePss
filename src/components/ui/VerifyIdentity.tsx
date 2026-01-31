@@ -104,7 +104,7 @@ export default function VerifyIdentity({ onVerify, onResend, onClose, isLoading,
                 )}
 
                 {/* OTP Inputs */}
-                <div className="flex gap-4 mb-10">
+                <div className="flex gap-4 mb-10" dir="ltr">
                     {otp.map((digit, index) => (
                         <input
                             key={index}
