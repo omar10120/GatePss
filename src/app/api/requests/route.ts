@@ -337,7 +337,13 @@ export async function POST(request: NextRequest) {
             console.error('Database error:', dbError);
             console.error('Database error message:', dbError?.message);
             console.error('Database error code:', dbError?.code);
-            throw dbError; 
+            return NextResponse.json(
+                {
+                    error: 'Database Error',
+                    message: dbError?.message || 'Failed to save request to database. Please try again.',
+                },
+                { status: 500 }
+            );
         }
 
 

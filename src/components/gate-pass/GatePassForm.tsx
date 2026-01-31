@@ -28,15 +28,59 @@ export const GatePassForm: React.FC = () => {
 
     // Fetch pass types from database
     useEffect(() => {
-        const fetchPassTypes = async () => {
+        const fetchPassTypes = async (retryCount = 0) => {
+            const MAX_RETRIES = 2;
+            const RETRY_DELAY = 1000; // 1 second
+
             try {
-                const response = await fetch('/api/pass-types');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+                const response = await fetch('/api/pass-types', {
+                    signal: controller.signal,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                clearTimeout(timeoutId);
+
                 if (response.ok) {
-                    const result = await response.json();
-                    setPassTypes(result.data || []);
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const result = await response.json();
+                        setPassTypes(result.data || []);
+                    } else {
+                        throw new Error('Invalid response format');
+                    }
+                } else {
+                    // If server error and we haven't exceeded retries, retry
+                    if (response.status >= 500 && retryCount < MAX_RETRIES) {
+                        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
+                        return fetchPassTypes(retryCount + 1);
+                    }
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('Error fetching pass types:', errorData.message || 'Failed to fetch pass types');
+                    setPassTypes([]); // Set empty array as fallback
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Error fetching pass types:', error);
+                
+                // Retry on network errors
+                if (
+                    (error.name === 'AbortError' || 
+                     error.message?.includes('ERR_CONNECTION_RESET') ||
+                     error.message?.includes('Failed to fetch') ||
+                     error.message?.includes('NetworkError')) &&
+                    retryCount < MAX_RETRIES
+                ) {
+                    console.log(`Retrying fetch pass types (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
+                    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
+                    return fetchPassTypes(retryCount + 1);
+                }
+                
+                // Set empty array as fallback on final failure
+                setPassTypes([]);
             } finally {
                 setLoadingPassTypes(false);
             }
@@ -331,7 +375,25 @@ export const GatePassForm: React.FC = () => {
                 body: formData,
             });
 
-            const data = await response.json();
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            let data: any = {};
+
+            if (contentType && contentType.includes('application/json')) {
+                try {
+                    data = await response.json();
+                } catch (jsonError) {
+                    console.error('JSON parse error:', jsonError);
+                    setError(getBilingualNested(['errors', 'submissionFailed']) || 'Failed to process server response. Please try again.');
+                    return;
+                }
+            } else {
+                // If not JSON, try to get text response
+                const textResponse = await response.text();
+                console.error('Non-JSON response:', textResponse);
+                setError(getBilingualNested(['errors', 'submissionFailed']) || `Server error: ${response.status} ${response.statusText}. Please try again.`);
+                return;
+            }
 
             if (!response.ok) {
                 // If there are validation errors array, display them
@@ -341,7 +403,8 @@ export const GatePassForm: React.FC = () => {
                     return;
                 }
                 // Single error message
-                setError(data.message || getBilingualNested(['errors', 'submissionFailed']));
+                const errorMessage = data.message || data.error || getBilingualNested(['errors', 'submissionFailed']);
+                setError(errorMessage);
                 return;
             }
 
@@ -353,7 +416,12 @@ export const GatePassForm: React.FC = () => {
             setConfirmed(false);
         } catch (err: any) {
             console.error('Submission error:', err);
-            setError(err.message || getBilingualNested(['errors', 'submissionFailed']));
+            // Handle network errors or other fetch errors
+            if (err instanceof TypeError && err.message.includes('fetch')) {
+                setError(getBilingualNested(['errors', 'submissionFailed']) || 'Network error. Please check your connection and try again.');
+            } else {
+                setError(err.message || getBilingualNested(['errors', 'submissionFailed']) || 'An unexpected error occurred. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
