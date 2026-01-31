@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
         if (!user) {
             return NextResponse.json(
-                { error: 'Authentication Failed', message: 'Invalid email or OTP' },
+                { error: 'Authentication Failed', message: 'No account found with this email address' },
                 { status: 401 }
             );
         }
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
             });
 
             return NextResponse.json(
-                { error: 'Authentication Failed', message: 'OTP not found. Please request a new OTP.' },
+                { error: 'Authentication Failed', message: 'No OTP code was found for your account. Please request a new OTP code.' },
                 { status: 401 }
             );
         }
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
             });
 
             return NextResponse.json(
-                { error: 'Authentication Failed', message: 'OTP has expired. Please request a new OTP.' },
+                { error: 'Authentication Failed', message: 'The OTP code has expired. Please request a new OTP code.' },
                 { status: 401 }
             );
         }
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
             });
 
             return NextResponse.json(
-                { error: 'Authentication Failed', message: 'Invalid OTP code' },
+                { error: 'Authentication Failed', message: 'The OTP code you entered is incorrect. Please check the code and try again, or request a new OTP code.' },
                 { status: 401 }
             );
         }

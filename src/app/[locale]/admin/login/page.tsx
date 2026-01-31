@@ -42,7 +42,9 @@ export default function AdminLoginPage() {
             const data = await response.json();
             console.log(data);
             if (!response.ok) {
-                throw new Error(data.message || 'Login failed');
+                const errorMessage = data.message || data.error || 'Login failed. Please check your credentials and try again.';
+                setError(errorMessage);
+                return;
             }
 
             // Check if OTP is required
@@ -61,7 +63,11 @@ export default function AdminLoginPage() {
             }
         } catch (err) {
             console.log(err);
-            setError(err instanceof Error ? err.message : 'Invalid email or password');
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('An unexpected error occurred. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -84,7 +90,10 @@ export default function AdminLoginPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'OTP verification failed');
+                // Extract clear error message from API response
+                const errorMessage = data.message || data.error || 'OTP verification failed. Please try again.';
+                setOtpError(errorMessage);
+                return;
             }
 
             // Store token in localStorage
@@ -95,8 +104,12 @@ export default function AdminLoginPage() {
             router.push('/admin/dashboard');
         } catch (err) {
             console.log(err);
-            const errorMessage = err instanceof Error ? err.message : 'Invalid OTP code';
-            setOtpError(errorMessage);
+            // Handle network errors or other unexpected errors
+            if (err instanceof Error) {
+                setOtpError(err.message);
+            } else {
+                setOtpError('An unexpected error occurred. Please try again.');
+            }
         } finally {
             setOtpLoading(false);
         }
@@ -119,13 +132,18 @@ export default function AdminLoginPage() {
             const data = await response.json();
             console.log(response);
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to resend OTP');
+                const errorMessage = data.message || data.error || 'Failed to resend OTP. Please try again.';
+                setOtpError(errorMessage);
+                return;
             }
 
             setOtpError('');
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to resend OTP';
-            setOtpError(errorMessage);
+            if (err instanceof Error) {
+                setOtpError(err.message);
+            } else {
+                setOtpError('An unexpected error occurred. Please try again.');
+            }
         } finally {
             setOtpLoading(false);
         }
