@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
         // Generate 4-digit OTP
         const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
-        const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+        const otpExpiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
 
         // Update user with OTP
         await prisma.user.update({
