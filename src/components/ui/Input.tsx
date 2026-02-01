@@ -133,7 +133,8 @@ export const Select: React.FC<SelectProps> = ({
                     id={selectId}
                     style={{ color: '#111827' }}
                     className={`
-                        flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] px-4 py-4 
+                        flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] pl-4 pr-10 py-4 
+                        rtl:pl-10 rtl:pr-4
                         text-[14px] font-['Rubik'] text-gray-900 appearance-none
                         focus:outline-none focus:ring-2 focus:ring-[#00B09C]/20 focus:border-[#00B09C] 
                         transition-all disabled:cursor-not-allowed disabled:opacity-50
@@ -152,7 +153,7 @@ export const Select: React.FC<SelectProps> = ({
                         </option>
                     ))}
                 </select>
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 right-0 pr-4 rtl:right-auto rtl:left-0 rtl:pl-4 flex items-center pointer-events-none">
                     <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
                     </svg>

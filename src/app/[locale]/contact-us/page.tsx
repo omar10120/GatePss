@@ -229,7 +229,7 @@ export default function ContactUsPage() {
                                     <select
                                         value={formData.passType}
                                         onChange={(e) => handleChange('passType', e.target.value)}
-                                        className={`w-full px-4 py-3 pr-12 bg-white border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${
+                                        className={`w-full px-4 py-3 pr-12 rtl:pl-12 rtl:pr-4 bg-white border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${
                                             errors.passType ? 'border-red-500' : 'border-gray-300'
                                         }`}
                                         disabled={loading}
@@ -243,7 +243,7 @@ export default function ContactUsPage() {
                                                 </option>
                                             ))}
                                     </select>
-                                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+                                    <div className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
