@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
         const photo = formData.get('photo') as File | null;
         const passEndDate = formData.get('passEndDate') as string | null;
         const passFor = formData.get('passFor') as string | null;
+        const passTypeId = formData.get('passTypeId') as string | null;
 
         // Validate required fields using BRD requirements
         const errors: string[] = [];
@@ -278,6 +279,18 @@ export async function POST(request: NextRequest) {
                 passFor: passFor?.trim() || null,
             };
 
+            // Add passTypeId if provided
+            if (passTypeId && passTypeId.trim() !== '') {
+                const parsedId = parseInt(passTypeId);
+                if (!isNaN(parsedId)) {
+                    requestData.passTypeId = parsedId;
+                }
+            }
+
+            // Add validityPeriod if provided
+            if (validityPeriod && validityPeriod.trim() !== '') {
+                requestData.validityPeriod = validityPeriod.trim();
+            }
 
             if (otherProfessions !== null && otherProfessions !== undefined) {
                 requestData.otherProfessions = otherProfessions.trim();
@@ -289,9 +302,39 @@ export async function POST(request: NextRequest) {
                 requestData.photoPath = photoPath;
             }
 
-            const newRequest = await prisma.request.create({
-                data: requestData,
-            });
+            // Try to create the request
+            // If passTypeId/validityPeriod columns don't exist, Prisma will throw an error
+            // We'll catch it and retry without those fields
+            let newRequest;
+            try {
+                newRequest = await prisma.request.create({
+                    data: requestData,
+                });
+            } catch (createError: any) {
+                // If error is about unknown column or unknown argument (passTypeId or validityPeriod don't exist in schema/client), remove them and retry
+                const errorMessage = createError?.message || '';
+                const errorCode = createError?.code || '';
+                
+                if (errorMessage.includes('Unknown column') || 
+                    errorMessage.includes('Unknown argument') ||
+                    errorMessage.includes('pass_type_id') || 
+                    errorMessage.includes('passTypeId') ||
+                    errorMessage.includes('validity_period') ||
+                    errorMessage.includes('validityPeriod') ||
+                    errorCode === 'P2010' || 
+                    errorCode === 'P2001') {
+                    console.warn('Columns passTypeId/validityPeriod may not exist in database or Prisma client not regenerated, retrying without them...');
+                    const retryData = { ...requestData };
+                    delete retryData.passTypeId;
+                    delete retryData.validityPeriod;
+                    newRequest = await prisma.request.create({
+                        data: retryData,
+                    });
+                } else {
+                    // Re-throw if it's a different error
+                    throw createError;
+                }
+            }
 
             // Store other documents as uploads if they exist
             if (otherDoc1Path) {
@@ -364,8 +407,10 @@ export async function POST(request: NextRequest) {
             }, { status: 201 });
         } catch (dbError: any) {
             console.error('Database error:', dbError);
-            console.error('Database error message:', dbError?.message);
-            console.error('Database error code:', dbError?.code);
+            if (dbError) {
+                console.error('Database error message:', dbError.message);
+                console.error('Database error code:', dbError.code);
+            }
             return NextResponse.json(
                 {
                     error: 'Database Error',

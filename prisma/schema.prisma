@@ -103,6 +103,8 @@ model Request {
   lastIntegrationStatusMessage String?  @map("last_integration_status_message") @db.Text
   qrCodePdfUrl                 String?  @map("qr_code_pdf_url")
   passFor                      String?  @map("pass_for")
+  passTypeId                   Int?     @map("pass_type_id")
+  validityPeriod               String?  @map("validity_period")
 
   approvedBy User?    @relation("ApprovedBy", fields: [approvedById], references: [id])
   uploads    Upload[]
