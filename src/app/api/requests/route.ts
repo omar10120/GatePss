@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
         const requestType = formData.get('requestType') as string;
         const passportIdImage = formData.get('passportIdImage') as File | null;
         const photo = formData.get('photo') as File | null;
+        const passEndDate = formData.get('passEndDate') as string | null;
         const passFor = formData.get('passFor') as string | null;
 
         // Validate required fields using BRD requirements
@@ -74,8 +75,8 @@ export async function POST(request: NextRequest) {
             errors.push('Organization is required (minimum 2 characters)');
         }
 
-        if (!validityPeriod || !['1_DAY', '1_WEEK', '1_MONTH'].includes(validityPeriod)) {
-            errors.push('Validity period is required (1_DAY, 1_WEEK, or 1_MONTH)');
+        if (!passEndDate && (!validityPeriod || !['1_DAY', '1_WEEK', '1_MONTH'].includes(validityPeriod))) {
+            errors.push('Validity period or Pass End Date is required');
         }
 
         if (!purposeOfVisit || purposeOfVisit.trim().length < 10) {
@@ -116,13 +117,13 @@ export async function POST(request: NextRequest) {
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
 
-      
+
             const maxSize = parseInt(process.env.MAX_FILE_SIZE || '5242880');
             if (buffer.length > maxSize) {
                 throw new Error(`File ${file.name} size exceeds 5MB limit`);
             }
 
-          
+
             const allowedTypes = ['jpg', 'jpeg', 'png', 'pdf'];
             const fileExt = file.name.split('.').pop()?.toLowerCase().trim();
 
@@ -130,34 +131,34 @@ export async function POST(request: NextRequest) {
                 throw new Error(`Only JPG, PNG, and PDF files are allowed for ${file.name}`);
             }
 
-          
+
             const isVercel = !!process.env.VERCEL;
 
             if (isVercel) {
-               
+
                 const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
                 const base64 = buffer.toString('base64');
                 const dataUrl = `data:${mimeType};base64,${base64}`;
-                
-              
+
+
                 return dataUrl;
             } else {
-            
+
                 try {
-                 
+
                     const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'passports');
                     await mkdir(uploadDir, { recursive: true });
 
-                 
+
                     const timestamp = Date.now();
                     const filename = `${prefix}_${timestamp}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
                     const filepath = path.join(uploadDir, filename);
 
-                   
+
                     await writeFile(filepath, buffer);
                     return `/uploads/passports/${filename}`;
                 } catch (fsError: any) {
-                  
+
                     console.warn('File system write failed, falling back to base64:', fsError.message);
                     const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
                     const base64 = buffer.toString('base64');
@@ -191,34 +192,42 @@ export async function POST(request: NextRequest) {
             );
         }
 
-   
+
+
+        // ... (existing validations)
+
+        // Date of Visit validation
         const visitDate = new Date(dateOfVisit);
         visitDate.setHours(0, 0, 0, 0);
 
         const validFrom = new Date(visitDate);
-        const validTo = new Date(visitDate);
+        let validTo = new Date(visitDate);
 
-        switch (validityPeriod) {
-            case '1_DAY':
-                validTo.setDate(validTo.getDate() + 1);
-                break;
-            case '1_WEEK':
-                validTo.setDate(validTo.getDate() + 7);
-                break;
-            case '1_MONTH':
-                validTo.setMonth(validTo.getMonth() + 1);
-                break;
-            default:
-                validTo.setDate(validTo.getDate() + 1); // Default to 1 day
+        if (passEndDate) {
+            validTo = new Date(passEndDate);
+        } else {
+            switch (validityPeriod) {
+                case '1_DAY':
+                    validTo.setDate(validTo.getDate() + 1);
+                    break;
+                case '1_WEEK':
+                    validTo.setDate(validTo.getDate() + 7);
+                    break;
+                case '1_MONTH':
+                    validTo.setMonth(validTo.getMonth() + 1);
+                    break;
+                default:
+                    validTo.setDate(validTo.getDate() + 1); // Default to 1 day
+            }
         }
         validTo.setHours(23, 59, 59, 999);
 
-       
+
         const requestNumber = generateRequestNumber();
 
-       
+
         try {
-     
+
             if (!prisma || !prisma.request) {
                 console.error('Prisma client is out of sync. Please stop the server and run: npx prisma generate');
                 return NextResponse.json(
@@ -249,7 +258,7 @@ export async function POST(request: NextRequest) {
                 passFor: passFor?.trim() || null,
             };
 
-       
+
             if (otherProfessions !== null && otherProfessions !== undefined) {
                 requestData.otherProfessions = otherProfessions.trim();
             }

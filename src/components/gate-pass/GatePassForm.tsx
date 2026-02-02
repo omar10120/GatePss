@@ -65,20 +65,20 @@ export const GatePassForm: React.FC = () => {
                 }
             } catch (error: any) {
                 console.error('Error fetching pass types:', error);
-                
+
                 // Retry on network errors
                 if (
-                    (error.name === 'AbortError' || 
-                     error.message?.includes('ERR_CONNECTION_RESET') ||
-                     error.message?.includes('Failed to fetch') ||
-                     error.message?.includes('NetworkError')) &&
+                    (error.name === 'AbortError' ||
+                        error.message?.includes('ERR_CONNECTION_RESET') ||
+                        error.message?.includes('Failed to fetch') ||
+                        error.message?.includes('NetworkError')) &&
                     retryCount < MAX_RETRIES
                 ) {
                     console.log(`Retrying fetch pass types (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
                     await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
                     return fetchPassTypes(retryCount + 1);
                 }
-                
+
                 // Set empty array as fallback on final failure
                 setPassTypes([]);
             } finally {
@@ -94,27 +94,27 @@ export const GatePassForm: React.FC = () => {
         try {
             let enValue: any = enMessages.GatePassPage;
             let arValue: any = arMessages.GatePassPage;
-            
+
             for (const key of path) {
                 if (enValue && typeof enValue === 'object') {
                     enValue = enValue[key];
                 } else {
                     enValue = undefined;
                 }
-                
+
                 if (arValue && typeof arValue === 'object') {
                     arValue = arValue[key];
                 } else {
                     arValue = undefined;
                 }
             }
-            
+
             const enText = typeof enValue === 'string' ? enValue : '';
             const arText = typeof arValue === 'string' ? arValue : '';
-            
+
             if (!enText && !arText) return '';
             if (!enText) return arText;
-            if (!arText) return enText; 
+            if (!arText) return enText;
             return `${enText} / ${arText}`;
         } catch (error) {
             console.error('Error getting bilingual text:', path, error);
@@ -130,7 +130,16 @@ export const GatePassForm: React.FC = () => {
     const [confirmed, setConfirmed] = useState(false);
     const [createdRequestNumber, setCreatedRequestNumber] = useState<string | null>(null);
     const [organizationValue, setOrganizationValue] = useState('');
-    
+    const [selectedPassType, setSelectedPassType] = useState<PassType | null>(null);
+    const [passEndDate, setPassEndDate] = useState('');
+
+    const isPermanent = (pt: PassType | null) => {
+        if (!pt) return false;
+        const nameEn = pt.name_en.toLowerCase();
+        const nameAr = pt.name_ar;
+        return nameEn.includes('permanent') || nameAr.includes('دائم');
+    };
+
     const ORGANIZATION_PREFIX = 'مجيس للخدمات الصناعية / Majis Industrial Services';
 
     const getFieldLabel = (name: string): string => {
@@ -167,7 +176,7 @@ export const GatePassForm: React.FC = () => {
             { name: 'nationality', value: formData.get('nationality') },
             { name: 'identification', value: formData.get('identification') },
             { name: 'organization', value: formData.get('organization') },
-            { name: 'validityPeriod', value: formData.get('validityPeriod') },
+            // validityPeriod is now conditionally validated later
             { name: 'passFor', value: formData.get('passFor') },
             { name: 'applicantName', value: formData.get('applicantName') },
             { name: 'fullNameAr', value: formData.get('fullNameAr') },
@@ -195,10 +204,37 @@ export const GatePassForm: React.FC = () => {
             const today = new Date();
             today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
             selectedDate.setHours(0, 0, 0, 0);
-            
+
             if (selectedDate < today) {
                 newFieldErrors['dateOfVisit'] = getBilingualNested(['errors', 'invalidDate']);
                 isValid = false;
+            }
+
+            // 4-month rule for permanent passes
+            if (isPermanent(selectedPassType)) {
+                const passEndDateValue = formData.get('passEndDate') as string;
+                if (!passEndDateValue) {
+                    newFieldErrors['passEndDate'] = getBilingualNested(['errors', 'required']) || 'is required';
+                    isValid = false;
+                } else {
+                    const endDate = new Date(passEndDateValue);
+                    const minEndDate = new Date(selectedDate);
+                    minEndDate.setMonth(minEndDate.getMonth() + 4);
+
+                    if (endDate < minEndDate) {
+                        newFieldErrors['passEndDate'] = locale === 'ar'
+                            ? 'يجب أن تكون فترة الصلاحية ٤ أشهر على الأقل'
+                            : 'Validity period must be at least 4 months';
+                        isValid = false;
+                    }
+                }
+            } else {
+                // Validity period required for temporary passes
+                const validityPeriod = formData.get('validityPeriod') as string;
+                if (!validityPeriod || validityPeriod.trim() === '') {
+                    newFieldErrors['validityPeriod'] = getBilingualNested(['errors', 'validityPeriodRequired']) || 'is required';
+                    isValid = false;
+                }
             }
         }
 
@@ -320,7 +356,7 @@ export const GatePassForm: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
+
         // Clear previous errors
         setError('');
         setErrors([]);
@@ -333,10 +369,10 @@ export const GatePassForm: React.FC = () => {
         }
 
         const formData = new FormData(e.currentTarget);
-        
+
         // Combine organization prefix with user input
         const userOrgInput = organizationValue.trim();
-        const fullOrganization = userOrgInput 
+        const fullOrganization = userOrgInput
             ? `${ORGANIZATION_PREFIX} + ${userOrgInput}`
             : ORGANIZATION_PREFIX;
         formData.set('organization', fullOrganization);
@@ -351,9 +387,9 @@ export const GatePassForm: React.FC = () => {
                 if (errorFields.length > 0) {
                     const firstErrorField = errorFields[0];
                     // Try to find the input/select/file input
-                    const element = document.querySelector(`[name="${firstErrorField}"]`) || 
-                                   document.querySelector(`#${firstErrorField}`) ||
-                                   document.querySelector(`label[for="${firstErrorField}"]`);
+                    const element = document.querySelector(`[name="${firstErrorField}"]`) ||
+                        document.querySelector(`#${firstErrorField}`) ||
+                        document.querySelector(`label[for="${firstErrorField}"]`);
                     if (element) {
                         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
@@ -413,6 +449,8 @@ export const GatePassForm: React.FC = () => {
             setCreatedRequestNumber(data.data?.requestNumber || null);
             (e.target as HTMLFormElement).reset();
             setOrganizationValue('');
+            setSelectedPassType(null);
+            setPassEndDate('');
             setConfirmed(false);
         } catch (err: any) {
             console.error('Submission error:', err);
@@ -435,6 +473,8 @@ export const GatePassForm: React.FC = () => {
         setConfirmed(false);
         setError('');
         setErrors([]);
+        setSelectedPassType(null);
+        setPassEndDate('');
     };
 
     if (success) {
@@ -486,13 +526,22 @@ export const GatePassForm: React.FC = () => {
                                 .filter(pt => pt.is_active)
                                 .map((pt) => ({
                                     value: pt.id.toString(),
-                                    label: locale === 'ar' 
-                                        ? pt.name_ar 
+                                    label: locale === 'ar'
+                                        ? pt.name_ar
                                         : `${pt.name_en}${pt.name_ar ? ` / ${pt.name_ar}` : ''}`,
                                 })),
                         ]}
                         required
                         disabled={loadingPassTypes}
+                        onChange={(e) => {
+                            const id = e.target.value;
+                            const pt = passTypes.find(p => p.id.toString() === id) || null;
+                            setSelectedPassType(pt);
+                            // Clear passEndDate if switching back to temporary
+                            if (!isPermanent(pt)) {
+                                setPassEndDate('');
+                            }
+                        }}
                     />
                     <Select
                         name="requestType"
@@ -518,7 +567,7 @@ export const GatePassForm: React.FC = () => {
                         ]}
                         required
                     />
-             
+
                     <div className="w-full">
                         <label className="block text-sm font-medium text-gray-700 mb-2 font-['Rubik']">
                             {getBilingualNested(['fields', 'organization'])}
@@ -540,7 +589,7 @@ export const GatePassForm: React.FC = () => {
                             <p className="mt-1 text-sm text-red-600 font-['Rubik']">{fieldErrors.organization}</p>
                         )}
                     </div>
-                  
+
                     <Input
                         name="dateOfVisit"
                         type="date"
@@ -555,7 +604,7 @@ export const GatePassForm: React.FC = () => {
                                 const today = new Date();
                                 today.setHours(0, 0, 0, 0);
                                 date.setHours(0, 0, 0, 0);
-                                
+
                                 if (date < today) {
                                     setFieldErrors(prev => ({
                                         ...prev,
@@ -576,18 +625,44 @@ export const GatePassForm: React.FC = () => {
                             </svg>
                         }
                     />
-                    <Select
-                        name="validityPeriod"
-                        label={getBilingualNested(['fields', 'validityPeriod'])}
-                        error={fieldErrors.validityPeriod}
-                        options={[
-                            { value: '', label: getBilingualNested(['placeholders', 'selectDate']) },
-                            { value: '1_DAY', label: getBilingualNested(['options', 'oneDay']) },
-                            { value: '1_WEEK', label: getBilingualNested(['options', 'oneWeek']) },
-                            { value: '1_MONTH', label: getBilingualNested(['options', 'oneMonth']) },
-                        ]}
-                        required
-                    />
+                    {isPermanent(selectedPassType) ? (
+                        <Input
+                            name="passEndDate"
+                            type="date"
+                            label={locale === 'ar' ? 'تاريخ انتهاء التصريح' : 'Pass End Date'}
+                            value={passEndDate}
+                            error={fieldErrors.passEndDate}
+                            required
+                            onChange={(e) => setPassEndDate(e.target.value)}
+                            min={(() => {
+                                const dateOfVisit = (document.querySelector('input[name="dateOfVisit"]') as HTMLInputElement)?.value;
+                                if (dateOfVisit) {
+                                    const date = new Date(dateOfVisit);
+                                    date.setMonth(date.getMonth() + 4);
+                                    return date.toISOString().split('T')[0];
+                                }
+                                return undefined;
+                            })()}
+                            rightIcon={
+                                <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            }
+                        />
+                    ) : (
+                        <Select
+                            name="validityPeriod"
+                            label={getBilingualNested(['fields', 'validityPeriod'])}
+                            error={fieldErrors.validityPeriod}
+                            options={[
+                                { value: '', label: getBilingualNested(['placeholders', 'selectDate']) },
+                                { value: '1_DAY', label: getBilingualNested(['options', 'oneDay']) },
+                                { value: '1_WEEK', label: getBilingualNested(['options', 'oneWeek']) },
+                                { value: '1_MONTH', label: getBilingualNested(['options', 'oneMonth']) },
+                            ]}
+                            required
+                        />
+                    )}
                     <Select
                         name="passFor"
                         label={getBilingualNested(['fields', 'passFor'])}
@@ -719,7 +794,7 @@ export const GatePassForm: React.FC = () => {
                         name="identification"
                         label={getBilingualNested(['fields', 'identification'])}
                         error={fieldErrors.identification}
-                        
+
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
                             { value: 'ID', label: getBilingualNested(['options', 'idCard']) },
