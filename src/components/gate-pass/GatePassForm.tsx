@@ -215,17 +215,17 @@ export const GatePassForm: React.FC = () => {
             if (isPermanent(selectedPassType)) {
                 const passEndDateValue = formData.get('passEndDate') as string;
                 if (!passEndDateValue) {
-                    newFieldErrors['passEndDate'] = getBilingualNested(['errors', 'required']) || 'is required';
+                    newFieldErrors['passEndDate'] = `${getBilingualNested(['fields', 'passEndDate'])} ${getBilingualNested(['errors', 'required'])}`;
                     isValid = false;
                 } else {
                     const endDate = new Date(passEndDateValue);
+                    endDate.setHours(0, 0, 0, 0);
                     const minEndDate = new Date(selectedDate);
                     minEndDate.setMonth(minEndDate.getMonth() + 4);
+                    minEndDate.setHours(0, 0, 0, 0);
 
                     if (endDate < minEndDate) {
-                        newFieldErrors['passEndDate'] = locale === 'ar'
-                            ? 'يجب أن تكون فترة الصلاحية ٤ أشهر على الأقل'
-                            : 'Validity period must be at least 4 months';
+                        newFieldErrors['passEndDate'] = getBilingualNested(['errors', 'passEndDateMin4Months']);
                         isValid = false;
                     }
                 }
@@ -617,6 +617,28 @@ export const GatePassForm: React.FC = () => {
                                         delete newErrors.dateOfVisit;
                                         return newErrors;
                                     });
+                                    
+                                    // Re-validate passEndDate if it's already set and pass type is permanent
+                                    if (isPermanent(selectedPassType) && passEndDate) {
+                                        const endDate = new Date(passEndDate);
+                                        endDate.setHours(0, 0, 0, 0);
+                                        const minEndDate = new Date(date);
+                                        minEndDate.setMonth(minEndDate.getMonth() + 4);
+                                        minEndDate.setHours(0, 0, 0, 0);
+                                        
+                                        if (endDate < minEndDate) {
+                                            setFieldErrors(prev => ({
+                                                ...prev,
+                                                passEndDate: getBilingualNested(['errors', 'passEndDateMin4Months'])
+                                            }));
+                                        } else {
+                                            setFieldErrors(prev => {
+                                                const newErrors = { ...prev };
+                                                delete newErrors.passEndDate;
+                                                return newErrors;
+                                            });
+                                        }
+                                    }
                                 }
                             }
                         }}
@@ -634,7 +656,48 @@ export const GatePassForm: React.FC = () => {
                             value={passEndDate}
                             error={fieldErrors.passEndDate}
                             required
-                            onChange={(e) => setPassEndDate(e.target.value)}
+                            onChange={(e) => {
+                                const selectedEndDate = e.target.value;
+                                setPassEndDate(selectedEndDate);
+                                
+                                // Real-time validation: check if end date is at least 4 months after start date
+                                if (selectedEndDate) {
+                                    const dateOfVisitInput = document.querySelector('input[name="dateOfVisit"]') as HTMLInputElement;
+                                    const dateOfVisitValue = dateOfVisitInput?.value;
+                                    
+                                    if (dateOfVisitValue) {
+                                        const startDate = new Date(dateOfVisitValue);
+                                        startDate.setHours(0, 0, 0, 0);
+                                        const endDate = new Date(selectedEndDate);
+                                        endDate.setHours(0, 0, 0, 0);
+                                        
+                                        // Calculate minimum end date (4 months after start date)
+                                        const minEndDate = new Date(startDate);
+                                        minEndDate.setMonth(minEndDate.getMonth() + 4);
+                                        minEndDate.setHours(0, 0, 0, 0);
+                                        
+                                        if (endDate < minEndDate) {
+                                            setFieldErrors(prev => ({
+                                                ...prev,
+                                                passEndDate: getBilingualNested(['errors', 'passEndDateMin4Months'])
+                                            }));
+                                        } else {
+                                            setFieldErrors(prev => {
+                                                const newErrors = { ...prev };
+                                                delete newErrors.passEndDate;
+                                                return newErrors;
+                                            });
+                                        }
+                                    }
+                                } else {
+                                    // Clear error if field is cleared
+                                    setFieldErrors(prev => {
+                                        const newErrors = { ...prev };
+                                        delete newErrors.passEndDate;
+                                        return newErrors;
+                                    });
+                                }
+                            }}
                             min={(() => {
                                 const dateOfVisit = (document.querySelector('input[name="dateOfVisit"]') as HTMLInputElement)?.value;
                                 if (dateOfVisit) {

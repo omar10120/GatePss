@@ -89,9 +89,29 @@ export async function POST(request: NextRequest) {
             const visitDate = new Date(dateOfVisit);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
+            visitDate.setHours(0, 0, 0, 0);
 
             if (visitDate < today) {
                 errors.push('Date of visit cannot be in the past');
+            }
+
+            // Validate passEndDate: must be at least 4 months after dateOfVisit
+            if (passEndDate) {
+                const endDate = new Date(passEndDate);
+                
+                // Check if passEndDate is a valid date
+                if (isNaN(endDate.getTime())) {
+                    errors.push('Pass End Date must be a valid date');
+                } else {
+                    endDate.setHours(0, 0, 0, 0);
+                    const minEndDate = new Date(visitDate);
+                    minEndDate.setMonth(minEndDate.getMonth() + 4);
+                    minEndDate.setHours(0, 0, 0, 0);
+
+                    if (endDate < minEndDate) {
+                        errors.push('Pass End Date must be at least 4 months after Pass Starting Date');
+                    }
+                }
             }
         }
 
