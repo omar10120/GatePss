@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -26,46 +26,112 @@ interface LatestRequestsProps {
 
 export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }) => {
     const t = useTranslations('Admin.dashboard');
-    const [filter, setFilter] = useState<'Day' | 'Week' | 'Month'>('Day');
+    const [filter, setFilter] = useState<'Day' | 'Week' | 'Month' | 'Custom'>('Day');
+    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+    const [customStartDate, setCustomStartDate] = useState<string>('');
+    const [customEndDate, setCustomEndDate] = useState<string>('');
+    const datePickerRef = useRef<HTMLDivElement>(null);
     const { hasPermission } = usePermissions(user);
+
+    // Close date picker when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+                setIsDatePickerOpen(false);
+            }
+        };
+
+        if (isDatePickerOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isDatePickerOpen]);
 
     // Filter requests based on selected time period
     const filteredRequests = useMemo(() => {
         if (!requests || requests.length === 0) return [];
 
         const now = new Date();
-        const filterDate = new Date();
+        let filterStartDate = new Date();
+        let filterEndDate = new Date(now);
+        filterEndDate.setHours(23, 59, 59, 999);
 
-        switch (filter) {
-            case 'Day':
-                filterDate.setHours(0, 0, 0, 0);
-                break;
-            case 'Week':
-                filterDate.setDate(now.getDate() - 7);
-                filterDate.setHours(0, 0, 0, 0);
-                break;
-            case 'Month':
-                filterDate.setMonth(now.getMonth() - 1);
-                filterDate.setHours(0, 0, 0, 0);
-                break;
+        if (filter === 'Custom' && customStartDate && customEndDate) {
+            // Use custom date range
+            filterStartDate = new Date(customStartDate);
+            filterStartDate.setHours(0, 0, 0, 0);
+            filterEndDate = new Date(customEndDate);
+            filterEndDate.setHours(23, 59, 59, 999);
+        } else {
+            // Use predefined filters
+            switch (filter) {
+                case 'Day':
+                    filterStartDate.setHours(0, 0, 0, 0);
+                    break;
+                case 'Week':
+                    filterStartDate.setDate(now.getDate() - 7);
+                    filterStartDate.setHours(0, 0, 0, 0);
+                    break;
+                case 'Month':
+                    filterStartDate.setMonth(now.getMonth() - 1);
+                    filterStartDate.setHours(0, 0, 0, 0);
+                    break;
+            }
         }
 
         return requests.filter((request) => {
             const requestDate = new Date(request.createdAt);
-            return requestDate >= filterDate && requestDate <= now;
+            return requestDate >= filterStartDate && requestDate <= filterEndDate;
         });
-    }, [requests, filter]);
+    }, [requests, filter, customStartDate, customEndDate]);
+
+    const handleFilterClick = (f: 'Day' | 'Week' | 'Month') => {
+        setFilter(f);
+        setCustomStartDate('');
+        setCustomEndDate('');
+        setIsDatePickerOpen(false);
+    };
+
+    const handleCalendarClick = () => {
+        setIsDatePickerOpen(!isDatePickerOpen);
+    };
+
+    const handleCustomDateApply = () => {
+        if (customStartDate && customEndDate) {
+            const start = new Date(customStartDate);
+            const end = new Date(customEndDate);
+            
+            if (start > end) {
+                // Swap dates if start is after end
+                setCustomStartDate(customEndDate);
+                setCustomEndDate(customStartDate);
+            } else {
+                setFilter('Custom');
+                setIsDatePickerOpen(false);
+            }
+        }
+    };
+
+    const handleClearCustomDate = () => {
+        setCustomStartDate('');
+        setCustomEndDate('');
+        setFilter('Day');
+        setIsDatePickerOpen(false);
+    };
 
     return (
         <div className="bg-white rounded-3xl p-6 shadow-sm mb-8 border border-gray-100">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-gray-900">{t('recent')}</h3>
                 {/* Filters UI to match given image */}
-                <div className="flex items-center bg-gray-50 p-1 rounded-xl">
+                <div className="flex items-center bg-gray-50 p-1 rounded-xl relative">
                     {(['Day', 'Week', 'Month'] as const).map((f) => (
                         <button
                             key={f}
-                            onClick={() => setFilter(f)}
+                            onClick={() => handleFilterClick(f)}
                             className={`px-4 h-8 rounded-lg text-sm font-medium transition-all
                                 ${filter === f
                                     ? 'bg-white shadow-sm text-gray-900 font-semibold'
@@ -79,13 +145,92 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
                             {t(`filter.${f.toLowerCase()}`)}
                         </button>
                     ))}
-                    {/* Calendar icon - only visual, not interactive, to match the image */}
-                    <div className="ml-2 flex items-center bg-inherit">
-                        <div className="bg-gray-100 p-1.5 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors flex items-center justify-center">
-                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {/* Calendar icon - now interactive */}
+                    <div className="ml-2 flex items-center bg-inherit relative" ref={datePickerRef}>
+                        <button
+                            onClick={handleCalendarClick}
+                            className={`bg-gray-100 p-1.5 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors flex items-center justify-center ${
+                                filter === 'Custom' ? 'bg-blue-100 hover:bg-blue-200' : ''
+                            }`}
+                            aria-label="Select custom date range"
+                        >
+                            <svg className={`w-5 h-5 ${filter === 'Custom' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                        </div>
+                        </button>
+                        
+                        {/* Date Picker Popover */}
+                        {isDatePickerOpen && (
+                            <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 p-4 z-50 min-w-[280px]">
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h4 className="text-sm font-semibold text-gray-900">Select Date Range</h4>
+                                        <button
+                                            onClick={() => setIsDatePickerOpen(false)}
+                                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                                            aria-label="Close"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                Start Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={customStartDate}
+                                                onChange={(e) => setCustomStartDate(e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                style={{ color: '#111827' }}
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                End Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={customEndDate}
+                                                onChange={(e) => setCustomEndDate(e.target.value)}
+                                                min={customStartDate || undefined}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                style={{ color: '#111827' }}
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                                        <button
+                                            onClick={handleCustomDateApply}
+                                            disabled={!customStartDate || !customEndDate}
+                                            className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Apply
+                                        </button>
+                                        {(customStartDate || customEndDate || filter === 'Custom') && (
+                                            <button
+                                                onClick={handleClearCustomDate}
+                                                className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                                            >
+                                                Clear
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    {filter === 'Custom' && customStartDate && customEndDate && (
+                                        <div className="text-xs text-gray-500 pt-1 border-t border-gray-100">
+                                            <span className="font-medium">Active:</span> {new Date(customStartDate).toLocaleDateString()} - {new Date(customEndDate).toLocaleDateString()}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
