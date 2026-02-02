@@ -258,6 +258,7 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
                                 
                                 return (
                                     <tr key={request.id} className="hover:bg-gray-50/50 transition-colors group">
+                                        
                                         <td className="py-4 px-2">
                                             <span className="text-sm text-gray-900">{request.requestNumber.slice(-3)}</span>
                                         </td>

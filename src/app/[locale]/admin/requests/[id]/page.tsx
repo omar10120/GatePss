@@ -132,13 +132,14 @@ export default function RequestDetailsPage() {
         }
 
 
-        if (requestId) {
-            fetchRequestDetails(requestId);
-        }
-
         // Check if edit mode is enabled from URL
         const editParam = searchParams.get('edit');
-        setIsEditMode(editParam === 'true');
+        const editMode = editParam === 'true';
+        setIsEditMode(editMode);
+
+        if (requestId) {
+            fetchRequestDetails(requestId, editMode);
+        }
     }, [requestId, searchParams]);
 
     // Fetch pass types from database
@@ -160,21 +161,24 @@ export default function RequestDetailsPage() {
         if (request && isEditMode) {
             // Only initialize if editData is empty or doesn't have the same id
             if (Object.keys(editData).length === 0 || editData.id !== request.id) {
-                setEditData({ ...request });
+                setEditData({ ...request, status: request.status, rejectionReason: request.rejectionReason });
             }
         }
     }, [request, isEditMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const fetchRequestDetails = async (id: string) => {
+    const fetchRequestDetails = async (id: string, editMode?: boolean) => {
         setLoading(true);
         setPermissionDenied(false);
         try {
             console.log('fetching request details: ' + id);
-            const result = await apiFetch<RequestDetails>(`/api/admin/requests/${id}`);
-            console.log('request details: ' + JSON.stringify(result));
+            // Include edit=true query parameter if in edit mode
+            const currentEditMode = editMode !== undefined ? editMode : isEditMode;
+            const url = currentEditMode ? `/api/admin/requests/${id}?edit=true` : `/api/admin/requests/${id}`;
+            const result = await apiFetch<RequestDetails>(url);
+         
             setRequest(result);
             // Only initialize editData if not in edit mode (to preserve user changes)
-            if (!isEditMode) {
+            if (!currentEditMode) {
                 setEditData({ ...result });
             } else {
                 // If in edit mode, merge with existing editData to preserve user changes
@@ -266,60 +270,233 @@ export default function RequestDetailsPage() {
                 updatePayload.bloodType = editData.bloodType;
             }
 
+            // Check if status is being changed
+            const statusChanged = isEditMode && editData.status !== undefined && editData.status !== request.status;
+            const newStatus = statusChanged ? editData.status : null;
+
+            // Validate rejection reason if status is being changed to REJECTED
+            if (newStatus === 'REJECTED') {
+                const rejectionReason = editData.rejectionReason !== undefined ? editData.rejectionReason : request.rejectionReason;
+                if (!rejectionReason || rejectionReason.trim().length < 10) {
+                    setError('Rejection reason must be at least 10 characters when status is REJECTED');
+                    setProcessing(false);
+                    return;
+                }
+            }
+
+            // Separate status updates from other updates
+            // We'll handle status via approve/reject endpoints, other fields via PUT
+            const otherUpdates = { ...updatePayload };
+            // Remove status and rejectionReason from otherUpdates since we handle them separately
+            delete otherUpdates.status;
+            delete otherUpdates.rejectionReason;
+
             // Check if there are files to upload
             const hasFiles = Object.values(files).some(file => file !== null);
             
-            if (Object.keys(updatePayload).length === 0 && !hasFiles) {
+            // Check if there are other changes besides status
+            const hasOtherChanges = Object.keys(otherUpdates).length > 0 || hasFiles;
+
+            // If no changes at all, return early
+            if (!statusChanged && !hasOtherChanges) {
                 setError('No changes to save');
                 setProcessing(false);
                 return;
             }
 
-            // If there are files, use FormData with authenticatedFetch, otherwise use apiFetch
-            if (hasFiles) {
-                const formData = new FormData();
-                
-                // Add all text fields to FormData
-                Object.keys(updatePayload).forEach(key => {
-                    const value = updatePayload[key];
-                    if (value !== null && value !== undefined) {
-                        if (value instanceof Date) {
-                            formData.append(key, value.toISOString());
-                        } else {
-                            formData.append(key, String(value));
+            // Handle status changes using approve/reject endpoints (matching list page logic)
+            if (statusChanged) {
+                if (newStatus === 'APPROVED') {
+                    // Use approve endpoint with updates
+                    const approvePayload: any = {};
+                    if (hasOtherChanges) {
+                        approvePayload.updates = otherUpdates;
+                    }
+                    
+                    // If there are files, we need to save them first via PUT, then approve
+                    if (hasFiles) {
+                        // First save files and other updates via PUT
+                        const formData = new FormData();
+                        Object.keys(otherUpdates).forEach(key => {
+                            const value = otherUpdates[key];
+                            if (value !== null && value !== undefined) {
+                                if (value instanceof Date) {
+                                    formData.append(key, value.toISOString());
+                                } else {
+                                    formData.append(key, String(value));
+                                }
+                            }
+                        });
+                        Object.keys(files).forEach(key => {
+                            const file = files[key];
+                            if (file) {
+                                formData.append(key, file);
+                            }
+                        });
+
+                        const url = `/api/admin/requests/${requestId}?edit=true`;
+                        const response = await authenticatedFetch(url, {
+                            method: 'PUT',
+                            body: formData,
+                        });
+
+                        if (!response.ok) {
+                            const result = await response.json().catch(() => ({}));
+                            throw new Error(result.message || 'Failed to update request');
                         }
                     }
-                });
-                
-                // Add files to FormData
-                Object.keys(files).forEach(key => {
-                    const file = files[key];
-                    if (file) {
-                        formData.append(key, file);
+
+                    // Then approve with any remaining updates
+                    if (Object.keys(approvePayload.updates || {}).length > 0) {
+                        await apiFetch(`/api/admin/requests/${requestId}/approve`, {
+                            method: 'POST',
+                            body: JSON.stringify(approvePayload),
+                        });
+                    } else {
+                        await apiFetch(`/api/admin/requests/${requestId}/approve`, {
+                            method: 'POST',
+                        });
                     }
-                });
 
-                const response = await authenticatedFetch(`/api/admin/requests/${requestId}`, {
-                    method: 'PUT',
-                    body: formData,
-                });
+                    setSuccess('Request approved and updated successfully!');
+                } else if (newStatus === 'REJECTED') {
+                    // First save other updates via PUT (if any)
+                    if (hasOtherChanges) {
+                        if (hasFiles) {
+                            const formData = new FormData();
+                            Object.keys(otherUpdates).forEach(key => {
+                                const value = otherUpdates[key];
+                                if (value !== null && value !== undefined) {
+                                    if (value instanceof Date) {
+                                        formData.append(key, value.toISOString());
+                                    } else {
+                                        formData.append(key, String(value));
+                                    }
+                                }
+                            });
+                            Object.keys(files).forEach(key => {
+                                const file = files[key];
+                                if (file) {
+                                    formData.append(key, file);
+                                }
+                            });
 
-                if (!response.ok) {
-                    const result = await response.json().catch(() => ({}));
-                    throw new Error(result.message || 'Failed to update request');
+                            const url = `/api/admin/requests/${requestId}?edit=true`;
+                            const response = await authenticatedFetch(url, {
+                                method: 'PUT',
+                                body: formData,
+                            });
+
+                            if (!response.ok) {
+                                const result = await response.json().catch(() => ({}));
+                                throw new Error(result.message || 'Failed to update request');
+                            }
+                        } else {
+                            const url = `/api/admin/requests/${requestId}?edit=true`;
+                            await apiFetch(url, {
+                                method: 'PUT',
+                                body: JSON.stringify(otherUpdates),
+                            });
+                        }
+                    }
+
+                    // Then reject with rejection reason
+                    const rejectionReason = editData.rejectionReason !== undefined ? editData.rejectionReason : request.rejectionReason;
+                    await apiFetch(`/api/admin/requests/${requestId}/reject`, {
+                        method: 'POST',
+                        body: JSON.stringify({ rejectionReason }),
+                    });
+
+                    setSuccess('Request rejected and updated successfully!');
+                } else if (newStatus === 'PENDING') {
+                    // For PENDING, include status in PUT request
+                    const pendingPayload = { ...otherUpdates, status: 'PENDING' };
+                    
+                    if (hasFiles) {
+                        const formData = new FormData();
+                        Object.keys(pendingPayload).forEach(key => {
+                            const value = pendingPayload[key];
+                            if (value !== null && value !== undefined) {
+                                if (value instanceof Date) {
+                                    formData.append(key, value.toISOString());
+                                } else {
+                                    formData.append(key, String(value));
+                                }
+                            }
+                        });
+                        Object.keys(files).forEach(key => {
+                            const file = files[key];
+                            if (file) {
+                                formData.append(key, file);
+                            }
+                        });
+
+                        const url = `/api/admin/requests/${requestId}?edit=true`;
+                        const response = await authenticatedFetch(url, {
+                            method: 'PUT',
+                            body: formData,
+                        });
+
+                        if (!response.ok) {
+                            const result = await response.json().catch(() => ({}));
+                            throw new Error(result.message || 'Failed to update request');
+                        }
+                    } else {
+                        const url = `/api/admin/requests/${requestId}?edit=true`;
+                        await apiFetch(url, {
+                            method: 'PUT',
+                            body: JSON.stringify(pendingPayload),
+                        });
+                    }
+
+                    setSuccess('Request updated successfully!');
                 }
             } else {
-                await apiFetch(`/api/admin/requests/${requestId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(updatePayload),
-                });
+                // No status change, just save other updates via PUT
+                if (hasFiles) {
+                    const formData = new FormData();
+                    Object.keys(otherUpdates).forEach(key => {
+                        const value = otherUpdates[key];
+                        if (value !== null && value !== undefined) {
+                            if (value instanceof Date) {
+                                formData.append(key, value.toISOString());
+                            } else {
+                                formData.append(key, String(value));
+                            }
+                        }
+                    });
+                    Object.keys(files).forEach(key => {
+                        const file = files[key];
+                        if (file) {
+                            formData.append(key, file);
+                        }
+                    });
+
+                    const url = isEditMode ? `/api/admin/requests/${requestId}?edit=true` : `/api/admin/requests/${requestId}`;
+                    const response = await authenticatedFetch(url, {
+                        method: 'PUT',
+                        body: formData,
+                    });
+
+                    if (!response.ok) {
+                        const result = await response.json().catch(() => ({}));
+                        throw new Error(result.message || 'Failed to update request');
+                    }
+                } else {
+                    const url = isEditMode ? `/api/admin/requests/${requestId}?edit=true` : `/api/admin/requests/${requestId}`;
+                    await apiFetch(url, {
+                        method: 'PUT',
+                        body: JSON.stringify(otherUpdates),
+                    });
+                }
+
+                setSuccess('Request updated successfully!');
             }
 
-            setSuccess('Request updated successfully!');
             setIsEditMode(false);
             // Remove edit query parameter from URL
             router.replace(`/admin/requests/${requestId}`);
-            fetchRequestDetails(requestId);
+            fetchRequestDetails(requestId, false);
         } catch (err: any) {
             setError(err.message || 'An error occurred');
             // apiFetch/authenticatedFetch handles 401 (token expiration) automatically with redirect
@@ -337,6 +514,12 @@ export default function RequestDetailsPage() {
     };
 
     const toggleEditMode = () => {
+        // Only allow editing if status is PENDING
+        if (!request || request.status !== 'PENDING') {
+            setError('Only pending requests can be edited');
+            return;
+        }
+
         if (isEditMode) {
             handleCancel();
         } else {
@@ -349,18 +532,53 @@ export default function RequestDetailsPage() {
         }
     };
 
-    const handleApprove = async () => {
+    const handleStatusUpdate = async (status: 'APPROVED' | 'REJECTED' | 'PENDING', rejectionReason?: string) => {
         setProcessing(true);
         setError('');
         setSuccess('');
 
         try {
-            await apiFetch(`/api/admin/requests/${requestId}/approve`, {
+            let endpoint = '';
+            let body = {};
+
+            if (status === 'APPROVED') {
+                endpoint = `/api/admin/requests/${requestId}/approve`;
+            } else if (status === 'REJECTED') {
+                if (!rejectionReason || rejectionReason.trim().length < 10) {
+                    setError('Rejection reason must be at least 10 characters');
+                    setProcessing(false);
+                    return;
+                }
+                endpoint = `/api/admin/requests/${requestId}/reject`;
+                body = { rejectionReason };
+            } else {
+                // For PENDING status, use PUT endpoint with edit=true
+                endpoint = `/api/admin/requests/${requestId}?edit=true`;
+                body = { status: 'PENDING' };
+                await apiFetch(endpoint, {
+                    method: 'PUT',
+                    body: JSON.stringify(body),
+                });
+                setSuccess('Request status updated to PENDING successfully!');
+                fetchRequestDetails(requestId, isEditMode);
+                setProcessing(false);
+                return;
+            }
+
+            await apiFetch(endpoint, {
                 method: 'POST',
+                body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
             });
 
-            setSuccess('Request approved successfully!');
-            fetchRequestDetails(requestId);
+            if (status === 'APPROVED') {
+                setSuccess('Request approved successfully!');
+            } else if (status === 'REJECTED') {
+                setSuccess('Request rejected successfully!');
+                setShowRejectModal(false);
+                setRejectionReason('');
+            }
+
+            fetchRequestDetails(requestId, isEditMode);
         } catch (err: any) {
             setError(err.message || 'An error occurred');
             // apiFetch handles 401 (token expiration) automatically with redirect
@@ -369,32 +587,16 @@ export default function RequestDetailsPage() {
         }
     };
 
+    const handleApprove = async () => {
+        await handleStatusUpdate('APPROVED');
+    };
+
     const handleReject = async () => {
         if (rejectionReason.length < 10) {
             setError('Rejection reason must be at least 10 characters');
             return;
         }
-
-        setProcessing(true);
-        setError('');
-        setSuccess('');
-
-        try {
-            await apiFetch(`/api/admin/requests/${requestId}/reject`, {
-                method: 'POST',
-                body: JSON.stringify({ rejectionReason }),
-            });
-
-            setSuccess('Request rejected successfully!');
-            setShowRejectModal(false);
-            setRejectionReason('');
-            fetchRequestDetails(requestId);
-        } catch (err: any) {
-            setError(err.message || 'An error occurred');
-            // apiFetch handles 401 (token expiration) automatically with redirect
-        } finally {
-            setProcessing(false);
-        }
+        await handleStatusUpdate('REJECTED', rejectionReason);
     };
 
     const getStatusColor = (status: string) => {
@@ -472,9 +674,46 @@ export default function RequestDetailsPage() {
                                     requestNumber={request.requestNumber}
                                     />
                                     <div className="flex items-center gap-3">
-                                        <span className={`px-4 py-2 rounded-[8px] text-sm font-medium ${getStatusColor(request.status)}`}>
-                                            {dt(`status.${request.status}`)}
-                                        </span>
+                                        {isEditMode && request.status === 'PENDING' ? (
+                                            <div className="flex flex-col gap-2">
+                                                <select
+                                                    value={editData.status !== undefined ? editData.status : request.status}
+                                                    onChange={(e) => {
+                                                        const newStatus = e.target.value as 'APPROVED' | 'REJECTED' | 'PENDING';
+                                                        setEditData(prev => ({ 
+                                                            ...prev, 
+                                                            status: newStatus,
+                                                            // Clear rejectionReason if status is not REJECTED
+                                                            rejectionReason: newStatus === 'REJECTED' ? (prev.rejectionReason || request.rejectionReason || '') : null
+                                                        }));
+                                                    }}
+                                                    className={`px-4 py-2 rounded-[8px] text-sm font-medium border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStatusColor(editData.status !== undefined ? editData.status : request.status)}`}
+                                                >
+                                                    <option value="PENDING">Pending</option>
+                                                    <option value="APPROVED">Approved</option>
+                                                    <option value="REJECTED">Rejected</option>
+                                                </select>
+                                                {(editData.status !== undefined ? editData.status : request.status) === 'REJECTED' && (
+                                                    <div className="mt-2">
+                                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                            Rejection Reason
+                                                        </label>
+                                                        <textarea
+                                                            value={editData.rejectionReason !== undefined ? (editData.rejectionReason || '') : (request.rejectionReason || '')}
+                                                            onChange={(e) => setEditData(prev => ({ ...prev, rejectionReason: e.target.value }))}
+                                                            placeholder="Enter rejection reason (minimum 10 characters)"
+                                                            rows={3}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            minLength={10}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span className={`px-4 py-2 rounded-[8px] text-sm font-medium ${getStatusColor(request.status)}`}>
+                                                {dt(`status.${request.status}`)}
+                                            </span>
+                                        )}
                                         <button
                                             onClick={toggleEditMode}
                                             className={`px-4 py-1 rounded-lg font-medium transition-colors flex items-center gap-2 ${
@@ -503,7 +742,7 @@ export default function RequestDetailsPage() {
                                     </div>
                                 </div>
 
-                                {isEditMode && (
+                                {isEditMode && request.status === 'PENDING' && (
                                     <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                                         <div className="flex justify-between items-center">
                                             <p className="text-blue-800 text-sm font-medium">Edit mode enabled. Make your changes and click Save.</p>
@@ -515,6 +754,14 @@ export default function RequestDetailsPage() {
                                                 {processing ? 'Saving...' : 'Save Changes'}
                                             </button>
                                         </div>
+                                    </div>
+                                )}
+                                
+                                {request.status !== 'PENDING' && (
+                                    <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <p className="text-yellow-800 text-sm font-medium">
+                                            This request cannot be edited because its status is {dt(`status.${request.status}`)}. Only pending requests can be edited.
+                                        </p>
                                     </div>
                                 )}
 
@@ -529,7 +776,7 @@ export default function RequestDetailsPage() {
                                     <div className="border-r border-gray-100 pr-0 lg:pr-8">
                                         <InfoSection
                                             title={t('passPermitInfo') || "Pass Permit Info"}
-                                            isEditable={isEditMode}
+                                            isEditable={isEditMode && request.status === 'PENDING'}
                                             onChange={(fieldName, value) => {
                                                 // Convert passTypeId to number if it's a select field
                                                 if (fieldName === 'passTypeId') {
@@ -641,7 +888,7 @@ export default function RequestDetailsPage() {
 
                                         <InfoSection
                                             title={t('passHolderInfo') || "Pass Holder Info"}
-                                            isEditable={isEditMode}
+                                            isEditable={isEditMode && request.status === 'PENDING'}
                                             onChange={(fieldName, value) => {
                                                 // Convert passTypeId to number if it's a select field
                                                 if (fieldName === 'passTypeId') {
@@ -734,7 +981,7 @@ export default function RequestDetailsPage() {
                                         <DocumentCard
                                             title={gt('fields.copyOfCivilId') || "Copy of Civil ID"}
                                             imageUrl={request.passportIdImagePath}
-                                            isEditable={isEditMode}
+                                            isEditable={isEditMode && request.status === 'PENDING'}
                                             fieldName="passportIdImage"
                                             onChange={(fieldName, file) => {
                                                 setFiles(prev => ({ ...prev, [fieldName]: file }));
@@ -754,7 +1001,7 @@ export default function RequestDetailsPage() {
                                         <DocumentCard
                                             title={gt('fields.photo') || "Photo"}
                                             imageUrl={request.uploads.find(u => u.fileType === 'PHOTO')?.filePath || null}
-                                            isEditable={isEditMode}
+                                            isEditable={isEditMode && request.status === 'PENDING'}
                                             fieldName="photo"
                                             onChange={(fieldName, file) => {
                                                 setFiles(prev => ({ ...prev, [fieldName]: file }));
@@ -779,7 +1026,7 @@ export default function RequestDetailsPage() {
                                                     key={upload.id}
                                                     title={`${gt('fields.otherDocuments1') || "Other Documents"} ${idx + 1}`}
                                                     imageUrl={upload.filePath}
-                                                    isEditable={isEditMode}
+                                                    isEditable={isEditMode && request.status === 'PENDING'}
                                                     fieldName={idx === 0 ? 'otherDocuments1' : 'otherDocuments2'}
                                                     onChange={(fieldName, file) => {
                                                         setFiles(prev => ({ ...prev, [fieldName]: file }));
@@ -802,7 +1049,7 @@ export default function RequestDetailsPage() {
                                                 <DocumentCard
                                                     title={`${gt('fields.otherDocuments1') || "Other Documents"} 1`}
                                                     imageUrl={null}
-                                                    isEditable={isEditMode}
+                                                    isEditable={isEditMode && request.status === 'PENDING'}
                                                     fieldName="otherDocuments1"
                                                     onChange={(fieldName, file) => {
                                                         setFiles(prev => ({ ...prev, [fieldName]: file }));
@@ -811,7 +1058,7 @@ export default function RequestDetailsPage() {
                                                 <DocumentCard
                                                     title={`${gt('fields.otherDocuments2') || "Other Documents"} 2`}
                                                     imageUrl={null}
-                                                    isEditable={isEditMode}
+                                                    isEditable={isEditMode && request.status === 'PENDING'}
                                                     fieldName="otherDocuments2"
                                                     onChange={(fieldName, file) => {
                                                         setFiles(prev => ({ ...prev, [fieldName]: file }));
@@ -869,11 +1116,21 @@ export default function RequestDetailsPage() {
                                         {t('cancel')}
                                     </button>
                                     <button
-                                        onClick={handleReject}
+                                        onClick={() => {
+                                            // Update editData with rejection reason and close modal
+                                            // Status will be saved when user clicks "Save Changes"
+                                            setEditData(prev => ({ 
+                                                ...prev, 
+                                                status: 'REJECTED',
+                                                rejectionReason: rejectionReason.trim()
+                                            }));
+                                            setShowRejectModal(false);
+                                            setRejectionReason('');
+                                        }}
                                         className="btn btn-danger flex-1"
-                                        disabled={processing || rejectionReason.length < 10}
+                                        disabled={rejectionReason.length < 10}
                                     >
-                                        {processing ? t('rejecting') : t('confirmReject')}
+                                        {t('confirmReject')}
                                     </button>
                                 </div>
                             </div>
