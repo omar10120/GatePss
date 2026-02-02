@@ -116,6 +116,11 @@ export async function POST(request: NextRequest) {
             email: user.email,
             role: user.role,
             permissions,
+            permissionsDetails: user.userPermissions.map((up: { permission: { id: number; key: string; description: string } }) => ({
+                id: up.permission.id,
+                key: up.permission.key,
+                description: up.permission.description,
+            })),
         });
 
         // Log successful verification
@@ -141,6 +146,11 @@ export async function POST(request: NextRequest) {
                     email: user.email,
                     role: user.role,
                     permissions,
+                    permissionsDetails: user.userPermissions.map((up: { permission: { id: number; key: string; description: string } }) => ({
+                        id: up.permission.id,
+                        key: up.permission.key,
+                        description: up.permission.description,
+                    })),
                 },
             },
         });

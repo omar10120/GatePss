@@ -199,7 +199,23 @@ export async function PUT(
                     }
                 }
 
-                return user;
+                const userPermissions = await tx.userPermission.findMany({
+                    where: { userId },
+                    include: {
+                        permission: true,
+                    },
+                });
+
+                const permissions = userPermissions.map((up: any) => ({
+                    id: up.permission.id,
+                    key: up.permission.key,
+                    description: up.permission.description,
+                }));
+
+                return {
+                    ...user,
+                    permissions,
+                };
             });
 
             // Log the update
@@ -228,6 +244,7 @@ export async function PUT(
                     phoneNumber: updatedUser.phoneNumber,
                     role: updatedUser.role,
                     isActive: updatedUser.isActive,
+                    permissions: updatedUser.permissions,
                 },
             });
 

@@ -98,13 +98,12 @@ export default function AddUserPage() {
     const fetchPermissions = async () => {
         try {
             // Get permissions from localStorage (full Permission objects with id, key, description)
-            const storedPermissions = localStorage.getItem('permissions');
-            
+            const user = localStorage.getItem('user');
+            const storedPermissions = JSON.parse(user || '{}')['permissionsDetails'];
             if (storedPermissions) {
                 try {
-                    const permissions = JSON.parse(storedPermissions);
-                    if (Array.isArray(permissions) && permissions.length > 0) {
-                        setPermissions(permissions);
+                    if (Array.isArray(storedPermissions) && storedPermissions.length > 0) {
+                        setPermissions(storedPermissions);
                         return;
                     }
                 } catch (parseError) {

@@ -58,6 +58,7 @@ export default function Header() {
 
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('permissions');
         router.push('/admin/login');
     };
 

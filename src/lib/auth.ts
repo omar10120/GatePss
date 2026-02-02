@@ -10,6 +10,11 @@ export interface JWTPayload {
     email: string;
     role: string;
     permissions: string[];
+    permissionsDetails: {
+        id: number;
+        key: string;
+        description: string;
+    }[];
 }
 
 export async function hashPassword(password: string): Promise<string> {
