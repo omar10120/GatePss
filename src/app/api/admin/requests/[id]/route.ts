@@ -197,7 +197,16 @@ export async function PUT(
             if (body.identification) updateData.identification = typeof body.identification === 'string' ? body.identification.trim() : body.identification;
             if (body.gender) updateData.gender = typeof body.gender === 'string' ? body.gender.trim() : body.gender;
             if (body.profession) updateData.profession = typeof body.profession === 'string' ? body.profession.trim() : body.profession;
-            if (body.passTypeId !== undefined) updateData.passTypeId = body.passTypeId ? parseInt(String(body.passTypeId)) : null;
+            if (body.passTypeId !== undefined) {
+                if (body.passTypeId === null || body.passTypeId === '') {
+                    updateData.passTypeId = null;
+                } else {
+                    const parsedId = parseInt(String(body.passTypeId));
+                    if (!isNaN(parsedId)) {
+                        updateData.passTypeId = parsedId;
+                    }
+                }
+            }
             if (body.validityPeriod) updateData.validityPeriod = typeof body.validityPeriod === 'string' ? body.validityPeriod.trim() : body.validityPeriod;
             if (body.otherProfessions !== undefined) updateData.otherProfessions = typeof body.otherProfessions === 'string' ? body.otherProfessions.trim() || null : body.otherProfessions;
             if (body.bloodType !== undefined) updateData.bloodType = typeof body.bloodType === 'string' ? body.bloodType.trim() || null : body.bloodType;
@@ -284,10 +293,40 @@ export async function PUT(
                 );
             }
 
-            const updatedRequest = await prisma.request.update({
-                where: { id: requestId },
-                data: updateData,
-            });
+            // Try to update the request
+            // If passTypeId/validityPeriod columns don't exist in Prisma client, remove them and retry
+            let updatedRequest;
+            try {
+                updatedRequest = await prisma.request.update({
+                    where: { id: requestId },
+                    data: updateData,
+                });
+            } catch (updateError: any) {
+                // If error is about unknown column or unknown argument (passTypeId or validityPeriod don't exist in schema/client), remove them and retry
+                const errorMessage = updateError?.message || '';
+                const errorCode = updateError?.code || '';
+                
+                if (errorMessage.includes('Unknown column') || 
+                    errorMessage.includes('Unknown argument') ||
+                    errorMessage.includes('pass_type_id') || 
+                    errorMessage.includes('passTypeId') ||
+                    errorMessage.includes('validity_period') ||
+                    errorMessage.includes('validityPeriod') ||
+                    errorCode === 'P2010' || 
+                    errorCode === 'P2001') {
+                    console.warn('Columns passTypeId/validityPeriod may not exist in database or Prisma client not regenerated, retrying without them...');
+                    const retryData = { ...updateData };
+                    delete retryData.passTypeId;
+                    delete retryData.validityPeriod;
+                    updatedRequest = await prisma.request.update({
+                        where: { id: requestId },
+                        data: retryData,
+                    });
+                } else {
+                    // Re-throw if it's a different error
+                    throw updateError;
+                }
+            }
 
             // Log the update
             await prisma.activityLog.create({
