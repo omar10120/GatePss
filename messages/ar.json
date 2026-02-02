@@ -233,6 +233,7 @@
             "identification": "الهوية",
             "organization": "المنظمة / المنظمة المضيفة",
             "passStartingDate": "تاريخ بدء التصريح",
+            "passEndDate": "تاريخ انتهاء التصريح",
             "validityPeriod": "فترة الصلاحية",
             "passFor": "التصريح لـ",
             "purposeOfVisit": "الغرض من الزيارة",

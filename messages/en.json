@@ -234,6 +234,7 @@
             "organization": "Organization \\ Host Organization",
             "passStartingDate": "Pass Starting Date",
             "validityPeriod": "Validity Period",
+            "passEndDate": "Pass End Date",
             "passFor": "Pass For",
             "purposeOfVisit": "Purpose of visit",
             "fullNameEn": "Full Name of Pass Holder(EN)",

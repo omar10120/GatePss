@@ -152,6 +152,7 @@ export const GatePassForm: React.FC = () => {
             'passportIdImage': 'copyOfCivilId',
             'passportIdNumber': 'idPassportNumber',
             'otherDocuments1': 'otherDocuments1',
+
         };
         const fieldKey = fieldMap[name] || name;
         return getBilingualNested(['fields', fieldKey]) || name;
@@ -629,7 +630,7 @@ export const GatePassForm: React.FC = () => {
                         <Input
                             name="passEndDate"
                             type="date"
-                            label={locale === 'ar' ? 'تاريخ انتهاء التصريح' : 'Pass End Date'}
+                            label={getBilingualNested(['fields', 'passEndDate'])}
                             value={passEndDate}
                             error={fieldErrors.passEndDate}
                             required
