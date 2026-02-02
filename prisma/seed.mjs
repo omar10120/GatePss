@@ -147,6 +147,19 @@ async function main() {
         },
     });
 
+    const subAdmin3 = await prisma.user.upsert({
+        where: { email: 'eng_hadirdeyab@yahoo.com' },
+        update: {},
+        create: {
+            name: 'Sub Administrator 2',
+            email: 'eng_hadirdeyab@yahoo.com',
+            passwordHash: hashedPassword,
+            role: 'SUB_ADMIN',
+            isActive: true,
+        },
+    });
+    
+
     // Assign limited permissions to Sub Admin 2 (VIEW_DASHBOARD and MANAGE_REQUESTS)
     for (const permission of subAdminPermissions) {
         await prisma.userPermission.upsert({
