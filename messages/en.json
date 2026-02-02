@@ -18,7 +18,7 @@
             "employees": "Employees"
         },
         "actions": {
-            "trackApplication": "Track Application",
+            "trackApplication": "Track Application.",
             "requestPermit": "Request a permit"
         },
         "contact": "Contact us",
