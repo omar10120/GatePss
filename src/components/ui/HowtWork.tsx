@@ -20,7 +20,7 @@ export default function HowtWork() {
                     </div>
 
                     {/* Process Flow Text */}
-                    <div className="mb-12 md:mb-16 max-w-4xl mx-auto">
+                    {/* <div className="mb-12 md:mb-16 max-w-4xl mx-auto">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                             <p className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed text-center font-['Rubik']">
                                     {t('howItWorks.processFlow')}
@@ -32,7 +32,7 @@ export default function HowtWork() {
                                 </Link>
                             </p>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Video Section */}
                     <div className="mb-12 md:mb-16 max-w-5xl mx-auto">
