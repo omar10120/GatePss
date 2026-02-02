@@ -280,11 +280,18 @@ export async function POST(request: NextRequest) {
             };
 
             // Add passTypeId if provided
-            if (passTypeId && passTypeId.trim() !== '') {
-                const parsedId = parseInt(passTypeId);
-                if (!isNaN(parsedId)) {
+            console.log('passTypeId from formData:', passTypeId, 'type:', typeof passTypeId);
+            if (passTypeId !== null && passTypeId !== undefined && String(passTypeId).trim() !== '') {
+                const parsedId = parseInt(String(passTypeId));
+                console.log('parsedId:', parsedId, 'isNaN:', isNaN(parsedId));
+                if (!isNaN(parsedId) && parsedId > 0) {
                     requestData.passTypeId = parsedId;
+                    console.log('✅ Added passTypeId to requestData:', requestData.passTypeId);
+                } else {
+                    console.warn('⚠️ passTypeId could not be parsed as positive integer:', passTypeId, 'parsed:', parsedId);
                 }
+            } else {
+                console.warn('⚠️ passTypeId is empty or null:', passTypeId);
             }
 
             // Add validityPeriod if provided
@@ -315,23 +322,35 @@ export async function POST(request: NextRequest) {
                 const errorMessage = createError?.message || '';
                 const errorCode = createError?.code || '';
                 
-                if (errorMessage.includes('Unknown column') || 
-                    errorMessage.includes('Unknown argument') ||
-                    errorMessage.includes('pass_type_id') || 
-                    errorMessage.includes('passTypeId') ||
-                    errorMessage.includes('validity_period') ||
-                    errorMessage.includes('validityPeriod') ||
+                console.error('Prisma create error:', {
+                    message: errorMessage,
+                    code: errorCode,
+                    hasPassTypeId: 'passTypeId' in requestData,
+                    passTypeIdValue: requestData.passTypeId,
+                });
+                
+                // Only catch specific Prisma validation errors about unknown fields
+                const isUnknownFieldError = 
+                    (errorMessage.includes('Unknown argument') && 
+                     (errorMessage.includes('passTypeId') || errorMessage.includes('validityPeriod'))) ||
+                    (errorMessage.includes('Unknown column') && 
+                     (errorMessage.includes('pass_type_id') || errorMessage.includes('validity_period'))) ||
                     errorCode === 'P2010' || 
-                    errorCode === 'P2001') {
+                    errorCode === 'P2001';
+                
+                if (isUnknownFieldError) {
                     console.warn('Columns passTypeId/validityPeriod may not exist in database or Prisma client not regenerated, retrying without them...');
+                    console.warn('Original requestData had passTypeId:', requestData.passTypeId, 'validityPeriod:', requestData.validityPeriod);
                     const retryData = { ...requestData };
                     delete retryData.passTypeId;
                     delete retryData.validityPeriod;
                     newRequest = await prisma.request.create({
                         data: retryData,
                     });
+                    console.warn('Request created without passTypeId/validityPeriod. Please regenerate Prisma client: npx prisma generate');
                 } else {
                     // Re-throw if it's a different error
+                    console.error('Different error occurred, re-throwing:', createError);
                     throw createError;
                 }
             }

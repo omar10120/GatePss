@@ -23,6 +23,41 @@ async function main() {
         });
     }
 
+    // Create Pass Types
+    console.log('Creating pass types...');
+    const passTypes = [
+        { name_en: 'Permanent', name_ar: 'دائم', is_active: true },
+        { name_en: 'Temporary', name_ar: 'مؤقت', is_active: true },
+    ];
+
+    for (const passType of passTypes) {
+        const existing = await prisma.pass_types.findFirst({
+            where: { name_en: passType.name_en },
+        });
+
+        if (existing) {
+            await prisma.pass_types.update({
+                where: { id: existing.id },
+                data: {
+                    name_en: passType.name_en,
+                    name_ar: passType.name_ar,
+                    is_active: passType.is_active,
+                    updated_at: new Date(),
+                },
+            });
+        } else {
+            await prisma.pass_types.create({
+                data: {
+                    name_en: passType.name_en,
+                    name_ar: passType.name_ar,
+                    is_active: passType.is_active,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                },
+            });
+        }
+    }
+
     // Create Super Admin
     const hashedPassword = await bcrypt.hash('admin123', 10);
 
@@ -88,11 +123,42 @@ async function main() {
                 userId_permissionId: {
                     userId: subAdmin.id,
                     permissionId: permission.id,
-                },
+                }
             },
             update: {},
             create: {
                 userId: subAdmin.id,
+                permissionId: permission.id,
+            },
+        });
+    }
+
+    // Create another Sub Admin
+    console.log('Creating another Sub Admin user...');
+    const subAdmin2 = await prisma.user.upsert({
+        where: { email: 'wsem.dawoodi2001@gmail.com' },
+        update: {},
+        create: {
+            name: 'Sub Administrator 2',
+            email: 'wsem.dawoodi2001@gmail.com',
+            passwordHash: hashedPassword,
+            role: 'SUB_ADMIN',
+            isActive: true,
+        },
+    });
+
+    // Assign limited permissions to Sub Admin 2 (VIEW_DASHBOARD and MANAGE_REQUESTS)
+    for (const permission of subAdminPermissions) {
+        await prisma.userPermission.upsert({
+            where: {
+                userId_permissionId: {
+                    userId: subAdmin2.id,
+                    permissionId: permission.id,
+                },
+            },
+            update: {},
+            create: {
+                userId: subAdmin2.id,
                 permissionId: permission.id,
             },
         });
@@ -105,6 +171,9 @@ async function main() {
     console.log('  Password: admin123');
     console.log('\nSub Admin:');
     console.log('  Email: subamrooody7@gmail.com');
+    console.log('  Password: admin123');
+    console.log('\nSub Admin 2:');
+    console.log('  Email: subwsem.dawoodi2001@gmail.com');
     console.log('  Password: admin123');
 }
 
