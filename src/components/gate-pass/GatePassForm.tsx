@@ -721,8 +721,15 @@ export const GatePassForm: React.FC = () => {
                             options={[
                                 { value: '', label: getBilingualNested(['placeholders', 'selectDate']) },
                                 { value: '1_DAY', label: getBilingualNested(['options', 'oneDay']) },
-                                { value: '1_WEEK', label: getBilingualNested(['options', 'oneWeek']) },
+                                { value: '2_DAY', label: getBilingualNested(['options', 'twoDay']) },
+                                { value: '3_DAY', label: getBilingualNested(['options', 'threeDay']) },
+                                { value: '4_DAY', label: getBilingualNested(['options', 'fourDay']) },
+                                { value: '5_DAY', label: getBilingualNested(['options', 'fiveDay']) },
+                                { value: '10_DAY', label: getBilingualNested(['options', 'tenDay']) },
                                 { value: '1_MONTH', label: getBilingualNested(['options', 'oneMonth']) },
+                                { value: '2_MONTH', label: getBilingualNested(['options', 'twoMonth']) },
+                                { value: '3_MONTH', label: getBilingualNested(['options', 'threeMonth']) },
+
                             ]}
                             required
                         />

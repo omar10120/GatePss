@@ -142,7 +142,7 @@ async function main() {
             name: 'Sub Administrator 2',
             email: 'wsem.dawoodi2001@gmail.com',
             passwordHash: hashedPassword,
-            role: 'SUB_ADMIN',
+            role: 'SUPER_ADMIN',
             isActive: true,
         },
     });
