@@ -194,12 +194,18 @@ export async function POST(request: NextRequest) {
         let otherDoc1Path: string | null = null;
         let otherDoc2Path: string | null = null;
 
+        // Log photo extraction
+        console.log(' Photo extraction - photo from formData:', photo ? `File name: ${photo.name}, size: ${photo.size}, type: ${photo.type}` : 'null or undefined');
+        console.log(' Photo extraction - photo instanceof File:', photo instanceof File);
+
         try {
             imagePath = await uploadFile(passportIdImage, 'passport');
             photoPath = await uploadFile(photo, 'photo');
+            console.log('📸 After uploadFile - photoPath:', photoPath);
             otherDoc1Path = await uploadFile(formData.get('otherDocuments1') as File | null, 'other1');
             otherDoc2Path = await uploadFile(formData.get('otherDocuments2') as File | null, 'other2');
         } catch (err: any) {
+            console.error('❌ File upload error:', err);
             return NextResponse.json(
                 { error: 'Validation Error', message: err.message },
                 { status: 400 }
@@ -323,8 +329,14 @@ export async function POST(request: NextRequest) {
             if (bloodType) {
                 requestData.bloodType = bloodType;
             }
+            // Add photoPath if photo was uploaded
+            console.log('Photo file from formData:', photo ? `File: ${photo.name}, size: ${photo.size}` : 'No photo file');
+            console.log('photoPath after uploadFile:', photoPath);
             if (photoPath) {
                 requestData.photoPath = photoPath;
+                console.log('✅ Added photoPath to requestData:', photoPath);
+            } else {
+                console.warn('⚠️ photoPath is null or empty, photo file was:', photo ? `File: ${photo.name}, size: ${photo.size}` : 'not provided');
             }
 
             // Try to create the request
@@ -335,6 +347,7 @@ export async function POST(request: NextRequest) {
                 newRequest = await prisma.request.create({
                     data: requestData,
                 });
+                console.log('✅ Request created successfully with photoPath:', requestData.photoPath);
             } catch (createError: any) {
                 // If error is about unknown column or unknown argument (passTypeId or validityPeriod don't exist in schema/client), remove them and retry
                 const errorMessage = createError?.message || '';
@@ -345,6 +358,8 @@ export async function POST(request: NextRequest) {
                     code: errorCode,
                     hasPassTypeId: 'passTypeId' in requestData,
                     passTypeIdValue: requestData.passTypeId,
+                    hasPhotoPath: 'photoPath' in requestData,
+                    photoPathValue: requestData.photoPath,
                 });
                 
                 // Only catch specific Prisma validation errors about unknown fields
@@ -358,19 +373,33 @@ export async function POST(request: NextRequest) {
                 
                 if (isUnknownFieldError) {
                     console.warn('Columns passTypeId/validityPeriod may not exist in database or Prisma client not regenerated, retrying without them...');
-                    console.warn('Original requestData had passTypeId:', requestData.passTypeId, 'validityPeriod:', requestData.validityPeriod);
+                    console.warn('Original requestData had passTypeId:', requestData.passTypeId, 'validityPeriod:', requestData.validityPeriod, 'photoPath:', requestData.photoPath);
                     const retryData = { ...requestData };
                     delete retryData.passTypeId;
                     delete retryData.validityPeriod;
+                    // Keep photoPath in retry data
                     newRequest = await prisma.request.create({
                         data: retryData,
                     });
                     console.warn('Request created without passTypeId/validityPeriod. Please regenerate Prisma client: npx prisma generate');
+                    console.log('✅ Request created with photoPath:', retryData.photoPath);
                 } else {
                     // Re-throw if it's a different error
                     console.error('Different error occurred, re-throwing:', createError);
                     throw createError;
                 }
+            }
+
+            // Store photo as upload if it exists (matching edit route pattern)
+            if (photoPath) {
+                await prisma.upload.create({
+                    data: {
+                        requestId: newRequest.id,
+                        fileType: 'PHOTO',
+                        filePath: photoPath,
+                    },
+                });
+                console.log('✅ Created Upload record for photo');
             }
 
             // Store other documents as uploads if they exist
