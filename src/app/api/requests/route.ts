@@ -237,6 +237,30 @@ export async function POST(request: NextRequest) {
                 case '1_MONTH':
                     validTo.setMonth(validTo.getMonth() + 1);
                     break;
+                case '2_DAY':
+                    validTo.setDate(validTo.getDate() + 2);
+                    break;
+                case '3_DAY':
+                    validTo.setDate(validTo.getDate() + 3);
+                    break;
+                case '4_DAY':
+                    validTo.setDate(validTo.getDate() + 4);
+                    break;
+                case '5_DAY':
+                    validTo.setDate(validTo.getDate() + 5);
+                    break;
+                case '10_DAY':
+                    validTo.setDate(validTo.getDate() + 10);
+                    break;
+                case '1_MONTH':
+                    validTo.setMonth(validTo.getMonth() + 1);
+                    break;
+                case '2_MONTH':
+                    validTo.setMonth(validTo.getMonth() + 2);
+                    break;
+                case '3_MONTH':
+                    validTo.setMonth(validTo.getMonth() + 3);
+                    break;
                 default:
                     validTo.setDate(validTo.getDate() + 1); // Default to 1 day
             }
