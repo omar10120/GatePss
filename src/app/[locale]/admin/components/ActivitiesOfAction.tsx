@@ -14,32 +14,82 @@ interface ChartDataPoint {
 
 export const ActivitiesOfAction: React.FC = () => {
     const t = useTranslations('Admin.dashboard');
-    const [filter, setFilter] = useState<'Day' | 'Week' | 'Month'>('Week');
+    const [filter, setFilter] = useState<'Day' | 'Week' | 'Month' | 'Custom'>('Week');
     const [loading, setLoading] = useState(true);
     const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
     const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; data: ChartDataPoint; type: 'requests' | 'permits' } | null>(null);
+    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+    const [customStartDate, setCustomStartDate] = useState<string>('');
+    const [customEndDate, setCustomEndDate] = useState<string>('');
+
 
     useEffect(() => {
         const fetchChartData = async () => {
             setLoading(true);
             try {
-                // Fix filter days: Day = 1, Week = 7, Month = 30
-                const days = filter === 'Day' ? 1 : filter === 'Week' ? 7 : 30;
-                const result = await apiFetch<{ lineChart: ChartDataPoint[]; pieChart: any[]; typeChart: any[] }>(`/api/admin/dashboard/charts?days=${days}`);
-                
+                let url = '/api/admin/dashboard/charts';
+    
+                if (filter === 'Custom' && customStartDate && customEndDate) {
+                    url += `?startDate=${customStartDate}&endDate=${customEndDate}`;
+                } else {
+                    const days =
+                        filter === 'Day' ? 1 :
+                        filter === 'Week' ? 7 :
+                        30;
+    
+                    url += `?days=${days}`;
+                }
+    
+                const result = await apiFetch<{ lineChart: ChartDataPoint[] }>(url);
+    
                 if (result?.lineChart) {
                     setChartData(result.lineChart);
                 }
             } catch (error) {
                 console.error('Error fetching chart data:', error);
-                // apiFetch handles 401 (token expiration) automatically with redirect
             } finally {
                 setLoading(false);
             }
         };
-
+    
         fetchChartData();
-    }, [filter]);
+    }, [filter, customStartDate, customEndDate]);
+    
+
+
+    const handleFilterClick = (f: 'Day' | 'Week' | 'Month') => {
+        setFilter(f);
+        setCustomStartDate('');
+        setCustomEndDate('');
+        setIsDatePickerOpen(false);
+    };
+
+    const handleCalendarClick = () => {
+        setIsDatePickerOpen(!isDatePickerOpen);
+    };
+
+    const handleCustomDateApply = () => {
+        if (!customStartDate || !customEndDate) return;
+    
+        const start = new Date(customStartDate);
+        const end = new Date(customEndDate);
+    
+        if (start > end) {
+            alert('Start date must be before end date');
+            return;
+        }
+    
+        setFilter('Custom');
+        setIsDatePickerOpen(false);
+    };
+    
+
+    const handleClearCustomDate = () => {
+        setCustomStartDate('');
+        setCustomEndDate('');
+        setFilter('Day');
+        setIsDatePickerOpen(false);
+    };
 
     // Generate SVG paths from real data
     const generatePath = (data: ChartDataPoint[], getValue: (point: ChartDataPoint) => number): string => {
@@ -74,21 +124,27 @@ export const ActivitiesOfAction: React.FC = () => {
     const adminApprovedPath = generatePath(chartData, (point) => point.adminApproved);
 
     // Get month labels based on data
-    const getMonthLabels = () => {
-        if (chartData.length === 0) return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
-        const labels: string[] = [];
-        const step = Math.max(1, Math.floor(chartData.length / 12));
-        
-        for (let i = 0; i < chartData.length; i += step) {
-            const date = new Date(chartData[i].date);
-            labels.push(date.toLocaleDateString('en-US', { month: 'short' }));
+    const getXAxisLabels = () => {
+        if (chartData.length === 0) return [];
+    
+        if (filter === 'Day' || filter === 'Week' || filter === 'Custom') {
+            return chartData.map(item =>
+                new Date(item.date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                })
+            );
         }
-        
-        return labels.slice(0, 12);
+    
+        // Month
+        return chartData.map(item =>
+            new Date(item.date).toLocaleDateString('en-US', {
+                month: 'short',
+            })
+        );
     };
-
-    const months = getMonthLabels();
+    
+    const xAxisLabels = getXAxisLabels();
 
     // Calculate points for interaction
     const getPoints = (data: ChartDataPoint[], getValue: (point: ChartDataPoint) => number) => {
@@ -151,7 +207,7 @@ export const ActivitiesOfAction: React.FC = () => {
                     {(['Day', 'Week', 'Month'] as const).map((f) => (
                         <button
                             key={f}
-                            onClick={() => setFilter(f)}
+                            onClick={() => handleFilterClick(f)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === f ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-600'
                                 }`}
                         >
@@ -159,9 +215,91 @@ export const ActivitiesOfAction: React.FC = () => {
                         </button>
                     ))}
                     <div className="bg-gray-100 p-2 rounded-lg ml-2 cursor-pointer hover:bg-gray-200 transition-colors">
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                    <div className="relative">
+                        <button
+                            onClick={handleCalendarClick}
+                            className={`bg-gray-100 p-1.5 rounded-lg hover:bg-gray-200 flex items-center justify-center ${
+                                filter === 'Custom' ? 'bg-blue-100' : ''
+                            }`}
+                        >
+                            <svg className={`w-5 h-5 ${filter === 'Custom' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </button>
+                        {/* Date Picker Popover */}
+                        {isDatePickerOpen && (
+                            <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-gray-200 p-4 z-[10000] min-w-[280px]">
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h4 className="text-sm font-semibold text-gray-900">Select Date Range</h4>
+                                        <button
+                                            onClick={() => setIsDatePickerOpen(false)}
+                                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                                            aria-label="Close"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                Start Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={customStartDate}
+                                                onChange={(e) => setCustomStartDate(e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                style={{ color: '#111827' }}
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                End Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={customEndDate}
+                                                onChange={(e) => setCustomEndDate(e.target.value)}
+                                                min={customStartDate || undefined}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                style={{ color: '#111827' }}
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                                        <button
+                                            onClick={handleCustomDateApply}
+                                            disabled={!customStartDate || !customEndDate}
+                                            className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Apply
+                                        </button>
+                                        {(customStartDate || customEndDate || filter === 'Custom') && (
+                                            <button
+                                                onClick={handleClearCustomDate}
+                                                className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                                            >
+                                                Clear
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    {filter === 'Custom' && customStartDate && customEndDate && (
+                                        <div className="text-xs text-gray-500 pt-1 border-t border-gray-100">
+                                            <span className="font-medium">Active:</span> {new Date(customStartDate).toLocaleDateString()} - {new Date(customEndDate).toLocaleDateString()}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        
+                        </div>
                     </div>
                 </div>
             </div>
@@ -176,7 +314,7 @@ export const ActivitiesOfAction: React.FC = () => {
                 </div>
             ) : (
                 <>
-                    <div className="relative h-64 mb-6">
+                    <div className="relative h-64 mb-6 overflow-visible">
                         {/* Custom SVG Line Chart */}
                         <svg viewBox="0 0 1000 200" className="w-full h-full overflow-visible">
                             {/* Grid Lines */}
@@ -276,7 +414,7 @@ export const ActivitiesOfAction: React.FC = () => {
                         {/* Tooltip */}
                         {hoveredPoint && (
                             <div
-                                className="absolute bg-white shadow-xl rounded-xl p-3 border border-gray-50 z-10 pointer-events-none"
+                                className="absolute z-50 bg-white shadow-xl rounded-xl p-3"
                                 style={{
                                     left: `${(hoveredPoint.x / 1000) * 100}%`,
                                     top: `${(hoveredPoint.y / 200) * 100}%`,
@@ -299,8 +437,10 @@ export const ActivitiesOfAction: React.FC = () => {
 
                     {/* X-Axis Labels */}
                     <div className="flex justify-between px-2 mb-6">
-                        {months.map((month, index) => (
-                            <span key={`${month}-${index}`} className="text-xs font-medium text-[#8E8E93]">{month}</span>
+                        {xAxisLabels.map((label, index) => (
+                            <span key={index} className="text-xs font-medium text-[#8E8E93]">
+                                {label}
+                            </span>
                         ))}
                     </div>
 
