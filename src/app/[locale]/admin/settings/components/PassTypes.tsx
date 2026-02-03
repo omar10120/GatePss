@@ -119,12 +119,12 @@ export default function PassTypes() {
             <div>
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-2xl font-bold text-gray-900">{t('title')}</h3>
-                    <button
+                    {/* <button
                         onClick={handleAddNew}
                         className="px-6 py-2 bg-[#00B09C] text-white rounded-lg font-medium hover:bg-[#008f7e] transition-colors"
                     >
                         {t('addNewType')}
-                    </button>
+                    </button> */}
                 </div>
 
                 <div className="bg-gray-50 rounded-3xl p-6 overflow-x-auto">
@@ -136,7 +136,7 @@ export default function PassTypes() {
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('passTypeAr')}</th>
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('added')}</th>
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('active')}</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('access')}</th>
+                                {/* <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">{t('access')}</th> */}
                             </tr>
                         </thead>
                         <tbody>
@@ -160,7 +160,7 @@ export default function PassTypes() {
                                             />
                                         </button>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    {/* <td className="px-6 py-4">
                                         <button
                                             onClick={() => handleEdit(passType)}
                                             className="text-[#00B09C] hover:text-[#008f7e] transition-colors"
@@ -172,7 +172,7 @@ export default function PassTypes() {
                                                 height={20}
                                             />
                                         </button>
-                                    </td>
+                                    </td> */}
                                 </tr>
                             ))}
                         </tbody>
