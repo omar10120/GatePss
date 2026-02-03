@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
             errors.push('Organization is required (minimum 2 characters)');
         }
 
-        if (!passEndDate && (!validityPeriod || !['1_DAY', '1_WEEK', '1_MONTH'].includes(validityPeriod))) {
+        if (!passEndDate && (!validityPeriod || !['1_DAY', '2_DAY', '3_DAY', '4_DAY', '5_DAY', '10_DAY', '1_MONTH', '2_MONTH', '3_MONTH'].includes(validityPeriod))) {
             errors.push('Validity period or Pass End Date is required');
         }
 
@@ -231,9 +231,6 @@ export async function POST(request: NextRequest) {
                 case '1_DAY':
                     validTo.setDate(validTo.getDate() + 1);
                     break;
-                case '1_WEEK':
-                    validTo.setDate(validTo.getDate() + 7);
-                    break;
                 case '1_MONTH':
                     validTo.setMonth(validTo.getMonth() + 1);
                     break;
@@ -251,9 +248,6 @@ export async function POST(request: NextRequest) {
                     break;
                 case '10_DAY':
                     validTo.setDate(validTo.getDate() + 10);
-                    break;
-                case '1_MONTH':
-                    validTo.setMonth(validTo.getMonth() + 1);
                     break;
                 case '2_MONTH':
                     validTo.setMonth(validTo.getMonth() + 2);

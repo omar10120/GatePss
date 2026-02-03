@@ -895,6 +895,7 @@ export const GatePassForm: React.FC = () => {
                         name="photo"
                         label={getBilingualNested(['fields', 'photo'])}
                         placeholder={getBilingualNested(['placeholders', 'choosePhoto'])}
+                        error={fieldErrors.photo}
                     />
                     <FileUpload
                         id="otherDocuments1"
