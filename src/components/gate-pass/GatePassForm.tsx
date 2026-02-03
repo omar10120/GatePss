@@ -550,10 +550,10 @@ export const GatePassForm: React.FC = () => {
                         error={fieldErrors.requestType}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
-                            { value: 'VISITOR', label: 'VISITOR' },
-                            { value: 'CONTRACTOR', label: 'CONTRACTOR' },
-                            { value: 'EMPLOYEE', label: 'EMPLOYEE' },
-                            { value: 'VEHICLE', label: 'VEHICLE' },
+                            { value: 'VISITOR', label: 'VISITOR / زائر' },
+                            { value: 'CONTRACTOR', label: 'CONTRACTOR / مقاول' },
+                            { value: 'EMPLOYEE', label: 'EMPLOYEE / موظف' },
+                            { value: 'VEHICLE', label: 'VEHICLE / سيارة' },
                         ]}
                         required
                     />
