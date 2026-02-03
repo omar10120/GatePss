@@ -327,7 +327,7 @@
             "approved": "Approved",
             "rejected": "Rejected",
             "pending": "Pending",
-            "byType": "Requests by Type",
+            "byType": "Requests by Type.",
             "recent": "Recent Requests",
             "viewAll": "View All Requests",
             "requests": "Requests",
