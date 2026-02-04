@@ -576,6 +576,7 @@
             "downloadInfo": "تحميل المعلومات",
             "viewQRCode": "عرض رمز الاستجابة السريعة",
             "temporary": "مؤقت",
+            
             "permanent": "دائم",
             "pagination": {
                 "showing": "عرض",

@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
 
             if (search) {
                 where.OR = [
-                    { requestNumber: { contains: search } },
+                    { requestNumber: { contapins: search } },
                     { applicantNameEn: { contains: search } },
                     { applicantNameAr: { contains: search } },
                     { applicantEmail: { contains: search } },
