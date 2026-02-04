@@ -395,7 +395,7 @@ export default function AdminRequestsPage() {
                                                                                     <span className="font-semibold text-gray-700">{t('columns.visitDate')}: </span>
                                                                                     <span className="text-gray-600">{formatDate(request.dateOfVisit)}</span>
                                                                                 </div>
-                                                                                {imageUrl && (
+                                                                                {/* {imageUrl && (
                                                                                     <div className="sm:col-span-2 lg:col-span-3">
                                                                                         <span className="font-semibold text-gray-700 block mb-2">{t('columns.uploaded')}: </span>
                                                                                         <img
@@ -407,7 +407,7 @@ export default function AdminRequestsPage() {
                                                                                             }}
                                                                                         />
                                                                                     </div>
-                                                                                )}
+                                                                                )} */}
                                                                             </div>
                                                                         </td>
                                                                     </tr>
