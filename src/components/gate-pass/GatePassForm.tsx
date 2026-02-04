@@ -527,9 +527,7 @@ export const GatePassForm: React.FC = () => {
                                 .filter(pt => pt.is_active)
                                 .map((pt) => ({
                                     value: pt.id.toString(),
-                                    label: locale === 'ar'
-                                        ? pt.name_ar
-                                        : `${pt.name_en}${pt.name_ar ? ` / ${pt.name_ar}` : ''}`,
+                                    label:  `${pt.name_en}${pt.name_ar ? ` / ${pt.name_ar}` : ''}`,
                                 })),
                         ]}
                         required
