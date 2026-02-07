@@ -188,29 +188,46 @@ export async function POST(
                     user.userId,
                     `وافق صُحار على الطلب رقم ${gateRequest.requestNumber}`
                 ).catch(err => console.error('Failed to create Sohar Port notifications:', err));
+                // Send approval email to applicant (async)
+                sendRequestApprovalEmail(
+                    gateRequest.applicantEmail,
+                    gateRequest.applicantNameEn,
+                    gateRequest.requestNumber,
+                    formatDate(gateRequest.dateOfVisit)
+                ).catch(err => console.error('Failed to send approval email:', err));
+    
+                return NextResponse.json({
+                    success: true,
+                    message: 'Request approved successfully',
+                    data: {
+                        request: approvedRequest,
+                        integration: {
+                            externalReference: apiResponse.externalReference,
+                            statusCode: apiResponse.statusCode,
+                            message: apiResponse.message,
+                            qrCodePdfUrl: apiResponse.qrCodePdfUrl,
+                        },
+                    },
+                });
+            } else {
+                createRequestNotifications(
+                    ActionType.SYSTEM_INTEGRATION,
+                    `Sohar Rejected the request of number ${gateRequest.requestNumber}`,
+                    'REQUEST',
+                    requestId,
+                    user.userId,
+                    `رفض صُحار الطلب رقم ${gateRequest.requestNumber}`
+                ).catch(err => console.error('Failed to create Sohar Port notifications:', err));
+                
+                return NextResponse.json({
+                    success: false,
+                    message: 'Request not approved',
+                    data: {
+                        request: approvedRequest,
+                    },
+                });
             }
 
-            // Send approval email to applicant (async)
-            sendRequestApprovalEmail(
-                gateRequest.applicantEmail,
-                gateRequest.applicantNameEn,
-                gateRequest.requestNumber,
-                formatDate(gateRequest.dateOfVisit)
-            ).catch(err => console.error('Failed to send approval email:', err));
-
-            return NextResponse.json({
-                success: true,
-                message: 'Request approved successfully',
-                data: {
-                    request: approvedRequest,
-                    integration: {
-                        externalReference: apiResponse.externalReference,
-                        statusCode: apiResponse.statusCode,
-                        message: apiResponse.message,
-                        qrCodePdfUrl: apiResponse.qrCodePdfUrl,
-                    },
-                },
-            });
 
         } catch (error: any) {
             console.error('Error approving request:', error);
