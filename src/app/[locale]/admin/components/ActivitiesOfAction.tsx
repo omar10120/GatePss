@@ -19,8 +19,12 @@ export const ActivitiesOfAction: React.FC = () => {
     const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
     const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; data: ChartDataPoint; type: 'requests' | 'permits' } | null>(null);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-    const [customStartDate, setCustomStartDate] = useState<string>('');
-    const [customEndDate, setCustomEndDate] = useState<string>('');
+    // Temporary state for date inputs (not applied until "Apply" is clicked)
+    const [tempStartDate, setTempStartDate] = useState<string>('');
+    const [tempEndDate, setTempEndDate] = useState<string>('');
+    // Applied date state (used for actual filtering)
+    const [appliedStartDate, setAppliedStartDate] = useState<string>('');
+    const [appliedEndDate, setAppliedEndDate] = useState<string>('');
 
 
     useEffect(() => {
@@ -29,8 +33,8 @@ export const ActivitiesOfAction: React.FC = () => {
             try {
                 let url = '/api/admin/dashboard/charts';
     
-                if (filter === 'Custom' && customStartDate && customEndDate) {
-                    url += `?startDate=${customStartDate}&endDate=${customEndDate}`;
+                if (filter === 'Custom' && appliedStartDate && appliedEndDate) {
+                    url += `?startDate=${appliedStartDate}&endDate=${appliedEndDate}`;
                 } else {
                     const days =
                         filter === 'Day' ? 1 :
@@ -53,14 +57,16 @@ export const ActivitiesOfAction: React.FC = () => {
         };
     
         fetchChartData();
-    }, [filter, customStartDate, customEndDate]);
+    }, [filter, appliedStartDate, appliedEndDate]);
     
 
 
     const handleFilterClick = (f: 'Day' | 'Week' | 'Month') => {
         setFilter(f);
-        setCustomStartDate('');
-        setCustomEndDate('');
+        setTempStartDate('');
+        setTempEndDate('');
+        setAppliedStartDate('');
+        setAppliedEndDate('');
         setIsDatePickerOpen(false);
     };
 
@@ -69,24 +75,29 @@ export const ActivitiesOfAction: React.FC = () => {
     };
 
     const handleCustomDateApply = () => {
-        if (!customStartDate || !customEndDate) return;
+        if (!tempStartDate || !tempEndDate) return;
     
-        const start = new Date(customStartDate);
-        const end = new Date(customEndDate);
+        const start = new Date(tempStartDate);
+        const end = new Date(tempEndDate);
     
         if (start > end) {
             alert('Start date must be before end date');
             return;
         }
     
+        // Apply the temporary dates to the actual filter state
+        setAppliedStartDate(tempStartDate);
+        setAppliedEndDate(tempEndDate);
         setFilter('Custom');
         setIsDatePickerOpen(false);
     };
     
 
     const handleClearCustomDate = () => {
-        setCustomStartDate('');
-        setCustomEndDate('');
+        setTempStartDate('');
+        setTempEndDate('');
+        setAppliedStartDate('');
+        setAppliedEndDate('');
         setFilter('Day');
         setIsDatePickerOpen(false);
     };
@@ -250,8 +261,8 @@ export const ActivitiesOfAction: React.FC = () => {
                                             </label>
                                             <input
                                                 type="date"
-                                                value={customStartDate}
-                                                onChange={(e) => setCustomStartDate(e.target.value)}
+                                                value={tempStartDate}
+                                                onChange={(e) => setTempStartDate(e.target.value)}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 style={{ color: '#111827' }}
                                             />
@@ -263,9 +274,9 @@ export const ActivitiesOfAction: React.FC = () => {
                                             </label>
                                             <input
                                                 type="date"
-                                                value={customEndDate}
-                                                onChange={(e) => setCustomEndDate(e.target.value)}
-                                                min={customStartDate || undefined}
+                                                value={tempEndDate}
+                                                onChange={(e) => setTempEndDate(e.target.value)}
+                                                min={tempStartDate || undefined}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 style={{ color: '#111827' }}
                                             />
@@ -275,12 +286,12 @@ export const ActivitiesOfAction: React.FC = () => {
                                     <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
                                         <button
                                             onClick={handleCustomDateApply}
-                                            disabled={!customStartDate || !customEndDate}
+                                            disabled={!tempStartDate || !tempEndDate}
                                             className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             Apply
                                         </button>
-                                        {(customStartDate || customEndDate || filter === 'Custom') && (
+                                        {(tempStartDate || tempEndDate || filter === 'Custom') && (
                                             <button
                                                 onClick={handleClearCustomDate}
                                                 className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
@@ -290,9 +301,9 @@ export const ActivitiesOfAction: React.FC = () => {
                                         )}
                                     </div>
                                     
-                                    {filter === 'Custom' && customStartDate && customEndDate && (
+                                    {filter === 'Custom' && appliedStartDate && appliedEndDate && (
                                         <div className="text-xs text-gray-500 pt-1 border-t border-gray-100">
-                                            <span className="font-medium">Active:</span> {new Date(customStartDate).toLocaleDateString()} - {new Date(customEndDate).toLocaleDateString()}
+                                            <span className="font-medium">Active:</span> {new Date(appliedStartDate).toLocaleDateString()} - {new Date(appliedEndDate).toLocaleDateString()}
                                         </div>
                                     )}
                                 </div>

@@ -38,13 +38,10 @@ export async function GET(request: NextRequest) {
         // APPROVED with externalReference -> show "So-Approved"
         // REJECTED -> show "So-Rejected"
         let displayStatus = 'PENDING';
-        if (gateRequest.status === 'APPROVED' && gateRequest.externalReference) {
-            displayStatus = 'SO_APPROVED';
-        } else if (gateRequest.status === 'REJECTED') {
-            displayStatus = 'SO_REJECTED';
-        } else if (gateRequest.status === 'APPROVED') {
-            // Approved but not yet integrated with SOHAR
+        if (gateRequest.status === 'APPROVED' || gateRequest.externalReference) {
             displayStatus = 'APPROVED';
+        } else if (gateRequest.status === 'SO_REJECTED' || gateRequest.status === 'REJECTED') {
+            displayStatus = 'REJECTED';
         } else {
             displayStatus = 'PENDING';
         }

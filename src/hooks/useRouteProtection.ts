@@ -7,9 +7,10 @@ import { apiFetch } from '@/lib/api-client';
 const ROUTE_PERMISSIONS: Record<string, string> = {
     '/admin/dashboard': PERMISSIONS.VIEW_DASHBOARD,
     '/admin/requests': PERMISSIONS.MANAGE_REQUESTS,
+    '/admin/permits': PERMISSIONS.MANAGE_PERMITS,
     '/admin/users': PERMISSIONS.MANAGE_USERS,
     '/admin/activity': PERMISSIONS.VIEW_LOGS,
-    '/admin/permits': PERMISSIONS.MANAGE_REQUESTS,
+    '/admin/settings': PERMISSIONS.MANAGE_SETTINGS,
 };
 
 export function useRouteProtection() {
