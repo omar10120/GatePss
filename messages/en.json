@@ -136,7 +136,7 @@
         "permitStatus": {
             "rejectedTitle": "The Request Application Was Rejected",
             "rejectedDescription": "The system informed you of the reason for the rejection via your Email, Please check it.",
-            "reviewTitle": "The Request Application Currently Under Review By Majis Team",
+            "reviewTitle": "The Request Application Currently Under Review By SOHAR System",
             "acceptedTitle": "The Request Application Was Accepted",
             "acceptedDescription": "The system informed you with the Application Acception via your Email, Please check it."
         },
@@ -297,9 +297,6 @@
             "fourDay": "4 Days",
             "fiveDay": "5 Days",
             "tenDay": "10 Days",
-            "oneWeek": "1 Week",
-            "twoWeek": "2 Weeks",
-            "threeWeek": "3 Weeks",
             "oneMonth": "1 Month",
             "twoMonth": "2 Months",
             "threeMonth": "3 Months",
@@ -307,7 +304,6 @@
             "male": "Male",
             "female": "Female",
             "engineer": "Engineer",
-            
             "visitor": "Visitor",
             "technical": "Technical",
             "manager": "Manager",
@@ -321,7 +317,7 @@
         "step2_desc": "Majis team validates and processes your request",
         "step3_title": "3. Receive Digital Permit",
         "step3_desc": "Approved applicants receive a QR-coded permit by email",
-        "columns":{
+        "columns": {
             "requestNumber": "Request Number "
         }
     },
@@ -631,7 +627,6 @@
                 "deletedSuccessfully": "FAQ Deleted Successfully",
                 "confirmDelete": "Are you sure you want to delete this FAQ?"
             }
-       
         },
         "notifications": {
             "title": "Notifications",
