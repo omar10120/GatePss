@@ -29,7 +29,7 @@ export default function Navbar() {
                         <Link href={`/${locale}`} className="text-gray-700 hover:text-info-500 font-medium transition-colors">
                             {t('nav.home')}
                         </Link>
-                        <Link href="#services" className="text-gray-700 hover:text-info-500 font-medium transition-colors">
+                        <Link href={`/${locale}#services`} className="text-gray-700 hover:text-info-500 font-medium transition-colors">
                             {t('nav.services')}
                         </Link>
                         <Link href={`/${locale}/how-it-works`} className="text-gray-700 hover:text-info-500 font-medium transition-colors">

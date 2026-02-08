@@ -136,7 +136,7 @@
         "permitStatus": {
             "rejectedTitle": "The Request Application Was Rejected",
             "rejectedDescription": "The system informed you of the reason for the rejection via your Email, Please check it.",
-            "reviewTitle": "The Request Application Currently Under Review By SOHAR System",
+            "reviewTitle": "The Request Application Currently Under Review By Majis Team",
             "acceptedTitle": "The Request Application Was Accepted",
             "acceptedDescription": "The system informed you with the Application Acception via your Email, Please check it."
         },
@@ -297,6 +297,9 @@
             "fourDay": "4 Days",
             "fiveDay": "5 Days",
             "tenDay": "10 Days",
+            "oneWeek": "1 Week",
+            "twoWeek": "2 Weeks",
+            "threeWeek": "3 Weeks",
             "oneMonth": "1 Month",
             "twoMonth": "2 Months",
             "threeMonth": "3 Months",

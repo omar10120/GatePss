@@ -4,8 +4,10 @@ import { NavItem } from '@/components/layout/Navigation';
 export const PERMISSIONS = {
     VIEW_DASHBOARD: 'VIEW_DASHBOARD',
     MANAGE_REQUESTS: 'MANAGE_REQUESTS',
+    MANAGE_PERMITS: 'MANAGE_PERMITS',
     MANAGE_USERS: 'MANAGE_USERS',
     VIEW_LOGS: 'VIEW_LOGS',
+    MANAGE_SETTINGS: 'MANAGE_SETTINGS',
 } as const;
 
 export type PermissionKey = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -14,14 +16,18 @@ export const PERMISSION_LABELS = {
     en: {
         [PERMISSIONS.VIEW_DASHBOARD]: 'View Dashboard',
         [PERMISSIONS.MANAGE_REQUESTS]: 'Manage Requests',
+        [PERMISSIONS.MANAGE_PERMITS]: 'Manage Permits',
         [PERMISSIONS.MANAGE_USERS]: 'Manage Users',
         [PERMISSIONS.VIEW_LOGS]: 'View Activity Logs',
+        [PERMISSIONS.MANAGE_SETTINGS]: 'Manage Settings',
     },
     ar: {
         [PERMISSIONS.VIEW_DASHBOARD]: 'عرض لوحة التحكم',
         [PERMISSIONS.MANAGE_REQUESTS]: 'إدارة الطلبات',
+        [PERMISSIONS.MANAGE_PERMITS]: 'إدارة التصاريح',
         [PERMISSIONS.MANAGE_USERS]: 'إدارة المستخدمين',
         [PERMISSIONS.VIEW_LOGS]: 'عرض سجل النشاط',
+        [PERMISSIONS.MANAGE_SETTINGS]: 'إدارة الإعدادات',
     },
 };
 
@@ -120,11 +126,14 @@ export const getSidebarItems = (
                 </svg>
             ),
         });
+    }
+    
+    if (hasPermission(PERMISSIONS.MANAGE_PERMITS)) {
         items.push({
             label: locale === 'en' ? 'Permits' : 'التصاريح',
             href: '/admin/permits',
             active: currentPath === '/admin/permits',
-            permission: PERMISSIONS.MANAGE_REQUESTS,
+            permission: PERMISSIONS.MANAGE_PERMITS,
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -162,7 +171,7 @@ export const getSidebarItems = (
         });
     }
 
-    // Add Notifications and Settings (always visible)
+    // Add Notifications (always visible)
     items.push({
         label: locale === 'en' ? 'Notifications' : 'الإشعارات',
         href: '/admin/notifications',
@@ -174,17 +183,21 @@ export const getSidebarItems = (
         ),
     });
 
-    items.push({
-        label: locale === 'en' ? 'Settings' : 'الإعدادات',
-        href: '/admin/settings',
-        active: currentPath === '/admin/settings',
-        icon: (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-        ),
-    });
+    // Add Settings (requires MANAGE_SETTINGS permission)
+    if (hasPermission(PERMISSIONS.MANAGE_SETTINGS)) {
+        items.push({
+            label: locale === 'en' ? 'Settings' : 'الإعدادات',
+            href: '/admin/settings',
+            active: currentPath === '/admin/settings',
+            permission: PERMISSIONS.MANAGE_SETTINGS,
+            icon: (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            ),
+        });
+    }
 
     return items;
 };

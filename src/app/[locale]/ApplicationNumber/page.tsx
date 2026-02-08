@@ -7,7 +7,7 @@ import HowtWork from '@/components/ui/HowtWork';
 import StatusCard from '@/components/ui/StatusCard';
 
 
-type DisplayStatus = 'PENDING' | 'APPROVED' | 'SO_APPROVED' | 'SO_REJECTED' | null;
+type DisplayStatus = 'PENDING' | 'APPROVED' | 'SO_APPROVED' | 'SO_REJECTED' | 'REJECTED' | null;
 
 export default function TrackApplication() {
     const t = useTranslations('HomePage');
@@ -52,8 +52,8 @@ export default function TrackApplication() {
     // Map displayStatus to StatusCard format
     const getStatusCardStatus = (): 'accepted' | 'rejected' | 'review' | null => {
         if (!displayStatus) return null;
-        if (displayStatus === 'SO_APPROVED') return 'accepted';
-        if (displayStatus === 'SO_REJECTED') return 'rejected';
+        if (displayStatus === 'APPROVED') return 'accepted';
+        if (displayStatus === 'REJECTED') return 'rejected';
         // PENDING or APPROVED (not yet So-Approved) -> review
         return 'review';
     };
