@@ -154,10 +154,10 @@ export default function FAQ() {
                                 />
                             </div>
 
-                            {/* Question Title (En) - Textarea (for Arabic answer) */}
+                            {/* Question Title (Ar) - Textarea (for Arabic answer) */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('questionTitleEn')}
+                                    {t('questionTitleAr')}
                                 </label>
                                 <textarea
                                     value={formData.answer_ar}

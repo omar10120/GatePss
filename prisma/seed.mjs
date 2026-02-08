@@ -10,8 +10,10 @@ async function main() {
     const permissions = [
         { key: 'VIEW_DASHBOARD', description: 'View dashboard and statistics' },
         { key: 'MANAGE_REQUESTS', description: 'Create, edit, approve, and reject gate pass requests' },
-        { key: 'MANAGE_USERS', description: 'Create and manage admin users' },
+        { key: 'MANAGE_PERMITS', description: 'Manage Permits' },
         { key: 'VIEW_LOGS', description: 'View activity logs and audit trail' },
+        { key: 'MANAGE_USERS', description: 'Create and manage admin users' },
+        { key: 'MANAGE_SETTINGS', description: 'Manage system settings' },
     ];
 
     console.log('Creating permissions...');

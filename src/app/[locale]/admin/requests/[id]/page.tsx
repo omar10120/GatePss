@@ -760,7 +760,7 @@ export default function RequestDetailsPage() {
                                 {request.status !== 'PENDING' && (
                                     <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                                         <p className="text-yellow-800 text-sm font-medium">
-                                            This request cannot be edited because its status is {dt(`status.${request.status}`)}. Only pending requests can be edited.
+                                            This request cannot be edited because it is {dt(`status.${request.status}`)}. Only pending requests can be modified.
                                         </p>
                                     </div>
                                 )}
