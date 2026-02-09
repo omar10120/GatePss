@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
                 prisma.request.count({ where: { status: 'PENDING' } }),
             ]);
 
-            // Get counts by request type
+            // Get counts by Identification Card
             const byType = await prisma.request.groupBy({
                 by: ['requestType'],
                 _count: true,

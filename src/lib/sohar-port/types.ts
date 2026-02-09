@@ -19,7 +19,7 @@ export type GatePassStatus =
     | 'APPROVED'     // Approved by admin
     | 'REJECTED'     // Rejected by admin
     | 'ACTIVE'       // Currently active in Sohar Port
-    | 'EXPIRED'      // Past validity period
+    | 'EXPIRED'      // Past Visit Duration
     | 'CANCELLED';   // Cancelled by admin or system
 
 // ============================================================================

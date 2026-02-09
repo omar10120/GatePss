@@ -11,12 +11,10 @@ export const UserRole = {
 
 export type UserRole = typeof UserRole[keyof typeof UserRole];
 
-// Request Type Enum
+// Identification Card Enum
 export const RequestType = {
-  VISITOR: 'VISITOR',
-  CONTRACTOR: 'CONTRACTOR',
-  EMPLOYEE: 'EMPLOYEE',
-  VEHICLE: 'VEHICLE',
+  'RESIDENT': 'RESIDENT',
+  'NOT_RESIDENT': 'NOT_RESIDENT',
 } as const;
 
 export type RequestType = typeof RequestType[keyof typeof RequestType];

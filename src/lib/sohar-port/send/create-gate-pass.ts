@@ -32,20 +32,18 @@ async function fileToBase64(filePath: string): Promise<string | null> {
 }
 
 /**
- * Map request type to Sohar Port format
+ * Map Identification Card to Sohar Port format
  */
 function mapRequestType(requestType: string): string {
     const typeMap: Record<string, string> = {
-        'VISITOR': '2',
-        'CONTRACTOR': '2',
-        'EMPLOYEE': '1',
-        'VEHICLE': '3',
+        'RESIDENT': '2',
+        'NOT_RESIDENT': '1',
     };
     return typeMap[requestType.toUpperCase()] || '2';
 }
 
 /**
- * Map pass for value
+ * Map Beneficiary of the permit value
  */
 function mapPassFor(passFor: string | null | undefined): string {
     if (!passFor) return '2';
@@ -116,7 +114,7 @@ export async function createGatePass(
     request: CreateGatePassRequest
 ): Promise<CreateGatePassResponse> {
     try {
-        logSuccess('createGatePass', `Creating gate pass for ${request.requestNumber}`);
+        logSuccess('createGatePass', `Creating gate Beneficiary of the permit ${request.requestNumber}`);
 
         // Extract extra fields
         const extraFields = request.extraFields || {};
@@ -128,7 +126,7 @@ export async function createGatePass(
             months_validity: gateRequest?.validFrom && gateRequest?.validTo
                 ? calculateMonthsValidity(new Date(gateRequest.validFrom), new Date(gateRequest.validTo))
                 : '30',
-            pass_for: mapPassFor(gateRequest?.passFor || extraFields.passFor),
+            pass_for: mapPassFor(gateRequest?.passFor || extraFields.passFor),  
             company: gateRequest?.organization || 'Majis Industrial Services',
             name: request.applicantName,
             phone: gateRequest?.applicantPhone || '',
@@ -137,7 +135,7 @@ export async function createGatePass(
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
             identification_number: request.passportIdNumber,
             visitor_type: mapVisitorType(request.requestType),
-            blood_type: gateRequest?.bloodType || extraFields.bloodType || 'O+',
+            
             start_date: formatDate(request.dateOfVisit),
             end_date: gateRequest?.validTo 
                 ? formatDate(gateRequest.validTo)

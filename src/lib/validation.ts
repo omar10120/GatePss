@@ -42,9 +42,9 @@ export function validateFileType(filename: string, allowedTypes: string[]): bool
   return allowedTypes.includes(extension);
 }
 
-// Request type validation
+// Identification Card validation
 export function validateRequestType(type: string): boolean {
-  const validTypes = ['VISITOR', 'CONTRACTOR', 'EMPLOYEE', 'VEHICLE'];
+  const validTypes = ['RESIDENT', 'NOT_RESIDENT'];
   return validTypes.includes(type);
 }
 
@@ -110,9 +110,9 @@ export function validateVisitorRequest(data: VisitorRequestData): ValidationResu
     }
   }
 
-  // Request type validation
+  // Identification Card validation
   if (!data.requestType || !validateRequestType(data.requestType)) {
-    errors.push('Valid request type is required (VISITOR, CONTRACTOR, EMPLOYEE, or VEHICLE)');
+    errors.push('Valid Identification Card is required (RESIDENT, NOT_RESIDENT)');
   }
 
   // Image validation

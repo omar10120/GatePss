@@ -11,19 +11,18 @@ export async function POST(request: NextRequest) {
         const formData = await request.formData();
 
         // Extract form fields
-        const applicantNameEn = formData.get('applicantName') as string;
+        const applicantNameEn = formData.get('applicantName') as string | null;
         const applicantNameAr = formData.get('fullNameAr') as string;
         const applicantEmail = formData.get('applicantEmail') as string;
-        const applicantPhone = formData.get('telephone') as string;
+        
         const gender = formData.get('gender') as string;
         const profession = formData.get('profession') as string;
         const otherProfessions = formData.get('otherProfessions') as string | null;
-        
         const passportIdNumber = formData.get('passportIdNumber') as string;
         const nationality = formData.get('nationality') as string;
         const identification = formData.get('identification') as string;
         const organization = formData.get('organization') as string;
-        const validityPeriod = formData.get('validityPeriod') as string;
+        const visitduration = formData.get('visitduration') as string;
         const purposeOfVisit = formData.get('purposeOfVisit') as string;
         const dateOfVisit = formData.get('dateOfVisit') as string;
         const requestType = formData.get('requestType') as string;
@@ -36,9 +35,7 @@ export async function POST(request: NextRequest) {
         // Validate required fields using BRD requirements
         const errors: string[] = [];
 
-        if (!applicantNameEn || applicantNameEn.trim().length < 2) {
-            errors.push('Applicant name (English) is required (minimum 2 characters)');
-        }
+        
 
         if (!applicantNameAr || applicantNameAr.trim().length < 2) {
             errors.push('Applicant name (Arabic) is required (minimum 2 characters)');
@@ -48,9 +45,7 @@ export async function POST(request: NextRequest) {
             errors.push('Valid email address is required');
         }
 
-        if (!applicantPhone || applicantPhone.trim().length < 8) {
-            errors.push('Valid phone number is required (minimum 8 characters)');
-        }
+      
 
         if (!gender || !['MALE', 'FEMALE'].includes(gender)) {
             errors.push('Gender is required (MALE or FEMALE)');
@@ -76,8 +71,8 @@ export async function POST(request: NextRequest) {
             errors.push('Organization is required (minimum 2 characters)');
         }
 
-        if (!passEndDate && (!validityPeriod || !['1_DAY', '2_DAY', '3_DAY', '4_DAY', '5_DAY', '10_DAY', '1_MONTH', '2_MONTH', '3_MONTH'].includes(validityPeriod))) {
-            errors.push('Validity period or Pass End Date is required');
+        if (!passEndDate && (!visitduration || !['1_DAY', '2_DAY', '3_DAY', '4_DAY', '5_DAY', '10_DAY', '1_MONTH', '2_MONTH', '3_MONTH'].includes(visitduration))) {
+            errors.push('Visit Duration or Pass End Date is required');
         }
 
         if (!purposeOfVisit || purposeOfVisit.trim().length < 10) {
@@ -117,7 +112,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (!requestType || !['RESIDENT', 'NOT_RESIDENT'].includes(requestType)) {
-            errors.push('Valid request type is required (Resident, Not Resident)');
+            errors.push('Valid Identification Card is required (Resident, Not Resident)');
         }
 
         if (!passportIdImage) {
@@ -233,7 +228,7 @@ export async function POST(request: NextRequest) {
         if (passEndDate) {
             validTo = new Date(passEndDate);
         } else {
-            switch (validityPeriod) {
+            switch (visitduration) {
                 case '1_DAY':
                     validTo.setDate(validTo.getDate() + 1);
                     break;
@@ -284,10 +279,10 @@ export async function POST(request: NextRequest) {
             // Build data object using camelCase to match current Prisma client
             const requestData: any = {
                 requestNumber,
-                applicantNameEn: applicantNameEn.trim(),
+                applicantNameEn: applicantNameEn?.trim() || null,
                 applicantNameAr: applicantNameAr.trim(),
                 applicantEmail: applicantEmail.toLowerCase().trim(),
-                applicantPhone: applicantPhone?.trim() || null,
+                applicantPhone: "+96892000000",
                 gender: gender,
                 profession: profession.trim(),
                 passportIdNumber: passportIdNumber.toUpperCase().trim(),
@@ -318,9 +313,9 @@ export async function POST(request: NextRequest) {
                 console.warn('⚠️ passTypeId is empty or null:', passTypeId);
             }
 
-            // Add validityPeriod if provided
-            if (validityPeriod && validityPeriod.trim() !== '') {
-                requestData.validityPeriod = validityPeriod.trim();
+            // Add visitduration if provided
+            if (visitduration && visitduration.trim() !== '') {
+                requestData.visitduration = visitduration.trim();
             }
 
             if (otherProfessions !== null && otherProfessions !== undefined) {
@@ -337,7 +332,7 @@ export async function POST(request: NextRequest) {
             }
 
             // Try to create the request
-            // If passTypeId/validityPeriod columns don't exist, Prisma will throw an error
+            // If passTypeId/visitduration columns don't exist, Prisma will throw an error
             // We'll catch it and retry without those fields
             let newRequest;
             try {
@@ -346,7 +341,7 @@ export async function POST(request: NextRequest) {
                 });
                 console.log('✅ Request created successfully with photoPath:', requestData.photoPath);
             } catch (createError: any) {
-                // If error is about unknown column or unknown argument (passTypeId or validityPeriod don't exist in schema/client), remove them and retry
+                // If error is about unknown column or unknown argument (passTypeId or visitduration don't exist in schema/client), remove them and retry
                 const errorMessage = createError?.message || '';
                 const errorCode = createError?.code || '';
                 
@@ -362,23 +357,23 @@ export async function POST(request: NextRequest) {
                 // Only catch specific Prisma validation errors about unknown fields
                 const isUnknownFieldError = 
                     (errorMessage.includes('Unknown argument') && 
-                     (errorMessage.includes('passTypeId') || errorMessage.includes('validityPeriod'))) ||
+                     (errorMessage.includes('passTypeId') || errorMessage.includes('visitduration'))) ||
                     (errorMessage.includes('Unknown column') && 
                      (errorMessage.includes('pass_type_id') || errorMessage.includes('validity_period'))) ||
                     errorCode === 'P2010' || 
                     errorCode === 'P2001';
                 
                 if (isUnknownFieldError) {
-                    console.warn('Columns passTypeId/validityPeriod may not exist in database or Prisma client not regenerated, retrying without them...');
-                    console.warn('Original requestData had passTypeId:', requestData.passTypeId, 'validityPeriod:', requestData.validityPeriod, 'photoPath:', requestData.photoPath);
+                    console.warn('Columns passTypeId/visitduration may not exist in database or Prisma client not regenerated, retrying without them...');
+                    console.warn('Original requestData had passTypeId:', requestData.passTypeId, 'visitduration:', requestData.visitduration, 'photoPath:', requestData.photoPath);
                     const retryData = { ...requestData };
                     delete retryData.passTypeId;
-                    delete retryData.validityPeriod;
+                    delete retryData.visitduration;
                     // Keep photoPath in retry data
                     newRequest = await prisma.request.create({
                         data: retryData,
                     });
-                    console.warn('Request created without passTypeId/validityPeriod. Please regenerate Prisma client: npx prisma generate');
+                    console.warn('Request created without passTypeId/visitduration. Please regenerate Prisma client: npx prisma generate');
                     console.log('✅ Request created with photoPath:', retryData.photoPath);
                 } else {
                     // Re-throw if it's a different error
@@ -428,7 +423,7 @@ export async function POST(request: NextRequest) {
                     affectedEntityId: newRequest.id,
                     details: JSON.stringify({
                         requestNumber,
-                        applicantNameEn,
+                        applicantNameEn: applicantNameEn?.trim() || null,
                         applicantNameAr,
                         applicantEmail,
                         requestType,
@@ -448,13 +443,13 @@ export async function POST(request: NextRequest) {
 
             sendRequestConfirmationEmail(
                 applicantEmail,
-                applicantNameEn,
+                applicantNameEn?.trim() || '',
                 requestNumber
             ).catch(err => console.error('Failed to send confirmation email:', err));
 
             sendAdminNotificationEmail(
                 requestNumber,
-                applicantNameEn,
+                applicantNameEn?.trim() || '',
                 requestType,
                 new Date(dateOfVisit).toLocaleDateString()
             ).catch(err => console.error('Failed to send admin notification:', err));

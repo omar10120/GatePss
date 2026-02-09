@@ -288,7 +288,7 @@ The system will:
    - Feature showcase
    - Call-to-action buttons
 
-2. **Gate Pass Form** (`/gate-pass`)
+2. **Gate Beneficiary of the permitm** (`/gate-pass`)
    - Multi-field form
    - File upload
    - Real-time validation

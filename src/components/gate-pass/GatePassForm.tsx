@@ -25,7 +25,7 @@ export const GatePassForm: React.FC = () => {
     const locale = useLocale();
     const [passTypes, setPassTypes] = useState<PassType[]>([]);
     const [loadingPassTypes, setLoadingPassTypes] = useState(true);
-    // const [state , action ] = useActionState();
+
 
     // Fetch pass types from database
     useEffect(() => {
@@ -133,6 +133,7 @@ export const GatePassForm: React.FC = () => {
     const [organizationValue, setOrganizationValue] = useState('');
     const [selectedPassType, setSelectedPassType] = useState<PassType | null>(null);
     const [passEndDate, setPassEndDate] = useState('');
+    
 
     const isPermanent = (pt: PassType | null) => {
         if (!pt) return false;
@@ -148,7 +149,7 @@ export const GatePassForm: React.FC = () => {
             'passTypeId': 'passType',
             'requestType': 'requestType',
             'dateOfVisit': 'passStartingDate',
-            'applicantName': 'fullNameEn',
+            
             'applicantEmail': 'email',
             'passportIdImage': 'copyOfCivilId',
             'passportIdNumber': 'idPassportNumber',
@@ -178,9 +179,10 @@ export const GatePassForm: React.FC = () => {
             { name: 'nationality', value: formData.get('nationality') },
             { name: 'identification', value: formData.get('identification') },
             { name: 'organization', value: formData.get('organization') },
-            // validityPeriod is now conditionally validated later
+            // visitduration is now conditionally validated later
             { name: 'passFor', value: formData.get('passFor') },
             { name: 'applicantName', value: formData.get('applicantName') },
+
             { name: 'fullNameAr', value: formData.get('fullNameAr') },
             { name: 'applicantEmail', value: formData.get('applicantEmail') },
             { name: 'gender', value: formData.get('gender') },
@@ -212,8 +214,14 @@ export const GatePassForm: React.FC = () => {
                 isValid = false;
             }
 
-            // 4-month rule for permanent passes
+            // 4-month rule for permanent passes and hide Full Name of Pass Holder(EN) / الاسم الكامل لحامل التصريح (EN)
             if (isPermanent(selectedPassType)) {
+                // Hide Full Name of Pass Holder(EN) / الاسم الكامل لحامل التصريح (EN)
+                setFieldErrors(prev => {
+                    
+                    const newErrors = { ...prev };
+                    return newErrors;
+                });
                 const passEndDateValue = formData.get('passEndDate') as string;
                 if (!passEndDateValue) {
                     newFieldErrors['passEndDate'] = `${getBilingualNested(['fields', 'passEndDate'])} ${getBilingualNested(['errors', 'required'])}`;
@@ -231,10 +239,10 @@ export const GatePassForm: React.FC = () => {
                     }
                 }
             } else {
-                // Validity period required for temporary passes
-                const validityPeriod = formData.get('validityPeriod') as string;
-                if (!validityPeriod || validityPeriod.trim() === '') {
-                    newFieldErrors['validityPeriod'] = getBilingualNested(['errors', 'validityPeriodRequired']) || 'is required';
+                // Visit Duration and required for temporary passes
+                const visitduration = formData.get('visitduration') as string;
+                if (!visitduration || visitduration.trim() === '') {
+                    newFieldErrors['visitduration'] = getBilingualNested(['errors', 'visitdurationRequired']) || 'is required';
                     isValid = false;
                 }
             }
@@ -247,7 +255,7 @@ export const GatePassForm: React.FC = () => {
             isValid = false;
         }
 
-        // Request Type validation (Resident, Not Resident)
+        // Identification Card validation (Resident, Not Resident)
         const requestType = formData.get('requestType') as string;
         const validRequestTypes = ['RESIDENT', 'NOT_RESIDENT'];
         if (!requestType || !validRequestTypes.includes(requestType)) {
@@ -255,13 +263,7 @@ export const GatePassForm: React.FC = () => {
             isValid = false;
         }
 
-        // Phone validation (minimum 8 characters)
-        const telephone = formData.get('telephone') as string;
-        if (!telephone || telephone.trim().length < 8) {
-            newFieldErrors['telephone'] = getBilingualNested(['errors', 'validPhoneRequired']);
-            isValid = false;
-        }
-
+        
         // Passport/ID Number validation (6-20 alphanumeric characters)
         const passportIdNumber = formData.get('passportIdNumber') as string;
         const passportIdRegex = /^[a-zA-Z0-9]{6,20}$/;
@@ -378,15 +380,18 @@ export const GatePassForm: React.FC = () => {
             ? `${ORGANIZATION_PREFIX} + ${userOrgInput}`
             : ORGANIZATION_PREFIX;
         formData.set('organization', fullOrganization);
-
+        
         // Validate all fields
+        
         if (!validateForm(formData)) {
+            
             setError(getBilingualNested(['errors', 'fixErrors']));
             // Scroll to first error after state update
             setTimeout(() => {
                 // Get the first error field from the updated state
                 const errorFields = Object.keys(fieldErrors);
                 if (errorFields.length > 0) {
+                    
                     const firstErrorField = errorFields[0];
                     // Try to find the input/select/file input
                     const element = document.querySelector(`[name="${firstErrorField}"]`) ||
@@ -399,6 +404,7 @@ export const GatePassForm: React.FC = () => {
             }, 100);
             return;
         }
+        
 
         setLoading(true);
         setError('');
@@ -453,6 +459,8 @@ export const GatePassForm: React.FC = () => {
             setOrganizationValue('');
             setSelectedPassType(null);
             setPassEndDate('');
+
+    
             setConfirmed(false);
         } catch (err: any) {
             console.error('Submission error:', err);
@@ -477,6 +485,7 @@ export const GatePassForm: React.FC = () => {
         setErrors([]);
         setSelectedPassType(null);
         setPassEndDate('');
+        
     };
 
     if (success) {
@@ -712,9 +721,9 @@ export const GatePassForm: React.FC = () => {
                         />
                     ) : (
                         <Select
-                            name="validityPeriod"
-                            label={getBilingualNested(['fields', 'validityPeriod'])}
-                            error={fieldErrors.validityPeriod}
+                            name="visitduration"
+                            label={getBilingualNested(['fields', 'visitduration'])}
+                            error={fieldErrors.visitduration}
                             options={[
                                 { value: '', label: getBilingualNested(['placeholders', 'selectDate']) },
                                 { value: '1_DAY', label: getBilingualNested(['options', 'oneDay']) },
@@ -737,8 +746,9 @@ export const GatePassForm: React.FC = () => {
                         error={fieldErrors.passFor}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'selectBeneficiary']) },
-                            { value: 'SELF', label: getBilingualNested(['options', 'self']) },
-                            { value: 'OTHER', label: getBilingualNested(['options', 'other']) },
+                            { value: 'VISITOR', label: getBilingualNested(['options', 'VISITOR']) },
+                            { value: 'SUB_CONTRACTOR', label: getBilingualNested(['options', 'SUB_CONTRACTOR']) },
+                            { value: 'SERVICE_PROVIDER', label: getBilingualNested(['options', 'SERVICE_PROVIDER']) },
                         ]}
                         required
                     />
@@ -762,18 +772,22 @@ export const GatePassForm: React.FC = () => {
                     </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 text-gray-900">
-                    <Input
+                    {isPermanent(selectedPassType) && (
+                        <Input
                         name="applicantName"
                         label={getBilingualNested(['fields', 'fullNameEn'])}
                         placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
                         error={fieldErrors.applicantName}
-                        required
+                        
+                    
+                        
                         rightIcon={
                             <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         }
-                    />
+                    />  
+                    )}
                     <Input
                         name="fullNameAr"
                         label={getBilingualNested(['fields', 'fullNameAr'])}
@@ -786,18 +800,20 @@ export const GatePassForm: React.FC = () => {
                             </svg>
                         }
                     />
-                    <Input
+                    {/* <Input
                         name="telephone"
                         label={getBilingualNested(['fields', 'telephone'])}
                         placeholder={getBilingualNested(['placeholders', 'telephoneHolder'])}
                         error={fieldErrors.telephone}
-                        required
+                        disabled
+                        value={applicantPhone}
+                        
                         rightIcon={
                             <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                             </svg>
                         }
-                    />
+                    /> */}
                     <Input
                         name="applicantEmail"
                         type="email"

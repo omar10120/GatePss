@@ -21,7 +21,6 @@ interface RequestDetails {
     applicantNameEn: string;
     applicantNameAr: string;
     applicantEmail: string;
-    applicantPhone: string | null;
     gender: string;
     profession: string;
     passportIdNumber: string;
@@ -39,8 +38,8 @@ interface RequestDetails {
     rejectionReason: string | null;
     passFor: string | null;
     otherProfessions: string | null;
-    bloodType: string | null;
-    validityPeriod: string | null;
+    
+    visitduration: string | null;
     createdAt: string;
     updatedAt: string;
     approvedById: number | null;
@@ -218,9 +217,6 @@ export default function RequestDetailsPage() {
             if (editData.applicantEmail && editData.applicantEmail !== request.applicantEmail) {
                 updatePayload.applicantEmail = editData.applicantEmail;
             }
-            if (editData.applicantPhone !== undefined && editData.applicantPhone !== request.applicantPhone) {
-                updatePayload.applicantPhone = editData.applicantPhone;
-            }
             if (editData.passportIdNumber && editData.passportIdNumber !== request.passportIdNumber) {
                 updatePayload.passportIdNumber = editData.passportIdNumber;
             }
@@ -260,15 +256,13 @@ export default function RequestDetailsPage() {
             if (editData.dateOfVisit !== undefined && editData.dateOfVisit !== request.dateOfVisit) {
                 updatePayload.dateOfVisit = editData.dateOfVisit;
             }
-            if (editData.validityPeriod !== undefined && editData.validityPeriod !== request.validityPeriod) {
-                updatePayload.validityPeriod = editData.validityPeriod;
+            if (editData.visitduration !== undefined && editData.visitduration !== request.visitduration) {
+                updatePayload.visitduration = editData.visitduration;
             }
             if (editData.otherProfessions !== undefined && editData.otherProfessions !== request.otherProfessions) {
                 updatePayload.otherProfessions = editData.otherProfessions;
             }
-            if (editData.bloodType !== undefined && editData.bloodType !== request.bloodType) {
-                updatePayload.bloodType = editData.bloodType;
-            }
+            
 
             // Check if status is being changed
             const statusChanged = isEditMode && editData.status !== undefined && editData.status !== request.status;
@@ -787,7 +781,7 @@ export default function RequestDetailsPage() {
                                             }}
                                             data={[
                                                 { 
-                                                    label: gt('fields.passType') || "Pass Type", 
+                                                    label: gt('fields.passType') || "Identification Card", 
                                                     value: isEditMode 
                                                         ? (editData.passTypeId !== undefined ? editData.passTypeId?.toString() : request.passTypeId?.toString() || '') 
                                                         : (request.passTypeId && passTypes.find(pt => pt.id === request.passTypeId) 
@@ -796,7 +790,7 @@ export default function RequestDetailsPage() {
                                                     fieldName: 'passTypeId',
                                                     fieldType: 'select',
                                                     options: [
-                                                        { value: '', label: gt('placeholders.selectPassType') || 'Select Pass Type' },
+                                                        { value: '', label: gt('placeholders.selectPassType') || 'Select Identification Card' },
                                                         ...passTypes.filter(pt => pt.is_active).map(pt => ({
                                                             value: pt.id.toString(),
                                                             label: locale === 'ar' ? pt.name_ar : `${pt.name_en}${pt.name_ar ? ` / ${pt.name_ar}` : ''}`
@@ -804,16 +798,14 @@ export default function RequestDetailsPage() {
                                                     ]
                                                 },
                                                 { 
-                                                    label: gt('fields.requestType') || "Request Type", 
+                                                    label: gt('fields.requestType') || "Identification Card", 
                                                     value: isEditMode ? (editData.requestType !== undefined ? editData.requestType : request.requestType) : request.requestType, 
                                                     fieldName: 'requestType',
                                                     fieldType: 'select',
                                                     options: [
                                                         { value: '', label: gt('placeholders.select') || 'Select' },
-                                                        { value: 'VISITOR', label: 'VISITOR' },
-                                                        { value: 'CONTRACTOR', label: 'CONTRACTOR' },
-                                                        { value: 'EMPLOYEE', label: 'EMPLOYEE' },
-                                                        { value: 'VEHICLE', label: 'VEHICLE' }
+                                                        { value: 'RESIDENT', label: 'RESIDENT' },
+                                                        { value: 'NOT_RESIDENT', label: 'NOT_RESIDENT' },
                                                     ]
                                                 },
                                                 { 
@@ -849,13 +841,13 @@ export default function RequestDetailsPage() {
                                                     fieldType: 'date'
                                                 },
                                                 { 
-                                                    label: gt('fields.validityPeriod') || "Validity Period", 
+                                                    label: gt('fields.visitduration') || "Visit Duration", 
                                                     value: isEditMode 
-                                                        ? (editData.validityPeriod !== undefined ? editData.validityPeriod : request.validityPeriod || '') 
-                                                        : (request.validityPeriod === '1_DAY' ? gt('options.oneDay') || '1 Day' :
-                                                           request.validityPeriod === '1_WEEK' ? gt('options.oneWeek') || '1 Week' :
-                                                           request.validityPeriod === '1_MONTH' ? gt('options.oneMonth') || '1 Month' : request.validityPeriod || '-'), 
-                                                    fieldName: 'validityPeriod',
+                                                        ? (editData.visitduration !== undefined ? editData.visitduration : request.visitduration || '') 
+                                                        : (request.visitduration === '1_DAY' ? gt('options.oneDay') || '1 Day' :
+                                                           request.visitduration === '1_WEEK' ? gt('options.oneWeek') || '1 Week' :
+                                                           request.visitduration === '1_MONTH' ? gt('options.oneMonth') || '1 Month' : request.visitduration || '-'), 
+                                                    fieldName: 'visitduration',
                                                     fieldType: 'select',
                                                     options: [
                                                         { value: '', label: gt('placeholders.selectDate') || 'Select Date' },
@@ -865,14 +857,15 @@ export default function RequestDetailsPage() {
                                                     ]
                                                 },
                                                 { 
-                                                    label: gt('fields.passFor') || "Pass For", 
-                                                    value: isEditMode ? (editData.passFor !== undefined ? (editData.passFor || 'SELF') : (request.passFor || 'SELF')) : (request.passFor === 'SELF' ? gt('options.self') || 'Self' : request.passFor === 'OTHER' ? gt('options.other') || 'Other' : request.passFor || 'Self'), 
+                                                    label: gt('fields.passFor') || "Beneficiary of the permit", 
+                                                    value: isEditMode ? (editData.passFor !== undefined ? (editData.passFor || 'VISITOR') : (request.passFor || 'VISITOR')) : (request.passFor === 'VISITOR' ? gt('options.VISITOR') || 'Visitor' : request.passFor === 'SUB_CONTRACTOR' ? gt('options.SUB_CONTRACTOR') || 'Sub contractor' : request.passFor === 'SERVICE_PROVIDER' ? gt('options.SERVICE_PROVIDER') || 'Service provider' : request.passFor || 'Visitor'), 
                                                     fieldName: 'passFor',
                                                     fieldType: 'select',
                                                     options: [
                                                         { value: '', label: gt('placeholders.selectBeneficiary') || 'Select Beneficiary' },
-                                                        { value: 'SELF', label: gt('options.self') || 'Self' },
-                                                        { value: 'OTHER', label: gt('options.other') || 'Other' }
+                                                        { value: 'VISITOR', label: gt('options.VISITOR') || 'Visitor' },
+                                                        { value: 'SUB_CONTRACTOR', label: gt('options.SUB_CONTRACTOR') || 'Sub contractor' },
+                                                        { value: 'SERVICE_PROVIDER', label: gt('options.SERVICE_PROVIDER') || 'Service provider' },
                                                     ]
                                                 },
                                                 { 
@@ -908,11 +901,7 @@ export default function RequestDetailsPage() {
                                                     value: isEditMode ? (editData.applicantNameAr !== undefined ? editData.applicantNameAr : request.applicantNameAr) : request.applicantNameAr, 
                                                     fieldName: 'applicantNameAr' 
                                                 },
-                                                { 
-                                                    label: gt('fields.telephone') || "Telephone", 
-                                                    value: isEditMode ? (editData.applicantPhone !== undefined ? (editData.applicantPhone || '-') : (request.applicantPhone || '-')) : (request.applicantPhone || '-'), 
-                                                    fieldName: 'applicantPhone' 
-                                                },
+                                            
                                                 { 
                                                     label: gt('fields.email') || "Email", 
                                                     value: isEditMode ? (editData.applicantEmail !== undefined ? editData.applicantEmail : request.applicantEmail) : request.applicantEmail, 
@@ -950,23 +939,7 @@ export default function RequestDetailsPage() {
                                                     value: isEditMode ? (editData.otherProfessions !== undefined ? editData.otherProfessions : request.otherProfessions || '') : (request.otherProfessions || '-'), 
                                                     fieldName: 'otherProfessions' 
                                                 },
-                                                { 
-                                                    label: gt('fields.bloodType') || "Blood Type", 
-                                                    value: isEditMode ? (editData.bloodType !== undefined ? editData.bloodType : request.bloodType || '') : (request.bloodType || '-'), 
-                                                    fieldName: 'bloodType',
-                                                    fieldType: 'select',
-                                                    options: [
-                                                        { value: '', label: gt('placeholders.select') || 'Select' },
-                                                        { value: 'O+', label: 'O+' },
-                                                        { value: 'O-', label: 'O-' },
-                                                        { value: 'A+', label: 'A+' },
-                                                        { value: 'A-', label: 'A-' },
-                                                        { value: 'B+', label: 'B+' },
-                                                        { value: 'B-', label: 'B-' },
-                                                        { value: 'AB+', label: 'AB+' },
-                                                        { value: 'AB-', label: 'AB-' }
-                                                    ]
-                                                },
+                                                
                                                 { 
                                                     label: gt('fields.idPassportNumber') || "ID Or Passport Number", 
                                                     value: isEditMode ? (editData.passportIdNumber !== undefined ? editData.passportIdNumber : request.passportIdNumber) : request.passportIdNumber, 

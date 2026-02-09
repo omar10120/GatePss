@@ -27,7 +27,7 @@ export default function AddUserPage() {
         name: '',
         email: '',
         phoneNumber: '',
-        password: '',
+        password: '',   
         permissionIds: [] as number[],
     });
     const [error, setError] = useState('');

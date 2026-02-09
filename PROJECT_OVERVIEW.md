@@ -266,7 +266,7 @@ gate-pass-system/
 
 **What's Built:**
 - Statistics summary (total, approved, rejected, pending)
-- Request type breakdown
+- Identification Card breakdown
 - Time-series data for charts
 - Recent requests
 - Status distribution
@@ -418,7 +418,7 @@ requests → activity_logs
 - RTL layout switching
 - Hero section
 - Features showcase
-- Request types display
+- Identification Cards display
 - Professional design
 - Responsive layout
 

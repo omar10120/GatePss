@@ -74,7 +74,7 @@ model Permission {
 model Request {
   id                           Int      @id @default(autoincrement())
   requestNumber                String   @unique @map("request_number")
-  applicantNameEn              String   @map("applicant_name_en")
+  applicantNameEn              String?   @map("applicant_name_en")
   applicantNameAr              String   @map("applicant_name_ar")
   applicantEmail               String   @map("applicant_email")
   applicantPhone               String?  @map("applicant_phone")
@@ -103,7 +103,7 @@ model Request {
   qrCodePdfUrl                 String?  @map("qr_code_pdf_url")
   passFor                      String?  @map("pass_for")
   passTypeId                   Int?     @map("pass_type_id")
-  validityPeriod               String?  @map("validity_period")
+  visitduration               String?  @map("validity_period")
 
   approvedBy User?    @relation("ApprovedBy", fields: [approvedById], references: [id])
   uploads    Upload[]
