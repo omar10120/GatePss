@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useActionState } from 'react';
 import { Input, Select } from '@/components/ui/Input';
 import { Textarea } from '../ui/Textarea';
 import { FileUpload } from '@/components/ui/FileUpload';
@@ -25,6 +25,7 @@ export const GatePassForm: React.FC = () => {
     const locale = useLocale();
     const [passTypes, setPassTypes] = useState<PassType[]>([]);
     const [loadingPassTypes, setLoadingPassTypes] = useState(true);
+    // const [state , action ] = useActionState();
 
     // Fetch pass types from database
     useEffect(() => {
@@ -246,9 +247,9 @@ export const GatePassForm: React.FC = () => {
             isValid = false;
         }
 
-        // Request Type validation (VISITOR, CONTRACTOR, EMPLOYEE, VEHICLE)
+        // Request Type validation (Resident, Not Resident)
         const requestType = formData.get('requestType') as string;
-        const validRequestTypes = ['VISITOR', 'CONTRACTOR', 'EMPLOYEE', 'VEHICLE'];
+        const validRequestTypes = ['RESIDENT', 'NOT_RESIDENT'];
         if (!requestType || !validRequestTypes.includes(requestType)) {
             newFieldErrors['requestType'] = getBilingualNested(['errors', 'validRequestTypeRequired']);
             isValid = false;
@@ -548,10 +549,8 @@ export const GatePassForm: React.FC = () => {
                         error={fieldErrors.requestType}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
-                            { value: 'VISITOR', label: 'VISITOR / زائر' },
-                            { value: 'CONTRACTOR', label: 'CONTRACTOR / مقاول' },
-                            { value: 'EMPLOYEE', label: 'EMPLOYEE / موظف' },
-                            { value: 'VEHICLE', label: 'VEHICLE / سيارة' },
+                            { value: 'RESIDENT', label: 'RESIDENT / مقيم' },
+                            { value: 'NOT_RESIDENT', label: 'NOT_RESIDENT / غير مقيم' },
                         ]}
                         required
                     />
@@ -843,21 +842,7 @@ export const GatePassForm: React.FC = () => {
                         label={getBilingualNested(['fields', 'otherProfessions'])}
                         placeholder={getBilingualNested(['placeholders', 'otherProfessions'])}
                     />
-                    <Select
-                        name="bloodType"
-                        label={getBilingualNested(['fields', 'bloodType'])}
-                        options={[
-                            { value: '', label: getBilingualNested(['placeholders', 'select']) },
-                            { value: 'O+', label: 'O+' },
-                            { value: 'O-', label: 'O-' },
-                            { value: 'A+', label: 'A+' },
-                            { value: 'A-', label: 'A-' },
-                            { value: 'B+', label: 'B+' },
-                            { value: 'B-', label: 'B-' },
-                            { value: 'AB+', label: 'AB+' },
-                            { value: 'AB-', label: 'AB-' },
-                        ]}
-                    />
+                
                     <Select
                         name="identification"
                         label={getBilingualNested(['fields', 'identification'])}

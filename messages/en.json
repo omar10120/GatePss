@@ -228,7 +228,7 @@
         },
         "fields": {
             "passType": "Pass Type",
-            "requestType": "Request Type",
+            "requestType": "Identification Card",
             "nationality": "Nationality",
             "identification": "Identification",
             "organization": "Organization \\ Host Organization",
@@ -279,7 +279,7 @@
             "validPassportIdRequired": "Valid passport/ID number is required (6-20 alphanumeric characters)",
             "purposeOfVisitRequired": "Purpose of visit is required (minimum 10 characters)",
             "validPassTypeRequired": "Valid pass type is required",
-            "validRequestTypeRequired": "Valid request type is required (VISITOR, CONTRACTOR, EMPLOYEE, or VEHICLE)",
+            "validRequestTypeRequired": "Valid Identification card is required (Resident, Not Resident)",
             "invalidDate": "Please select a valid date (cannot be in the past)"
         },
         "options": {
@@ -342,10 +342,8 @@
             "permissionDenied": "You do not have permission to view the dashboard.",
             "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
             "types": {
-                "VISITOR": "Visitor",
-                "CONTRACTOR": "Contractor",
-                "EMPLOYEE": "Employee",
-                "VEHICLE": "Vehicle"
+                "RESIDENT": "Resident",
+                "NOT_RESIDENT": "Not Resident"
             },
             "status": {
                 "PENDING": "Pending",
@@ -562,7 +560,7 @@
             "holderName": "Holder Name",
             "email": "Email",
             "role": "Role",
-            "requestType": "Request Type",
+            "requestType": "Identification Card",
             "passType": "Pass Type",
             "identification": "Identification",
             "permit": "Permit",

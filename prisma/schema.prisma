@@ -81,7 +81,6 @@ model Request {
   gender                       String
   profession                   String
   otherProfessions             String?  @map("other_professions")
-  bloodType                    String?  @map("blood_type")
   photoPath                    String?  @map("photo_path") @db.LongText
   passportIdNumber             String   @map("passport_id_number")
   passportIdImagePath          String?  @map("passport_id_image_path") @db.LongText

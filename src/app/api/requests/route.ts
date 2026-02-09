@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
         const gender = formData.get('gender') as string;
         const profession = formData.get('profession') as string;
         const otherProfessions = formData.get('otherProfessions') as string | null;
-        const bloodType = formData.get('bloodType') as string | null;
+        
         const passportIdNumber = formData.get('passportIdNumber') as string;
         const nationality = formData.get('nationality') as string;
         const identification = formData.get('identification') as string;
@@ -116,8 +116,8 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        if (!requestType || !['VISITOR', 'CONTRACTOR', 'EMPLOYEE', 'VEHICLE'].includes(requestType)) {
-            errors.push('Valid request type is required (VISITOR, CONTRACTOR, EMPLOYEE, or VEHICLE)');
+        if (!requestType || !['RESIDENT', 'NOT_RESIDENT'].includes(requestType)) {
+            errors.push('Valid request type is required (Resident, Not Resident)');
         }
 
         if (!passportIdImage) {
@@ -325,9 +325,6 @@ export async function POST(request: NextRequest) {
 
             if (otherProfessions !== null && otherProfessions !== undefined) {
                 requestData.otherProfessions = otherProfessions.trim();
-            }
-            if (bloodType) {
-                requestData.bloodType = bloodType;
             }
             // Add photoPath if photo was uploaded
             console.log('Photo file from formData:', photo ? `File: ${photo.name}, size: ${photo.size}` : 'No photo file');
