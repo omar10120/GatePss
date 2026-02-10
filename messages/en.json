@@ -254,7 +254,7 @@
             "select": "Select --",
             "selectPassType": "Select Pass Type --",
             "typeOrganization": "Type Organization Name --",
-            "selectDate": "Select a date for your visit --",
+            "selectDate": "Select a duration for your visit --",
             "selectBeneficiary": "Select the beneficiary of the permit --",
             "typePurpose": "Type the purpose of the visit",
             "otherProfessions": "Enter other profession details (optional)",
@@ -298,7 +298,6 @@
             "oneMonth": "1 Month",
             "twoMonth": "2 Months",
             "threeMonth": "3 Months",
-            
             "VISITOR": "Visitor",
             "SUB_CONTRACTOR": "Sub contractor",
             "SERVICE_PROVIDER": "Service provider",
@@ -344,7 +343,9 @@
             "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
             "types": {
                 "RESIDENT": "Resident",
-                "NOT_RESIDENT": "Not Resident"
+                "NOT_RESIDENT": "Not Resident",
+                "Resident": "Resident",
+                "Not Resident": "Not Resident"
             },
             "status": {
                 "PENDING": "Pending",

@@ -50,7 +50,7 @@
             "title": "كيف يعمل",
             "subtitle": "شاهد الفيديو للتعرف على خطوات تقديم الطلب والمتطلبات اللازمة خطوة بخطوة.",
             "processFlow": " أضف طلبك → استلم إشعارًا عبر البريد الإلكتروني → تحقق من الحالة في صفحة تتبع الطلب",
-            "trackApplication" : "تتبع الطلب",
+            "trackApplication": "تتبع الطلب",
             "videoPlaceholder": "سيتم توفير الفيديو هنا",
             "step1": {
                 "title": "١. تقديم الطلب",
@@ -254,7 +254,7 @@
             "select": "اختر --",
             "selectPassType": "اختر نوع التصريح --",
             "typeOrganization": "اكتب اسم المنظمة --",
-            "selectDate": "اختر تاريخاً لزيارتك --",
+            "selectDate": "اختر مدة لزيارتك --",
             "selectBeneficiary": "اختر المستفيد من التصريح --",
             "typePurpose": "اكتب الغرض من الزيارة",
             "otherProfessions": "أدخل تفاصيل مهنة أخرى (اختياري)",
@@ -321,9 +321,9 @@
         "step2_desc": "يقوم فريق مجيس بالتحقق من الطلب ومعالجته",
         "step3_title": "٣. استلام التصريح الرقمي",
         "step3_desc": "يصل التصريح الرقمي المعتمد المزود برمز (QR) عبر البريد الإلكتروني",
-        "columns":{
-                "requestNumber": "Request Number "
-            }
+        "columns": {
+            "requestNumber": "Request Number "
+        }
     },
     "Admin": {
         "dashboard": {
@@ -347,7 +347,7 @@
             "contactAdmin": "يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.",
             "types": {
                 "RESIDENT": "مقيم",
-                "NOT_RESIDENT" : "غير مقيم"
+                "NOT_RESIDENT": "غير مقيم"
             },
             "status": {
                 "PENDING": "قيد الانتظار",
@@ -577,7 +577,6 @@
             "downloadInfo": "تحميل المعلومات",
             "viewQRCode": "عرض رمز الاستجابة السريعة",
             "temporary": "مؤقت",
-            
             "permanent": "دائم",
             "pagination": {
                 "showing": "عرض",
@@ -630,7 +629,6 @@
                 "deletedSuccessfully": "تم حذف السؤال بنجاح",
                 "confirmDelete": "هل أنت متأكد من حذف هذا السؤال؟"
             }
-      
         },
         "notifications": {
             "title": "الإشعارات",

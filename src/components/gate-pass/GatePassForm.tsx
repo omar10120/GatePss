@@ -25,7 +25,7 @@ export const GatePassForm: React.FC = () => {
     const locale = useLocale();
     const [passTypes, setPassTypes] = useState<PassType[]>([]);
     const [loadingPassTypes, setLoadingPassTypes] = useState(true);
-
+    // const [state , action ] = useActionState();
 
     // Fetch pass types from database
     useEffect(() => {
@@ -133,7 +133,7 @@ export const GatePassForm: React.FC = () => {
     const [organizationValue, setOrganizationValue] = useState('');
     const [selectedPassType, setSelectedPassType] = useState<PassType | null>(null);
     const [passEndDate, setPassEndDate] = useState('');
-    
+
 
     const isPermanent = (pt: PassType | null) => {
         if (!pt) return false;
@@ -149,7 +149,7 @@ export const GatePassForm: React.FC = () => {
             'passTypeId': 'passType',
             'requestType': 'requestType',
             'dateOfVisit': 'passStartingDate',
-            
+            'applicantName': 'fullNameEn',
             'applicantEmail': 'email',
             'passportIdImage': 'copyOfCivilId',
             'passportIdNumber': 'idPassportNumber',
@@ -182,7 +182,6 @@ export const GatePassForm: React.FC = () => {
             // visitduration is now conditionally validated later
             { name: 'passFor', value: formData.get('passFor') },
             { name: 'applicantName', value: formData.get('applicantName') },
-
             { name: 'fullNameAr', value: formData.get('fullNameAr') },
             { name: 'applicantEmail', value: formData.get('applicantEmail') },
             { name: 'gender', value: formData.get('gender') },
@@ -218,8 +217,9 @@ export const GatePassForm: React.FC = () => {
             if (isPermanent(selectedPassType)) {
                 // Hide Full Name of Pass Holder(EN) / الاسم الكامل لحامل التصريح (EN)
                 setFieldErrors(prev => {
-                    
                     const newErrors = { ...prev };
+                    delete newErrors.fullNameEn;
+
                     return newErrors;
                 });
                 const passEndDateValue = formData.get('passEndDate') as string;
@@ -263,7 +263,7 @@ export const GatePassForm: React.FC = () => {
             isValid = false;
         }
 
-        
+
         // Passport/ID Number validation (6-20 alphanumeric characters)
         const passportIdNumber = formData.get('passportIdNumber') as string;
         const passportIdRegex = /^[a-zA-Z0-9]{6,20}$/;
@@ -380,18 +380,15 @@ export const GatePassForm: React.FC = () => {
             ? `${ORGANIZATION_PREFIX} + ${userOrgInput}`
             : ORGANIZATION_PREFIX;
         formData.set('organization', fullOrganization);
-        
+
         // Validate all fields
-        
         if (!validateForm(formData)) {
-            
             setError(getBilingualNested(['errors', 'fixErrors']));
             // Scroll to first error after state update
             setTimeout(() => {
                 // Get the first error field from the updated state
                 const errorFields = Object.keys(fieldErrors);
                 if (errorFields.length > 0) {
-                    
                     const firstErrorField = errorFields[0];
                     // Try to find the input/select/file input
                     const element = document.querySelector(`[name="${firstErrorField}"]`) ||
@@ -404,7 +401,6 @@ export const GatePassForm: React.FC = () => {
             }, 100);
             return;
         }
-        
 
         setLoading(true);
         setError('');
@@ -460,7 +456,7 @@ export const GatePassForm: React.FC = () => {
             setSelectedPassType(null);
             setPassEndDate('');
 
-    
+
             setConfirmed(false);
         } catch (err: any) {
             console.error('Submission error:', err);
@@ -485,7 +481,7 @@ export const GatePassForm: React.FC = () => {
         setErrors([]);
         setSelectedPassType(null);
         setPassEndDate('');
-        
+
     };
 
     if (success) {
@@ -537,7 +533,7 @@ export const GatePassForm: React.FC = () => {
                                 .filter(pt => pt.is_active)
                                 .map((pt) => ({
                                     value: pt.id.toString(),
-                                    label:  `${pt.name_en}${pt.name_ar ? ` / ${pt.name_ar}` : ''}`,
+                                    label: `${pt.name_en}${pt.name_ar ? ` / ${pt.name_ar}` : ''}`,
                                 })),
                         ]}
                         required
@@ -558,8 +554,8 @@ export const GatePassForm: React.FC = () => {
                         error={fieldErrors.requestType}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
-                            { value: 'RESIDENT', label: 'RESIDENT / مقيم' },
-                            { value: 'NOT_RESIDENT', label: 'NOT_RESIDENT / غير مقيم' },
+                            { value: 'Resident', label: 'Resident / مقيم' },
+                            { value: 'Not Resident', label: 'Not Resident / غير مقيم' },
                         ]}
                         required
                     />
@@ -623,7 +619,7 @@ export const GatePassForm: React.FC = () => {
                                         delete newErrors.dateOfVisit;
                                         return newErrors;
                                     });
-                                    
+
                                     // Re-validate passEndDate if it's already set and pass type is permanent
                                     if (isPermanent(selectedPassType) && passEndDate) {
                                         const endDate = new Date(passEndDate);
@@ -631,7 +627,7 @@ export const GatePassForm: React.FC = () => {
                                         const minEndDate = new Date(date);
                                         minEndDate.setMonth(minEndDate.getMonth() + 4);
                                         minEndDate.setHours(0, 0, 0, 0);
-                                        
+
                                         if (endDate < minEndDate) {
                                             setFieldErrors(prev => ({
                                                 ...prev,
@@ -665,23 +661,23 @@ export const GatePassForm: React.FC = () => {
                             onChange={(e) => {
                                 const selectedEndDate = e.target.value;
                                 setPassEndDate(selectedEndDate);
-                                
+
                                 // Real-time validation: check if end date is at least 4 months after start date
                                 if (selectedEndDate) {
                                     const dateOfVisitInput = document.querySelector('input[name="dateOfVisit"]') as HTMLInputElement;
                                     const dateOfVisitValue = dateOfVisitInput?.value;
-                                    
+
                                     if (dateOfVisitValue) {
                                         const startDate = new Date(dateOfVisitValue);
                                         startDate.setHours(0, 0, 0, 0);
                                         const endDate = new Date(selectedEndDate);
                                         endDate.setHours(0, 0, 0, 0);
-                                        
+
                                         // Calculate minimum end date (4 months after start date)
                                         const minEndDate = new Date(startDate);
                                         minEndDate.setMonth(minEndDate.getMonth() + 4);
                                         minEndDate.setHours(0, 0, 0, 0);
-                                        
+
                                         if (endDate < minEndDate) {
                                             setFieldErrors(prev => ({
                                                 ...prev,
@@ -774,19 +770,19 @@ export const GatePassForm: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 text-gray-900">
                     {isPermanent(selectedPassType) && (
                         <Input
-                        name="applicantName"
-                        label={getBilingualNested(['fields', 'fullNameEn'])}
-                        placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
-                        error={fieldErrors.applicantName}
-                        
-                    
-                        
-                        rightIcon={
-                            <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        }
-                    />  
+                            name="applicantName"
+                            label={getBilingualNested(['fields', 'fullNameEn'])}
+                            placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
+                            error={fieldErrors.applicantName}
+
+
+
+                            rightIcon={
+                                <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            }
+                        />
                     )}
                     <Input
                         name="fullNameAr"
@@ -858,7 +854,7 @@ export const GatePassForm: React.FC = () => {
                         label={getBilingualNested(['fields', 'otherProfessions'])}
                         placeholder={getBilingualNested(['placeholders', 'otherProfessions'])}
                     />
-                
+
                     <Select
                         name="identification"
                         label={getBilingualNested(['fields', 'identification'])}
