@@ -174,7 +174,7 @@ export default function PermitsPage() {
     };
 
     const getIdentificationLabel = (identification: string) => {
-        return identification === 'RESIDENT' ? 'Resident' : identification === 'NON_RESIDENT' ? 'Non Resident' : identification;
+        return identification === 'Resident' ? 'Resident' : identification === 'NON_Resident' ? 'Non Resident' : identification;
     };
 
     return (

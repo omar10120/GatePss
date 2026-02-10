@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        if (!requestType || !['RESIDENT', 'NOT_RESIDENT'].includes(requestType)) {
+        if (!requestType || !['Resident', 'Not Resident'].includes(requestType)) {
             errors.push('Valid Identification Card is required (Resident, Not Resident)');
         }
 

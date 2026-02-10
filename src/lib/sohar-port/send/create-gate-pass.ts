@@ -11,16 +11,16 @@ import path from 'path';
 async function fileToBase64(filePath: string): Promise<string | null> {
     try {
         if (!filePath) return null;
-        
+
         if (filePath.startsWith('data:')) {
-           
+
             const base64Match = filePath.match(/base64,(.+)$/);
             if (base64Match && base64Match[1]) {
                 return base64Match[1];
             }
             return null;
         }
-        
+
         // Regular file path - read from file system (local development)
         const fullPath = path.join(process.cwd(), 'public', filePath);
         const fileBuffer = await readFile(fullPath);
@@ -36,8 +36,8 @@ async function fileToBase64(filePath: string): Promise<string | null> {
  */
 function mapRequestType(requestType: string): string {
     const typeMap: Record<string, string> = {
-        'RESIDENT': '2',
-        'NOT_RESIDENT': '1',
+        'Resident': '2',
+        'Not Resident': '1',
     };
     return typeMap[requestType.toUpperCase()] || '2';
 }
@@ -126,7 +126,7 @@ export async function createGatePass(
             months_validity: gateRequest?.validFrom && gateRequest?.validTo
                 ? calculateMonthsValidity(new Date(gateRequest.validFrom), new Date(gateRequest.validTo))
                 : '30',
-            pass_for: mapPassFor(gateRequest?.passFor || extraFields.passFor),  
+            pass_for: mapPassFor(gateRequest?.passFor || extraFields.passFor),
             company: gateRequest?.organization || 'Majis Industrial Services',
             name: request.applicantName,
             phone: gateRequest?.applicantPhone || '',
@@ -135,9 +135,9 @@ export async function createGatePass(
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
             identification_number: request.passportIdNumber,
             visitor_type: mapVisitorType(request.requestType),
-            
+
             start_date: formatDate(request.dateOfVisit),
-            end_date: gateRequest?.validTo 
+            end_date: gateRequest?.validTo
                 ? formatDate(gateRequest.validTo)
                 : formatDate(new Date(new Date(request.dateOfVisit).getTime() + 30 * 24 * 60 * 60 * 1000)),
             reason_for_visit: request.purposeOfVisit,

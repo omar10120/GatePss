@@ -38,7 +38,7 @@ interface RequestDetails {
     rejectionReason: string | null;
     passFor: string | null;
     otherProfessions: string | null;
-    
+
     visitduration: string | null;
     createdAt: string;
     updatedAt: string;
@@ -174,7 +174,7 @@ export default function RequestDetailsPage() {
             const currentEditMode = editMode !== undefined ? editMode : isEditMode;
             const url = currentEditMode ? `/api/admin/requests/${id}?edit=true` : `/api/admin/requests/${id}`;
             const result = await apiFetch<RequestDetails>(url);
-         
+
             setRequest(result);
             // Only initialize editData if not in edit mode (to preserve user changes)
             if (!currentEditMode) {
@@ -207,7 +207,7 @@ export default function RequestDetailsPage() {
         try {
             // Prepare update data - only include fields that have changed
             const updatePayload: any = {};
-            
+
             if (editData.applicantNameEn && editData.applicantNameEn !== request.applicantNameEn) {
                 updatePayload.applicantNameEn = editData.applicantNameEn;
             }
@@ -262,7 +262,7 @@ export default function RequestDetailsPage() {
             if (editData.otherProfessions !== undefined && editData.otherProfessions !== request.otherProfessions) {
                 updatePayload.otherProfessions = editData.otherProfessions;
             }
-            
+
 
             // Check if status is being changed
             const statusChanged = isEditMode && editData.status !== undefined && editData.status !== request.status;
@@ -287,7 +287,7 @@ export default function RequestDetailsPage() {
 
             // Check if there are files to upload
             const hasFiles = Object.values(files).some(file => file !== null);
-            
+
             // Check if there are other changes besides status
             const hasOtherChanges = Object.keys(otherUpdates).length > 0 || hasFiles;
 
@@ -306,7 +306,7 @@ export default function RequestDetailsPage() {
                     if (hasOtherChanges) {
                         approvePayload.updates = otherUpdates;
                     }
-                    
+
                     // If there are files, we need to save them first via PUT, then approve
                     if (hasFiles) {
                         // First save files and other updates via PUT
@@ -405,7 +405,7 @@ export default function RequestDetailsPage() {
                 } else if (newStatus === 'PENDING') {
                     // For PENDING, include status in PUT request
                     const pendingPayload = { ...otherUpdates, status: 'PENDING' };
-                    
+
                     if (hasFiles) {
                         const formData = new FormData();
                         Object.keys(pendingPayload).forEach(key => {
@@ -664,8 +664,8 @@ export default function RequestDetailsPage() {
                             {/* Header Section */}
                             <div className="bg-white rounded-[16px] p-6 shadow-sm mb-6">
                                 <div className="flex items-center justify-between mb-8">
-                                <RequestHeader
-                                    requestNumber={request.requestNumber}
+                                    <RequestHeader
+                                        requestNumber={request.requestNumber}
                                     />
                                     <div className="flex items-center gap-3">
                                         {isEditMode && request.status === 'PENDING' ? (
@@ -674,8 +674,8 @@ export default function RequestDetailsPage() {
                                                     value={editData.status !== undefined ? editData.status : request.status}
                                                     onChange={(e) => {
                                                         const newStatus = e.target.value as 'APPROVED' | 'REJECTED' | 'PENDING';
-                                                        setEditData(prev => ({ 
-                                                            ...prev, 
+                                                        setEditData(prev => ({
+                                                            ...prev,
                                                             status: newStatus,
                                                             // Clear rejectionReason if status is not REJECTED
                                                             rejectionReason: newStatus === 'REJECTED' ? (prev.rejectionReason || request.rejectionReason || '') : null
@@ -710,11 +710,10 @@ export default function RequestDetailsPage() {
                                         )}
                                         <button
                                             onClick={toggleEditMode}
-                                            className={`px-4 py-1 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                                                isEditMode
-                                                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                                            }`}
+                                            className={`px-4 py-1 rounded-lg font-medium transition-colors flex items-center gap-2 ${isEditMode
+                                                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                                                }`}
                                             disabled={processing}
                                         >
                                             {isEditMode ? (
@@ -750,7 +749,7 @@ export default function RequestDetailsPage() {
                                         </div>
                                     </div>
                                 )}
-                                
+
                                 {request.status !== 'PENDING' && (
                                     <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                                         <p className="text-yellow-800 text-sm font-medium">
@@ -780,13 +779,13 @@ export default function RequestDetailsPage() {
                                                 }
                                             }}
                                             data={[
-                                                { 
-                                                    label: gt('fields.passType') || "Identification Card", 
-                                                    value: isEditMode 
-                                                        ? (editData.passTypeId !== undefined ? editData.passTypeId?.toString() : request.passTypeId?.toString() || '') 
-                                                        : (request.passTypeId && passTypes.find(pt => pt.id === request.passTypeId) 
+                                                {
+                                                    label: gt('fields.passType') || "Identification Card",
+                                                    value: isEditMode
+                                                        ? (editData.passTypeId !== undefined ? editData.passTypeId?.toString() : request.passTypeId?.toString() || '')
+                                                        : (request.passTypeId && passTypes.find(pt => pt.id === request.passTypeId)
                                                             ? (locale === 'ar' ? passTypes.find(pt => pt.id === request.passTypeId)!.name_ar : passTypes.find(pt => pt.id === request.passTypeId)!.name_en)
-                                                            : 'N/A'), 
+                                                            : 'N/A'),
                                                     fieldName: 'passTypeId',
                                                     fieldType: 'select',
                                                     options: [
@@ -797,20 +796,20 @@ export default function RequestDetailsPage() {
                                                         }))
                                                     ]
                                                 },
-                                                { 
-                                                    label: gt('fields.requestType') || "Identification Card", 
-                                                    value: isEditMode ? (editData.requestType !== undefined ? editData.requestType : request.requestType) : request.requestType, 
+                                                {
+                                                    label: gt('fields.requestType') || "Identification Card",
+                                                    value: isEditMode ? (editData.requestType !== undefined ? editData.requestType : request.requestType) : request.requestType,
                                                     fieldName: 'requestType',
                                                     fieldType: 'select',
                                                     options: [
                                                         { value: '', label: gt('placeholders.select') || 'Select' },
-                                                        { value: 'RESIDENT', label: 'RESIDENT' },
-                                                        { value: 'NOT_RESIDENT', label: 'NOT_RESIDENT' },
+                                                        { value: 'Resident', label: 'Resident' },
+                                                        { value: 'Not Resident', label: 'Not Resident' },
                                                     ]
                                                 },
-                                                { 
-                                                    label: gt('fields.nationality') || "Nationality", 
-                                                    value: isEditMode ? (editData.nationality !== undefined ? editData.nationality : request.nationality) : request.nationality, 
+                                                {
+                                                    label: gt('fields.nationality') || "Nationality",
+                                                    value: isEditMode ? (editData.nationality !== undefined ? editData.nationality : request.nationality) : request.nationality,
                                                     fieldName: 'nationality',
                                                     fieldType: 'select',
                                                     options: [
@@ -819,9 +818,9 @@ export default function RequestDetailsPage() {
                                                         { value: 'OTHER', label: gt('options.other') || 'Other' }
                                                     ]
                                                 },
-                                                { 
-                                                    label: gt('fields.identification') || "Identification", 
-                                                    value: isEditMode ? (editData.identification !== undefined ? editData.identification : request.identification) : request.identification, 
+                                                {
+                                                    label: gt('fields.identification') || "Identification",
+                                                    value: isEditMode ? (editData.identification !== undefined ? editData.identification : request.identification) : request.identification,
                                                     fieldName: 'identification',
                                                     fieldType: 'select',
                                                     options: [
@@ -830,23 +829,23 @@ export default function RequestDetailsPage() {
                                                         { value: 'PASSPORT', label: gt('options.passport') || 'Passport' }
                                                     ]
                                                 },
-                                                { 
-                                                    label: gt('fields.organization') || "Organization Host", 
-                                                    value: request.organization 
+                                                {
+                                                    label: gt('fields.organization') || "Organization Host",
+                                                    value: request.organization
                                                 },
-                                                { 
-                                                    label: gt('fields.passStartingDate') || "Pass Starting Date", 
-                                                    value: isEditMode ? (editData.dateOfVisit !== undefined ? editData.dateOfVisit : request.dateOfVisit) : new Date(request.dateOfVisit).toLocaleDateString(), 
+                                                {
+                                                    label: gt('fields.passStartingDate') || "Pass Starting Date",
+                                                    value: isEditMode ? (editData.dateOfVisit !== undefined ? editData.dateOfVisit : request.dateOfVisit) : new Date(request.dateOfVisit).toLocaleDateString(),
                                                     fieldName: 'dateOfVisit',
                                                     fieldType: 'date'
                                                 },
-                                                { 
-                                                    label: gt('fields.visitduration') || "Visit Duration", 
-                                                    value: isEditMode 
-                                                        ? (editData.visitduration !== undefined ? editData.visitduration : request.visitduration || '') 
+                                                {
+                                                    label: gt('fields.visitduration') || "Visit Duration",
+                                                    value: isEditMode
+                                                        ? (editData.visitduration !== undefined ? editData.visitduration : request.visitduration || '')
                                                         : (request.visitduration === '1_DAY' ? gt('options.oneDay') || '1 Day' :
-                                                           request.visitduration === '1_WEEK' ? gt('options.oneWeek') || '1 Week' :
-                                                           request.visitduration === '1_MONTH' ? gt('options.oneMonth') || '1 Month' : request.visitduration || '-'), 
+                                                            request.visitduration === '1_WEEK' ? gt('options.oneWeek') || '1 Week' :
+                                                                request.visitduration === '1_MONTH' ? gt('options.oneMonth') || '1 Month' : request.visitduration || '-'),
                                                     fieldName: 'visitduration',
                                                     fieldType: 'select',
                                                     options: [
@@ -856,9 +855,9 @@ export default function RequestDetailsPage() {
                                                         { value: '1_MONTH', label: gt('options.oneMonth') || '1 Month' }
                                                     ]
                                                 },
-                                                { 
-                                                    label: gt('fields.passFor') || "Beneficiary of the permit", 
-                                                    value: isEditMode ? (editData.passFor !== undefined ? (editData.passFor || 'VISITOR') : (request.passFor || 'VISITOR')) : (request.passFor === 'VISITOR' ? gt('options.VISITOR') || 'Visitor' : request.passFor === 'SUB_CONTRACTOR' ? gt('options.SUB_CONTRACTOR') || 'Sub contractor' : request.passFor === 'SERVICE_PROVIDER' ? gt('options.SERVICE_PROVIDER') || 'Service provider' : request.passFor || 'Visitor'), 
+                                                {
+                                                    label: gt('fields.passFor') || "Beneficiary of the permit",
+                                                    value: isEditMode ? (editData.passFor !== undefined ? (editData.passFor || 'VISITOR') : (request.passFor || 'VISITOR')) : (request.passFor === 'VISITOR' ? gt('options.VISITOR') || 'Visitor' : request.passFor === 'SUB_CONTRACTOR' ? gt('options.SUB_CONTRACTOR') || 'Sub contractor' : request.passFor === 'SERVICE_PROVIDER' ? gt('options.SERVICE_PROVIDER') || 'Service provider' : request.passFor || 'Visitor'),
                                                     fieldName: 'passFor',
                                                     fieldType: 'select',
                                                     options: [
@@ -868,9 +867,9 @@ export default function RequestDetailsPage() {
                                                         { value: 'SERVICE_PROVIDER', label: gt('options.SERVICE_PROVIDER') || 'Service provider' },
                                                     ]
                                                 },
-                                                { 
-                                                    label: gt('fields.purposeOfVisit') || "Purpose of visit", 
-                                                    value: isEditMode ? (editData.purposeOfVisit !== undefined ? editData.purposeOfVisit : request.purposeOfVisit) : request.purposeOfVisit, 
+                                                {
+                                                    label: gt('fields.purposeOfVisit') || "Purpose of visit",
+                                                    value: isEditMode ? (editData.purposeOfVisit !== undefined ? editData.purposeOfVisit : request.purposeOfVisit) : request.purposeOfVisit,
                                                     fieldName: 'purposeOfVisit',
                                                     fieldType: 'textarea'
                                                 },
@@ -891,25 +890,25 @@ export default function RequestDetailsPage() {
                                                 }
                                             }}
                                             data={[
-                                                { 
-                                                    label: gt('fields.fullNameEn') || "Holder Name(En)", 
-                                                    value: isEditMode ? (editData.applicantNameEn !== undefined ? editData.applicantNameEn : request.applicantNameEn) : request.applicantNameEn, 
-                                                    fieldName: 'applicantNameEn' 
+                                                {
+                                                    label: gt('fields.fullNameEn') || "Holder Name(En)",
+                                                    value: isEditMode ? (editData.applicantNameEn !== undefined ? editData.applicantNameEn : request.applicantNameEn) : request.applicantNameEn,
+                                                    fieldName: 'applicantNameEn'
                                                 },
-                                                { 
-                                                    label: gt('fields.fullNameAr') || "Holder Name(Ar)", 
-                                                    value: isEditMode ? (editData.applicantNameAr !== undefined ? editData.applicantNameAr : request.applicantNameAr) : request.applicantNameAr, 
-                                                    fieldName: 'applicantNameAr' 
+                                                {
+                                                    label: gt('fields.fullNameAr') || "Holder Name(Ar)",
+                                                    value: isEditMode ? (editData.applicantNameAr !== undefined ? editData.applicantNameAr : request.applicantNameAr) : request.applicantNameAr,
+                                                    fieldName: 'applicantNameAr'
                                                 },
-                                            
-                                                { 
-                                                    label: gt('fields.email') || "Email", 
-                                                    value: isEditMode ? (editData.applicantEmail !== undefined ? editData.applicantEmail : request.applicantEmail) : request.applicantEmail, 
-                                                    fieldName: 'applicantEmail' 
+
+                                                {
+                                                    label: gt('fields.email') || "Email",
+                                                    value: isEditMode ? (editData.applicantEmail !== undefined ? editData.applicantEmail : request.applicantEmail) : request.applicantEmail,
+                                                    fieldName: 'applicantEmail'
                                                 },
-                                                { 
-                                                    label: gt('fields.gender') || "Gender", 
-                                                    value: isEditMode ? (editData.gender !== undefined ? editData.gender : request.gender) : (request.gender === 'MALE' ? gt('options.male') || 'Male' : request.gender === 'FEMALE' ? gt('options.female') || 'Female' : request.gender), 
+                                                {
+                                                    label: gt('fields.gender') || "Gender",
+                                                    value: isEditMode ? (editData.gender !== undefined ? editData.gender : request.gender) : (request.gender === 'MALE' ? gt('options.male') || 'Male' : request.gender === 'FEMALE' ? gt('options.female') || 'Female' : request.gender),
                                                     fieldName: 'gender',
                                                     fieldType: 'select',
                                                     options: [
@@ -918,9 +917,9 @@ export default function RequestDetailsPage() {
                                                         { value: 'FEMALE', label: gt('options.female') || 'Female' }
                                                     ]
                                                 },
-                                                { 
-                                                    label: gt('fields.profession') || "Profession", 
-                                                    value: isEditMode ? (editData.profession !== undefined ? editData.profession : request.profession) : request.profession, 
+                                                {
+                                                    label: gt('fields.profession') || "Profession",
+                                                    value: isEditMode ? (editData.profession !== undefined ? editData.profession : request.profession) : request.profession,
                                                     fieldName: 'profession',
                                                     fieldType: 'select',
                                                     options: [
@@ -934,16 +933,16 @@ export default function RequestDetailsPage() {
                                                         { value: 'OTHER', label: gt('options.other') || 'Other' }
                                                     ]
                                                 },
-                                                { 
-                                                    label: gt('fields.otherProfessions') || "Other Professions", 
-                                                    value: isEditMode ? (editData.otherProfessions !== undefined ? editData.otherProfessions : request.otherProfessions || '') : (request.otherProfessions || '-'), 
-                                                    fieldName: 'otherProfessions' 
+                                                {
+                                                    label: gt('fields.otherProfessions') || "Other Professions",
+                                                    value: isEditMode ? (editData.otherProfessions !== undefined ? editData.otherProfessions : request.otherProfessions || '') : (request.otherProfessions || '-'),
+                                                    fieldName: 'otherProfessions'
                                                 },
-                                                
-                                                { 
-                                                    label: gt('fields.idPassportNumber') || "ID Or Passport Number", 
-                                                    value: isEditMode ? (editData.passportIdNumber !== undefined ? editData.passportIdNumber : request.passportIdNumber) : request.passportIdNumber, 
-                                                    fieldName: 'passportIdNumber' 
+
+                                                {
+                                                    label: gt('fields.idPassportNumber') || "ID Or Passport Number",
+                                                    value: isEditMode ? (editData.passportIdNumber !== undefined ? editData.passportIdNumber : request.passportIdNumber) : request.passportIdNumber,
+                                                    fieldName: 'passportIdNumber'
                                                 },
                                             ]}
                                         />
@@ -1015,7 +1014,7 @@ export default function RequestDetailsPage() {
                                                     }}
                                                 />
                                             ))}
-                                        
+
                                         {/* Add empty slots for other documents if they don't exist */}
                                         {isEditMode && request.uploads.filter(u => u.fileType.startsWith('OTHER')).length === 0 && (
                                             <>
@@ -1092,8 +1091,8 @@ export default function RequestDetailsPage() {
                                         onClick={() => {
                                             // Update editData with rejection reason and close modal
                                             // Status will be saved when user clicks "Save Changes"
-                                            setEditData(prev => ({ 
-                                                ...prev, 
+                                            setEditData(prev => ({
+                                                ...prev,
                                                 status: 'REJECTED',
                                                 rejectionReason: rejectionReason.trim()
                                             }));
@@ -1113,11 +1112,11 @@ export default function RequestDetailsPage() {
 
                 {/* Image Modal */}
                 {imageModal.isOpen && imageModal.imageUrl && (
-                    <div 
+                    <div
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
                         onClick={() => setImageModal({ isOpen: false, imageUrl: null, title: '' })}
                     >
-                        <div 
+                        <div
                             className="relative w-[80vw] h-[80vh] max-w-[90vw] max-h-[90vh] bg-white rounded-lg overflow-hidden shadow-2xl"
                             onClick={(e) => e.stopPropagation()}
                         >

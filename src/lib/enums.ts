@@ -13,8 +13,8 @@ export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 // Identification Card Enum
 export const RequestType = {
-  'RESIDENT': 'RESIDENT',
-  'NOT_RESIDENT': 'NOT_RESIDENT',
+  'Resident': 'Resident',
+  'Not Resident': 'Not Resident',
 } as const;
 
 export type RequestType = typeof RequestType[keyof typeof RequestType];

@@ -346,8 +346,8 @@
             "permissionDenied": "ليس لديك صلاحية لعرض لوحة التحكم.",
             "contactAdmin": "يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.",
             "types": {
-                "RESIDENT": "مقيم",
-                "NOT_RESIDENT": "غير مقيم"
+                "Resident": "مقيم",
+                "Not Resident": "غير مقيم"
             },
             "status": {
                 "PENDING": "قيد الانتظار",

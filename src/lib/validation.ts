@@ -44,7 +44,7 @@ export function validateFileType(filename: string, allowedTypes: string[]): bool
 
 // Identification Card validation
 export function validateRequestType(type: string): boolean {
-  const validTypes = ['RESIDENT', 'NOT_RESIDENT'];
+  const validTypes = ['Resident', 'Not Resident'];
   return validTypes.includes(type);
 }
 
@@ -112,7 +112,7 @@ export function validateVisitorRequest(data: VisitorRequestData): ValidationResu
 
   // Identification Card validation
   if (!data.requestType || !validateRequestType(data.requestType)) {
-    errors.push('Valid Identification Card is required (RESIDENT, NOT_RESIDENT)');
+    errors.push('Valid Identification Card is required (Resident, Not Resident)');
   }
 
   // Image validation

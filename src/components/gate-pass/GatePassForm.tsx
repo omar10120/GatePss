@@ -257,7 +257,7 @@ export const GatePassForm: React.FC = () => {
 
         // Identification Card validation (Resident, Not Resident)
         const requestType = formData.get('requestType') as string;
-        const validRequestTypes = ['RESIDENT', 'NOT_RESIDENT'];
+        const validRequestTypes = ['Resident', 'Not Resident not'];
         if (!requestType || !validRequestTypes.includes(requestType)) {
             newFieldErrors['requestType'] = getBilingualNested(['errors', 'validRequestTypeRequired']);
             isValid = false;

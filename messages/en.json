@@ -342,8 +342,6 @@
             "permissionDenied": "You do not have permission to view the dashboard.",
             "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
             "types": {
-                "RESIDENT": "Resident",
-                "NOT_RESIDENT": "Not Resident",
                 "Resident": "Resident",
                 "Not Resident": "Not Resident"
             },
