@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
         const applicantNameEn = formData.get('applicantName') as string | null;
         const applicantNameAr = formData.get('fullNameAr') as string;
         const applicantEmail = formData.get('applicantEmail') as string;
-        
         const gender = formData.get('gender') as string;
         const profession = formData.get('profession') as string;
         const otherProfessions = formData.get('otherProfessions') as string | null;
@@ -35,7 +34,7 @@ export async function POST(request: NextRequest) {
         // Validate required fields using BRD requirements
         const errors: string[] = [];
 
-        
+
 
         if (!applicantNameAr || applicantNameAr.trim().length < 2) {
             errors.push('Applicant name (Arabic) is required (minimum 2 characters)');
@@ -45,7 +44,7 @@ export async function POST(request: NextRequest) {
             errors.push('Valid email address is required');
         }
 
-      
+
 
         if (!gender || !['MALE', 'FEMALE'].includes(gender)) {
             errors.push('Gender is required (MALE or FEMALE)');
@@ -94,7 +93,7 @@ export async function POST(request: NextRequest) {
             // Validate passEndDate: must be at least 4 months after dateOfVisit
             if (passEndDate) {
                 const endDate = new Date(passEndDate);
-                
+
                 // Check if passEndDate is a valid date
                 if (isNaN(endDate.getTime())) {
                     errors.push('Pass End Date must be a valid date');
@@ -344,7 +343,7 @@ export async function POST(request: NextRequest) {
                 // If error is about unknown column or unknown argument (passTypeId or visitduration don't exist in schema/client), remove them and retry
                 const errorMessage = createError?.message || '';
                 const errorCode = createError?.code || '';
-                
+
                 console.error('Prisma create error:', {
                     message: errorMessage,
                     code: errorCode,
@@ -353,16 +352,16 @@ export async function POST(request: NextRequest) {
                     hasPhotoPath: 'photoPath' in requestData,
                     photoPathValue: requestData.photoPath,
                 });
-                
+
                 // Only catch specific Prisma validation errors about unknown fields
-                const isUnknownFieldError = 
-                    (errorMessage.includes('Unknown argument') && 
-                     (errorMessage.includes('passTypeId') || errorMessage.includes('visitduration'))) ||
-                    (errorMessage.includes('Unknown column') && 
-                     (errorMessage.includes('pass_type_id') || errorMessage.includes('validity_period'))) ||
-                    errorCode === 'P2010' || 
+                const isUnknownFieldError =
+                    (errorMessage.includes('Unknown argument') &&
+                        (errorMessage.includes('passTypeId') || errorMessage.includes('visitduration'))) ||
+                    (errorMessage.includes('Unknown column') &&
+                        (errorMessage.includes('pass_type_id') || errorMessage.includes('validity_period'))) ||
+                    errorCode === 'P2010' ||
                     errorCode === 'P2001';
-                
+
                 if (isUnknownFieldError) {
                     console.warn('Columns passTypeId/visitduration may not exist in database or Prisma client not regenerated, retrying without them...');
                     console.warn('Original requestData had passTypeId:', requestData.passTypeId, 'visitduration:', requestData.visitduration, 'photoPath:', requestData.photoPath);

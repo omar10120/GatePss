@@ -109,7 +109,7 @@ export async function POST(
 
             const apiResponse = await soharPortClient.send.createGatePass({
                 requestNumber: gateRequest.requestNumber,
-                applicantName: gateRequest.applicantNameEn,
+                applicantName: gateRequest.applicantNameEn || "",
                 applicantEmail: gateRequest.applicantEmail,
                 passportIdNumber: gateRequest.passportIdNumber,
                 purposeOfVisit: gateRequest.purposeOfVisit,
@@ -191,11 +191,11 @@ export async function POST(
                 // Send approval email to applicant (async)
                 sendRequestApprovalEmail(
                     gateRequest.applicantEmail,
-                    gateRequest.applicantNameEn,
+                    gateRequest.applicantNameEn || "",
                     gateRequest.requestNumber,
                     formatDate(gateRequest.dateOfVisit)
                 ).catch(err => console.error('Failed to send approval email:', err));
-    
+
                 return NextResponse.json({
                     success: true,
                     message: 'Request approved successfully',
@@ -218,7 +218,7 @@ export async function POST(
                     user.userId,
                     `رفض صُحار الطلب رقم ${gateRequest.requestNumber}`
                 ).catch(err => console.error('Failed to create Sohar Port notifications:', err));
-                
+
                 return NextResponse.json({
                     success: false,
                     message: 'Request not approved',
