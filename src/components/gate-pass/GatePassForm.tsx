@@ -181,7 +181,8 @@ export const GatePassForm: React.FC = () => {
             { name: 'organization', value: formData.get('organization') },
             // visitduration is now conditionally validated later
             { name: 'passFor', value: formData.get('passFor') },
-            { name: 'applicantName', value: formData.get('applicantName') },
+            // applicantName is now conditionally validated
+            ...(!isPermanent(selectedPassType) ? [{ name: 'applicantName', value: formData.get('applicantName') }] : []),
             { name: 'fullNameAr', value: formData.get('fullNameAr') },
             { name: 'applicantEmail', value: formData.get('applicantEmail') },
             { name: 'gender', value: formData.get('gender') },
@@ -257,7 +258,7 @@ export const GatePassForm: React.FC = () => {
 
         // Identification Card validation (Resident, Not Resident)
         const requestType = formData.get('requestType') as string;
-        const validRequestTypes = ['Resident', 'Not Resident not'];
+        const validRequestTypes = ['Resident', 'Not Resident'];
         if (!requestType || !validRequestTypes.includes(requestType)) {
             newFieldErrors['requestType'] = getBilingualNested(['errors', 'validRequestTypeRequired']);
             isValid = false;
@@ -768,7 +769,7 @@ export const GatePassForm: React.FC = () => {
                     </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 text-gray-900">
-                    {isPermanent(selectedPassType) && (
+                    {!isPermanent(selectedPassType) && (
                         <Input
                             name="applicantName"
                             label={getBilingualNested(['fields', 'fullNameEn'])}

@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
         const formData = await request.formData();
 
         // Extract form fields
-        const applicantNameEn = formData.get('applicantName') as string | null;
-        const applicantNameAr = formData.get('fullNameAr') as string;
+        const applicantNameEn = (formData.get('applicantName') as string) || '';
+        const applicantNameAr = (formData.get('fullNameAr') as string) || '';
         const applicantEmail = formData.get('applicantEmail') as string;
         const gender = formData.get('gender') as string;
         const profession = formData.get('profession') as string;
@@ -35,6 +35,10 @@ export async function POST(request: NextRequest) {
         const errors: string[] = [];
 
 
+
+        if (!passEndDate && (!applicantNameEn || applicantNameEn.trim().length < 2)) {
+            errors.push('Applicant name (English) is required (minimum 2 characters)');
+        }
 
         if (!applicantNameAr || applicantNameAr.trim().length < 2) {
             errors.push('Applicant name (Arabic) is required (minimum 2 characters)');
