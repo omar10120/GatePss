@@ -17,7 +17,7 @@ export default function LanguageSelector() {
         >
             {locale === 'en' ?
                 <Image
-                    src="/images/svg/om.svg`"
+                    src="/images/svg/om.svg"
                     alt="Logo"
                     width={18}
                     height={18}
