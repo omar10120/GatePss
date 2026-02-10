@@ -335,7 +335,7 @@ export default function AdminRequestsPage() {
                                                                         </button>
                                                                     </td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#747474] text-[12px] sm:text-[14px] text-center">{request.id}</td>
-                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#222222] font-bold text-[12px] sm:text-[14px] text-center">{request.applicantNameEn}</td>
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#222222] font-bold text-[12px] sm:text-[14px] text-center">{request.applicantNameEn || request.applicantNameAr}</td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 relative overflow-visible text-center">
                                                                         <div className="flex justify-center">
                                                                             <StatusUpdate
