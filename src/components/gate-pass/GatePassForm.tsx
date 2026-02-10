@@ -562,12 +562,123 @@ export const GatePassForm: React.FC = () => {
                     />
                     <Select
                         name="nationality"
+                        
                         label={getBilingualNested(['fields', 'nationality'])}
                         error={fieldErrors.nationality}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
-                            { value: 'OMAN', label: getBilingualNested(['options', 'omani']) },
                             { value: 'OTHER', label: getBilingualNested(['options', 'other']) },
+                            
+                            { value: 'AFGHAN', label: getBilingualNested(['options', 'afghan']) },
+                            { value: 'ALBANIAN', label: getBilingualNested(['options', 'albanian']) },
+                            { value: 'ALGERIAN', label: getBilingualNested(['options', 'algerian']) },
+                            { value: 'AMERICAN', label: getBilingualNested(['options', 'american']) },
+                            { value: 'ANDORRAN', label: getBilingualNested(['options', 'andorran']) },
+                            { value: 'ANGOLAN', label: getBilingualNested(['options', 'angolan']) },
+                            { value: 'ARGENTINIAN', label: getBilingualNested(['options', 'argentinian']) },
+                            { value: 'ARMENIAN', label: getBilingualNested(['options', 'armenian']) },
+                            { value: 'AUSTRALIAN', label: getBilingualNested(['options', 'australian']) },
+                            { value: 'AUSTRIAN', label: getBilingualNested(['options', 'austrian']) },
+                          
+                            { value: 'AZERBAIJANI', label: getBilingualNested(['options', 'azerbaijani']) },
+                            { value: 'BAHRAINI', label: getBilingualNested(['options', 'bahraini']) },
+                            { value: 'BANGLADESHI', label: getBilingualNested(['options', 'bangladeshi']) },
+                            { value: 'BELGIAN', label: getBilingualNested(['options', 'belgian']) },
+                            { value: 'BOLIVIAN', label: getBilingualNested(['options', 'bolivian']) },
+                            { value: 'BRAZILIAN', label: getBilingualNested(['options', 'brazilian']) },
+                            { value: 'BRITISH', label: getBilingualNested(['options', 'british']) },
+                            { value: 'BULGARIAN', label: getBilingualNested(['options', 'bulgarian']) },
+                          
+                            { value: 'CANADIAN', label: getBilingualNested(['options', 'canadian']) },
+                            { value: 'CHILEAN', label: getBilingualNested(['options', 'chilean']) },
+                            { value: 'CHINESE', label: getBilingualNested(['options', 'chinese']) },
+                            { value: 'COLOMBIAN', label: getBilingualNested(['options', 'colombian']) },
+                            { value: 'CROATIAN', label: getBilingualNested(['options', 'croatian']) },
+                            { value: 'CUBAN', label: getBilingualNested(['options', 'cuban']) },
+                            { value: 'CYPRIOT', label: getBilingualNested(['options', 'cypriot']) },
+                            { value: 'CZECH', label: getBilingualNested(['options', 'czech']) },
+                          
+                            { value: 'DANISH', label: getBilingualNested(['options', 'danish']) },
+                            { value: 'DOMINICAN', label: getBilingualNested(['options', 'dominican']) },
+                          
+                            { value: 'DUTCH', label: getBilingualNested(['options', 'dutch']) },
+                            { value: 'EGYPTIAN', label: getBilingualNested(['options', 'egyptian']) },
+                            { value: 'EMIRATI', label: getBilingualNested(['options', 'emirati']) },
+                            { value: 'ESTONIAN', label: getBilingualNested(['options', 'estonian']) },
+                            { value: 'ETHIOPIAN', label: getBilingualNested(['options', 'ethiopian']) },
+                          
+                            { value: 'FILIPINO', label: getBilingualNested(['options', 'filipino']) },
+                            { value: 'FINNISH', label: getBilingualNested(['options', 'finnish']) },
+                            { value: 'FRENCH', label: getBilingualNested(['options', 'french']) },
+                          
+                            { value: 'GEORGIAN', label: getBilingualNested(['options', 'georgian']) },
+                            { value: 'GERMAN', label: getBilingualNested(['options', 'german']) },
+                            { value: 'GHANAIAN', label: getBilingualNested(['options', 'ghanaian']) },
+                            { value: 'GREEK', label: getBilingualNested(['options', 'greek']) },
+                          
+                            { value: 'HUNGARIAN', label: getBilingualNested(['options', 'hungarian']) },
+                          
+                            { value: 'INDIAN', label: getBilingualNested(['options', 'indian']) },
+                            { value: 'INDONESIAN', label: getBilingualNested(['options', 'indonesian']) },
+                            { value: 'IRANIAN', label: getBilingualNested(['options', 'iranian']) },
+                            { value: 'IRAQI', label: getBilingualNested(['options', 'iraqi']) },
+                            { value: 'IRISH', label: getBilingualNested(['options', 'irish']) },
+                            { value: 'ITALIAN', label: getBilingualNested(['options', 'italian']) },
+                          
+                            { value: 'JAPANESE', label: getBilingualNested(['options', 'japanese']) },
+                            { value: 'JORDANIAN', label: getBilingualNested(['options', 'jordanian']) },
+                          
+                            { value: 'KENYAN', label: getBilingualNested(['options', 'kenyan']) },
+                            { value: 'KUWAITI', label: getBilingualNested(['options', 'kuwaiti']) },
+                          
+                            { value: 'LEBANESE', label: getBilingualNested(['options', 'lebanese']) },
+                            { value: 'LIBYAN', label: getBilingualNested(['options', 'libyan']) },
+                            { value: 'LITHUANIAN', label: getBilingualNested(['options', 'lithuanian']) },
+                          
+                            { value: 'MALAYSIAN', label: getBilingualNested(['options', 'malaysian']) },
+                            { value: 'MEXICAN', label: getBilingualNested(['options', 'mexican']) },
+                            { value: 'MOROCCAN', label: getBilingualNested(['options', 'moroccan']) },
+                          
+                            { value: 'NEPALese', label: getBilingualNested(['options', 'nepalese']) },
+                            { value: 'NIGERIAN', label: getBilingualNested(['options', 'nigerian']) },
+                            { value: 'NORWEGIAN', label: getBilingualNested(['options', 'norwegian']) },
+                          
+                            { value: 'OMANI', label: getBilingualNested(['options', 'omani']) },
+                          
+                            { value: 'PAKISTANI', label: getBilingualNested(['options', 'pakistani']) },
+                            { value: 'PALESTINIAN', label: getBilingualNested(['options', 'palestinian']) },
+                            { value: 'PERUVIAN', label: getBilingualNested(['options', 'peruvian']) },
+                            { value: 'POLISH', label: getBilingualNested(['options', 'polish']) },
+                            { value: 'PORTUGUESE', label: getBilingualNested(['options', 'portuguese']) },
+                          
+                            { value: 'QATARI', label: getBilingualNested(['options', 'qatari']) },
+                          
+                            { value: 'ROMANIAN', label: getBilingualNested(['options', 'romanian']) },
+                            { value: 'RUSSIAN', label: getBilingualNested(['options', 'russian']) },
+                          
+                            { value: 'SAUDI', label: getBilingualNested(['options', 'saudi']) },
+                            { value: 'SENEGALese', label: getBilingualNested(['options', 'senegalese']) },
+                            { value: 'SERBIAN', label: getBilingualNested(['options', 'serbian']) },
+                            { value: 'SINGAPOREAN', label: getBilingualNested(['options', 'singaporean']) },
+                            { value: 'SOUTH_AFRICAN', label: getBilingualNested(['options', 'south_african']) },
+                            { value: 'SPANISH', label: getBilingualNested(['options', 'spanish']) },
+                            { value: 'SUDANESE', label: getBilingualNested(['options', 'sudanese']) },
+                            { value: 'SWEDISH', label: getBilingualNested(['options', 'swedish']) },
+                            { value: 'SWISS', label: getBilingualNested(['options', 'swiss']) },
+                            { value: 'SYRIAN', label: getBilingualNested(['options', 'syrian']) },
+                          
+                            { value: 'TUNISIAN', label: getBilingualNested(['options', 'tunisian']) },
+                            { value: 'TURKISH', label: getBilingualNested(['options', 'turkish']) },
+                          
+                            { value: 'UKRAINIAN', label: getBilingualNested(['options', 'ukrainian']) },
+                          
+                            { value: 'VENEZUELAN', label: getBilingualNested(['options', 'venezuelan']) },
+                            { value: 'VIETNAMESE', label: getBilingualNested(['options', 'vietnamese']) },
+                          
+                            { value: 'YEMENI', label: getBilingualNested(['options', 'yemeni']) },
+                          
+                            
+
                         ]}
                         required
                     />
