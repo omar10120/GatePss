@@ -569,9 +569,9 @@ export default function RequestDetailsPage() {
             });
 
             if (status === 'APPROVED') {
-                setSuccess('Request approved successfully!');
+                setSuccess(t('requestapproved'));
             } else if (status === 'REJECTED') {
-                setSuccess('Request rejected successfully!');
+                setSuccess(t('requestrejected'));
                 setShowRejectModal(false);
                 setRejectionReason('');
             }
@@ -807,8 +807,8 @@ export default function RequestDetailsPage() {
                                                     fieldType: 'select',
                                                     options: [
                                                         { value: '', label: gt('placeholders.select') || 'Select' },
-                                                        { value: 'Resident', label: 'Resident' },
-                                                        { value: 'Not Resident', label: 'Not Resident' },
+                                                        { value: 'Resident', label: dt('types.Resident') },
+                                                        { value: 'Not Resident', label: dt('types.Not Resident') },
                                                     ]
                                                 },
                                                 {

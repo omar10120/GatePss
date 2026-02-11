@@ -443,6 +443,8 @@
             "title": "Dashboard",
             "welcome": "Welcome back",
             "logout": "Logout",
+            "visitorsapplicationscard": "Visitors Applications Card",
+            "Totalapplications": "Total applications",
             "summary": "Summary",
             "total": "Total Requests",
             "approved": "Approved",
@@ -563,6 +565,8 @@
             "passPermitInfo": "Pass Permit Info",
             "passHolderInfo": "Pass Holder Info",
             "permitsQrCode": "Permits(QR Code)",
+            "requestapproved": "Request Approved Successfully!",
+            "requestrejected": "Request Rejected Successfully!",
             "fields": {
                 "passType": "Pass Type",
                 "nationality": "Nationality",

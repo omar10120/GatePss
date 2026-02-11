@@ -1,6 +1,8 @@
 'use client';
 
+
 import React from 'react';
+import { useTranslations } from 'use-intl';
 
 interface VisitorsApplicationsCardProps {
     data: {
@@ -16,6 +18,7 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
     const approved = data?.approved || 0;
     const rejected = data?.rejected || 0;
 
+    const t = useTranslations('Admin.dashboard');
     // SVG Donut Chart Calculation
     const size = 200;
     const strokeWidth = 40;
@@ -31,8 +34,8 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
 
     return (
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col items-center h-full">
-            <h3 className="text-xl font-bold text-gray-900 mb-1">Visitors Applications Card</h3>
-            <p className="text-[#8E8E93] text-sm mb-8">{total} Total applications</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-1">{t('visitorsapplicationscard')}</h3>
+            <p className="text-[#8E8E93] text-sm mb-8">{total} {t('Totalapplications')}</p>
 
             <div className="relative mb-8">
                 <svg width={size} height={size} className="transform -rotate-90">
@@ -78,12 +81,12 @@ export const VisitorsApplicationsCard: React.FC<VisitorsApplicationsCardProps> =
                 <div className="flex items-center gap-2">
                     <div className="w-1.5 h-4 bg-[#00B09C] rounded-full"></div>
                     <span className="text-sm font-bold text-gray-900">{approved}</span>
-                    <span className="text-xs text-[#8E8E93]">Approved</span>
+                    <span className="text-xs text-[#8E8E93]">{t('approved')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-1.5 h-4 bg-[#FF5757] rounded-full"></div>
                     <span className="text-sm font-bold text-gray-900">{rejected}</span>
-                    <span className="text-xs text-[#8E8E93]">Rejected</span>
+                    <span className="text-xs text-[#8E8E93]">{t('rejected')}</span>
                 </div>
             </div>
         </div>

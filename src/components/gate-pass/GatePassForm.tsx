@@ -6,7 +6,7 @@ import { Textarea } from '../ui/Textarea';
 import { FileUpload } from '@/components/ui/FileUpload';
 import enMessages from '../../../messages/en.json';
 import arMessages from '../../../messages/ar.json';
-import { useLocale } from 'next-intl';
+
 
 import { SuccessfullDialog } from '../ui/SuccessfullDialog';
 
@@ -22,7 +22,7 @@ interface PassType {
 }
 
 export const GatePassForm: React.FC = () => {
-    const locale = useLocale();
+
     const [passTypes, setPassTypes] = useState<PassType[]>([]);
     const [loadingPassTypes, setLoadingPassTypes] = useState(true);
     // const [state , action ] = useActionState();

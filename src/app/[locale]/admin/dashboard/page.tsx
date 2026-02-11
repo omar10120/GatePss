@@ -43,6 +43,7 @@ export default function AdminDashboardPage() {
     const router = useRouter();
     const pathname = usePathname();
     const locale = useLocale() as 'en' | 'ar';
+
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<DashboardData | null>(null);
     const [user, setUser] = useState<any>(null);
@@ -72,7 +73,7 @@ export default function AdminDashboardPage() {
         setPermissionDenied(false);
         try {
             const result = await apiFetch<{ summary: DashboardData['summary']; byType: DashboardData['byType']; recentRequests: DashboardData['recentRequests'] }>('/api/admin/dashboard/summary');
-            
+
             setData({
                 summary: result.summary,
                 byType: result.byType,
@@ -139,8 +140,8 @@ export default function AdminDashboardPage() {
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                                 {/* Latest Requests */}
                                 <div className="lg:col-span-2">
-                                    <LatestRequests 
-                                        requests={data?.recentRequests} 
+                                    <LatestRequests
+                                        requests={data?.recentRequests}
                                         user={user}
                                     />
                                 </div>
