@@ -955,9 +955,19 @@ export default function RequestDetailsPage() {
                                                     fieldType: 'select',
                                                     options: [
                                                         { value: '', label: gt('placeholders.selectDate') || 'Select Date' },
+
                                                         { value: '1_DAY', label: gt('options.oneDay') || '1 Day' },
-                                                        { value: '1_WEEK', label: gt('options.oneWeek') || '1 Week' },
-                                                        { value: '1_MONTH', label: gt('options.oneMonth') || '1 Month' }
+                                                        { value: '2_DAY', label: gt('options.twoDay') || '2 Days' },
+                                                        { value: '3_DAY', label: gt('options.threeDay') || '3 Days' },
+                                                        { value: '4_DAY', label: gt('options.fourDay') || '4 Days' },
+                                                        { value: '5_DAY', label: gt('options.fiveDay') || '5 Days' },
+                                                        { value: '10_DAY', label: gt('options.tenDay') || '10 Days' },
+
+                                                        { value: '1_MONTH', label: gt('options.oneMonth') || '1 Month' },
+                                                        { value: '2_MONTH', label: gt('options.twoMonth') || '2 Months' },
+                                                        { value: '3_MONTH', label: gt('options.threeMonth') || '3 Months' },
+
+
                                                     ]
                                                 },
                                                 {
