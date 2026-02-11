@@ -497,6 +497,7 @@
         },
         "requests": {
             "title": "Gate Pass Requests",
+            "Loadingrequests": "Loading requests...",
             "searchPlaceholder": "Search By Name, Email, ID Number",
             "filterBy": "Filter By",
             "date": "Date",
