@@ -952,11 +952,16 @@ export const GatePassForm: React.FC = () => {
                         error={fieldErrors.profession}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
-                            { value: 'ENGINEER', label: getBilingualNested(['options', 'engineer']) },
-                            { value: 'VISITOR', label: getBilingualNested(['options', 'visitor']) },
-                            { value: 'TECHNICAL', label: getBilingualNested(['options', 'technical']) },
-                            { value: 'MANAGER', label: getBilingualNested(['options', 'manager']) },
+                            { value: 'DRIVER', label: getBilingualNested(['options', 'driver']) },
+                            { value: 'PRO', label: getBilingualNested(['options', 'pro']) },
                             { value: 'ADMINISTRATOR', label: getBilingualNested(['options', 'administrator']) },
+                            { value: 'FINANCIAL', label: getBilingualNested(['options', 'financial']) },
+                            { value: 'TECHNICAL', label: getBilingualNested(['options', 'technical']) },
+                            { value: 'HR', label: getBilingualNested(['options', 'hr']) },
+                            { value: 'MARINE', label: getBilingualNested(['options', 'marine']) },
+                            { value: 'SECURITY', label: getBilingualNested(['options', 'security']) },
+                            { value: 'MARKETING', label: getBilingualNested(['options', 'marketing']) },
+                            { value: 'PROCURMENT', label: getBilingualNested(['options', 'procurement']) },
                             { value: 'OTHER', label: getBilingualNested(['options', 'other']) },
                         ]}
                         required

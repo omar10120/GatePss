@@ -973,7 +973,16 @@ export default function RequestDetailsPage() {
                                                         { value: 'TECHNICAL', label: gt('options.technical') || 'Technical' },
                                                         { value: 'MANAGER', label: gt('options.manager') || 'Manager' },
                                                         { value: 'ADMINISTRATOR', label: gt('options.administrator') || 'Administrator' },
+                                                        { value: 'DRIVER', label: gt('options.driver') || 'Driver' },
+                                                        { value: 'PRO', label: gt('options.pro') || 'Pro' },
+                                                        { value: 'FINANCIAL', label: gt('options.financial') || 'Financial' },
+                                                        { value: 'HR', label: gt('options.hr') || 'HR' },
+                                                        { value: 'MARINE', label: gt('options.marine') || 'Marine' },
+                                                        { value: 'SECURITY', label: gt('options.security') || 'Security' },
+                                                        { value: 'MARKETING', label: gt('options.marketing') || 'Marketing' },
+                                                        { value: 'PROCURMENT', label: gt('options.procurement') || 'Procurement' },
                                                         { value: 'OTHER', label: gt('options.other') || 'Other' }
+
                                                     ]
                                                 },
                                                 {
