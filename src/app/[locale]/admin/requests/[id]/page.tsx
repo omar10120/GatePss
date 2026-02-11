@@ -813,52 +813,114 @@ export default function RequestDetailsPage() {
                                                     fieldName: 'nationality',
                                                     fieldType: 'select',
                                                     options: [
-                                                        { value: '', label: gt('placeholders.select') || 'Select' },
-                                                        { value: 'OMAN', label: gt('options.omani') || 'Omani' },
-                                                        { value: 'OTHER', label: gt('options.other') || 'Other' },
                                                         { value: 'AFGHAN', label: gt('options.afghan') || 'Afghan' },
                                                         { value: 'ALBANIAN', label: gt('options.albanian') || 'Albanian' },
                                                         { value: 'ALGERIAN', label: gt('options.algerian') || 'Algerian' },
                                                         { value: 'AMERICAN', label: gt('options.american') || 'American' },
                                                         { value: 'ANDORRAN', label: gt('options.andorran') || 'Andorran' },
                                                         { value: 'ANGOLAN', label: gt('options.angolan') || 'Angolan' },
-                                                        { value: 'ANTIGUAN', label: gt('options.antiguan') || 'Antiguan' },
                                                         { value: 'ARGENTINIAN', label: gt('options.argentinian') || 'Argentinian' },
                                                         { value: 'ARMENIAN', label: gt('options.armenian') || 'Armenian' },
                                                         { value: 'AUSTRALIAN', label: gt('options.australian') || 'Australian' },
-                                                        { value: 'AZERBAIJANIAN', label: gt('options.azerbaijani') || 'Azerbaijani' },
-                                                        { value: 'BAHAMIAN', label: gt('options.bahamian') || 'Bahamian' },
+                                                        { value: 'AUSTRIAN', label: gt('options.austrian') || 'Austrian' },
+
+                                                        { value: 'AZERBAIJANI', label: gt('options.azerbaijani') || 'Azerbaijani' },
                                                         { value: 'BAHRAINI', label: gt('options.bahraini') || 'Bahraini' },
                                                         { value: 'BANGLADESHI', label: gt('options.bangladeshi') || 'Bangladeshi' },
-                                                        { value: 'BELARUSIAN', label: gt('options.belarusian') || 'Belarusian' },
                                                         { value: 'BELGIAN', label: gt('options.belgian') || 'Belgian' },
-                                                        { value: 'BELIZEAN', label: gt('options.belizean') || 'Belizean' },
-                                                        { value: 'BENINESE', label: gt('options.beninese') || 'Beninese' },
                                                         { value: 'BOLIVIAN', label: gt('options.bolivian') || 'Bolivian' },
-                                                        { value: 'BOSNIAN', label: gt('options.bosnian') || 'Bosnian' },
-                                                        { value: 'BOTSWANAN', label: gt('options.botswanan') || 'Botswanan' },
                                                         { value: 'BRAZILIAN', label: gt('options.brazilian') || 'Brazilian' },
                                                         { value: 'BRITISH', label: gt('options.british') || 'British' },
                                                         { value: 'BULGARIAN', label: gt('options.bulgarian') || 'Bulgarian' },
-                                                        { value: 'BURKINABE', label: gt('options.burkinabe') || 'Burkinabe' },
-                                                        { value: 'BURMESE', label: gt('options.burmese') || 'Burmese' },
-                                                        { value: 'BURUNDIAN', label: gt('options.burundian') || 'Burundian' },
-                                                        { value: 'CAMBODIAN', label: gt('options.cambodian') || 'Cambodian' },
-                                                        { value: 'CAMEROONIAN', label: gt('options.cameroonian') || 'Cameroonian' },
+
                                                         { value: 'CANADIAN', label: gt('options.canadian') || 'Canadian' },
-                                                        { value: 'CAPE_VERDEAN', label: gt('options.cape_verdean') || 'Cape Verdean' },
-                                                        { value: 'CENTRAL_AFRICAN', label: gt('options.central_african') || 'Central African' },
-                                                        { value: 'CHADIAN', label: gt('options.chadian') || 'Chadian' },
                                                         { value: 'CHILEAN', label: gt('options.chilean') || 'Chilean' },
                                                         { value: 'CHINESE', label: gt('options.chinese') || 'Chinese' },
                                                         { value: 'COLOMBIAN', label: gt('options.colombian') || 'Colombian' },
-                                                        { value: 'COMORAN', label: gt('options.comoran') || 'Comoran' },
-                                                        { value: 'CONGOLESE', label: gt('options.congolese') || 'Congolese' },
-                                                        { value: 'COOK_ISLANDER', label: gt('options.cook_islander') || 'Cook Islander' },
-                                                        { value: 'COSTA_RICAN', label: gt('options.costa_rican') || 'Costa Rican' },
                                                         { value: 'CROATIAN', label: gt('options.croatian') || 'Croatian' },
                                                         { value: 'CUBAN', label: gt('options.cuban') || 'Cuban' },
-                                                        { value: 'CYPRIOT', label: gt('options.cyprotic') || 'Cyprotic' },
+                                                        { value: 'CYPRIOT', label: gt('options.cypriot') || 'Cypriot' },
+                                                        { value: 'CZECH', label: gt('options.czech') || 'Czech' },
+
+                                                        { value: 'DANISH', label: gt('options.danish') || 'Danish' },
+                                                        { value: 'DOMINICAN', label: gt('options.dominican') || 'Dominican' },
+                                                        { value: 'DUTCH', label: gt('options.dutch') || 'Dutch' },
+
+                                                        { value: 'EGYPTIAN', label: gt('options.egyptian') || 'Egyptian' },
+                                                        { value: 'EMIRATI', label: gt('options.emirati') || 'Emirati' },
+                                                        { value: 'ESTONIAN', label: gt('options.estonian') || 'Estonian' },
+                                                        { value: 'ETHIOPIAN', label: gt('options.ethiopian') || 'Ethiopian' },
+
+                                                        { value: 'FILIPINO', label: gt('options.filipino') || 'Filipino' },
+                                                        { value: 'FINNISH', label: gt('options.finnish') || 'Finnish' },
+                                                        { value: 'FRENCH', label: gt('options.french') || 'French' },
+
+                                                        { value: 'GEORGIAN', label: gt('options.georgian') || 'Georgian' },
+                                                        { value: 'GERMAN', label: gt('options.german') || 'German' },
+                                                        { value: 'GHANAIAN', label: gt('options.ghanaian') || 'Ghanaian' },
+                                                        { value: 'GREEK', label: gt('options.greek') || 'Greek' },
+
+                                                        { value: 'HUNGARIAN', label: gt('options.hungarian') || 'Hungarian' },
+
+                                                        { value: 'INDIAN', label: gt('options.indian') || 'Indian' },
+                                                        { value: 'INDONESIAN', label: gt('options.indonesian') || 'Indonesian' },
+                                                        { value: 'IRANIAN', label: gt('options.iranian') || 'Iranian' },
+                                                        { value: 'IRAQI', label: gt('options.iraqi') || 'Iraqi' },
+                                                        { value: 'IRISH', label: gt('options.irish') || 'Irish' },
+                                                        { value: 'ITALIAN', label: gt('options.italian') || 'Italian' },
+
+                                                        { value: 'JAPANESE', label: gt('options.japanese') || 'Japanese' },
+                                                        { value: 'JORDANIAN', label: gt('options.jordanian') || 'Jordanian' },
+
+                                                        { value: 'KENYAN', label: gt('options.kenyan') || 'Kenyan' },
+                                                        { value: 'KUWAITI', label: gt('options.kuwaiti') || 'Kuwaiti' },
+
+                                                        { value: 'LEBANESE', label: gt('options.lebanese') || 'Lebanese' },
+                                                        { value: 'LIBYAN', label: gt('options.libyan') || 'Libyan' },
+                                                        { value: 'LITHUANIAN', label: gt('options.lithuanian') || 'Lithuanian' },
+
+                                                        { value: 'MALAYSIAN', label: gt('options.malaysian') || 'Malaysian' },
+                                                        { value: 'MEXICAN', label: gt('options.mexican') || 'Mexican' },
+                                                        { value: 'MOROCCAN', label: gt('options.moroccan') || 'Moroccan' },
+
+                                                        { value: 'NEPALESE', label: gt('options.nepalese') || 'Nepalese' },
+                                                        { value: 'NIGERIAN', label: gt('options.nigerian') || 'Nigerian' },
+                                                        { value: 'NORWEGIAN', label: gt('options.norwegian') || 'Norwegian' },
+
+                                                        { value: 'OMANI', label: gt('options.omani') || 'Omani' },
+
+                                                        { value: 'PAKISTANI', label: gt('options.pakistani') || 'Pakistani' },
+                                                        { value: 'PALESTINIAN', label: gt('options.palestinian') || 'Palestinian' },
+                                                        { value: 'PERUVIAN', label: gt('options.peruvian') || 'Peruvian' },
+                                                        { value: 'POLISH', label: gt('options.polish') || 'Polish' },
+                                                        { value: 'PORTUGUESE', label: gt('options.portuguese') || 'Portuguese' },
+
+                                                        { value: 'QATARI', label: gt('options.qatari') || 'Qatari' },
+
+                                                        { value: 'ROMANIAN', label: gt('options.romanian') || 'Romanian' },
+                                                        { value: 'RUSSIAN', label: gt('options.russian') || 'Russian' },
+
+                                                        { value: 'SAUDI', label: gt('options.saudi') || 'Saudi' },
+                                                        { value: 'SENEGALESE', label: gt('options.senegalese') || 'Senegalese' },
+                                                        { value: 'SERBIAN', label: gt('options.serbian') || 'Serbian' },
+                                                        { value: 'SINGAPOREAN', label: gt('options.singaporean') || 'Singaporean' },
+                                                        { value: 'SOUTH_AFRICAN', label: gt('options.south_african') || 'South African' },
+                                                        { value: 'SPANISH', label: gt('options.spanish') || 'Spanish' },
+                                                        { value: 'SUDANESE', label: gt('options.sudanese') || 'Sudanese' },
+                                                        { value: 'SWEDISH', label: gt('options.swedish') || 'Swedish' },
+                                                        { value: 'SWISS', label: gt('options.swiss') || 'Swiss' },
+                                                        { value: 'SYRIAN', label: gt('options.syrian') || 'Syrian' },
+
+                                                        { value: 'TUNISIAN', label: gt('options.tunisian') || 'Tunisian' },
+                                                        { value: 'TURKISH', label: gt('options.turkish') || 'Turkish' },
+
+                                                        { value: 'UKRAINIAN', label: gt('options.ukrainian') || 'Ukrainian' },
+
+                                                        { value: 'VENEZUELAN', label: gt('options.venezuelan') || 'Venezuelan' },
+                                                        { value: 'VIETNAMESE', label: gt('options.vietnamese') || 'Vietnamese' },
+
+                                                        { value: 'YEMENI', label: gt('options.yemeni') || 'Yemeni' },
+
                                                     ]
                                                 },
                                                 {
