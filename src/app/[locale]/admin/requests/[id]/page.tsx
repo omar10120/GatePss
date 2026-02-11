@@ -27,11 +27,13 @@ interface RequestDetails {
     passportIdImagePath: string | null;
     nationality: string;
     identification: string;
+
     organization: string;
     validFrom: string;
     validTo: string;
     purposeOfVisit: string;
     dateOfVisit: string;
+    passEndDate: string;
     requestType: string;
     passTypeId: number | null;
     status: string;
@@ -241,8 +243,8 @@ export default function RequestDetailsPage() {
             if (editData.profession && editData.profession !== request.profession) {
                 updatePayload.profession = editData.profession;
             }
-            if (editData.dateOfVisit) {
-                updatePayload.dateOfVisit = editData.dateOfVisit;
+            if (editData.passEndDate) {
+                updatePayload.passEndDate = editData.passEndDate;
             }
             if (editData.validFrom) {
                 updatePayload.validFrom = editData.validFrom;
@@ -262,7 +264,9 @@ export default function RequestDetailsPage() {
             if (editData.otherProfessions !== undefined && editData.otherProfessions !== request.otherProfessions) {
                 updatePayload.otherProfessions = editData.otherProfessions;
             }
-
+            if (editData.dateOfVisit !== undefined && editData.dateOfVisit !== request.dateOfVisit) {
+                updatePayload.dateOfVisit = editData.dateOfVisit;
+            }
 
             // Check if status is being changed
             const statusChanged = isEditMode && editData.status !== undefined && editData.status !== request.status;
@@ -945,6 +949,13 @@ export default function RequestDetailsPage() {
                                                     fieldType: 'date'
                                                 },
                                                 {
+
+                                                    label: gt('fields.passEndDate') || "Pass Ending Date",
+                                                    value: isEditMode ? (editData.passEndDate !== undefined ? editData.passEndDate : request.passEndDate) : new Date(request.passEndDate).toLocaleDateString(),
+                                                    fieldName: 'passEndDate',
+                                                    fieldType: 'date'
+                                                },
+                                                {
                                                     label: gt('fields.visitduration') || "Visit Duration",
                                                     value: isEditMode
                                                         ? (editData.visitduration !== undefined ? editData.visitduration : request.visitduration || '')
@@ -1092,6 +1103,7 @@ export default function RequestDetailsPage() {
                                                 }
                                             }}
                                         />
+
 
                                         {/* Photo */}
                                         <DocumentCard

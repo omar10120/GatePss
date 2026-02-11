@@ -573,6 +573,7 @@
                 "identification": "الهوية",
                 "passStartingDate": "تاريخ بدء التصريح",
                 "visitduration": "فترة الصلاحية",
+                "passEndDate": "تاريخ انتهاء التصريح",
                 "passFor": "المستفيد من التصريح",
                 "purposeOfVisit": "الغرض من الزيارة",
                 "organization": "المؤسسة المستضيفة",
