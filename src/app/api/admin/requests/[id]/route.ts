@@ -25,7 +25,7 @@ export async function GET(
             const gateRequest = await prisma.request.findUnique({
                 where: { id: requestId },
                 include: {
-                    approvedBy: {   
+                    approvedBy: {
                         select: {
                             id: true,
                             name: true,
@@ -101,11 +101,11 @@ export async function PUT(
             // Check if request is FormData (file upload) or JSON
             const contentType = req.headers.get('content-type') || '';
             let body: any;
-            
+
             if (contentType.includes('multipart/form-data')) {
                 const formData = await req.formData();
                 body = {};
-                
+
                 // Extract text fields
                 for (const [key, value] of formData.entries()) {
                     if (value instanceof File) {
@@ -209,7 +209,7 @@ export async function PUT(
             }
             if (body.visitduration) updateData.visitduration = typeof body.visitduration === 'string' ? body.visitduration.trim() : body.visitduration;
             if (body.otherProfessions !== undefined) updateData.otherProfessions = typeof body.otherProfessions === 'string' ? body.otherProfessions.trim() || null : body.otherProfessions;
-            
+
 
             // Handle file uploads
             try {
@@ -305,14 +305,14 @@ export async function PUT(
                 // If error is about unknown column or unknown argument (passTypeId or visitduration don't exist in schema/client), remove them and retry
                 const errorMessage = updateError?.message || '';
                 const errorCode = updateError?.code || '';
-                
-                if (errorMessage.includes('Unknown column') || 
+
+                if (errorMessage.includes('Unknown column') ||
                     errorMessage.includes('Unknown argument') ||
-                    errorMessage.includes('pass_type_id') || 
+                    errorMessage.includes('pass_type_id') ||
                     errorMessage.includes('passTypeId') ||
                     errorMessage.includes('validity_period') ||
                     errorMessage.includes('visitduration') ||
-                    errorCode === 'P2010' || 
+                    errorCode === 'P2010' ||
                     errorCode === 'P2001') {
                     console.warn('Columns passTypeId/visitduration may not exist in database or Prisma client not regenerated, retrying without them...');
                     const retryData = { ...updateData };

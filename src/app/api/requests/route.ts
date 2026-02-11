@@ -285,7 +285,7 @@ export async function POST(request: NextRequest) {
                 applicantNameEn: applicantNameEn?.trim() || null,
                 applicantNameAr: applicantNameAr.trim(),
                 applicantEmail: applicantEmail.toLowerCase().trim(),
-                applicantPhone: "+96892000000",
+                applicantPhone: "+96892104795",
                 gender: gender,
                 profession: profession.trim(),
                 passportIdNumber: passportIdNumber.toUpperCase().trim(),

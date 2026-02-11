@@ -26,7 +26,7 @@ export const GatePassForm: React.FC = () => {
     const [passTypes, setPassTypes] = useState<PassType[]>([]);
     const [loadingPassTypes, setLoadingPassTypes] = useState(true);
     // const [state , action ] = useActionState();
-
+    const applicantPhone = "+96892104795";
     // Fetch pass types from database
     useEffect(() => {
         const fetchPassTypes = async (retryCount = 0) => {
@@ -562,13 +562,13 @@ export const GatePassForm: React.FC = () => {
                     />
                     <Select
                         name="nationality"
-                        
+
                         label={getBilingualNested(['fields', 'nationality'])}
                         error={fieldErrors.nationality}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
                             { value: 'OTHER', label: getBilingualNested(['options', 'other']) },
-                            
+
                             { value: 'AFGHAN', label: getBilingualNested(['options', 'afghan']) },
                             { value: 'ALBANIAN', label: getBilingualNested(['options', 'albanian']) },
                             { value: 'ALGERIAN', label: getBilingualNested(['options', 'algerian']) },
@@ -579,7 +579,7 @@ export const GatePassForm: React.FC = () => {
                             { value: 'ARMENIAN', label: getBilingualNested(['options', 'armenian']) },
                             { value: 'AUSTRALIAN', label: getBilingualNested(['options', 'australian']) },
                             { value: 'AUSTRIAN', label: getBilingualNested(['options', 'austrian']) },
-                          
+
                             { value: 'AZERBAIJANI', label: getBilingualNested(['options', 'azerbaijani']) },
                             { value: 'BAHRAINI', label: getBilingualNested(['options', 'bahraini']) },
                             { value: 'BANGLADESHI', label: getBilingualNested(['options', 'bangladeshi']) },
@@ -588,7 +588,7 @@ export const GatePassForm: React.FC = () => {
                             { value: 'BRAZILIAN', label: getBilingualNested(['options', 'brazilian']) },
                             { value: 'BRITISH', label: getBilingualNested(['options', 'british']) },
                             { value: 'BULGARIAN', label: getBilingualNested(['options', 'bulgarian']) },
-                          
+
                             { value: 'CANADIAN', label: getBilingualNested(['options', 'canadian']) },
                             { value: 'CHILEAN', label: getBilingualNested(['options', 'chilean']) },
                             { value: 'CHINESE', label: getBilingualNested(['options', 'chinese']) },
@@ -597,65 +597,65 @@ export const GatePassForm: React.FC = () => {
                             { value: 'CUBAN', label: getBilingualNested(['options', 'cuban']) },
                             { value: 'CYPRIOT', label: getBilingualNested(['options', 'cypriot']) },
                             { value: 'CZECH', label: getBilingualNested(['options', 'czech']) },
-                          
+
                             { value: 'DANISH', label: getBilingualNested(['options', 'danish']) },
                             { value: 'DOMINICAN', label: getBilingualNested(['options', 'dominican']) },
-                          
+
                             { value: 'DUTCH', label: getBilingualNested(['options', 'dutch']) },
                             { value: 'EGYPTIAN', label: getBilingualNested(['options', 'egyptian']) },
                             { value: 'EMIRATI', label: getBilingualNested(['options', 'emirati']) },
                             { value: 'ESTONIAN', label: getBilingualNested(['options', 'estonian']) },
                             { value: 'ETHIOPIAN', label: getBilingualNested(['options', 'ethiopian']) },
-                          
+
                             { value: 'FILIPINO', label: getBilingualNested(['options', 'filipino']) },
                             { value: 'FINNISH', label: getBilingualNested(['options', 'finnish']) },
                             { value: 'FRENCH', label: getBilingualNested(['options', 'french']) },
-                          
+
                             { value: 'GEORGIAN', label: getBilingualNested(['options', 'georgian']) },
                             { value: 'GERMAN', label: getBilingualNested(['options', 'german']) },
                             { value: 'GHANAIAN', label: getBilingualNested(['options', 'ghanaian']) },
                             { value: 'GREEK', label: getBilingualNested(['options', 'greek']) },
-                          
+
                             { value: 'HUNGARIAN', label: getBilingualNested(['options', 'hungarian']) },
-                          
+
                             { value: 'INDIAN', label: getBilingualNested(['options', 'indian']) },
                             { value: 'INDONESIAN', label: getBilingualNested(['options', 'indonesian']) },
                             { value: 'IRANIAN', label: getBilingualNested(['options', 'iranian']) },
                             { value: 'IRAQI', label: getBilingualNested(['options', 'iraqi']) },
                             { value: 'IRISH', label: getBilingualNested(['options', 'irish']) },
                             { value: 'ITALIAN', label: getBilingualNested(['options', 'italian']) },
-                          
+
                             { value: 'JAPANESE', label: getBilingualNested(['options', 'japanese']) },
                             { value: 'JORDANIAN', label: getBilingualNested(['options', 'jordanian']) },
-                          
+
                             { value: 'KENYAN', label: getBilingualNested(['options', 'kenyan']) },
                             { value: 'KUWAITI', label: getBilingualNested(['options', 'kuwaiti']) },
-                          
+
                             { value: 'LEBANESE', label: getBilingualNested(['options', 'lebanese']) },
                             { value: 'LIBYAN', label: getBilingualNested(['options', 'libyan']) },
                             { value: 'LITHUANIAN', label: getBilingualNested(['options', 'lithuanian']) },
-                          
+
                             { value: 'MALAYSIAN', label: getBilingualNested(['options', 'malaysian']) },
                             { value: 'MEXICAN', label: getBilingualNested(['options', 'mexican']) },
                             { value: 'MOROCCAN', label: getBilingualNested(['options', 'moroccan']) },
-                          
+
                             { value: 'NEPALese', label: getBilingualNested(['options', 'nepalese']) },
                             { value: 'NIGERIAN', label: getBilingualNested(['options', 'nigerian']) },
                             { value: 'NORWEGIAN', label: getBilingualNested(['options', 'norwegian']) },
-                          
+
                             { value: 'OMANI', label: getBilingualNested(['options', 'omani']) },
-                          
+
                             { value: 'PAKISTANI', label: getBilingualNested(['options', 'pakistani']) },
                             { value: 'PALESTINIAN', label: getBilingualNested(['options', 'palestinian']) },
                             { value: 'PERUVIAN', label: getBilingualNested(['options', 'peruvian']) },
                             { value: 'POLISH', label: getBilingualNested(['options', 'polish']) },
                             { value: 'PORTUGUESE', label: getBilingualNested(['options', 'portuguese']) },
-                          
+
                             { value: 'QATARI', label: getBilingualNested(['options', 'qatari']) },
-                          
+
                             { value: 'ROMANIAN', label: getBilingualNested(['options', 'romanian']) },
                             { value: 'RUSSIAN', label: getBilingualNested(['options', 'russian']) },
-                          
+
                             { value: 'SAUDI', label: getBilingualNested(['options', 'saudi']) },
                             { value: 'SENEGALese', label: getBilingualNested(['options', 'senegalese']) },
                             { value: 'SERBIAN', label: getBilingualNested(['options', 'serbian']) },
@@ -666,18 +666,18 @@ export const GatePassForm: React.FC = () => {
                             { value: 'SWEDISH', label: getBilingualNested(['options', 'swedish']) },
                             { value: 'SWISS', label: getBilingualNested(['options', 'swiss']) },
                             { value: 'SYRIAN', label: getBilingualNested(['options', 'syrian']) },
-                          
+
                             { value: 'TUNISIAN', label: getBilingualNested(['options', 'tunisian']) },
                             { value: 'TURKISH', label: getBilingualNested(['options', 'turkish']) },
-                          
+
                             { value: 'UKRAINIAN', label: getBilingualNested(['options', 'ukrainian']) },
-                          
+
                             { value: 'VENEZUELAN', label: getBilingualNested(['options', 'venezuelan']) },
                             { value: 'VIETNAMESE', label: getBilingualNested(['options', 'vietnamese']) },
-                          
+
                             { value: 'YEMENI', label: getBilingualNested(['options', 'yemeni']) },
-                          
-                            
+
+
 
                         ]}
                         required
@@ -908,20 +908,20 @@ export const GatePassForm: React.FC = () => {
                             </svg>
                         }
                     />
-                    {/* <Input
+                    <Input
                         name="telephone"
                         label={getBilingualNested(['fields', 'telephone'])}
                         placeholder={getBilingualNested(['placeholders', 'telephoneHolder'])}
                         error={fieldErrors.telephone}
                         disabled
                         value={applicantPhone}
-                        
+
                         rightIcon={
                             <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                             </svg>
                         }
-                    /> */}
+                    />
                     <Input
                         name="applicantEmail"
                         type="email"
