@@ -30,6 +30,8 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [customStartDate, setCustomStartDate] = useState<string>('');
     const [customEndDate, setCustomEndDate] = useState<string>('');
+    const [pendingStartDate, setPendingStartDate] = useState<string>('');
+    const [pendingEndDate, setPendingEndDate] = useState<string>('');
     const datePickerRef = useRef<HTMLDivElement>(null);
     const { hasPermission } = usePermissions(user);
 
@@ -92,32 +94,47 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
         setFilter(f);
         setCustomStartDate('');
         setCustomEndDate('');
+        setPendingStartDate('');
+        setPendingEndDate('');
         setIsDatePickerOpen(false);
     };
 
     const handleCalendarClick = () => {
-        setIsDatePickerOpen(!isDatePickerOpen);
+        const newState = !isDatePickerOpen;
+        if (newState) {
+            // Sync pending states with committed states when opening
+            setPendingStartDate(customStartDate);
+            setPendingEndDate(customEndDate);
+        }
+        setIsDatePickerOpen(newState);
     };
 
     const handleCustomDateApply = () => {
-        if (customStartDate && customEndDate) {
-            const start = new Date(customStartDate);
-            const end = new Date(customEndDate);
+        if (pendingStartDate && pendingEndDate) {
+            let start = pendingStartDate;
+            let end = pendingEndDate;
             
-            if (start > end) {
+            if (new Date(start) > new Date(end)) {
                 // Swap dates if start is after end
-                setCustomStartDate(customEndDate);
-                setCustomEndDate(customStartDate);
-            } else {
-                setFilter('Custom');
-                setIsDatePickerOpen(false);
+                const temp = start;
+                start = end;
+                end = temp;
+                setPendingStartDate(start);
+                setPendingEndDate(end);
             }
+            
+            setCustomStartDate(start);
+            setCustomEndDate(end);
+            setFilter('Custom');
+            setIsDatePickerOpen(false);
         }
     };
 
     const handleClearCustomDate = () => {
         setCustomStartDate('');
         setCustomEndDate('');
+        setPendingStartDate('');
+        setPendingEndDate('');
         setFilter('Day');
         setIsDatePickerOpen(false);
     };
@@ -183,8 +200,8 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
                                             </label>
                                             <input
                                                 type="date"
-                                                value={customStartDate}
-                                                onChange={(e) => setCustomStartDate(e.target.value)}
+                                                value={pendingStartDate}
+                                                onChange={(e) => setPendingStartDate(e.target.value)}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 style={{ color: '#111827' }}
                                             />
@@ -196,9 +213,9 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
                                             </label>
                                             <input
                                                 type="date"
-                                                value={customEndDate}
-                                                onChange={(e) => setCustomEndDate(e.target.value)}
-                                                min={customStartDate || undefined}
+                                                value={pendingEndDate}
+                                                onChange={(e) => setPendingEndDate(e.target.value)}
+                                                min={pendingStartDate || undefined}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 style={{ color: '#111827' }}
                                             />
@@ -208,12 +225,12 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
                                     <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
                                         <button
                                             onClick={handleCustomDateApply}
-                                            disabled={!customStartDate || !customEndDate}
+                                            disabled={!pendingStartDate || !pendingEndDate}
                                             className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             Apply
                                         </button>
-                                        {(customStartDate || customEndDate || filter === 'Custom') && (
+                                        {(pendingStartDate || pendingEndDate || filter === 'Custom') && (
                                             <button
                                                 onClick={handleClearCustomDate}
                                                 className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
