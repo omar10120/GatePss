@@ -278,7 +278,9 @@
             "purposeOfVisitRequired": "الغرض من الزيارة مطلوب (10 أحرف على الأقل)",
             "validPassTypeRequired": "نوع تصريح صحيح مطلوب",
             "validRequestTypeRequired": "بطاقة تعريقية صحيح مطلوب (مقيم , غير مقيم)",
-            "invalidDate": "يرجى اختيار تاريخ صحيح (لا يمكن أن يكون في الماضي)"
+            "invalidDate": "يرجى اختيار تاريخ صحيح (لا يمكن أن يكون في الماضي)",
+            "passEndDateMin4Months": "تاريخ انتهاء التصريح يجب أن يكون بعد 4 أشهر على الأقل من تاريخ البدء",
+            "visitdurationRequired": "مدة الزيارة مطلوبة"
         },
         "options": {
             "visitorPass": "تصريح مقيم",
