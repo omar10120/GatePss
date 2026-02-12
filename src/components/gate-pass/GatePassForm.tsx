@@ -170,7 +170,7 @@ export const GatePassForm: React.FC = () => {
         return '';
     };
 
-    const validateForm = (formData: FormData): boolean => {
+    const validateForm = (formData: FormData): { isValid: boolean; errors: FieldErrors } => {
         const newFieldErrors: FieldErrors = {};
         let isValid = true;
 
@@ -216,13 +216,6 @@ export const GatePassForm: React.FC = () => {
 
             // 4-month rule for permanent passes and hide Full Name of Pass Holder(EN) / الاسم الكامل لحامل التصريح (EN)
             if (isPermanent(selectedPassType)) {
-                // Hide Full Name of Pass Holder(EN) / الاسم الكامل لحامل التصريح (EN)
-                setFieldErrors(prev => {
-                    const newErrors = { ...prev };
-                    delete newErrors.fullNameEn;
-
-                    return newErrors;
-                });
                 const passEndDateValue = formData.get('passEndDate') as string;
                 if (!passEndDateValue) {
                     newFieldErrors['passEndDate'] = `${getBilingualNested(['fields', 'passEndDate'])} ${getBilingualNested(['errors', 'required'])}`;
@@ -356,7 +349,7 @@ export const GatePassForm: React.FC = () => {
 
 
         setFieldErrors(newFieldErrors);
-        return isValid;
+        return { isValid, errors: newFieldErrors };
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -383,12 +376,13 @@ export const GatePassForm: React.FC = () => {
         formData.set('organization', fullOrganization);
 
         // Validate all fields
-        if (!validateForm(formData)) {
+        const validation = validateForm(formData);
+        if (!validation.isValid) {
             setError(getBilingualNested(['errors', 'fixErrors']));
             // Scroll to first error after state update
             setTimeout(() => {
-                // Get the first error field from the updated state
-                const errorFields = Object.keys(fieldErrors);
+                // Get the first error field from the returned validation errors
+                const errorFields = Object.keys(validation.errors);
                 if (errorFields.length > 0) {
                     const firstErrorField = errorFields[0];
                     // Try to find the input/select/file input
