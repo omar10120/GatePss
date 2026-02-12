@@ -247,7 +247,7 @@ export default function PermitsPage() {
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{permit.id}</td>
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{permit.externalReference || permit.requestNumber}</td>
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{formattedDate}</td>
-                                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{permit.applicantNameEn}</td>
+                                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{permit.applicantNameEn ? permit.applicantNameEn : permit.applicantNameAr}</td>
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{permit.applicantEmail}</td>
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{permit.profession}</td>
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{permit.requestType}</td>
