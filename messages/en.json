@@ -436,7 +436,7 @@
         "step3_title": "3. Receive Digital Permit",
         "step3_desc": "Approved applicants receive a QR-coded permit by email",
         "columns": {
-            "requestNumber": "Request Number "
+            "requestNumber": "Request Number. "
         }
     },
     "Admin": {
