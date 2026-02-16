@@ -8,9 +8,10 @@ import Header from '../components/Header';
 import { useTranslations, useLocale } from 'next-intl';
 import PassTypes from './components/PassTypes';
 import FAQ from './components/FAQ';
+import GeneralSettings from './components/GeneralSettings';
 import Image from 'next/image';
 
-type ViewMode = 'home' | 'passTypes' | 'faq';
+type ViewMode = 'home' | 'passTypes' | 'faq' | 'general';
 
 export default function SettingsPage() {
     const router = useRouter();
@@ -47,6 +48,9 @@ export default function SettingsPage() {
         }
         if (viewMode === 'faq') {
             return <FAQ />;
+        }
+        if (viewMode === 'general') {
+            return <GeneralSettings />;
         }
         return (
             <div className="space-y-4">
@@ -87,6 +91,29 @@ export default function SettingsPage() {
                         </div>
                         <span className="text-lg font-medium text-gray-900">{t('passTypes.title')}</span>
                     </div>
+                </div>
+
+                {/* General Settings Card */}
+                <div
+                    onClick={() => setViewMode('general')}
+                    className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow flex items-center justify-between"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+                            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3z" fill="#00B09C"/>
+                                <text x="12" y="16" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">S</text>
+                            </svg>
+                        </div>
+                        <span className="text-lg font-medium text-gray-900">{t('general.title')}</span>
+                    </div>
+                    <Image
+                        src="/images/svg/Edit 2.svg"
+                        alt="Edit"
+                        width={20}
+                        height={20}
+                        className="text-gray-400"
+                    />
                 </div>
             </div>
         );

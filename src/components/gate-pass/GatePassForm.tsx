@@ -25,8 +25,25 @@ export const GatePassForm: React.FC = () => {
 
     const [passTypes, setPassTypes] = useState<PassType[]>([]);
     const [loadingPassTypes, setLoadingPassTypes] = useState(true);
+    const [applicantPhone, setApplicantPhone] = useState("+96892104795"); // Default fallback
     // const [state , action ] = useActionState();
-    const applicantPhone = "+96892104795";
+
+    // Fetch settings
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const response = await fetch('/api/settings/applicant_phone');
+                if (response.ok) {
+                    const data = await response.json();
+                    setApplicantPhone(data.value);
+                }
+            } catch (error) {
+                console.error('Error fetching applicant phone:', error);
+            }
+        };
+        fetchSettings();
+    }, []);
+
     // Fetch pass types from database
     useEffect(() => {
         const fetchPassTypes = async (retryCount = 0) => {
@@ -1070,5 +1087,6 @@ export const GatePassForm: React.FC = () => {
         </form>
     );
 };
+ 
 
 

@@ -776,6 +776,14 @@
                 "updatedSuccessfully": "تم تحديث السؤال بنجاح",
                 "deletedSuccessfully": "تم حذف السؤال بنجاح",
                 "confirmDelete": "هل أنت متأكد من حذف هذا السؤال؟"
+            },
+            "general": {
+                "title": "الإعدادات العامة",
+                "applicantPhoneLabel": "رقم هاتف مقدم الطلب",
+                "applicantPhoneHelp": "سيتم عرض رقم الهاتف هذا في نموذج تصريح البوابة ليتمكن المتقدمون من التواصل.",
+                "save": "حفظ الإعدادات",
+                "saving": "جاري الحفظ...",
+                "savedSuccessfully": "تم حفظ الإعدادات بنجاح"
             }
         },
         "notifications": {
