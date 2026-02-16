@@ -441,6 +441,12 @@
     },
     "Admin": {
         "dashboard": {
+            "applyNow": "Apply Now",
+            "clear": "Clear",
+            "selectDateRange": "Select Date Range",
+            "startDate": "Start Date",
+            "endDate": "End Date",
+            "active": "Active",
             "profile": "Profile",
             "title": "Dashboard",
             "welcome": "Welcome back",
@@ -468,7 +474,10 @@
             "status": {
                 "PENDING": "Pending",
                 "APPROVED": "Approved",
-                "REJECTED": "Rejected"
+                "REJECTED": "Rejected",
+                "accept": "Accept",
+                "reject": "Reject",
+                "edit": "Edit"
             },
             "loading": "Loading dashboard...",
             "logoutConfirm": {
@@ -498,7 +507,8 @@
             "work": "Work"
         },
         "requests": {
-            "title": "Gate Pass Requests",
+            "applyNow": "Apply Now",
+            "title": "Requests",
             "Loadingrequests": "Loading requests...",
             "searchPlaceholder": "Search By Name, Email, ID Number",
             "filterBy": "Filter By",
@@ -539,10 +549,20 @@
             "applicantInfo": "Applicant Information",
             "name": "Name",
             "email": "Email",
+            "edit": "Edit",
             "passportId": "Passport/ID Number",
             "document": "Uploaded Document",
             "viewDocument": "View Document",
             "detailsTitle": "Request Details",
+            "editModeEnabled": "Edit mode enabled. Make your changes and click Save.",
+            "saveChanges": "Save Changes",
+            "saving": "Saving...",
+            "editModeDisabled": "This request cannot be edited because it is {status}. Only pending requests can be modified.",
+            "editModeDisabledStatus": {
+                "PENDING": "Pending",
+                "APPROVED": "Approved",
+                "REJECTED": "Rejected"
+            },
             "type": "Type",
             "visitDate": "Visit Date",
             "purpose": "Purpose of Visit",
@@ -562,6 +582,9 @@
             "submittedOn": "Submitted On",
             "lastUpdated": "Last Updated",
             "permissionDenied": "You do not have permission to view this request.",
+            "requestUpdatedSuccessfully": "Request updated successfully!",
+            "requestRejectedAndUpdatedSuccessfully": "Request rejected and updated successfully!",
+            "requestApprovedAndUpdatedSuccessfully": "Request approved and updated successfully!",
             "contactAdmin": "Please contact your administrator if you believe this is a mistake.",
             "notFound": "Request not found",
             "loading": "Loading request details...",
@@ -570,6 +593,7 @@
             "permitsQrCode": "Permits(QR Code)",
             "requestapproved": "Request Approved Successfully!",
             "requestrejected": "Request Rejected Successfully!",
+            "requestStatusUpdatedToPendingSuccessfully": "Request status updated to PENDING successfully!",
             "fields": {
                 "passType": "Pass Type",
                 "nationality": "Nationality",

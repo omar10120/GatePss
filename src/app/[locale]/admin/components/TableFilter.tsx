@@ -49,6 +49,7 @@ export const TableFilter: React.FC<TableFilterProps> = ({
     hideDate = false,
 }) => {
     const t = useTranslations('Admin.requests');
+    const dt = useTranslations('Admin.dashboard');
     const locale = useLocale();
     const isRtl = locale === 'ar';
 
@@ -67,11 +68,11 @@ export const TableFilter: React.FC<TableFilterProps> = ({
     );
     const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(selectedDate);
 
-    // Default status options if not provided
+    // Default status options if not provided - use translations
     const defaultStatusOptions = [
-        { value: "PENDING", label: "Pending" },
-        { value: "APPROVED", label: "Approved" },
-        { value: "REJECTED", label: "Rejected" },
+        { value: "PENDING", label: dt('status.PENDING') },
+        { value: "APPROVED", label: dt('status.APPROVED') },
+        { value: "REJECTED", label: dt('status.REJECTED') },
     ];
 
     const optionsToRender = statusOptions || defaultStatusOptions;
@@ -306,7 +307,7 @@ export const TableFilter: React.FC<TableFilterProps> = ({
                                 onClick={handleApplyDate}
                                 className="w-full mt-4 bg-[#00B09C] text-white font-bold py-3 px-4 rounded-lg hover:bg-[#008f7e] transition-colors"
                             >
-                                Apply Now
+                                {t('applyNow')}
                             </button>
                         </div>
                     )}

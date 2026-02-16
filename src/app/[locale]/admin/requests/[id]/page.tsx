@@ -367,7 +367,7 @@ export default function RequestDetailsPage() {
                         });
                     }
 
-                    setSuccess('Request approved and updated successfully!');
+                    setSuccess(t('requestApprovedAndUpdatedSuccessfully'));
                 } else if (newStatus === 'REJECTED') {
                     // First save other updates via PUT (if any)
                     if (hasOtherChanges) {
@@ -416,7 +416,7 @@ export default function RequestDetailsPage() {
                         body: JSON.stringify({ rejectionReason }),
                     });
 
-                    setSuccess('Request rejected and updated successfully!');
+                    setSuccess(t('requestRejectedAndUpdatedSuccessfully'));
                 } else if (newStatus === 'PENDING') {
                     // For PENDING, include status in PUT request
                     const pendingPayload = { ...otherUpdates, status: 'PENDING' };
@@ -458,7 +458,7 @@ export default function RequestDetailsPage() {
                         });
                     }
 
-                    setSuccess('Request updated successfully!');
+                    setSuccess(t('requestUpdatedSuccessfully'));
                 }
             } else {
                 // No status change, just save other updates via PUT
@@ -499,7 +499,7 @@ export default function RequestDetailsPage() {
                     });
                 }
 
-                setSuccess('Request updated successfully!');
+                setSuccess(t('requestUpdatedSuccessfully'));
             }
 
             setIsEditMode(false);
@@ -568,7 +568,7 @@ export default function RequestDetailsPage() {
                     method: 'PUT',
                     body: JSON.stringify(body),
                 });
-                setSuccess('Request status updated to PENDING successfully!');
+                setSuccess(t('requestStatusUpdatedToPendingSuccessfully'));
                 fetchRequestDetails(requestId, isEditMode);
                 setProcessing(false);
                 return;
@@ -698,9 +698,9 @@ export default function RequestDetailsPage() {
                                                     }}
                                                     className={`px-4 py-2 rounded-[8px] text-sm font-medium border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStatusColor(editData.status !== undefined ? editData.status : request.status)}`}
                                                 >
-                                                    <option value="PENDING">Pending</option>
-                                                    <option value="APPROVED">Approved</option>
-                                                    <option value="REJECTED">Rejected</option>
+                                                    <option value="PENDING">{dt('status.PENDING')}</option>
+                                                    <option value="APPROVED">{dt('status.APPROVED')}</option>
+                                                    <option value="REJECTED">{dt('status.REJECTED')}</option>
                                                 </select>
                                                 {(editData.status !== undefined ? editData.status : request.status) === 'REJECTED' && (
                                                     <div className="mt-2">
@@ -736,14 +736,14 @@ export default function RequestDetailsPage() {
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                                     </svg>
-                                                    Cancel
+                                                    {t('cancel')}
                                                 </>
                                             ) : (
                                                 <>
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
-                                                    Edit
+                                                    {t('edit')}
                                                 </>
                                             )}
                                         </button>
@@ -753,14 +753,15 @@ export default function RequestDetailsPage() {
                                 {isEditMode && request.status === 'PENDING' && (
                                     <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                                         <div className="flex justify-between items-center">
-                                            <p className="text-blue-800 text-sm font-medium">Edit mode enabled. Make your changes and click Save.</p>
+                                            <p className="text-blue-800 text-sm font-medium">{t('editModeEnabled')}</p>
                                             <button
                                                 onClick={handleSave}
                                                 disabled={processing}
                                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                                {processing ? 'Saving...' : 'Save Changes'}
+                                                {processing ? t('saving') : t('saveChanges')}
                                             </button>
+                                            {t('saveChanges')}
                                         </div>
                                     </div>
                                 )}
@@ -768,7 +769,7 @@ export default function RequestDetailsPage() {
                                 {request.status !== 'PENDING' && (
                                     <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                                         <p className="text-yellow-800 text-sm font-medium">
-                                            This request cannot be edited because it is {dt(`status.${request.status}`)}. Only pending requests can be modified.
+                                            {t('editModeDisabled', { status: t(`editModeDisabledStatus.${request.status}`) })}
                                         </p>
                                     </div>
                                 )}

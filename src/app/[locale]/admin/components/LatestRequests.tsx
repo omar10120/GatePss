@@ -181,7 +181,7 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
                             <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 p-4 z-50 min-w-[280px]">
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between mb-2">
-                                        <h4 className="text-sm font-semibold text-gray-900">Select Date Range</h4>
+                                        <h4 className="text-sm font-semibold text-gray-900">{t('selectDateRange')}</h4>
                                         <button
                                             onClick={() => setIsDatePickerOpen(false)}
                                             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -196,7 +196,7 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
                                     <div className="space-y-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                Start Date
+                                                {t('startDate')}
                                             </label>
                                             <input
                                                 type="date"
@@ -209,7 +209,7 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
                                         
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                End Date
+                                                {t('endDate')}
                                             </label>
                                             <input
                                                 type="date"
@@ -228,21 +228,21 @@ export const LatestRequests: React.FC<LatestRequestsProps> = ({ requests, user }
                                             disabled={!pendingStartDate || !pendingEndDate}
                                             className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            Apply
+                                            {t('applyNow')}
                                         </button>
                                         {(pendingStartDate || pendingEndDate || filter === 'Custom') && (
                                             <button
                                                 onClick={handleClearCustomDate}
                                                 className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
                                             >
-                                                Clear
+                                                {t('clear')}
                                             </button>
                                         )}
                                     </div>
                                     
                                     {filter === 'Custom' && customStartDate && customEndDate && (
                                         <div className="text-xs text-gray-500 pt-1 border-t border-gray-100">
-                                            <span className="font-medium">Active:</span> {new Date(customStartDate).toLocaleDateString()} - {new Date(customEndDate).toLocaleDateString()}
+                                            <span className="font-medium">{t('active')}:</span> {new Date(customStartDate).toLocaleDateString()} - {new Date(customEndDate).toLocaleDateString()}
                                         </div>
                                     )}
                                 </div>

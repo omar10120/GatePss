@@ -445,6 +445,12 @@
     },
     "Admin": {
         "dashboard": {
+            "applyNow": "تطبيق الآن",
+            "clear": "مسح",
+            "selectDateRange": "اختر نطاق التاريخ",
+            "startDate": "تاريخ البداية",
+            "endDate": "تاريخ النهاية",
+            "active": "نشط",
             "profile": "الملف الشخصي",
             "title": "لوحة التحكم",
             "welcome": "مرحباً بك",
@@ -472,7 +478,10 @@
             "status": {
                 "PENDING": "قيد الانتظار",
                 "APPROVED": "مقبول",
-                "REJECTED": "مرفوض"
+                "REJECTED": "مرفوض",
+                "accept": "قبول",
+                "reject": "رفض",
+                "edit": "تعديل"
             },
             "loading": "Loading dashboard...",
             "logoutConfirm": {
@@ -502,7 +511,8 @@
             "work": "عمل"
         },
         "requests": {
-            "title": "طلبات تصاريح البوابة",
+            "applyNow": "تطبيق الآن",
+            "title": "طلبات التصاريح",
             "Loadingrequests": "تحديث الطلبات...",
             "searchPlaceholder": "البحث بالاسم، البريد الإلكتروني، رقم الهوية",
             "filterBy": "تصفية حسب",
@@ -543,7 +553,21 @@
             "applicantInfo": "معلومات مقدم الطلب",
             "name": "الاسم",
             "email": "البريد الإلكتروني",
+            "edit": "تعديل",
+            "editModeEnabled": "تم تفعيل وضع التعديل. قم بإجراء التعديلات واضغط على حفظ.",
+            "saveChanges": "حفظ التعديلات",
+            "saving": "جاري الحفظ...",
             "passportId": "رقم جواز السفر/الهوية",
+            "editModeDisabled": "هذا الطلب لا يمكن تعديله لأنه {status}. يمكن تعديل الطلبات المعلقة فقط.",
+            "editModeDisabledStatus": {
+                "PENDING": "قيد الانتظار",
+                "APPROVED": "مقبول",
+                "REJECTED": "مرفوض"
+            },
+            "requestUpdatedSuccessfully": "تم تحديث الطلب بنجاح!",
+            "requestRejectedAndUpdatedSuccessfully": "تم رفض الطلب وتحديثه بنجاح!",
+            "requestApprovedAndUpdatedSuccessfully": "تم الموافقة على الطلب وتحديثه بنجاح!",
+            "requestStatusUpdatedToPendingSuccessfully": "تم تحديث حالة الطلب إلى قيد الانتظار بنجاح!",
             "document": "المستند المرفوع",
             "viewDocument": "عرض المستند",
             "detailsTitle": "تفاصيل الطلب",
