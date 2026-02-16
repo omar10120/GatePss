@@ -747,6 +747,14 @@
                 "updatedSuccessfully": "FAQ Updated Successfully",
                 "deletedSuccessfully": "FAQ Deleted Successfully",
                 "confirmDelete": "Are you sure you want to delete this FAQ?"
+            },
+            "general": {
+                "title": "General Settings",
+                "applicantPhoneLabel": "Applicant Phone Number",
+                "applicantPhoneHelp": "This phone number will be displayed on the Gate Pass form for applicants to contact.",
+                "save": "Save Settings",
+                "saving": "Saving...",
+                "savedSuccessfully": "Settings saved successfully"
             }
         },
         "notifications": {

@@ -164,3 +164,11 @@ model User {
 
   @@map("users")
 }
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String @db.Text
+
+  @@map("settings")
+}
