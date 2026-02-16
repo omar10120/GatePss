@@ -35,9 +35,31 @@ export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor, onReject
 
         if (isOpen && buttonRef.current) {
             const rect = buttonRef.current.getBoundingClientRect();
+            const dropdownWidth = 140; // min-w-[140px]
+            const dropdownHeight = 100; // approximate height
+            const spacing = 4;
+            
+            // Calculate position
+            let left = rect.left;
+            let top = rect.bottom + spacing;
+            
+            // Ensure dropdown stays within viewport bounds
+            if (left + dropdownWidth > window.innerWidth) {
+                left = window.innerWidth - dropdownWidth - 8; // 8px margin from edge
+            }
+            if (left < 0) {
+                left = 8; // 8px margin from left edge
+            }
+            
+            // If dropdown would go below viewport, show it above the button
+            if (top + dropdownHeight > window.innerHeight) {
+                top = rect.top - dropdownHeight - spacing;
+            }
+            
+            // For fixed positioning, use viewport coordinates directly (no scroll offset needed)
             setDropdownPosition({
-                top: rect.bottom + window.scrollY + 4,
-                left: rect.left + window.scrollX,
+                top: Math.max(8, top), // Ensure at least 8px from top
+                left: Math.max(8, left), // Ensure at least 8px from left
             });
         }
 
@@ -104,7 +126,7 @@ export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor, onReject
     const dropdownContent = isOpen && isMounted ? (
         <div
             ref={dropdownRef}
-            className="fixed w-36 bg-white rounded-lg shadow-lg border border-blue-200 overflow-hidden z-[9999]"
+            className="fixed min-w-[140px] bg-white rounded-lg shadow-lg border border-blue-200 overflow-hidden z-[9999]"
             style={{
                 top: `${dropdownPosition.top}px`,
                 left: `${dropdownPosition.left}px`,
