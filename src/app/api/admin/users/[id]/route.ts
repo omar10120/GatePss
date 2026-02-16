@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requirePermission } from '@/middleware/api';
+import { requirePermission, requireAuth } from '@/middleware/api';
+import { JWTPayload } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { hashPassword } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
@@ -11,7 +12,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    return requirePermission(request, 'MANAGE_USERS', async (req, user) => {
+    return requireAuth(request, async (req: NextRequest, authenticatedUser: JWTPayload) => {
         try {
             const userId = parseInt(id);
 
@@ -20,6 +21,36 @@ export async function GET(
                     { error: 'Invalid Request', message: 'Invalid user ID' },
                     { status: 400 }
                 );
+            }
+
+            // Allow access if:
+            // 1. User is fetching their own data
+            // 2. User is a SUPER_ADMIN
+            // 3. User has MANAGE_USERS permission
+            const isSelf = authenticatedUser.userId === userId;
+            const isSuperAdmin = authenticatedUser.role === 'SUPER_ADMIN';
+
+            if (!isSelf && !isSuperAdmin) {
+                // Fetch fresh permissions from database
+                const dbUser = await prisma.user.findUnique({
+                    where: { id: authenticatedUser.userId },
+                    include: {
+                        userPermissions: {
+                            include: {
+                                permission: true,
+                            },
+                        },
+                    },
+                });
+
+                const currentPermissions = dbUser?.userPermissions.map((p: any) => p.permission.key) || [];
+
+                if (!currentPermissions.includes('MANAGE_USERS')) {
+                    return NextResponse.json(
+                        { error: 'Forbidden', message: 'Insufficient permissions' },
+                        { status: 403 }
+                    );
+                }
             }
 
             const userData = await prisma.user.findUnique({
@@ -73,13 +104,12 @@ export async function GET(
     });
 }
 
-// PUT /api/admin/users/[id] - Update user
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    return requirePermission(request, 'MANAGE_USERS', async (req, user) => {
+    return requireAuth(request, async (req: NextRequest, authenticatedUser: JWTPayload) => {
         try {
             const userId = parseInt(id);
 
@@ -90,8 +120,47 @@ export async function PUT(
                 );
             }
 
+            const isSelf = authenticatedUser.userId === userId;
+            const isSuperAdmin = authenticatedUser.role === 'SUPER_ADMIN';
+
+            // Check if user has permission to update this user
+            if (!isSelf && !isSuperAdmin) {
+                const dbUser = await prisma.user.findUnique({
+                    where: { id: authenticatedUser.userId },
+                    include: {
+                        userPermissions: {
+                            include: {
+                                permission: true,
+                            },
+                        },
+                    },
+                });
+
+                const currentPermissions = dbUser?.userPermissions.map((p: any) => p.permission.key) || [];
+
+                if (!currentPermissions.includes('MANAGE_USERS')) {
+                    return NextResponse.json(
+                        { error: 'Forbidden', message: 'Insufficient permissions' },
+                        { status: 403 }
+                    );
+                }
+            }
+
             const body = await req.json();
             const { name, email, phoneNumber, password, role, isActive, permissionIds } = body;
+
+            // Block self-permission/role/status editing
+            if (isSelf) {
+                if (role || typeof isActive === 'boolean' || permissionIds) {
+                    return NextResponse.json(
+                        { 
+                            error: 'Forbidden', 
+                            message: 'You cannot modify your own permissions, role, or active status' 
+                        },
+                        { status: 403 }
+                    );
+                }
+            }
 
             // Get existing user
             const existingUser = await prisma.user.findUnique({
@@ -105,13 +174,9 @@ export async function PUT(
                 );
             }
 
-            // Prevent modifying own account
-            if (userId === user.userId) {
-                return NextResponse.json(
-                    { error: 'Invalid Operation', message: 'Cannot modify your own account' },
-                    { status: 400 }
-                );
-            }
+            // Prevent modifying own account ONLY if it's not a self-update
+            // (The existing code blocked any self-modification, even name/email)
+            // if (userId === user.userId) { ... } -> Removed this check since we now allow self-update of basic fields
 
             // Build update data
             const updateData: any = {};
@@ -128,10 +193,10 @@ export async function PUT(
             // Validate permissions if provided
             if (permissionIds && Array.isArray(permissionIds) && permissionIds.length > 0) {
                 // If not SUPER_ADMIN, verify that user can assign these permissions
-                if (user.role !== 'SUPER_ADMIN') {
+                if (authenticatedUser.role !== 'SUPER_ADMIN') {
                     // Get current user's permissions from database
                     const dbUser = await prisma.user.findUnique({
-                        where: { id: user.userId },
+                        where: { id: authenticatedUser.userId },
                         include: {
                             userPermissions: {
                                 include: {
@@ -218,16 +283,15 @@ export async function PUT(
                 };
             });
 
-            // Log the update
             await prisma.activityLog.create({
                 data: {
-                    userId: user.userId,
+                    userId: authenticatedUser.userId,
                     actionType: ActionType.USER_MANAGEMENT,
                     actionPerformed: `Updated user: ${existingUser.email}`,
                     affectedEntityType: 'USER',
                     affectedEntityId: userId,
                     details: JSON.stringify({
-                        updatedBy: user.email,
+                        updatedBy: authenticatedUser.email,
                         updatedFields: Object.keys(updateData),
                         permissionsUpdated: !!permissionIds,
                     }),
