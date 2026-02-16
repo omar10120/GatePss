@@ -119,6 +119,17 @@ export default function RequestDetailsPage() {
         return user.permissions?.includes(permissionKey) || false;
     };
 
+    // Helper function to check if pass type is permanent
+    const isPermanent = (passTypeId: number | null) => {
+        if (!passTypeId) return false;
+        const passType = passTypes.find(pt => pt.id === passTypeId);
+        if (!passType) return false;
+        const nameEn = passType.name_en.toLowerCase();
+        const nameAr = passType.name_ar;
+        return nameEn.includes('permanent') || nameAr.includes('دائم');
+    };
+
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
@@ -948,14 +959,15 @@ export default function RequestDetailsPage() {
                                                     fieldName: 'dateOfVisit',
                                                     fieldType: 'date'
                                                 },
-                                                {
-
+                                                // Show Pass End Date only for Permanent passes
+                                                ...(isPermanent(isEditMode ? (editData.passTypeId !== undefined ? editData.passTypeId : request.passTypeId) : request.passTypeId) ? [{
                                                     label: gt('fields.passEndDate') || "Pass Ending Date",
                                                     value: isEditMode ? (editData.passEndDate !== undefined ? editData.passEndDate : request.passEndDate) : new Date(request.passEndDate).toLocaleDateString(),
                                                     fieldName: 'passEndDate',
-                                                    fieldType: 'date'
-                                                },
-                                                {
+                                                    fieldType: 'date' as const
+                                                }] : []),
+                                                // Show Visit Duration only for Temporary passes
+                                                ...(!isPermanent(isEditMode ? (editData.passTypeId !== undefined ? editData.passTypeId : request.passTypeId) : request.passTypeId) ? [{
                                                     label: gt('fields.visitduration') || "Visit Duration",
                                                     value: isEditMode
                                                         ? (editData.visitduration !== undefined ? editData.visitduration : request.visitduration || '')
@@ -963,7 +975,7 @@ export default function RequestDetailsPage() {
                                                             request.visitduration === '1_WEEK' ? gt('options.oneWeek') || '1 Week' :
                                                                 request.visitduration === '1_MONTH' ? gt('options.oneMonth') || '1 Month' : request.visitduration || '-'),
                                                     fieldName: 'visitduration',
-                                                    fieldType: 'select',
+                                                    fieldType: 'select' as const,
                                                     options: [
                                                         { value: '', label: gt('placeholders.selectDate') || 'Select Date' },
 
@@ -980,7 +992,7 @@ export default function RequestDetailsPage() {
 
 
                                                     ]
-                                                },
+                                                }] : []),
                                                 {
                                                     label: gt('fields.passFor') || "Beneficiary of the permit",
                                                     value: isEditMode ? (editData.passFor !== undefined ? (editData.passFor || 'VISITOR') : (request.passFor || 'VISITOR')) : (request.passFor === 'VISITOR' ? gt('options.VISITOR') || 'Visitor' : request.passFor === 'SUB_CONTRACTOR' ? gt('options.SUB_CONTRACTOR') || 'Sub contractor' : request.passFor === 'SERVICE_PROVIDER' ? gt('options.SERVICE_PROVIDER') || 'Service provider' : request.passFor || 'Visitor'),
@@ -1015,17 +1027,21 @@ export default function RequestDetailsPage() {
                                                     setEditData(prev => ({ ...prev, [fieldName]: value }));
                                                 }
                                             }}
+
                                             data={[
-                                                {
-                                                    label: gt('fields.fullNameEn') || "Holder Name(En)",
-                                                    value: isEditMode ? (editData.applicantNameEn !== undefined ? editData.applicantNameEn : request.applicantNameEn) : request.applicantNameEn,
-                                                    fieldName: 'applicantNameEn'
-                                                },
                                                 {
                                                     label: gt('fields.fullNameAr') || "Holder Name(Ar)",
                                                     value: isEditMode ? (editData.applicantNameAr !== undefined ? editData.applicantNameAr : request.applicantNameAr) : request.applicantNameAr,
                                                     fieldName: 'applicantNameAr'
                                                 },
+                                                // Show Full Name (AR) only for Temporary passes
+                                                ...(!isPermanent(isEditMode ? (editData.passTypeId !== undefined ? editData.passTypeId : request.passTypeId) : request.passTypeId) ? [{
+                                                    
+
+                                                    label: gt('fields.fullNameEn') || "Holder Name(En)",
+                                                    value: isEditMode ? (editData.applicantNameEn !== undefined ? editData.applicantNameEn : request.applicantNameEn) : request.applicantNameEn,
+                                                    fieldName: 'applicantNameEn'
+                                                }] : []),
 
                                                 {
                                                     label: gt('fields.email') || "Email",
