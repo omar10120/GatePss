@@ -231,7 +231,7 @@
             "requestType": "Identification Card",
             "nationality": "Nationality",
             "identification": "Identification",
-            "organization": "Organization \\ Host Organization",
+            "organization": "Organization \\ Host Organization.",
             "passStartingDate": "Pass Starting Date.",
             "visitduration": "Visit Duration",
             "passEndDate": "Pass End Date",
