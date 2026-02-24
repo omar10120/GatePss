@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
             const dateFilter = searchParams.get('date'); // Frontend sends: today, yesterday, this_week, this_month
             const dateFrom = searchParams.get('dateFrom');
             const dateTo = searchParams.get('dateTo');
+            const entityType = searchParams.get('entityType');
             const search = searchParams.get('search');
             const page = parseInt(searchParams.get('page') || '1');
             const limit = parseInt(searchParams.get('limit') || '20');
@@ -32,6 +33,10 @@ export async function GET(request: NextRequest) {
 
             if (passFor) {
                 where.passFor = passFor;
+            }
+
+            if (entityType) {
+                where.entityType = entityType;
             }
 
             // Handle date filter from frontend

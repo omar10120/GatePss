@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `requests` ADD COLUMN `entity_type` VARCHAR(191) NOT NULL DEFAULT 'port';

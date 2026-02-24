@@ -104,6 +104,7 @@ model Request {
   passFor                      String?  @map("pass_for")
   passTypeId                   Int?     @map("pass_type_id")
   visitduration               String?  @map("validity_period")
+  entityType                   String   @default("port") @map("entity_type")
 
   approvedBy User?    @relation("ApprovedBy", fields: [approvedById], references: [id])
   uploads    Upload[]

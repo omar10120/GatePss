@@ -30,13 +30,19 @@ export async function POST(request: NextRequest) {
         const passEndDate = formData.get('passEndDate') as string | null;
         const passFor = formData.get('passFor') as string | null;
         const passTypeId = formData.get('passTypeId') as string | null;
+        const entityType = (formData.get('entityType') as string) || 'port';
 
         // Validate required fields using BRD requirements
         const errors: string[] = [];
 
 
 
-        if (!passEndDate && (!applicantNameEn || applicantNameEn.trim().length < 2)) {
+        // English name is required for Freezone (all types) OR Sohar Port (Permanent only)
+        // Permanent is detected by having a passEndDate
+        const isPermanent = !!passEndDate;
+        const englishNameRequired = entityType === 'freezone' || (entityType === 'port' && isPermanent);
+
+        if (englishNameRequired && (!applicantNameEn || applicantNameEn.trim().length < 2)) {
             errors.push('Applicant name (English) is required (minimum 2 characters)');
         }
 
@@ -116,6 +122,10 @@ export async function POST(request: NextRequest) {
 
         if (!requestType || !['Resident', 'Not Resident'].includes(requestType)) {
             errors.push('Valid Identification Card is required (Resident, Not Resident)');
+        }
+
+        if (!entityType || !['port', 'freezone'].includes(entityType)) {
+            errors.push('Entity Type is required (port or freezone)');
         }
 
         if (!passportIdImage) {
@@ -299,6 +309,7 @@ export async function POST(request: NextRequest) {
                 dateOfVisit: new Date(dateOfVisit),
                 requestType: requestType as RequestType,
                 passFor: passFor?.trim() || null,
+                entityType: entityType.trim(),
             };
 
             // Add passTypeId if provided

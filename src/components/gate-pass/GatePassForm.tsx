@@ -149,6 +149,7 @@ export const GatePassForm: React.FC = () => {
     const [createdRequestNumber, setCreatedRequestNumber] = useState<string | null>(null);
     const [organizationValue, setOrganizationValue] = useState('');
     const [selectedPassType, setSelectedPassType] = useState<PassType | null>(null);
+    const [entityType, setEntityType] = useState<string>('port');
     const [passEndDate, setPassEndDate] = useState('');
 
 
@@ -198,8 +199,11 @@ export const GatePassForm: React.FC = () => {
             { name: 'organization', value: formData.get('organization') },
             // visitduration is now conditionally validated later
             { name: 'passFor', value: formData.get('passFor') },
-            // applicantName is now conditionally validated
-            ...(!isPermanent(selectedPassType) ? [{ name: 'applicantName', value: formData.get('applicantName') }] : []),
+            { name: 'entityType', value: formData.get('entityType') },
+            // English name is required for Freezone (all types) OR Port (Permanent only)
+            ...((entityType === 'freezone' || (entityType === 'port' && isPermanent(selectedPassType))) 
+                ? [{ name: 'applicantName', value: formData.get('applicantName') }] 
+                : []),
             { name: 'fullNameAr', value: formData.get('fullNameAr') },
             { name: 'applicantEmail', value: formData.get('applicantEmail') },
             { name: 'gender', value: formData.get('gender') },
@@ -535,6 +539,18 @@ export const GatePassForm: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 ">
 
+                    <Select
+                        name="entityType"
+                        label={'Entity Type / نوع الجهة'}
+                        value={entityType}
+                        error={fieldErrors.entityType}
+                        options={[
+                            { value: 'port', label: 'Port / ميناء' },
+                            { value: 'freezone', label: 'Freezone / المنطقة الحرة' },
+                        ]}
+                        required
+                        onChange={(e) => setEntityType(e.target.value)}
+                    />
                     <Select
                         name="passTypeId"
                         label={getBilingualNested(['fields', 'passType'])}
@@ -891,7 +907,7 @@ export const GatePassForm: React.FC = () => {
                     </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 text-gray-900">
-                    {!isPermanent(selectedPassType) && (
+                    {(entityType === 'freezone' || (entityType === 'port' && isPermanent(selectedPassType))) && (
                         <Input
                             name="applicantName"
                             label={getBilingualNested(['fields', 'fullNameEn'])}

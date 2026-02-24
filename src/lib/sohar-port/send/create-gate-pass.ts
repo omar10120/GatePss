@@ -119,7 +119,7 @@ export async function createGatePass(
         // Extract extra fields
         const extraFields = request.extraFields || {};
         const gateRequest = extraFields.gateRequest as any; // Full request object from database
-
+        const entityType = extraFields.entityType || gateRequest?.entityType || 'port';
         // Map fields to Sohar Port API format
         const soharPortPayload: any = {
             pass_type: mapRequestType(request.requestType),
@@ -193,7 +193,7 @@ export async function createGatePass(
             method: 'POST',
             endpoint: getEndpointUrl('v1', 'CREATE_GATE_PASS'),
             params: {
-                entity: 'port',
+                entity: entityType,
             },
             data: soharPortPayload,
         });
