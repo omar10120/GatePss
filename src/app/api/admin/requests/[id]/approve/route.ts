@@ -6,6 +6,7 @@ import { sendRequestApprovalEmail } from '@/lib/email';
 import { ActionType } from '@/lib/enums';
 import { formatDate } from '@/utils/helpers';
 import { createRequestNotifications } from '@/utils/notification-helper';
+import { logger } from '@/lib/logger';
 
 interface ApproveRequestBody {
     updates?: {
@@ -76,15 +77,15 @@ export async function POST(
             // Apply any last-minute edits if provided
             if (body.updates) {
                 const updateData: any = {};
-                if (body.updates.applicantNameEn) updateData.applicantNameEn = body.updates.applicantNameEn.trim();
-                if (body.updates.applicantNameAr) updateData.applicantNameAr = body.updates.applicantNameAr.trim();
-                if (body.updates.applicantEmail) updateData.applicantEmail = body.updates.applicantEmail.toLowerCase().trim();
-                if (body.updates.applicantPhone) updateData.applicantPhone = body.updates.applicantPhone.trim();
-                if (body.updates.passportIdNumber) updateData.passportIdNumber = body.updates.passportIdNumber.toUpperCase().trim();
-                if (body.updates.purposeOfVisit) updateData.purposeOfVisit = body.updates.purposeOfVisit.trim();
-                if (body.updates.dateOfVisit) updateData.dateOfVisit = new Date(body.updates.dateOfVisit);
-                if (body.updates.requestType) updateData.requestType = body.updates.requestType;
-                if (body.updates.entityType) updateData.entityType = body.updates.entityType;
+                if (body.updates.applicantNameEn !== undefined) updateData.applicantNameEn = body.updates.applicantNameEn.trim();
+                if (body.updates.applicantNameAr !== undefined) updateData.applicantNameAr = body.updates.applicantNameAr.trim();
+                if (body.updates.applicantEmail !== undefined) updateData.applicantEmail = body.updates.applicantEmail.toLowerCase().trim();
+                if (body.updates.applicantPhone !== undefined) updateData.applicantPhone = body.updates.applicantPhone.trim();
+                if (body.updates.passportIdNumber !== undefined) updateData.passportIdNumber = body.updates.passportIdNumber.toUpperCase().trim();
+                if (body.updates.purposeOfVisit !== undefined) updateData.purposeOfVisit = body.updates.purposeOfVisit.trim();
+                if (body.updates.dateOfVisit !== undefined) updateData.dateOfVisit = new Date(body.updates.dateOfVisit);
+                if (body.updates.requestType !== undefined) updateData.requestType = body.updates.requestType;
+                if (body.updates.entityType !== undefined) updateData.entityType = body.updates.entityType;
                 if (body.updates.passFor !== undefined) updateData.passFor = body.updates.passFor?.trim() || null;
 
                 if (Object.keys(updateData).length > 0) {
@@ -126,11 +127,21 @@ export async function POST(
 
             if (!apiResponse.success) {
                 console.error('Sohar Port Integration Failed:', apiResponse);
-                // API call failed - don't approve the request
+                
+                // Persist the failure status to the database so admins can see why it failed
+                await prisma.request.update({
+                    where: { id: requestId },
+                    data: {
+                        lastIntegrationStatusCode: apiResponse.statusCode,
+                        lastIntegrationStatusMessage: apiResponse.message,
+                    },
+                });
+
+                // API call failed - don't approve the request in the system status, but record the integration attempt
                 return NextResponse.json(
                     {
                         error: 'Integration Error',
-                        message: 'Failed to submit to Sohar Port system',
+                        message: apiResponse.message || 'Failed to submit to Sohar Port system',
                         details: {
                             statusCode: apiResponse.statusCode,
                             apiMessage: apiResponse.message,
@@ -148,10 +159,11 @@ export async function POST(
                     status: 'APPROVED',
                     approvedById: user.userId,
                     externalReference: apiResponse.externalReference,
+                    externalStatus: apiResponse.so_status,
                     lastIntegrationStatusCode: apiResponse.statusCode,
                     lastIntegrationStatusMessage: apiResponse.message,
                     qrCodePdfUrl: apiResponse.qrCodePdfUrl || null,
-                },
+                } as any,
             });
 
             // Log the approval
@@ -233,9 +245,14 @@ export async function POST(
 
 
         } catch (error: any) {
-            console.error('Error approving request:', error);
+            logger.error('Error approving request:', {
+                requestId: id,
+                message: error.message,
+                stack: error.stack,
+                userId: user.userId,
+            });
             return NextResponse.json(
-                { error: 'Internal Server Error', message: 'Failed to approve request' },
+                { error: 'Internal Server Error', message: 'Failed to approve request', details: error.message },
                 { status: 500 }
             );
         }

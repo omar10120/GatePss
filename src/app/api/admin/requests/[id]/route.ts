@@ -182,21 +182,21 @@ export async function PUT(
             // Update allowed fields
             const updateData: any = {};
 
-            if (body.applicantNameEn) updateData.applicantNameEn = typeof body.applicantNameEn === 'string' ? body.applicantNameEn.trim() : body.applicantNameEn;
-            if (body.applicantNameAr) updateData.applicantNameAr = typeof body.applicantNameAr === 'string' ? body.applicantNameAr.trim() : body.applicantNameAr;
-            if (body.applicantEmail) updateData.applicantEmail = typeof body.applicantEmail === 'string' ? body.applicantEmail.toLowerCase().trim() : body.applicantEmail;
-            if (body.applicantPhone) updateData.applicantPhone = typeof body.applicantPhone === 'string' ? body.applicantPhone.trim() : body.applicantPhone;
-            if (body.passportIdNumber) updateData.passportIdNumber = typeof body.passportIdNumber === 'string' ? body.passportIdNumber.toUpperCase().trim() : body.passportIdNumber;
-            if (body.purposeOfVisit) updateData.purposeOfVisit = typeof body.purposeOfVisit === 'string' ? body.purposeOfVisit.trim() : body.purposeOfVisit;
-            if (body.dateOfVisit) updateData.dateOfVisit = new Date(body.dateOfVisit);
-            if (body.validFrom) updateData.validFrom = new Date(body.validFrom);
-            if (body.validTo) updateData.validTo = new Date(body.validTo);
-            if (body.requestType) updateData.requestType = body.requestType;
+            if (body.applicantNameEn !== undefined) updateData.applicantNameEn = typeof body.applicantNameEn === 'string' ? body.applicantNameEn.trim() : body.applicantNameEn;
+            if (body.applicantNameAr !== undefined) updateData.applicantNameAr = typeof body.applicantNameAr === 'string' ? body.applicantNameAr.trim() : body.applicantNameAr;
+            if (body.applicantEmail !== undefined) updateData.applicantEmail = typeof body.applicantEmail === 'string' ? body.applicantEmail.toLowerCase().trim() : body.applicantEmail;
+            if (body.applicantPhone !== undefined) updateData.applicantPhone = typeof body.applicantPhone === 'string' ? body.applicantPhone.trim() : body.applicantPhone;
+            if (body.passportIdNumber !== undefined) updateData.passportIdNumber = typeof body.passportIdNumber === 'string' ? body.passportIdNumber.toUpperCase().trim() : body.passportIdNumber;
+            if (body.purposeOfVisit !== undefined) updateData.purposeOfVisit = typeof body.purposeOfVisit === 'string' ? body.purposeOfVisit.trim() : body.purposeOfVisit;
+            if (body.dateOfVisit !== undefined) updateData.dateOfVisit = new Date(body.dateOfVisit);
+            if (body.validFrom !== undefined) updateData.validFrom = new Date(body.validFrom);
+            if (body.validTo !== undefined) updateData.validTo = new Date(body.validTo);
+            if (body.requestType !== undefined) updateData.requestType = body.requestType;
             if (body.passFor !== undefined) updateData.passFor = typeof body.passFor === 'string' ? body.passFor.trim() || null : body.passFor;
-            if (body.nationality) updateData.nationality = typeof body.nationality === 'string' ? body.nationality.trim() : body.nationality;
-            if (body.identification) updateData.identification = typeof body.identification === 'string' ? body.identification.trim() : body.identification;
-            if (body.gender) updateData.gender = typeof body.gender === 'string' ? body.gender.trim() : body.gender;
-            if (body.profession) updateData.profession = typeof body.profession === 'string' ? body.profession.trim() : body.profession;
+            if (body.nationality !== undefined) updateData.nationality = typeof body.nationality === 'string' ? body.nationality.trim() : body.nationality;
+            if (body.identification !== undefined) updateData.identification = typeof body.identification === 'string' ? body.identification.trim() : body.identification;
+            if (body.gender !== undefined) updateData.gender = typeof body.gender === 'string' ? body.gender.trim() : body.gender;
+            if (body.profession !== undefined) updateData.profession = typeof body.profession === 'string' ? body.profession.trim() : body.profession;
             if (body.passTypeId !== undefined) {
                 if (body.passTypeId === null || body.passTypeId === '') {
                     updateData.passTypeId = null;
@@ -207,8 +207,8 @@ export async function PUT(
                     }
                 }
             }
-            if (body.visitduration) updateData.visitduration = typeof body.visitduration === 'string' ? body.visitduration.trim() : body.visitduration;
-            if (body.entityType) updateData.entityType = typeof body.entityType === 'string' ? body.entityType.trim() : body.entityType;
+            if (body.visitduration !== undefined) updateData.visitduration = typeof body.visitduration === 'string' ? body.visitduration.trim() : body.visitduration;
+            if (body.entityType !== undefined) updateData.entityType = typeof body.entityType === 'string' ? body.entityType.trim() : body.entityType;
             if (body.otherProfessions !== undefined) updateData.otherProfessions = typeof body.otherProfessions === 'string' ? body.otherProfessions.trim() || null : body.otherProfessions;
 
 

@@ -16,6 +16,9 @@ import {
 } from './types';
 import { getConfig, HTTP_STATUS, ERROR_MESSAGES } from './config';
 import { logApiCall } from './utils/logger';
+import { logger } from '../logger';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { randomUUID } from 'crypto';
 
 /**
  * HTTP Client for Sohar Port API
@@ -33,17 +36,36 @@ export class SoharPortHttpClient {
      * Create configured Axios instance
      */
     private createAxiosInstance(): AxiosInstance {
-        const instance = axios.create({
+        if (this.config.useMock) {
+            console.log('?? Sohar Port API is in MOCK mode');
+        }
+
+        const axiosConfig: AxiosRequestConfig = {
             baseURL: this.config.baseUrl,
             timeout: this.config.timeout,
             headers: {
                 'Content-Type': 'application/json',
+                Accept: 'application/json',
             },
-        });
+        };
+
+        // Add Proxy Support
+        if (this.config.proxyUrl) {
+            console.log(`?? Routing Sohar Port API through proxy: ${this.config.proxyUrl}`);
+            const agent = new HttpsProxyAgent(this.config.proxyUrl);
+            axiosConfig.httpsAgent = agent;
+            axiosConfig.proxy = false; // Disable default axios proxy handling to use the agent
+        }
+
+        const instance = axios.create(axiosConfig);
 
         // Request interceptor
         instance.interceptors.request.use(
             (config) => {
+                const requestId = randomUUID();
+                (config as any).requestId = requestId;
+                (config as any).startTime = Date.now();
+
                 // Add Basic Auth credentials
                 if (this.config.username && this.config.password) {
                     const credentials = Buffer.from(`${this.config.username}:${this.config.password}`).toString('base64');
@@ -53,8 +75,17 @@ export class SoharPortHttpClient {
                     config.headers.Authorization = `Bearer ${this.config.apiKey}`;
                 }
 
-                // Log request
-                console.log(`📤 Sohar Port API Request: ${config.method?.toUpperCase()} ${config.url}`);
+                // Structured log for request
+                const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
+                logger.info(`📤 Sohar Port API Request: ${config.method?.toUpperCase()} ${fullUrl}`, {
+                    type: 'SOHAR_PORT_REQUEST',
+                    requestId,
+                    method: config.method?.toUpperCase(),
+                    url: fullUrl,
+                    params: config.params,
+                    headers: { ...config.headers, Authorization: '***MASKED***' },
+                    data: config.data,
+                });
 
                 return config;
             },
@@ -66,13 +97,37 @@ export class SoharPortHttpClient {
         // Response interceptor
         instance.interceptors.response.use(
             (response) => {
-                // Log successful response
-                console.log(`✅ Sohar Port API Response: ${response.status} ${response.config.url}`);
+                const requestId = (response.config as any).requestId;
+                const duration = Date.now() - (response.config as any).startTime;
+
+                // Structured log for successful response
+                logger.info(`✅ Sohar Port API Response: ${response.status} ${response.config.url}`, {
+                    type: 'SOHAR_PORT_RESPONSE',
+                    requestId,
+                    url: response.config.url,
+                    status: response.status,
+                    duration: `${duration}ms`,
+                    data: response.data,
+                });
                 return response;
             },
             (error) => {
-                // Log error response
-                console.error(`❌ Sohar Port API Error: ${error.message}`);
+                const requestId = error.config?.requestId;
+                const duration = error.config?.startTime ? Date.now() - error.config.startTime : undefined;
+
+                // Structured log for error response
+                const fullUrl = error.config?.baseURL ? `${error.config.baseURL}${error.config.url}` : error.config?.url;
+                logger.error(`❌ Sohar Port API Error: ${error.message} ${fullUrl}`, {
+                    type: 'SOHAR_PORT_ERROR',
+                    requestId,
+                    url: fullUrl,
+                    params: error.config?.params,
+                    status: error.response?.status,
+                    message: error.message,
+                    duration: duration ? `${duration}ms` : undefined,
+                    data: error.response?.data,
+                    stack: error.stack,
+                });
                 return Promise.reject(this.handleError(error));
             }
         );

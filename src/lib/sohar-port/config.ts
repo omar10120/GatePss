@@ -20,6 +20,8 @@ export const DEFAULT_CONFIG: Required<SoharPortConfig> = {
     // Basic Auth credentials
     username: process.env.SOHAR_PORT_USERNAME || 'Majees.API',
     password: process.env.SOHAR_PORT_PASSWORD || '',
+    // Connection Proxy
+    proxyUrl: process.env.SOHAR_PORT_PROXY_URL || '',
 };
 
 /**

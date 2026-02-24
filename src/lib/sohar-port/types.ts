@@ -67,6 +67,7 @@ export interface CreateGatePassRequest {
 export interface CreateGatePassResponse extends BaseResponse {
     externalReference?: string;  // Sohar Port's reference ID
     qrCodePdfUrl?: string;        // URL to download QR code PDF
+    so_status?: string;          // Pass status from Sohar Port
     error?: string;               // Error message if failed
 }
 
@@ -194,6 +195,10 @@ export interface GetStatusResponse extends BaseResponse {
     status?: GatePassStatus;
     validFrom?: string;
     validUntil?: string;
+    citizenship?: string;
+    professions?: string;
+    bloodType?: string;
+    otherProfessions?: string;
     error?: string;
 }
 
@@ -214,6 +219,7 @@ export interface SoharPortConfig {
     retryDelay?: number;
     username?: string;
     password?: string;
+    proxyUrl?: string;
 }
 
 /**

@@ -221,46 +221,46 @@ export default function RequestDetailsPage() {
             // Prepare update data - only include fields that have changed
             const updatePayload: any = {};
 
-            if (editData.applicantNameEn && editData.applicantNameEn !== request.applicantNameEn) {
+            if (editData.applicantNameEn !== undefined && editData.applicantNameEn !== request.applicantNameEn) {
                 updatePayload.applicantNameEn = editData.applicantNameEn;
             }
-            if (editData.applicantNameAr && editData.applicantNameAr !== request.applicantNameAr) {
+            if (editData.applicantNameAr !== undefined && editData.applicantNameAr !== request.applicantNameAr) {
                 updatePayload.applicantNameAr = editData.applicantNameAr;
             }
-            if (editData.applicantEmail && editData.applicantEmail !== request.applicantEmail) {
+            if (editData.applicantEmail !== undefined && editData.applicantEmail !== request.applicantEmail) {
                 updatePayload.applicantEmail = editData.applicantEmail;
             }
-            if (editData.passportIdNumber && editData.passportIdNumber !== request.passportIdNumber) {
+            if (editData.passportIdNumber !== undefined && editData.passportIdNumber !== request.passportIdNumber) {
                 updatePayload.passportIdNumber = editData.passportIdNumber;
             }
-            if (editData.purposeOfVisit && editData.purposeOfVisit !== request.purposeOfVisit) {
+            if (editData.purposeOfVisit !== undefined && editData.purposeOfVisit !== request.purposeOfVisit) {
                 updatePayload.purposeOfVisit = editData.purposeOfVisit;
             }
-            if (editData.requestType && editData.requestType !== request.requestType) {
+            if (editData.requestType !== undefined && editData.requestType !== request.requestType) {
                 updatePayload.requestType = editData.requestType;
             }
             if (editData.passFor !== undefined && editData.passFor !== request.passFor) {
                 updatePayload.passFor = editData.passFor;
             }
-            if (editData.nationality && editData.nationality !== request.nationality) {
+            if (editData.nationality !== undefined && editData.nationality !== request.nationality) {
                 updatePayload.nationality = editData.nationality;
             }
-            if (editData.identification && editData.identification !== request.identification) {
+            if (editData.identification !== undefined && editData.identification !== request.identification) {
                 updatePayload.identification = editData.identification;
             }
-            if (editData.gender && editData.gender !== request.gender) {
+            if (editData.gender !== undefined && editData.gender !== request.gender) {
                 updatePayload.gender = editData.gender;
             }
-            if (editData.profession && editData.profession !== request.profession) {
+            if (editData.profession !== undefined && editData.profession !== request.profession) {
                 updatePayload.profession = editData.profession;
             }
-            if (editData.passEndDate) {
+            if (editData.passEndDate !== undefined && editData.passEndDate !== request.passEndDate) {
                 updatePayload.passEndDate = editData.passEndDate;
             }
-            if (editData.validFrom) {
+            if (editData.validFrom !== undefined && editData.validFrom !== request.validFrom) {
                 updatePayload.validFrom = editData.validFrom;
             }
-            if (editData.validTo) {
+            if (editData.validTo !== undefined && editData.validTo !== request.validTo) {
                 updatePayload.validTo = editData.validTo;
             }
             if (editData.passTypeId !== undefined && editData.passTypeId !== request.passTypeId) {
@@ -829,113 +829,113 @@ export default function RequestDetailsPage() {
                                                     fieldName: 'nationality',
                                                     fieldType: 'select',
                                                     options: [
-                                                        { value: 'AFGHAN', label: gt('options.afghan') || 'Afghan' },
-                                                        { value: 'ALBANIAN', label: gt('options.albanian') || 'Albanian' },
-                                                        { value: 'ALGERIAN', label: gt('options.algerian') || 'Algerian' },
-                                                        { value: 'AMERICAN', label: gt('options.american') || 'American' },
-                                                        { value: 'ANDORRAN', label: gt('options.andorran') || 'Andorran' },
-                                                        { value: 'ANGOLAN', label: gt('options.angolan') || 'Angolan' },
-                                                        { value: 'ARGENTINIAN', label: gt('options.argentinian') || 'Argentinian' },
-                                                        { value: 'ARMENIAN', label: gt('options.armenian') || 'Armenian' },
-                                                        { value: 'AUSTRALIAN', label: gt('options.australian') || 'Australian' },
-                                                        { value: 'AUSTRIAN', label: gt('options.austrian') || 'Austrian' },
+                                                        { value: 'Afghan', label: gt('options.afghan') || 'Afghan' },
+                                                        { value: 'Albanian', label: gt('options.albanian') || 'Albanian' },
+                                                        { value: 'Algerian', label: gt('options.algerian') || 'Algerian' },
+                                                        { value: 'American', label: gt('options.american') || 'American' },
+                                                        { value: 'Andorran', label: gt('options.andorran') || 'Andorran' },
+                                                        { value: 'Angolan', label: gt('options.angolan') || 'Angolan' },
+                                                        { value: 'Argentinian', label: gt('options.argentinian') || 'Argentinian' },
+                                                        { value: 'Armenian', label: gt('options.armenian') || 'Armenian' },
+                                                        { value: 'Australian', label: gt('options.australian') || 'Australian' },
+                                                        { value: 'Austrian', label: gt('options.austrian') || 'Austrian' },
 
-                                                        { value: 'AZERBAIJANI', label: gt('options.azerbaijani') || 'Azerbaijani' },
-                                                        { value: 'BAHRAINI', label: gt('options.bahraini') || 'Bahraini' },
-                                                        { value: 'BANGLADESHI', label: gt('options.bangladeshi') || 'Bangladeshi' },
-                                                        { value: 'BELGIAN', label: gt('options.belgian') || 'Belgian' },
-                                                        { value: 'BOLIVIAN', label: gt('options.bolivian') || 'Bolivian' },
-                                                        { value: 'BRAZILIAN', label: gt('options.brazilian') || 'Brazilian' },
-                                                        { value: 'BRITISH', label: gt('options.british') || 'British' },
-                                                        { value: 'BULGARIAN', label: gt('options.bulgarian') || 'Bulgarian' },
+                                                        { value: 'Azerbaijani', label: gt('options.azerbaijani') || 'Azerbaijani' },
+                                                        { value: 'Bahraini', label: gt('options.bahraini') || 'Bahraini' },
+                                                        { value: 'Bangladeshi', label: gt('options.bangladeshi') || 'Bangladeshi' },
+                                                        { value: 'Belgian', label: gt('options.belgian') || 'Belgian' },
+                                                        { value: 'Bolivian', label: gt('options.bolivian') || 'Bolivian' },
+                                                        { value: 'Brazilian', label: gt('options.brazilian') || 'Brazilian' },
+                                                        { value: 'British', label: gt('options.british') || 'British' },
+                                                        { value: 'Bulgarian', label: gt('options.bulgarian') || 'Bulgarian' },
 
-                                                        { value: 'CANADIAN', label: gt('options.canadian') || 'Canadian' },
-                                                        { value: 'CHILEAN', label: gt('options.chilean') || 'Chilean' },
-                                                        { value: 'CHINESE', label: gt('options.chinese') || 'Chinese' },
-                                                        { value: 'COLOMBIAN', label: gt('options.colombian') || 'Colombian' },
-                                                        { value: 'CROATIAN', label: gt('options.croatian') || 'Croatian' },
-                                                        { value: 'CUBAN', label: gt('options.cuban') || 'Cuban' },
-                                                        { value: 'CYPRIOT', label: gt('options.cypriot') || 'Cypriot' },
-                                                        { value: 'CZECH', label: gt('options.czech') || 'Czech' },
+                                                        { value: 'Canadian', label: gt('options.canadian') || 'Canadian' },
+                                                        { value: 'Chilean', label: gt('options.chilean') || 'Chilean' },
+                                                        { value: 'Chinese', label: gt('options.chinese') || 'Chinese' },
+                                                        { value: 'Colombian', label: gt('options.colombian') || 'Colombian' },
+                                                        { value: 'Croatian', label: gt('options.croatian') || 'Croatian' },
+                                                        { value: 'Cuban', label: gt('options.cuban') || 'Cuban' },
+                                                        { value: 'Cypriot', label: gt('options.cypriot') || 'Cypriot' },
+                                                        { value: 'Czech', label: gt('options.czech') || 'Czech' },
 
-                                                        { value: 'DANISH', label: gt('options.danish') || 'Danish' },
-                                                        { value: 'DOMINICAN', label: gt('options.dominican') || 'Dominican' },
-                                                        { value: 'DUTCH', label: gt('options.dutch') || 'Dutch' },
+                                                        { value: 'Danish', label: gt('options.danish') || 'Danish' },
+                                                        { value: 'Dominican', label: gt('options.dominican') || 'Dominican' },
+                                                        { value: 'Dutch', label: gt('options.dutch') || 'Dutch' },
 
-                                                        { value: 'EGYPTIAN', label: gt('options.egyptian') || 'Egyptian' },
-                                                        { value: 'EMIRATI', label: gt('options.emirati') || 'Emirati' },
-                                                        { value: 'ESTONIAN', label: gt('options.estonian') || 'Estonian' },
-                                                        { value: 'ETHIOPIAN', label: gt('options.ethiopian') || 'Ethiopian' },
+                                                        { value: 'Egyptian', label: gt('options.egyptian') || 'Egyptian' },
+                                                        { value: 'Emirati', label: gt('options.emirati') || 'Emirati' },
+                                                        { value: 'Estonian', label: gt('options.estonian') || 'Estonian' },
+                                                        { value: 'Ethiopian', label: gt('options.ethiopian') || 'Ethiopian' },
 
-                                                        { value: 'FILIPINO', label: gt('options.filipino') || 'Filipino' },
-                                                        { value: 'FINNISH', label: gt('options.finnish') || 'Finnish' },
-                                                        { value: 'FRENCH', label: gt('options.french') || 'French' },
+                                                        { value: 'Filipino', label: gt('options.filipino') || 'Filipino' },
+                                                        { value: 'Finnish', label: gt('options.finnish') || 'Finnish' },
+                                                        { value: 'French', label: gt('options.french') || 'French' },
 
-                                                        { value: 'GEORGIAN', label: gt('options.georgian') || 'Georgian' },
-                                                        { value: 'GERMAN', label: gt('options.german') || 'German' },
-                                                        { value: 'GHANAIAN', label: gt('options.ghanaian') || 'Ghanaian' },
-                                                        { value: 'GREEK', label: gt('options.greek') || 'Greek' },
+                                                        { value: 'Georgian', label: gt('options.georgian') || 'Georgian' },
+                                                        { value: 'German', label: gt('options.german') || 'German' },
+                                                        { value: 'Ghanaian', label: gt('options.ghanaian') || 'Ghanaian' },
+                                                        { value: 'Greek', label: gt('options.greek') || 'Greek' },
 
-                                                        { value: 'HUNGARIAN', label: gt('options.hungarian') || 'Hungarian' },
+                                                        { value: 'Hungarian', label: gt('options.hungarian') || 'Hungarian' },
 
-                                                        { value: 'INDIAN', label: gt('options.indian') || 'Indian' },
-                                                        { value: 'INDONESIAN', label: gt('options.indonesian') || 'Indonesian' },
-                                                        { value: 'IRANIAN', label: gt('options.iranian') || 'Iranian' },
-                                                        { value: 'IRAQI', label: gt('options.iraqi') || 'Iraqi' },
-                                                        { value: 'IRISH', label: gt('options.irish') || 'Irish' },
-                                                        { value: 'ITALIAN', label: gt('options.italian') || 'Italian' },
+                                                        { value: 'Indian', label: gt('options.indian') || 'Indian' },
+                                                        { value: 'Indonesian', label: gt('options.indonesian') || 'Indonesian' },
+                                                        { value: 'Iranian', label: gt('options.iranian') || 'Iranian' },
+                                                        { value: 'Iraqi', label: gt('options.iraqi') || 'Iraqi' },
+                                                        { value: 'Irish', label: gt('options.irish') || 'Irish' },
+                                                        { value: 'Italian', label: gt('options.italian') || 'Italian' },
 
-                                                        { value: 'JAPANESE', label: gt('options.japanese') || 'Japanese' },
-                                                        { value: 'JORDANIAN', label: gt('options.jordanian') || 'Jordanian' },
+                                                        { value: 'Japanese', label: gt('options.japanese') || 'Japanese' },
+                                                        { value: 'Jordanian', label: gt('options.jordanian') || 'Jordanian' },
 
-                                                        { value: 'KENYAN', label: gt('options.kenyan') || 'Kenyan' },
-                                                        { value: 'KUWAITI', label: gt('options.kuwaiti') || 'Kuwaiti' },
+                                                        { value: 'Kenyan', label: gt('options.kenyan') || 'Kenyan' },
+                                                        { value: 'Kuwaiti', label: gt('options.kuwaiti') || 'Kuwaiti' },
 
-                                                        { value: 'LEBANESE', label: gt('options.lebanese') || 'Lebanese' },
-                                                        { value: 'LIBYAN', label: gt('options.libyan') || 'Libyan' },
-                                                        { value: 'LITHUANIAN', label: gt('options.lithuanian') || 'Lithuanian' },
+                                                        { value: 'Lebanese', label: gt('options.lebanese') || 'Lebanese' },
+                                                        { value: 'Libyan', label: gt('options.libyan') || 'Libyan' },
+                                                        { value: 'Lithuanian', label: gt('options.lithuanian') || 'Lithuanian' },
 
-                                                        { value: 'MALAYSIAN', label: gt('options.malaysian') || 'Malaysian' },
-                                                        { value: 'MEXICAN', label: gt('options.mexican') || 'Mexican' },
-                                                        { value: 'MOROCCAN', label: gt('options.moroccan') || 'Moroccan' },
+                                                        { value: 'Malaysian', label: gt('options.malaysian') || 'Malaysian' },
+                                                        { value: 'Mexican', label: gt('options.mexican') || 'Mexican' },
+                                                        { value: 'Moroccan', label: gt('options.moroccan') || 'Moroccan' },
 
-                                                        { value: 'NEPALESE', label: gt('options.nepalese') || 'Nepalese' },
-                                                        { value: 'NIGERIAN', label: gt('options.nigerian') || 'Nigerian' },
-                                                        { value: 'NORWEGIAN', label: gt('options.norwegian') || 'Norwegian' },
+                                                        { value: 'Nepalese', label: gt('options.nepalese') || 'Nepalese' },
+                                                        { value: 'Nigerian', label: gt('options.nigerian') || 'Nigerian' },
+                                                        { value: 'Norwegian', label: gt('options.norwegian') || 'Norwegian' },
 
-                                                        { value: 'OMANI', label: gt('options.omani') || 'Omani' },
+                                                        { value: 'Omani', label: gt('options.omani') || 'Omani' },
 
-                                                        { value: 'PAKISTANI', label: gt('options.pakistani') || 'Pakistani' },
-                                                        { value: 'PALESTINIAN', label: gt('options.palestinian') || 'Palestinian' },
-                                                        { value: 'PERUVIAN', label: gt('options.peruvian') || 'Peruvian' },
-                                                        { value: 'POLISH', label: gt('options.polish') || 'Polish' },
-                                                        { value: 'PORTUGUESE', label: gt('options.portuguese') || 'Portuguese' },
+                                                        { value: 'Pakistani', label: gt('options.pakistani') || 'Pakistani' },
+                                                        { value: 'Palestinian', label: gt('options.palestinian') || 'Palestinian' },
+                                                        { value: 'Peruvian', label: gt('options.peruvian') || 'Peruvian' },
+                                                        { value: 'Polish', label: gt('options.polish') || 'Polish' },
+                                                        { value: 'Portuguese', label: gt('options.portuguese') || 'Portuguese' },
 
-                                                        { value: 'QATARI', label: gt('options.qatari') || 'Qatari' },
+                                                        { value: 'Qatari', label: gt('options.qatari') || 'Qatari' },
 
-                                                        { value: 'ROMANIAN', label: gt('options.romanian') || 'Romanian' },
-                                                        { value: 'RUSSIAN', label: gt('options.russian') || 'Russian' },
+                                                        { value: 'Romanian', label: gt('options.romanian') || 'Romanian' },
+                                                        { value: 'Russian', label: gt('options.russian') || 'Russian' },
 
-                                                        { value: 'SAUDI', label: gt('options.saudi') || 'Saudi' },
-                                                        { value: 'SENEGALESE', label: gt('options.senegalese') || 'Senegalese' },
-                                                        { value: 'SERBIAN', label: gt('options.serbian') || 'Serbian' },
-                                                        { value: 'SINGAPOREAN', label: gt('options.singaporean') || 'Singaporean' },
-                                                        { value: 'SOUTH_AFRICAN', label: gt('options.south_african') || 'South African' },
-                                                        { value: 'SPANISH', label: gt('options.spanish') || 'Spanish' },
-                                                        { value: 'SUDANESE', label: gt('options.sudanese') || 'Sudanese' },
-                                                        { value: 'SWEDISH', label: gt('options.swedish') || 'Swedish' },
-                                                        { value: 'SWISS', label: gt('options.swiss') || 'Swiss' },
-                                                        { value: 'SYRIAN', label: gt('options.syrian') || 'Syrian' },
+                                                        { value: 'Saudi', label: gt('options.saudi') || 'Saudi' },
+                                                        { value: 'Senegalese', label: gt('options.senegalese') || 'Senegalese' },
+                                                        { value: 'Serbian', label: gt('options.serbian') || 'Serbian' },
+                                                        { value: 'Singaporean', label: gt('options.singaporean') || 'Singaporean' },
+                                                        { value: 'South African', label: gt('options.south_african') || 'South African' },
+                                                        { value: 'Spanish', label: gt('options.spanish') || 'Spanish' },
+                                                        { value: 'Sudanese', label: gt('options.sudanese') || 'Sudanese' },
+                                                        { value: 'Swedish', label: gt('options.swedish') || 'Swedish' },
+                                                        { value: 'Swiss', label: gt('options.swiss') || 'Swiss' },
+                                                        { value: 'Syrian', label: gt('options.syrian') || 'Syrian' },
 
-                                                        { value: 'TUNISIAN', label: gt('options.tunisian') || 'Tunisian' },
-                                                        { value: 'TURKISH', label: gt('options.turkish') || 'Turkish' },
+                                                        { value: 'Tunisian', label: gt('options.tunisian') || 'Tunisian' },
+                                                        { value: 'Turkish', label: gt('options.turkish') || 'Turkish' },
 
-                                                        { value: 'UKRAINIAN', label: gt('options.ukrainian') || 'Ukrainian' },
+                                                        { value: 'Ukrainian', label: gt('options.ukrainian') || 'Ukrainian' },
 
-                                                        { value: 'VENEZUELAN', label: gt('options.venezuelan') || 'Venezuelan' },
-                                                        { value: 'VIETNAMESE', label: gt('options.vietnamese') || 'Vietnamese' },
+                                                        { value: 'Venezuelan', label: gt('options.venezuelan') || 'Venezuelan' },
+                                                        { value: 'Vietnamese', label: gt('options.vietnamese') || 'Vietnamese' },
 
-                                                        { value: 'YEMENI', label: gt('options.yemeni') || 'Yemeni' },
+                                                        { value: 'Yemeni', label: gt('options.yemeni') || 'Yemeni' },
 
                                                     ]
                                                 },
@@ -1067,21 +1067,21 @@ export default function RequestDetailsPage() {
                                                     fieldType: 'select',
                                                     options: [
                                                         { value: '', label: gt('placeholders.select') || 'Select' },
-                                                        { value: 'ENGINEER', label: gt('options.engineer') || 'Engineer' },
-                                                        { value: 'TECHNICIAN', label: gt('options.technician') || 'Technician' },
-                                                        { value: 'VISITOR', label: gt('options.visitor') || 'Visitor' },
-                                                        { value: 'TECHNICAL', label: gt('options.technical') || 'Technical' },
-                                                        { value: 'MANAGER', label: gt('options.manager') || 'Manager' },
-                                                        { value: 'ADMINISTRATOR', label: gt('options.administrator') || 'Administrator' },
-                                                        { value: 'DRIVER', label: gt('options.driver') || 'Driver' },
-                                                        { value: 'PRO', label: gt('options.pro') || 'Pro' },
-                                                        { value: 'FINANCIAL', label: gt('options.financial') || 'Financial' },
-                                                        { value: 'HR', label: gt('options.hr') || 'HR' },
-                                                        { value: 'MARINE', label: gt('options.marine') || 'Marine' },
-                                                        { value: 'SECURITY', label: gt('options.security') || 'Security' },
-                                                        { value: 'MARKETING', label: gt('options.marketing') || 'Marketing' },
-                                                        { value: 'PROCURMENT', label: gt('options.procurement') || 'Procurement' },
-                                                        { value: 'OTHER', label: gt('options.other') || 'Other' }
+                                                        { value: 'Engineer', label: gt('options.engineer') || 'Engineer' },
+                                                        { value: 'Technician', label: gt('options.technician') || 'Technician' },
+                                                        { value: 'Visitor', label: gt('options.visitor') || 'Visitor' },
+                                                        { value: 'Technical', label: gt('options.technical') || 'Technical' },
+                                                        { value: 'Manager', label: gt('options.manager') || 'Manager' },
+                                                        { value: 'Administrator', label: gt('options.administrator') || 'Administrator' },
+                                                        { value: 'Driver', label: gt('options.driver') || 'Driver' },
+                                                        { value: 'Pro', label: gt('options.pro') || 'Pro' },
+                                                        { value: 'Financial', label: gt('options.financial') || 'Financial' },
+                                                        { value: 'Hr', label: gt('options.hr') || 'HR' },
+                                                        { value: 'Marine', label: gt('options.marine') || 'Marine' },
+                                                        { value: 'Security', label: gt('options.security') || 'Security' },
+                                                        { value: 'Marketing', label: gt('options.marketing') || 'Marketing' },
+                                                        { value: 'Procurement', label: gt('options.procurement') || 'Procurement' },
+                                                        { value: 'Other', label: gt('options.other') || 'Other' }
 
                                                     ]
                                                 },

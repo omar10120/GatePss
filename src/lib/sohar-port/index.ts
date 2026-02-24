@@ -7,7 +7,8 @@
 
 import { SoharPortHttpClient } from './client';
 import { SoharPortConfig } from './types';
-import { validateConfig } from './config';
+import { validateConfig, getConfig } from './config';
+import { logger } from '../logger';
 
 // Send operations
 import { createGatePass } from './send/create-gate-pass';
@@ -78,10 +79,10 @@ export class SoharPortClient {
     };
 
     constructor(config?: Partial<SoharPortConfig>) {
-        this.config = {
+        this.config = getConfig({
             useMock: process.env.SOHAR_PORT_MOCK_MODE === 'true',
             ...config,
-        };
+        });
 
         // Validate configuration
         validateConfig(this.config);
@@ -91,23 +92,29 @@ export class SoharPortClient {
 
         // Initialize send operations
         this.send = {
-            createGatePass: this.config.useMock
-                ? mockCreateGatePass
-                : (request) => createGatePass(this.httpClient, request),
+            createGatePass: async (request: CreateGatePassRequest) => {
+                if (this.config.useMock) return mockCreateGatePass(request);
+                return createGatePass(this.httpClient, request);
+            },
         };
 
         // Initialize receive operations
         this.receive = {
-            getGatePass: this.config.useMock
-                ? mockGetGatePass
-                : (request) => getGatePass(this.httpClient, request),
-            listGatePasses: this.config.useMock
-                ? mockListGatePasses
-                : (request) => listGatePasses(this.httpClient, request),
+            getGatePass: async (request: GetGatePassRequest) => {
+                if (this.config.useMock) return mockGetGatePass(request);
+                return getGatePass(this.httpClient, request);
+            },
+            listGatePasses: async (request?: ListGatePassesRequest) => {
+                if (this.config.useMock) return mockListGatePasses(request);
+                return listGatePasses(this.httpClient, request);
+            },
         };
 
         // Log initialization
-        console.log(`🔧 Sohar Port Client initialized (Mode: ${this.config.useMock ? 'MOCK' : 'REAL'})`);
+        logger.info(`Sohar Port Client initialized`, {
+            mode: this.config.useMock ? 'MOCK' : 'REAL',
+            baseUrl: this.config.baseUrl,
+        });
     }
 
     /**
