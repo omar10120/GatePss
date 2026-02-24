@@ -208,6 +208,7 @@ export async function PUT(
                 }
             }
             if (body.visitduration) updateData.visitduration = typeof body.visitduration === 'string' ? body.visitduration.trim() : body.visitduration;
+            if (body.entityType) updateData.entityType = typeof body.entityType === 'string' ? body.entityType.trim() : body.entityType;
             if (body.otherProfessions !== undefined) updateData.otherProfessions = typeof body.otherProfessions === 'string' ? body.otherProfessions.trim() || null : body.otherProfessions;
 
 
@@ -312,12 +313,14 @@ export async function PUT(
                     errorMessage.includes('passTypeId') ||
                     errorMessage.includes('validity_period') ||
                     errorMessage.includes('visitduration') ||
+                    errorMessage.includes('entityType') ||
                     errorCode === 'P2010' ||
                     errorCode === 'P2001') {
-                    console.warn('Columns passTypeId/visitduration may not exist in database or Prisma client not regenerated, retrying without them...');
+                    console.warn('Columns passTypeId/visitduration/entityType may not exist in database or Prisma client not regenerated, retrying without them...');
                     const retryData = { ...updateData };
                     delete retryData.passTypeId;
                     delete retryData.visitduration;
+                    delete retryData.entityType;
                     updatedRequest = await prisma.request.update({
                         where: { id: requestId },
                         data: retryData,

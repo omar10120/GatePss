@@ -17,6 +17,7 @@ interface ApproveRequestBody {
         purposeOfVisit?: string;
         dateOfVisit?: string;
         requestType?: string;
+        entityType?: string;
         passFor?: string;
     };
 }
@@ -83,6 +84,7 @@ export async function POST(
                 if (body.updates.purposeOfVisit) updateData.purposeOfVisit = body.updates.purposeOfVisit.trim();
                 if (body.updates.dateOfVisit) updateData.dateOfVisit = new Date(body.updates.dateOfVisit);
                 if (body.updates.requestType) updateData.requestType = body.updates.requestType;
+                if (body.updates.entityType) updateData.entityType = body.updates.entityType;
                 if (body.updates.passFor !== undefined) updateData.passFor = body.updates.passFor?.trim() || null;
 
                 if (Object.keys(updateData).length > 0) {
@@ -117,6 +119,7 @@ export async function POST(
                 requestType: gateRequest.requestType as any,
                 extraFields: {
                     passFor: gateRequest.passFor,
+                    entityType: gateRequest.entityType,
                     gateRequest: gateRequest, // Pass full request object for mapping
                 },
             });
