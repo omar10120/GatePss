@@ -6,6 +6,7 @@ import { getEndpointUrl } from '../config';
 import { logSuccess, logError } from '../utils/logger';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { logger } from '../../logger';
 
 
 async function fileToBase64(filePath: string): Promise<string | null> {
@@ -130,12 +131,12 @@ export async function createGatePass(
             company: gateRequest?.organization || 'Majis Industrial Services',
             name: request.applicantName,
             phone: gateRequest?.applicantPhone || '',
-            name_in_arabic: gateRequest?.applicantNameAr || request.applicantName,
+            name_in_arabic: gateRequest?.applicantNameAr,
             email: request.applicantEmail,
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
             identification_number: request.passportIdNumber,
             visitor_type: mapVisitorType(request.requestType),
-
+            blood_type: gateRequest?.bloodType || 'O+',
             start_date: formatDate(request.dateOfVisit),
             end_date: gateRequest?.validTo
                 ? formatDate(gateRequest.validTo)
@@ -189,6 +190,14 @@ export async function createGatePass(
             soharPortPayload.photo_attachment = soharPortPayload.identification_attachment;
         }
 
+        // Log the final payload being sent
+        logger.info(`Sohar Port Integration Payload: ${request.requestNumber}`, {
+            type: 'SOHAR_PORT_DEBUG_REQUEST',
+            requestNumber: request.requestNumber,
+            entityType,
+            payload: soharPortPayload,
+        });
+
         const response = await client.requestWithRetry<any>({
             method: 'POST',
             endpoint: getEndpointUrl('v1', 'CREATE_GATE_PASS'),
@@ -198,13 +207,29 @@ export async function createGatePass(
             data: soharPortPayload,
         });
 
+        // Log the raw response from Sohar Port
+        logger.info(`Sohar Port Integration Response: ${request.requestNumber}`, {
+            type: 'SOHAR_PORT_DEBUG_RESPONSE',
+            requestNumber: request.requestNumber,
+            response,
+        });
+
+        // Map fields to normalized response, handling both PascalCase (API) and camelCase (Mock/Legacy)
+        const isSuccess = response.Result === 'SUCCESS';
+        
         const result: CreateGatePassResponse = {
-            success: true,
+            success: true, // We reached this point, so it's a success in terms of request/response flow
             statusCode: 200,
-            message: response.message || 'Gate pass created successfully',
-            externalReference: response.passNumber || response.referenceId || response.id || response.externalReference,
+            message: (isSuccess ? `Gate pass created successfully${response.PassStatus ? ` (Status: ${response.PassStatus})` : ''}` : 'Request received with issues'),
+            externalReference: response.PassNumber,
+            so_status: response.PassStatus,
             qrCodePdfUrl: response.qrCodePdfUrl || response.qrCode,
         };
+
+        // If explicitly failed in the body despite 200 OK
+        if (response.Result === 'FAILED' || response.result === 'FAILED') {
+            result.success = false;
+        }
 
         logSuccess('createGatePass', `Gate pass created: ${result.externalReference}`);
 
@@ -213,10 +238,26 @@ export async function createGatePass(
     } catch (error: any) {
         logError('createGatePass', error);
 
+        // Include detailed error message if available (e.g., ModelState validation errors)
+        const errorMessage = error.details?.Message || error.details?.message || error.message || 'Failed to create gate pass';
+        const modelState = error.details?.ModelState || error.details?.modelState;
+        
+        let detailedError = errorMessage;
+        if (modelState) {
+            const issues = Object.entries(modelState)
+                .map(([key, value]) => {
+                    // Strip "gatePass." prefix for cleaner display
+                    const cleanKey = key.replace(/^gatePass\./, '');
+                    return `${cleanKey}: ${(value as string[]).join(', ')}`;
+                })
+                .join('; ');
+            detailedError = `${errorMessage} Details: ${issues}`;
+        }
+
         return {
             success: false,
             statusCode: error.statusCode || 500,
-            message: error.message || 'Failed to create gate pass',
+            message: detailedError,
             error: error.message,
         };
     }
