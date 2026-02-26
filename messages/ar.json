@@ -534,7 +534,9 @@
                 "telephone": "الهاتف",
                 "passType": "نوع التصريح",
                 "passFor": "المستفيد من التصريح",
-                "uploaded": "تم الرفع"
+                "uploaded": "تم الرفع",
+                "soharStatus": "حالة صحار",
+                "soharMessage": "رسالة صحار"
             },
             "viewDetails": "عرض التفاصيل",
             "noResults": "لم يتم العثور على طلبات",
@@ -616,7 +618,10 @@
                 "profession": "المهنة",
                 "idPassportNumber": "رقم الهوية أو الجواز",
                 "passportIdNumber": "رقم الجواز/الهوية",
-                "otherDocuments": "مستندات أخرى"
+                "otherDocuments": "مستندات أخرى",
+                "entityType": "نوع الجهة",
+                "soharStatus": "حالة صحار",
+                "soharMessage": "رسالة صحار"
             }
         },
         "activity": {

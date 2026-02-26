@@ -39,6 +39,8 @@ interface Request {
         name: string;
         email: string;
     } | null;
+    externalStatus?: string | null;
+    lastIntegrationStatusMessage?: string | null;
 }
 
 interface Pagination {
@@ -308,6 +310,7 @@ export default function AdminRequestsPage() {
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">ID</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.holderName')}</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.status')}</th>
+                                                        <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.soharStatus')}</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.actions')}</th>
                                                     </tr>
                                                 </thead>
@@ -355,6 +358,11 @@ export default function AdminRequestsPage() {
                                                                         </div>
                                                                     </td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
+                                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${request.externalStatus ? 'bg-blue-50 text-blue-700' : 'bg-gray-50 text-gray-500'}`}>
+                                                                            {request.externalStatus || '-'}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
                                                                         <Link
                                                                             href={`/admin/requests/${request.id}`}
                                                                             className="text-[#00B09C] hover:text-[#008f7e] text-[12px] sm:text-[14px] font-bold whitespace-nowrap"
@@ -390,6 +398,10 @@ export default function AdminRequestsPage() {
                                                                                 <div>
                                                                                     <span className="font-semibold text-gray-700">{t('columns.passFor')}: </span>
                                                                                     <span className="text-gray-600">{getPassForLabel(request.requestType)}</span>
+                                                                                </div>
+                                                                                <div className="sm:col-span-2 lg:col-span-3">
+                                                                                    <span className="font-semibold text-gray-700">{t('columns.soharMessage')}: </span>
+                                                                                    <span className="text-gray-600">{request.lastIntegrationStatusMessage || '-'}</span>
                                                                                 </div>
                                                                                 <div>
                                                                                     <span className="font-semibold text-gray-700">{t('columns.visitDate')}: </span>

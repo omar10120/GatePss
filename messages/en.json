@@ -530,7 +530,9 @@
                 "telephone": "Telephone",
                 "passType": "Pass Type",
                 "passFor": "Beneficiary of the permit",
-                "uploaded": "Uploaded"
+                "uploaded": "Uploaded",
+                "soharStatus": "Sohar Status",
+                "soharMessage": "Sohar Message"
             },
             "viewDetails": "View Details",
             "noResults": "No requests found",
@@ -611,7 +613,10 @@
                 "profession": "Profession",
                 "idPassportNumber": "ID Or Passport Number",
                 "passportIdNumber": "Passport/ID Number",
-                "otherDocuments": "Other Documents"
+                "otherDocuments": "Other Documents",
+                "entityType": "Entity Type",
+                "soharStatus": "Sohar Status",
+                "soharMessage": "Sohar Message"
             }
         },
         "activity": {

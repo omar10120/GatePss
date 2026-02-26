@@ -59,6 +59,7 @@ interface RequestDetails {
         filePath: string;
         uploadedAt: string;
     }>;
+    entityType: string;
     logs: Array<{
         id: number;
         timestamp: string;
@@ -274,6 +275,9 @@ export default function RequestDetailsPage() {
             }
             if (editData.otherProfessions !== undefined && editData.otherProfessions !== request.otherProfessions) {
                 updatePayload.otherProfessions = editData.otherProfessions;
+            }
+            if (editData.entityType !== undefined && editData.entityType !== request.entityType) {
+                updatePayload.entityType = editData.entityType;
             }
             if (editData.dateOfVisit !== undefined && editData.dateOfVisit !== request.dateOfVisit) {
                 updatePayload.dateOfVisit = editData.dateOfVisit;
@@ -795,8 +799,20 @@ export default function RequestDetailsPage() {
                                                 }
                                             }}
                                             data={[
-                                                {
-                                                    label: gt('fields.passType') || "Identification Card",
+                                                    {
+                                                        label: t('fields.entityType') || "Entity Type",
+                                                        value: isEditMode && request.status === 'PENDING'
+                                                            ? (editData.entityType || request.entityType)
+                                                            : (dt(`entityTypes.${request.entityType}`) || request.entityType),
+                                                        fieldName: 'entityType',
+                                                        fieldType: 'select',
+                                                        options: [
+                                                            { value: 'port', label: 'Port' },
+                                                            { value: 'freezone', label: 'Freezone' }
+                                                        ]
+                                                    },
+                                                    {
+                                                        label: gt('fields.passType') || "Identification Card",
                                                     value: isEditMode
                                                         ? (editData.passTypeId !== undefined ? editData.passTypeId?.toString() : request.passTypeId?.toString() || '')
                                                         : (request.passTypeId && passTypes.find(pt => pt.id === request.passTypeId)
