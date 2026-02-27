@@ -204,12 +204,12 @@ export async function POST(
                     `وافق صُحار على الطلب رقم ${gateRequest.requestNumber}`
                 ).catch(err => console.error('Failed to create Sohar Port notifications:', err));
                 // Send approval email to applicant (async)
-                sendRequestApprovalEmail(
-                    gateRequest.applicantEmail,
-                    gateRequest.applicantNameEn || "",
-                    gateRequest.requestNumber,
-                    formatDate(gateRequest.dateOfVisit)
-                ).catch(err => console.error('Failed to send approval email:', err));
+                // sendRequestApprovalEmail(
+                //     gateRequest.applicantEmail,
+                //     gateRequest.applicantNameEn || "",
+                //     gateRequest.requestNumber,
+                //     formatDate(gateRequest.dateOfVisit)
+                // ).catch(err => console.error('Failed to send approval email:', err));
 
                 return NextResponse.json({
                     success: true,

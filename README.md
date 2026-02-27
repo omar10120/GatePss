@@ -67,7 +67,7 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_API_URL="http://localhost:3000/api"
 
 # File Upload
-MAX_FILE_SIZE=5242880  # 5MB
+MAX_FILE_SIZE=1048576  # 1MB
 UPLOAD_DIR="./public/uploads"
 ```
 

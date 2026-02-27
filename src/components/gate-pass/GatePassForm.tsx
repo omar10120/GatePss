@@ -9,6 +9,7 @@ import arMessages from '../../../messages/ar.json';
 
 
 import { SuccessfullDialog } from '../ui/SuccessfullDialog';
+import { compressImage } from '@/utils/helpers';
 
 interface FieldErrors {
     [key: string]: string;
@@ -308,10 +309,10 @@ export const GatePassForm: React.FC = () => {
             newFieldErrors['passportIdImage'] = `${fieldLabel} ${getBilingualNested(['errors', 'required'])}`;
             isValid = false;
         } else {
-            // Validate passport ID image size (max 5MB)
-            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            // Validate passport ID image size (max 1MB)
+            const maxSize = 1 * 1024 * 1024; // 1MB in bytes
             if (passportIdImage.size > maxSize) {
-                newFieldErrors['passportIdImage'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 5MB limit';
+                newFieldErrors['passportIdImage'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 1MB limit';
                 isValid = false;
             }
             // Validate file type
@@ -325,10 +326,10 @@ export const GatePassForm: React.FC = () => {
         // Photo validation (optional but if provided, validate it)
         const photo = formData.get('photo') as File | null;
         if (photo && photo.size > 0) {
-            // Validate photo size (max 5MB)
-            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            // Validate photo size (max 100KB to match Sohar Port)
+            const maxSize = 100 * 1024; // 100KB in bytes
             if (photo.size > maxSize) {
-                newFieldErrors['photo'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 5MB limit';
+                newFieldErrors['photo'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (100KB)';
                 isValid = false;
             }
             // Validate file type
@@ -342,28 +343,30 @@ export const GatePassForm: React.FC = () => {
         // Other Documents validation (optional but if provided, validate them)
         const otherDocuments1 = formData.get('otherDocuments1') as File | null;
         if (otherDocuments1 && otherDocuments1.size > 0) {
-            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            const maxSize = 1 * 1024 * 1024; // 1MB in bytes
             if (otherDocuments1.size > maxSize) {
-                newFieldErrors['otherDocuments1'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 5MB limit';
+                newFieldErrors['otherDocuments1'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 1MB limit';
                 isValid = false;
             }
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-            if (!allowedTypes.includes(otherDocuments1.type)) {
-                newFieldErrors['otherDocuments1'] = getBilingualNested(['errors', 'invalidFileType']) || 'Only JPG, PNG, and PDF files are allowed';
+            const allowedTypes = ['doc', 'docx', 'pdf', 'zip'];
+            const fileExt = otherDocuments1.name.split('.').pop()?.toLowerCase().trim();
+            if (!fileExt || !allowedTypes.includes(fileExt)) {
+                newFieldErrors['otherDocuments1'] = 'Only .doc,.pdf,.zip filetypes are allowed.';
                 isValid = false;
             }
         }
 
         const otherDocuments2 = formData.get('otherDocuments2') as File | null;
         if (otherDocuments2 && otherDocuments2.size > 0) {
-            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            const maxSize = 1 * 1024 * 1024; // 1MB in bytes
             if (otherDocuments2.size > maxSize) {
-                newFieldErrors['otherDocuments2'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 5MB limit';
+                newFieldErrors['otherDocuments2'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 1MB limit';
                 isValid = false;
             }
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-            if (!allowedTypes.includes(otherDocuments2.type)) {
-                newFieldErrors['otherDocuments2'] = getBilingualNested(['errors', 'invalidFileType']) || 'Only JPG, PNG, and PDF files are allowed';
+            const allowedTypes = ['doc', 'docx', 'pdf', 'zip'];
+            const fileExt = otherDocuments2.name.split('.').pop()?.toLowerCase().trim();
+            if (!fileExt || !allowedTypes.includes(fileExt)) {
+                newFieldErrors['otherDocuments2'] = 'Only .doc,.pdf,.zip filetypes are allowed.';
                 isValid = false;
             }
         }
@@ -387,7 +390,24 @@ export const GatePassForm: React.FC = () => {
             return;
         }
 
-        const formData = new FormData(e.currentTarget);
+        setLoading(true);
+        const rawFormData = new FormData(e.currentTarget);
+        const formData = new FormData();
+        
+        // Process each field, compressing images to meet Sohar Port limits
+        for (const [key, value] of rawFormData.entries()) {
+            if (value instanceof File && (key === 'photo' || key === 'passportIdImage') && value.size > 0) {
+                // Photo needs to be tiny (<50-100KB), Passport ID can be slightly larger
+                const options = key === 'photo' 
+                    ? { maxWidth: 300, maxHeight: 300, quality: 0.4 }
+                    : { maxWidth: 600, maxHeight: 600, quality: 0.5 };
+                const compressedFile = await compressImage(value, options);
+                console.log(`Compressed ${key}: ${value.size} -> ${compressedFile.size} bytes`);
+                formData.append(key, compressedFile);
+            } else {
+                formData.append(key, value);
+            }
+        }
 
         // Combine organization prefix with user input
         const userOrgInput = organizationValue.trim();
@@ -399,6 +419,7 @@ export const GatePassForm: React.FC = () => {
         // Validate all fields
         const validation = validateForm(formData);
         if (!validation.isValid) {
+            setLoading(false);
             setError(getBilingualNested(['errors', 'fixErrors']));
             // Scroll to first error after state update
             setTimeout(() => {
@@ -1023,8 +1044,9 @@ export const GatePassForm: React.FC = () => {
                             id="passportIdImage"
                             name="passportIdImage"
                             label={getBilingualNested(['fields', 'copyOfCivilId'])}
-                            placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
+                            placeholder={getBilingualNested(['placeholders', 'choosePhoto'])}
                             required
+                            accept=".png,.jpg,.jpeg"
                             error={fieldErrors.passportIdImage}
                         />
                     </div>
@@ -1033,6 +1055,7 @@ export const GatePassForm: React.FC = () => {
                         name="photo"
                         label={getBilingualNested(['fields', 'photo'])}
                         placeholder={getBilingualNested(['placeholders', 'choosePhoto'])}
+                        accept=".png,.jpg,.jpeg"
                         error={fieldErrors.photo}
                     />
                     <FileUpload
@@ -1040,12 +1063,17 @@ export const GatePassForm: React.FC = () => {
                         name="otherDocuments1"
                         label={getBilingualNested(['fields', 'otherDocuments1'])}
                         placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
+                        accept=".doc,.pdf,.zip"
+                        error={fieldErrors.otherDocuments1}
                     />
+
                     <FileUpload
                         id="otherDocuments2"
                         name="otherDocuments2"
                         label={getBilingualNested(['fields', 'otherDocuments2'])}
                         placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
+                        accept=".doc,.pdf,.zip"
+                        error={fieldErrors.otherDocuments2}
                     />
                 </div>
             </section>

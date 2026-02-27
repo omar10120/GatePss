@@ -13,7 +13,10 @@ import { RequestHeader } from './components/RequestHeader';
 import { InfoSection } from './components/InfoSection';
 import { DocumentCard } from './components/DocumentCard';
 import { PermitSection } from './components/PermitSection';
+import SuccessModal from '@/components/ui/SuccessModal';
+import IntegrationErrorModal from '@/components/ui/IntegrationErrorModal';
 import { apiFetch, authenticatedFetch } from '@/lib/api-client';
+import { compressImage } from '@/utils/helpers';
 
 interface RequestDetails {
     id: number;
@@ -40,6 +43,7 @@ interface RequestDetails {
     rejectionReason: string | null;
     passFor: string | null;
     otherProfessions: string | null;
+    externalStatus?: string | null;
 
     visitduration: string | null;
     createdAt: string;
@@ -59,6 +63,7 @@ interface RequestDetails {
         filePath: string;
         uploadedAt: string;
     }>;
+    entityType: string;
     logs: Array<{
         id: number;
         timestamp: string;
@@ -98,6 +103,9 @@ export default function RequestDetailsPage() {
     const [request, setRequest] = useState<RequestDetails | null>(null);
     const [user, setUser] = useState<UserData | null>(null);
     const [showRejectModal, setShowRejectModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [integrationError, setIntegrationError] = useState<any>(null);
     const [rejectionReason, setRejectionReason] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -106,6 +114,7 @@ export default function RequestDetailsPage() {
     const [editData, setEditData] = useState<Partial<RequestDetails>>({});
     const [passTypes, setPassTypes] = useState<PassType[]>([]);
     const [files, setFiles] = useState<{ [key: string]: File | null }>({});
+    const [removedFiles, setRemovedFiles] = useState<{ [key: string]: boolean }>({});
     const [imageModal, setImageModal] = useState<{ isOpen: boolean; imageUrl: string | null; title: string }>({
         isOpen: false,
         imageUrl: null,
@@ -127,6 +136,11 @@ export default function RequestDetailsPage() {
         const nameEn = passType.name_en.toLowerCase();
         const nameAr = passType.name_ar;
         return nameEn.includes('permanent') || nameAr.includes('دائم');
+    };
+
+    const handleRemoveFile = (fieldName: string) => {
+        setFiles(prev => ({ ...prev, [fieldName]: null }));
+        setRemovedFiles(prev => ({ ...prev, [fieldName]: true }));
     };
 
 
@@ -275,6 +289,9 @@ export default function RequestDetailsPage() {
             if (editData.otherProfessions !== undefined && editData.otherProfessions !== request.otherProfessions) {
                 updatePayload.otherProfessions = editData.otherProfessions;
             }
+            if (editData.entityType !== undefined && editData.entityType !== request.entityType) {
+                updatePayload.entityType = editData.entityType;
+            }
             if (editData.dateOfVisit !== undefined && editData.dateOfVisit !== request.dateOfVisit) {
                 updatePayload.dateOfVisit = editData.dateOfVisit;
             }
@@ -300,8 +317,9 @@ export default function RequestDetailsPage() {
             delete otherUpdates.status;
             delete otherUpdates.rejectionReason;
 
-            // Check if there are files to upload
-            const hasFiles = Object.values(files).some(file => file !== null);
+            // Check if there are files to upload or remove
+            const hasRemovals = Object.keys(removedFiles).length > 0;
+            const hasFiles = Object.values(files).some(file => file !== null) || hasRemovals;
 
             // Check if there are other changes besides status
             const hasOtherChanges = Object.keys(otherUpdates).length > 0 || hasFiles;
@@ -336,10 +354,24 @@ export default function RequestDetailsPage() {
                                 }
                             }
                         });
-                        Object.keys(files).forEach(key => {
+                        for (const key of Object.keys(files)) {
                             const file = files[key];
                             if (file) {
-                                formData.append(key, file);
+                                if (key === 'photo' || key === 'passportIdImage') {
+                                    const options = key === 'photo' 
+                                        ? { maxWidth: 300, maxHeight: 300, quality: 0.4 }
+                                        : { maxWidth: 600, maxHeight: 600, quality: 0.5 };
+                                    const compressedFile = await compressImage(file, options);
+                                    console.log(`[handleSave-Approve] Compressed ${key}: ${file.size} -> ${compressedFile.size} bytes`);
+                                    formData.append(key, compressedFile);
+                                } else {
+                                    formData.append(key, file);
+                                }
+                            }
+                        }
+                        Object.keys(removedFiles).forEach(key => {
+                            if (removedFiles[key]) {
+                                formData.append(`remove_${key}`, 'true');
                             }
                         });
 
@@ -383,10 +415,24 @@ export default function RequestDetailsPage() {
                                     }
                                 }
                             });
-                            Object.keys(files).forEach(key => {
+                            for (const key of Object.keys(files)) {
                                 const file = files[key];
                                 if (file) {
-                                    formData.append(key, file);
+                                    if (key === 'photo' || key === 'passportIdImage') {
+                                        const options = key === 'photo' 
+                                            ? { maxWidth: 300, maxHeight: 300, quality: 0.4 }
+                                            : { maxWidth: 600, maxHeight: 600, quality: 0.5 };
+                                        const compressedFile = await compressImage(file, options);
+                                        console.log(`[handleSave-Reject] Compressed ${key}: ${file.size} -> ${compressedFile.size} bytes`);
+                                        formData.append(key, compressedFile);
+                                    } else {
+                                        formData.append(key, file);
+                                    }
+                                }
+                            }
+                            Object.keys(removedFiles).forEach(key => {
+                                if (removedFiles[key]) {
+                                    formData.append(`remove_${key}`, 'true');
                                 }
                             });
 
@@ -433,11 +479,23 @@ export default function RequestDetailsPage() {
                                 }
                             }
                         });
-                        Object.keys(files).forEach(key => {
+                        for (const key of Object.keys(files)) {
                             const file = files[key];
                             if (file) {
-                                formData.append(key, file);
+                                if (key === 'photo' || key === 'passportIdImage') {
+                                    const options = key === 'photo' 
+                                        ? { maxWidth: 300, maxHeight: 300, quality: 0.4 }
+                                        : { maxWidth: 600, maxHeight: 600, quality: 0.5 };
+                                    const compressedFile = await compressImage(file, options);
+                                    console.log(`Compressed ${key}: ${file.size} -> ${compressedFile.size} bytes`);
+                                    formData.append(key, compressedFile);
+                                } else {
+                                    formData.append(key, file);
+                                }
                             }
+                        }
+                        Object.keys(removedFiles).forEach(key => {
+                            formData.append(`remove_${key}`, 'true');
                         });
 
                         const url = `/api/admin/requests/${requestId}?edit=true`;
@@ -474,11 +532,23 @@ export default function RequestDetailsPage() {
                             }
                         }
                     });
-                    Object.keys(files).forEach(key => {
+                    for (const key of Object.keys(files)) {
                         const file = files[key];
                         if (file) {
-                            formData.append(key, file);
+                            if (key === 'photo' || key === 'passportIdImage') {
+                                const options = key === 'photo' 
+                                    ? { maxWidth: 300, maxHeight: 300, quality: 0.4 }
+                                    : { maxWidth: 600, maxHeight: 600, quality: 0.5 };
+                                const compressedFile = await compressImage(file, options);
+                                console.log(`Compressed ${key}: ${file.size} -> ${compressedFile.size} bytes`);
+                                formData.append(key, compressedFile);
+                            } else {
+                                formData.append(key, file);
+                            }
                         }
+                    }
+                    Object.keys(removedFiles).forEach(key => {
+                        formData.append(`remove_${key}`, 'true');
                     });
 
                     const url = isEditMode ? `/api/admin/requests/${requestId}?edit=true` : `/api/admin/requests/${requestId}`;
@@ -503,6 +573,7 @@ export default function RequestDetailsPage() {
             }
 
             setIsEditMode(false);
+            setRemovedFiles({});
             // Remove edit query parameter from URL
             router.replace(`/admin/requests/${requestId}`);
             fetchRequestDetails(requestId, false);
@@ -519,6 +590,8 @@ export default function RequestDetailsPage() {
             setEditData({ ...request }); // Reset to original data
         }
         setIsEditMode(false);
+        setFiles({});
+        setRemovedFiles({});
         router.replace(`/admin/requests/${requestId}`);
     };
 
@@ -574,10 +647,15 @@ export default function RequestDetailsPage() {
                 return;
             }
 
-            await apiFetch(endpoint, {
+            const result = await apiFetch<any>(endpoint, {
                 method: 'POST',
                 body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
             });
+
+            if (status === 'APPROVED' && result?.integration?.message) {
+                setSuccessMessage(result.integration.message);
+                setShowSuccessModal(true);
+            }
 
             if (status === 'APPROVED') {
                 setSuccess(t('requestapproved'));
@@ -589,8 +667,16 @@ export default function RequestDetailsPage() {
 
             fetchRequestDetails(requestId, isEditMode);
         } catch (err: any) {
-            setError(err.message || 'An error occurred');
-            // apiFetch handles 401 (token expiration) automatically with redirect
+            console.error('Error updating status:', err);
+            if (err.details || err.message?.includes('Integration')) {
+                setIntegrationError({
+                    error: err.details?.error || 'Integration Error',
+                    message: err.message,
+                    details: err.details
+                });
+            } else {
+                setError(err.message || 'An error occurred');
+            }
         } finally {
             setProcessing(false);
         }
@@ -795,8 +881,20 @@ export default function RequestDetailsPage() {
                                                 }
                                             }}
                                             data={[
-                                                {
-                                                    label: gt('fields.passType') || "Identification Card",
+                                                    {
+                                                        label: t('fields.entityType') || "Entity Type",
+                                                        value: isEditMode && request.status === 'PENDING'
+                                                            ? (editData.entityType || request.entityType)
+                                                            : (dt(`entityTypes.${request.entityType}`) || request.entityType),
+                                                        fieldName: 'entityType',
+                                                        fieldType: 'select',
+                                                        options: [
+                                                            { value: 'port', label: 'Port' },
+                                                            { value: 'freezone', label: 'Freezone' }
+                                                        ]
+                                                    },
+                                                    {
+                                                        label: gt('fields.passType') || "Identification Card",
                                                     value: isEditMode
                                                         ? (editData.passTypeId !== undefined ? editData.passTypeId?.toString() : request.passTypeId?.toString() || '')
                                                         : (request.passTypeId && passTypes.find(pt => pt.id === request.passTypeId)
@@ -1012,6 +1110,22 @@ export default function RequestDetailsPage() {
                                                     fieldName: 'purposeOfVisit',
                                                     fieldType: 'textarea'
                                                 },
+                                                {
+                                                    label: t('fields.soharCode') || "Sohar Code",
+                                                    value: request.lastIntegrationStatusCode ? request.lastIntegrationStatusCode.toString() : '-',
+                                                },
+                                                {
+                                                    label: t('fields.soharStatus') || "Sohar Status",
+                                                    value: request.externalStatus ? request.externalStatus.toString() : '-',
+                                                },
+                                                {
+                                                    label: t('fields.soharReference') || "Sohar Reference",
+                                                    value: request.externalReference || '-',
+                                                },
+                                                {
+                                                    label: t('fields.soharMessage') || "Sohar Message",
+                                                    value: request.lastIntegrationStatusMessage || '-',
+                                                },
                                             ]}
                                         />
 
@@ -1107,8 +1221,10 @@ export default function RequestDetailsPage() {
                                             imageUrl={request.passportIdImagePath}
                                             isEditable={isEditMode && request.status === 'PENDING'}
                                             fieldName="passportIdImage"
+                                            placeholder={gt('placeholders.choosePhoto') || "Choose Photo"}
                                             onChange={(fieldName, file) => {
                                                 setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                                setRemovedFiles(prev => ({ ...prev, [fieldName]: false }));
                                             }}
                                             onView={() => {
                                                 if (request.passportIdImagePath) {
@@ -1128,9 +1244,13 @@ export default function RequestDetailsPage() {
                                             imageUrl={request.uploads.find(u => u.fileType === 'PHOTO')?.filePath || null}
                                             isEditable={isEditMode && request.status === 'PENDING'}
                                             fieldName="photo"
+                                            forceRemoved={!!removedFiles['photo']}
+                                            placeholder={gt('placeholders.choosePhoto') || "Choose Photo"}
                                             onChange={(fieldName, file) => {
                                                 setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                                setRemovedFiles(prev => ({ ...prev, [fieldName]: false }));
                                             }}
+                                            onRemove={handleRemoveFile}
                                             onView={() => {
                                                 const photoUrl = request.uploads.find(u => u.fileType === 'PHOTO')?.filePath;
                                                 if (photoUrl) {
@@ -1149,19 +1269,24 @@ export default function RequestDetailsPage() {
                                             .map((upload, idx) => (
                                                 <DocumentCard
                                                     key={upload.id}
-                                                    title={`${gt('fields.otherDocuments1') || "Other Documents"} ${idx + 1}`}
+                                                    title={idx === 0 ? (gt('fields.otherDocuments1') || "Other Documents 1") : (gt('fields.otherDocuments2') || "Other Documents 2")}
                                                     imageUrl={upload.filePath}
                                                     isEditable={isEditMode && request.status === 'PENDING'}
                                                     fieldName={idx === 0 ? 'otherDocuments1' : 'otherDocuments2'}
+                                                    forceRemoved={!!removedFiles[idx === 0 ? 'otherDocuments1' : 'otherDocuments2']}
+                                                    accept=".doc,.docx,.pdf,.zip"
+                                                    placeholder={gt('placeholders.chooseFile') || "Choose File"}
                                                     onChange={(fieldName, file) => {
                                                         setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                                        setRemovedFiles(prev => ({ ...prev, [fieldName]: false }));
                                                     }}
+                                                    onRemove={handleRemoveFile}
                                                     onView={() => {
                                                         if (upload.filePath) {
                                                             setImageModal({
                                                                 isOpen: true,
                                                                 imageUrl: upload.filePath,
-                                                                title: `${gt('fields.otherDocuments1') || "Other Documents"} ${idx + 1}`
+                                                                 title: idx === 0 ? (gt('fields.otherDocuments1') || "Other Documents 1") : (gt('fields.otherDocuments2') || "Other Documents 2")
                                                             });
                                                         }
                                                     }}
@@ -1172,22 +1297,32 @@ export default function RequestDetailsPage() {
                                         {isEditMode && request.uploads.filter(u => u.fileType.startsWith('OTHER')).length === 0 && (
                                             <>
                                                 <DocumentCard
-                                                    title={`${gt('fields.otherDocuments1') || "Other Documents"} 1`}
+                                                     title={gt('fields.otherDocuments1') || "Other Documents 1"}
                                                     imageUrl={null}
                                                     isEditable={isEditMode && request.status === 'PENDING'}
                                                     fieldName="otherDocuments1"
+                                                    forceRemoved={!!removedFiles['otherDocuments1']}
+                                                    accept=".doc,.docx,.pdf,.zip"
+                                                    placeholder={gt('placeholders.chooseFile') || "Choose File"}
                                                     onChange={(fieldName, file) => {
                                                         setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                                        setRemovedFiles(prev => ({ ...prev, [fieldName]: false }));
                                                     }}
+                                                    onRemove={handleRemoveFile}
                                                 />
                                                 <DocumentCard
-                                                    title={`${gt('fields.otherDocuments2') || "Other Documents"} 2`}
+                                                     title={gt('fields.otherDocuments2') || "Other Documents 2"}
                                                     imageUrl={null}
                                                     isEditable={isEditMode && request.status === 'PENDING'}
                                                     fieldName="otherDocuments2"
+                                                    forceRemoved={!!removedFiles['otherDocuments2']}
+                                                    accept=".doc,.docx,.pdf,.zip"
+                                                    placeholder={gt('placeholders.chooseFile') || "Choose File"}
                                                     onChange={(fieldName, file) => {
                                                         setFiles(prev => ({ ...prev, [fieldName]: file }));
+                                                        setRemovedFiles(prev => ({ ...prev, [fieldName]: false }));
                                                     }}
+                                                    onRemove={handleRemoveFile}
                                                 />
                                             </>
                                         )}
@@ -1291,16 +1426,66 @@ export default function RequestDetailsPage() {
                                 </div>
                             )}
 
-                            {/* Image */}
+                            {/* Content */}
                             <div className="w-full h-full flex items-center justify-center p-4">
-                                <img
-                                    src={imageModal.imageUrl}
-                                    alt={imageModal.title}
-                                    className="max-w-full max-h-full object-contain"
-                                />
+                                {(() => {
+                                    const url = imageModal.imageUrl;
+                                    const isDataUrl = url.startsWith('data:image/');
+                                    const extensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp'];
+                                    const isImage = isDataUrl || extensions.some(ext => url.toLowerCase().split('?')[0].endsWith(ext));
+
+                                    if (isImage) {
+                                        return (
+                                            <img
+                                                src={url}
+                                                alt={imageModal.title}
+                                                className="max-w-full max-h-full object-contain"
+                                            />
+                                        );
+                                    }
+
+                                    return (
+                                        <div className="flex flex-col items-center gap-6">
+                                            <div className="w-32 h-32 bg-[#FAF9FB] rounded-2xl flex items-center justify-center border border-gray-100">
+                                                <svg className="w-16 h-16 text-[#00B09C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-lg font-medium text-gray-900 mb-2">{url.split('/').pop()?.split('-').pop()}</p>
+                                                <a 
+                                                    href={url} 
+                                                    download 
+                                                    className="btn btn-primary inline-flex items-center gap-2"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M7 10l5 5m0 0l5-5m-5 5V3" />
+                                                    </svg>
+                                                    {gt('submit') ? "Download File" : "Download File"}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         </div>
                     </div>
+                )}
+                {showSuccessModal && (
+                    <SuccessModal
+                        message={successMessage}
+                        onClose={() => setShowSuccessModal(false)}
+                    />
+                )}
+                {integrationError && (
+                    <IntegrationErrorModal
+                        isOpen={true}
+                        onClose={() => setIntegrationError(null)}
+                        error={integrationError.error}
+                        message={integrationError.message}
+                        details={integrationError.details}
+                    />
                 )}
             </div>
         </div >

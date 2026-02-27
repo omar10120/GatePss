@@ -9,6 +9,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { TableFilter } from '../components/TableFilter';
 import { StatusUpdate } from './components/StatusUpdate';
 import RejectSuccessModal from '@/components/ui/RejectSuccessModal';
+import SuccessModal from '@/components/ui/SuccessModal';
+import IntegrationErrorModal from '@/components/ui/IntegrationErrorModal';
 import { apiFetch } from '@/lib/api-client';
 
 interface Request {
@@ -39,6 +41,8 @@ interface Request {
         name: string;
         email: string;
     } | null;
+    externalStatus?: string | null;
+    lastIntegrationStatusMessage?: string | null;
 }
 
 interface Pagination {
@@ -70,6 +74,9 @@ export default function AdminRequestsPage() {
 
     const [permissionDenied, setPermissionDenied] = useState(false);
     const [showRejectSuccessModal, setShowRejectSuccessModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [integrationError, setIntegrationError] = useState<any>(null);
     const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
     // Helper function to check if user has a specific permission
@@ -144,18 +151,31 @@ export default function AdminRequestsPage() {
                 throw new Error('Setting to PENDING is not supported');
             }
 
-            await apiFetch(endpoint, {
+            const result = await apiFetch<any>(endpoint, {
                 method: 'POST',
                 body: JSON.stringify(body),
             });
+
+            if (status === 'APPROVED' && result?.integration?.message) {
+                setSuccessMessage(result.integration.message);
+                setShowSuccessModal(true);
+            }
 
             // Refresh the list to reflect changes
             await fetchRequests();
 
         } catch (error: any) {
             console.error('Error updating status:', error);
-            // apiFetch handles 401 (token expiration) automatically with redirect
-            throw error; // Re-throw so StatusUpdate component can handle it
+            // Catch integration errors (typically 400 or 500) that have technical details
+            if (error.details || error.message?.includes('Integration')) {
+                setIntegrationError({
+                    error: error.details?.error || 'Integration Error',
+                    message: error.message,
+                    details: error.details
+                });
+            } else {
+                throw error;
+            }
         }
     };
 
@@ -308,6 +328,7 @@ export default function AdminRequestsPage() {
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">ID</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.holderName')}</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.status')}</th>
+                                                        <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.soharStatus')}</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.actions')}</th>
                                                     </tr>
                                                 </thead>
@@ -355,6 +376,11 @@ export default function AdminRequestsPage() {
                                                                         </div>
                                                                     </td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
+                                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${request.externalStatus ? 'bg-blue-50 text-blue-700' : 'bg-gray-50 text-gray-500'}`}>
+                                                                            {request.externalStatus || '-'}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
                                                                         <Link
                                                                             href={`/admin/requests/${request.id}`}
                                                                             className="text-[#00B09C] hover:text-[#008f7e] text-[12px] sm:text-[14px] font-bold whitespace-nowrap"
@@ -390,6 +416,10 @@ export default function AdminRequestsPage() {
                                                                                 <div>
                                                                                     <span className="font-semibold text-gray-700">{t('columns.passFor')}: </span>
                                                                                     <span className="text-gray-600">{getPassForLabel(request.requestType)}</span>
+                                                                                </div>
+                                                                                <div className="sm:col-span-2 lg:col-span-3">
+                                                                                    <span className="font-semibold text-gray-700">{t('columns.soharMessage')}: </span>
+                                                                                    <span className="text-gray-600">{request.lastIntegrationStatusMessage || '-'}</span>
                                                                                 </div>
                                                                                 <div>
                                                                                     <span className="font-semibold text-gray-700">{t('columns.visitDate')}: </span>
@@ -464,6 +494,23 @@ export default function AdminRequestsPage() {
                 onClose={() => setShowRejectSuccessModal(false)}
                 message="The Request Was Successfully Rejected"
             />
+
+            {showSuccessModal && (
+                <SuccessModal
+                    message={successMessage}
+                    onClose={() => setShowSuccessModal(false)}
+                />
+            )}
+
+            {integrationError && (
+                <IntegrationErrorModal
+                    isOpen={true}
+                    onClose={() => setIntegrationError(null)}
+                    error={integrationError.error}
+                    message={integrationError.message}
+                    details={integrationError.details}
+                />
+            )}
         </div>
     );
 }

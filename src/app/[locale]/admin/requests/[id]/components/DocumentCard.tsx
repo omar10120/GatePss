@@ -10,6 +10,10 @@ interface DocumentCardProps {
     fieldName?: string;
     onChange?: (fieldName: string, file: File | null) => void;
     error?: string;
+    accept?: string;
+    placeholder?: string;
+    onRemove?: (fieldName: string) => void;
+    forceRemoved?: boolean;
 }
 
 export const DocumentCard: React.FC<DocumentCardProps> = ({ 
@@ -19,28 +23,56 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
     isEditable = false,
     fieldName,
     onChange,
-    error
+    error,
+    accept = ".png,.jpg,.jpeg,.pdf",
+    placeholder,
+    onRemove,
+    forceRemoved = false
 }) => {
     const gt = useTranslations('GatePassPage');
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [internalIsRemoved, setInternalIsRemoved] = useState(false);
     
-    const src = previewUrl || imageUrl;
+    const isRemoved = forceRemoved || internalIsRemoved;
+    
+    const src = isRemoved ? null : (previewUrl || imageUrl);
+
+    const isImage = (url: string | null) => {
+        if (!url) return false;
+        // Check for data URLs
+        if (url.startsWith('data:image/')) return true;
+        // Check for common image extensions
+        const extensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp'];
+        return extensions.some(ext => url.toLowerCase().split('?')[0].endsWith(ext));
+    };
+
+    const isImg = isImage(src);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setSelectedFile(file);
-            // Create preview URL
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewUrl(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-            
+            setPreviewUrl(URL.createObjectURL(file));
+            setInternalIsRemoved(false);
             if (onChange && fieldName) {
                 onChange(fieldName, file);
             }
+        }
+    };
+
+    const handleRemove = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setInternalIsRemoved(true);
+        setPreviewUrl(null);
+        setSelectedFile(null);
+        // Reset the file input if it exists
+        if (fieldName) {
+            const input = document.getElementById(fieldName) as HTMLInputElement;
+            if (input) input.value = '';
+        }
+        if (onRemove && fieldName) {
+            onRemove(fieldName);
         }
     };
 
@@ -56,18 +88,14 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                             type="file"
                             name={fieldName}
                             id={fieldName}
-                            accept=".png,.jpg,.jpeg,.pdf"
+                            accept={accept}
                             className="hidden"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
+                                    setInternalIsRemoved(false);
                                     setSelectedFile(file);
-                                    // Create preview URL
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => {
-                                        setPreviewUrl(reader.result as string);
-                                    };
-                                    reader.readAsDataURL(file);
+                                    setPreviewUrl(URL.createObjectURL(file));
                                     
                                     if (onChange && fieldName) {
                                         onChange(fieldName, file);
@@ -93,7 +121,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                             >
                                 <div className="flex items-center gap-3 overflow-hidden">
                                     <div className="bg-[#F7F1EB] text-[#747474] px-3 py-1.5 rounded-[4px] text-[14px] font-['Rubik'] whitespace-nowrap">
-                                        {gt('placeholders.chooseFile') || "Choose File (PNG, JPG, PDF) max 1MB"}
+                                        {placeholder || gt('placeholders.chooseFile') || "Choose File"}
                                     </div>
                                     <span className="text-[14px] text-[#747474] truncate font-['Rubik']">
                                         {selectedFile?.name || ''}
@@ -122,21 +150,50 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                 {src && (
                     <div className="mt-4 bg-[#FAF9FB] rounded-[8px] p-6 flex justify-center items-center relative min-h-[160px]">
                         <div className="relative w-full max-w-[280px] h-[160px] cursor-pointer group" onClick={onView}>
-                            <img
-                                src={src}
-                                alt={title}
-                                className="w-full h-full object-contain rounded-md"
-                            />
-                            <div 
-                                className="absolute bottom-2 right-2 p-2 bg-white rounded-md shadow-md opacity-100 hover:bg-gray-50 transition-colors cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (onView) onView();
-                                }}
-                            >
-                                <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 4l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                                </svg>
+                            {isImg ? (
+                                <img
+                                    src={src}
+                                    alt={title}
+                                    className="w-full h-full object-contain rounded-md"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center bg-white rounded-md border border-gray-200 gap-3">
+                                    <svg className="w-12 h-12 text-[#00B09C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <span className="text-sm font-medium text-gray-600 px-4 text-center truncate w-full">
+                                        {src.split('/').pop()?.split('-').pop() || title}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            <div className="absolute bottom-2 right-2 flex gap-2">
+                                {/* Remove Button */}
+                                {onRemove && fieldName && (
+                                    <button
+                                        onClick={handleRemove}
+                                        className="p-1.5 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors shadow-sm"
+                                        title="Remove document"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                )}
+
+                                {/* Expand Button */}
+                                <div 
+                                    className="p-2 bg-white rounded-md shadow-md opacity-100 hover:bg-gray-50 transition-colors cursor-pointer text-gray-600"
+                                    title="View"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (onView) onView();
+                                    }}
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 4l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -152,11 +209,22 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
             <div className="bg-[#FAF9FB] rounded-[8px] p-6 flex justify-center items-center relative min-h-[160px]">
                 {src ? (
                     <div className="relative w-full max-w-[280px] h-[160px] cursor-pointer group" onClick={onView}>
-                        <img
-                            src={src}
-                            alt={title}
-                            className="w-full h-full object-contain rounded-md"
-                        />
+                        {isImg ? (
+                            <img
+                                src={src}
+                                alt={title}
+                                className="w-full h-full object-contain rounded-md"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-white rounded-md border border-gray-200 gap-3">
+                                <svg className="w-12 h-12 text-[#00B09C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span className="text-sm font-medium text-gray-600 px-4 text-center truncate w-full">
+                                    {src.split('/').pop()?.split('-').pop() || title}
+                                </span>
+                            </div>
+                        )}
 
                         {/* Expand Icon */}
                         <div 
@@ -172,7 +240,12 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="text-gray-400 text-sm">No document available</div>
+                    <div className="flex flex-col items-center justify-center text-gray-400 gap-2">
+                        <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-sm font-['Rubik']">{gt('noDocumentAvailable') || "No document available"}</span>
+                    </div>
                 )}
             </div>
         </div>

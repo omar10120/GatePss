@@ -5,7 +5,7 @@ interface FileUploadProps {
     name: string;
     id: string;
     required?: boolean;
-    accept?: string;
+    accept: string;
     placeholder?: string;
     error?: string;
 }
@@ -15,8 +15,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     name,
     id,
     required = false,
-    accept = ".png,.jpg,.jpeg,.pdf",
-    placeholder = "Choose File (PNG, JPG, PDF) max 1MB",
+    accept,
+    placeholder,
     error,
 }) => {
     const [fileName, setFileName] = React.useState<string | null>(null);

@@ -147,17 +147,24 @@ export async function POST(request: NextRequest) {
             const buffer = Buffer.from(bytes);
 
 
-            const maxSize = parseInt(process.env.MAX_FILE_SIZE || '5242880');
+            const maxSize = parseInt(process.env.MAX_FILE_SIZE || '1048576');
             if (buffer.length > maxSize) {
-                throw new Error(`File ${file.name} size exceeds 5MB limit`);
+                throw new Error(`File ${file.name} size exceeds 1MB limit`);
             }
 
 
             const allowedTypes = ['jpg', 'jpeg', 'png', 'pdf'];
             const fileExt = file.name.split('.').pop()?.toLowerCase().trim();
 
-            if (!fileExt || !allowedTypes.includes(fileExt)) {
-                throw new Error(`Only JPG, PNG, and PDF files are allowed for ${file.name}`);
+            if (prefix === 'other1' || prefix === 'other2') {
+                const otherAllowedTypes = ['doc', 'docx', 'pdf', 'zip'];
+                if (!fileExt || !otherAllowedTypes.includes(fileExt)) {
+                    throw new Error(`Only .doc,.pdf,.zip filetypes are allowed.`);
+                }
+            } else {
+                if (!fileExt || !allowedTypes.includes(fileExt)) {
+                    throw new Error(`Only JPG, PNG, and PDF files are allowed for ${file.name}`);
+                }
             }
 
 

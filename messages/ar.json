@@ -221,6 +221,7 @@
         "title": "احصل على تصريح دخول سريع",
         "subtitle": "مثالي للاحتياجات العاجلة للسفر أو الجداول المزدحمة، يرجى إعادة التحقق من المرفقات قبل التقديم.",
         "successTitle": "تم الإرسال بنجاح ",
+        "noDocumentAvailable": "لا يوجد مستندات متاحة",
         "done": "تم",
         "sections": {
             "passPermitInfo": "معلومات تصريح المرور",
@@ -262,7 +263,7 @@
             "telephoneHolder": "هاتف حامل التصريح",
             "emailHolder": "البريد الإلكتروني لحامل التصريح",
             "typeIdPassport": "اكتب رقم الهوية أو جواز السفر لحامل التصريح",
-            "chooseFile": "اختر ملفاً (PNG, JPG, PDF) بحد أقصى ١ ميجابايت",
+            "chooseFile": "اختر ملفاً (DOC, PDF, ZIP) بحد أقصى ١ ميجابايت",
             "choosePhoto": "اختر صورة (PNG, JPG) بحد أقصى ١ ميجابايت"
         },
         "confirmation": "أؤكد أنني راجعت جميع المعلومات والمرفقات في هذا الطلب، وأتحمل المسؤولية الكاملة عن جميع المعلومات التي يحتوي عليها.",
@@ -534,7 +535,9 @@
                 "telephone": "الهاتف",
                 "passType": "نوع التصريح",
                 "passFor": "المستفيد من التصريح",
-                "uploaded": "تم الرفع"
+                "uploaded": "تم الرفع",
+                "soharStatus": "حالة صحار",
+                "soharMessage": "رسالة صحار"
             },
             "viewDetails": "عرض التفاصيل",
             "noResults": "لم يتم العثور على طلبات",
@@ -616,7 +619,12 @@
                 "profession": "المهنة",
                 "idPassportNumber": "رقم الهوية أو الجواز",
                 "passportIdNumber": "رقم الجواز/الهوية",
-                "otherDocuments": "مستندات أخرى"
+                "otherDocuments": "مستندات أخرى",
+                "entityType": "نوع الجهة",
+                "soharStatus": "حالة صحار",
+                "soharMessage": "رسالة صحار",
+                "soharCode": "رمز صحار",
+                "soharReference": "مرجع صحار"
             }
         },
         "activity": {
