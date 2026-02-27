@@ -221,6 +221,7 @@
         "title": "Get A Fast-Track Entry Permit",
         "subtitle": "Perfect for urgent travel needs or busy schedules, Please Recheck the attachments before submitting.",
         "successTitle": "Your application Submitted Successfully ",
+        "noDocumentAvailable": "No Document Available",
         "done": "Done",
         "sections": {
             "passPermitInfo": "Pass Permit Info",
@@ -262,7 +263,7 @@
             "telephoneHolder": "Telephone of Pass Holder",
             "emailHolder": "Email of Pass Holder",
             "typeIdPassport": "Type ID Or Passport Number of Pass Holder",
-            "chooseFile": "Choose File (PNG, JPG, PDF) max 1MB",
+            "chooseFile": "Choose File (DOC, PDF, ZIP) max 1MB",
             "choosePhoto": "Choose Photo (PNG, JPG) max 1MB"
         },
         "confirmation": "I Confirm That I Have Reviewed All Information And Attachments In This Request, And I Am Fully Responsible For All Information That Contains.",
@@ -616,7 +617,9 @@
                 "otherDocuments": "Other Documents",
                 "entityType": "Entity Type",
                 "soharStatus": "Sohar Status",
-                "soharMessage": "Sohar Message"
+                "soharMessage": "Sohar Message",
+                "soharCode": "Sohar Code",
+                "soharReference": "Sohar Reference"
             }
         },
         "activity": {

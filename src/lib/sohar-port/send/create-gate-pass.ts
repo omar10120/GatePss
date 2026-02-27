@@ -177,12 +177,13 @@ export async function createGatePass(
             }
         }
 
-        // Add photo if available (use separate photo field, fallback to passport image)
-        if (gateRequest?.photoPath) {
-            const photoBase64 = await fileToBase64(gateRequest.photoPath);
+        // Handle photo from uploads
+        const photoUpload = gateRequest?.uploads?.find((u: any) => u.fileType === 'PHOTO');
+        if (photoUpload) {
+            const photoBase64 = await fileToBase64(photoUpload.filePath);
             if (photoBase64) {
                 soharPortPayload.photo_attachment = photoBase64;
-                soharPortPayload.photo = path.basename(gateRequest.photoPath);
+                soharPortPayload.photo = path.basename(photoUpload.filePath);
             }
         } else if (gateRequest?.passportIdImagePath && soharPortPayload.identification_attachment) {
             // Fallback to passport image if no separate photo
@@ -190,7 +191,20 @@ export async function createGatePass(
             soharPortPayload.photo_attachment = soharPortPayload.identification_attachment;
         }
 
-        // Log the final payload being sent
+        // Log attachment sizes for debugging
+        const attachmentsSize = {
+            identification: soharPortPayload.identification_attachment?.length ? Math.round(soharPortPayload.identification_attachment.length / 1024) + 'KB' : 'N/A',
+            photo: soharPortPayload.photo_attachment?.length ? Math.round(soharPortPayload.photo_attachment.length / 1024) + 'KB' : 'N/A',
+            other1: soharPortPayload.other_attachment?.length ? Math.round(soharPortPayload.other_attachment.length / 1024) + 'KB' : 'N/A',
+            other2: soharPortPayload.other_attachment2?.length ? Math.round(soharPortPayload.other_attachment2.length / 1024) + 'KB' : 'N/A',
+        };
+        logger.info(`Attachment sizes for ${request.requestNumber}:`, attachmentsSize);
+
+        // Log the final payload being sent (excluding attachments for cleaner logs if needed)
+        const debugPayload = { ...soharPortPayload };
+        // Don't remove them from the real payload, just from the debug log if they are too big
+        // but for now let's keep the existing logger call below as is.
+        
         logger.info(`Sohar Port Integration Payload: ${request.requestNumber}`, {
             type: 'SOHAR_PORT_DEBUG_REQUEST',
             requestNumber: request.requestNumber,
@@ -220,7 +234,7 @@ export async function createGatePass(
         const result: CreateGatePassResponse = {
             success: true, // We reached this point, so it's a success in terms of request/response flow
             statusCode: 200,
-            message: (isSuccess ? `Gate pass created successfully${response.PassStatus ? ` (Status: ${response.PassStatus})` : ''}` : 'Request received with issues'),
+            message: (isSuccess ? `Gate pass created successfully` : 'Request received with issues'),
             externalReference: response.PassNumber,
             so_status: response.PassStatus,
             qrCodePdfUrl: response.qrCodePdfUrl || response.qrCode,

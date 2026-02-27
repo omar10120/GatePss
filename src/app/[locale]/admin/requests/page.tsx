@@ -9,6 +9,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { TableFilter } from '../components/TableFilter';
 import { StatusUpdate } from './components/StatusUpdate';
 import RejectSuccessModal from '@/components/ui/RejectSuccessModal';
+import SuccessModal from '@/components/ui/SuccessModal';
+import IntegrationErrorModal from '@/components/ui/IntegrationErrorModal';
 import { apiFetch } from '@/lib/api-client';
 
 interface Request {
@@ -72,6 +74,9 @@ export default function AdminRequestsPage() {
 
     const [permissionDenied, setPermissionDenied] = useState(false);
     const [showRejectSuccessModal, setShowRejectSuccessModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [integrationError, setIntegrationError] = useState<any>(null);
     const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
     // Helper function to check if user has a specific permission
@@ -146,18 +151,31 @@ export default function AdminRequestsPage() {
                 throw new Error('Setting to PENDING is not supported');
             }
 
-            await apiFetch(endpoint, {
+            const result = await apiFetch<any>(endpoint, {
                 method: 'POST',
                 body: JSON.stringify(body),
             });
+
+            if (status === 'APPROVED' && result?.integration?.message) {
+                setSuccessMessage(result.integration.message);
+                setShowSuccessModal(true);
+            }
 
             // Refresh the list to reflect changes
             await fetchRequests();
 
         } catch (error: any) {
             console.error('Error updating status:', error);
-            // apiFetch handles 401 (token expiration) automatically with redirect
-            throw error; // Re-throw so StatusUpdate component can handle it
+            // Catch integration errors (typically 400 or 500) that have technical details
+            if (error.details || error.message?.includes('Integration')) {
+                setIntegrationError({
+                    error: error.details?.error || 'Integration Error',
+                    message: error.message,
+                    details: error.details
+                });
+            } else {
+                throw error;
+            }
         }
     };
 
@@ -476,6 +494,23 @@ export default function AdminRequestsPage() {
                 onClose={() => setShowRejectSuccessModal(false)}
                 message="The Request Was Successfully Rejected"
             />
+
+            {showSuccessModal && (
+                <SuccessModal
+                    message={successMessage}
+                    onClose={() => setShowSuccessModal(false)}
+                />
+            )}
+
+            {integrationError && (
+                <IntegrationErrorModal
+                    isOpen={true}
+                    onClose={() => setIntegrationError(null)}
+                    error={integrationError.error}
+                    message={integrationError.message}
+                    details={integrationError.details}
+                />
+            )}
         </div>
     );
 }

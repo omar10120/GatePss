@@ -90,9 +90,9 @@ export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor, onReject
         setLoading(true);
         try {
             await onUpdate(status);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to update status", error);
-            alert("Failed to update status");
+            alert(error?.message || "Failed to update status");
         } finally {
             setLoading(false);
         }
@@ -106,9 +106,9 @@ export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor, onReject
             if (onRejectSuccess) {
                 onRejectSuccess();
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to reject request", error);
-            alert("Failed to reject request");
+            alert(error?.message || "Failed to reject request");
         } finally {
             setLoading(false);
         }

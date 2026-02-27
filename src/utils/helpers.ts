@@ -135,3 +135,59 @@ export function getRequestTypeLabel(type: string): string {
     };
     return labels[type] || type;
 }
+
+/**
+ * Compresses an image file using Canvas API
+ */
+export async function compressImage(file: File, options?: { maxWidth?: number, maxHeight?: number, quality?: number }): Promise<File> {
+    if (typeof window === 'undefined' || !file.type.startsWith('image/')) return file;
+    
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                const maxWidth = options?.maxWidth || 1200;
+                const maxHeight = options?.maxHeight || 1200;
+                const quality = options?.quality || 0.7;
+                
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx?.drawImage(img, 0, 0, width, height);
+                
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const compressedFile = new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(compressedFile);
+                    } else {
+                        resolve(file);
+                    }
+                }, 'image/jpeg', quality);
+            };
+            img.onerror = () => resolve(file);
+            img.src = e.target?.result as string;
+        };
+        reader.onerror = () => resolve(file);
+        reader.readAsDataURL(file);
+    });
+}

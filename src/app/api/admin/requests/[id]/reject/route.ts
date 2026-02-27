@@ -88,12 +88,12 @@ export async function POST(
             ).catch(err => console.error('Failed to create notifications:', err));
 
             // Send rejection email to applicant (async)
-            sendRequestRejectionEmail(
-                gateRequest.applicantEmail,
-                gateRequest.applicantNameEn || "",
-                gateRequest.requestNumber,
-                rejectionReason.trim()
-            ).catch(err => console.error('Failed to send rejection email:', err));
+            // sendRequestRejectionEmail(
+            //     gateRequest.applicantEmail,
+            //     gateRequest.applicantNameEn || "",
+            //     gateRequest.requestNumber,
+            //     rejectionReason.trim()
+            // ).catch(err => console.error('Failed to send rejection email:', err));
 
             return NextResponse.json({
                 success: true,

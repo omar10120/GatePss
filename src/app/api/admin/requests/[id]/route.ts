@@ -139,16 +139,23 @@ export async function PUT(
                 const bytes = await file.arrayBuffer();
                 const buffer = Buffer.from(bytes);
 
-                const maxSize = parseInt(process.env.MAX_FILE_SIZE || '5242880');
+                const maxSize = parseInt(process.env.MAX_FILE_SIZE || '1048576');
                 if (buffer.length > maxSize) {
-                    throw new Error(`File ${file.name} size exceeds 5MB limit`);
+                    throw new Error(`File ${file.name} size exceeds 1MB limit`);
                 }
 
                 const allowedTypes = ['jpg', 'jpeg', 'png', 'pdf'];
                 const fileExt = file.name.split('.').pop()?.toLowerCase().trim();
 
-                if (!fileExt || !allowedTypes.includes(fileExt)) {
-                    throw new Error(`Only JPG, PNG, and PDF files are allowed for ${file.name}`);
+                if (prefix === 'other1' || prefix === 'other2') {
+                    const otherAllowedTypes = ['doc', 'docx', 'pdf', 'zip'];
+                    if (!fileExt || !otherAllowedTypes.includes(fileExt)) {
+                        throw new Error(`Only .doc,.pdf,.zip filetypes are allowed.`);
+                    }
+                } else {
+                    if (!fileExt || !allowedTypes.includes(fileExt)) {
+                        throw new Error(`Only JPG, PNG, and PDF files are allowed for ${file.name}`);
+                    }
                 }
 
                 const isVercel = !!process.env.VERCEL;
@@ -214,13 +221,19 @@ export async function PUT(
 
             // Handle file uploads
             try {
+                console.log('[API-Requests] PUT Body Keys:', Object.keys(body));
+                
                 if (body.passportIdImage instanceof File) {
+                    console.log('[API-Requests] Uploading passport image...');
                     const imagePath = await uploadFile(body.passportIdImage, 'passport');
                     if (imagePath) {
                         updateData.passportIdImagePath = imagePath;
                     }
                 }
+                
+                // Handle Photo - Check for both upload and removal
                 if (body.photo instanceof File) {
+                    console.log('[API-Requests] Uploading new photo...');
                     const photoPath = await uploadFile(body.photo, 'photo');
                     if (photoPath) {
                         // Update or create photo upload
@@ -242,8 +255,16 @@ export async function PUT(
                             });
                         }
                     }
+                } else if (body.remove_photo === 'true' || body.remove_photo === true) {
+                    console.log(`[API-Requests] Removing photo for request ${requestId}`);
+                    await prisma.upload.deleteMany({
+                        where: { requestId, fileType: 'PHOTO' }
+                    });
                 }
+                
+                // Handle Other Documents 1
                 if (body.otherDocuments1 instanceof File) {
+                    console.log('[API-Requests] Uploading other document 1...');
                     const otherDoc1Path = await uploadFile(body.otherDocuments1, 'other1');
                     if (otherDoc1Path) {
                         const existingOther1 = await prisma.upload.findFirst({
@@ -264,6 +285,11 @@ export async function PUT(
                             });
                         }
                     }
+                } else if (body.remove_otherDocuments1 === 'true' || body.remove_otherDocuments1 === true) {
+                    console.log(`[API-Requests] Removing other document 1 for request ${requestId}`);
+                    await prisma.upload.deleteMany({
+                        where: { requestId, fileType: 'OTHER_DOCUMENT_1' }
+                    });
                 }
                 if (body.otherDocuments2 instanceof File) {
                     const otherDoc2Path = await uploadFile(body.otherDocuments2, 'other2');
@@ -286,6 +312,10 @@ export async function PUT(
                             });
                         }
                     }
+                } else if (body.remove_otherDocuments2 === 'true' || body.remove_otherDocuments2 === true) {
+                    await prisma.upload.deleteMany({
+                        where: { requestId, fileType: 'OTHER_DOCUMENT_2' }
+                    });
                 }
             } catch (fileError: any) {
                 return NextResponse.json(
