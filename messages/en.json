@@ -249,7 +249,7 @@
             "idPassportNumber": "ID Or Passport Number of Pass Holder",
             "copyOfCivilId": "Copy of Civil ID or Passport",
             "otherDocuments1": "Other Documents 1",
-            "otherDocuments2": "Other Documents 2"
+            "otherDocuments2": "Other Documents 2."
         },
         "placeholders": {
             "select": "Select --",
