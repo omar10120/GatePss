@@ -8,6 +8,7 @@ interface FileUploadProps {
     accept: string;
     placeholder?: string;
     error?: string;
+    helperText?: string;
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
@@ -18,14 +19,20 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     accept,
     placeholder,
     error,
+    helperText,
 }) => {
     const [fileName, setFileName] = React.useState<string | null>(null);
 
     return (
         <div className="w-full">
-            <label htmlFor={id} className="block text-[16px] font-normal text-[#222222] mb-2 font-['Rubik']">
+            <label htmlFor={id} className="block text-[16px] font-normal text-[#222222] mb-1 font-['Rubik']">
                 {label}
             </label>
+            {helperText && (
+                <p className="text-[12px] text-[#747474] mb-2 font-['Rubik'] font-light">
+                    {helperText}
+                </p>
+            )}
             <div className="relative group">
                 <input
                     type="file"

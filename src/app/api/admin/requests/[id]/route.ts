@@ -133,29 +133,22 @@ export async function PUT(
             // Allow editing for all statuses (removed restriction)
 
             // Handle file uploads
-            const uploadFile = async (file: File | null, prefix: string) => {
+            const uploadFile = async (file: File | null, prefix: string, customMaxSize?: number, allowedExts: string[] = ['jpg', 'jpeg', 'png', 'pdf']) => {
                 if (!file || file.size === 0 || file.name === undefined || file.name === '') return null;
 
                 const bytes = await file.arrayBuffer();
                 const buffer = Buffer.from(bytes);
 
-                const maxSize = parseInt(process.env.MAX_FILE_SIZE || '1048576');
+                const maxSize = customMaxSize || parseInt(process.env.MAX_FILE_SIZE || '1048576');
                 if (buffer.length > maxSize) {
-                    throw new Error(`File ${file.name} size exceeds 1MB limit`);
+                    const sizeLabel = maxSize >= 1024 * 1024 ? `${(maxSize / (1024 * 1024)).toFixed(0)}MB` : `${(maxSize / 1024).toFixed(0)}KB`;
+                    throw new Error(`File ${file.name} size exceeds ${sizeLabel} limit`);
                 }
 
-                const allowedTypes = ['jpg', 'jpeg', 'png', 'pdf'];
                 const fileExt = file.name.split('.').pop()?.toLowerCase().trim();
 
-                if (prefix === 'other1' || prefix === 'other2') {
-                    const otherAllowedTypes = ['doc', 'docx', 'pdf', 'zip'];
-                    if (!fileExt || !otherAllowedTypes.includes(fileExt)) {
-                        throw new Error(`Only .doc,.pdf,.zip filetypes are allowed.`);
-                    }
-                } else {
-                    if (!fileExt || !allowedTypes.includes(fileExt)) {
-                        throw new Error(`Only JPG, PNG, and PDF files are allowed for ${file.name}`);
-                    }
+                if (!fileExt || !allowedExts.includes(fileExt)) {
+                    throw new Error(`Invalid file type for ${file.name}. Allowed types: ${allowedExts.join(', ')}`);
                 }
 
                 const isVercel = !!process.env.VERCEL;
@@ -225,7 +218,7 @@ export async function PUT(
                 
                 if (body.passportIdImage instanceof File) {
                     console.log('[API-Requests] Uploading passport image...');
-                    const imagePath = await uploadFile(body.passportIdImage, 'passport');
+                    const imagePath = await uploadFile(body.passportIdImage, 'passport', 2 * 1024 * 1024, ['jpg', 'jpeg', 'png', 'pdf']);
                     if (imagePath) {
                         updateData.passportIdImagePath = imagePath;
                     }
@@ -234,7 +227,7 @@ export async function PUT(
                 // Handle Photo - Check for both upload and removal
                 if (body.photo instanceof File) {
                     console.log('[API-Requests] Uploading new photo...');
-                    const photoPath = await uploadFile(body.photo, 'photo');
+                    const photoPath = await uploadFile(body.photo, 'photo', 250 * 1024, ['jpg', 'jpeg', 'png']);
                     if (photoPath) {
                         // Update or create photo upload
                         const existingPhoto = await prisma.upload.findFirst({
@@ -265,7 +258,7 @@ export async function PUT(
                 // Handle Other Documents 1
                 if (body.otherDocuments1 instanceof File) {
                     console.log('[API-Requests] Uploading other document 1...');
-                    const otherDoc1Path = await uploadFile(body.otherDocuments1, 'other1');
+                    const otherDoc1Path = await uploadFile(body.otherDocuments1, 'other1', 2 * 1024 * 1024, ['pdf']);
                     if (otherDoc1Path) {
                         const existingOther1 = await prisma.upload.findFirst({
                             where: { requestId, fileType: 'OTHER_DOCUMENT_1' }
@@ -292,7 +285,7 @@ export async function PUT(
                     });
                 }
                 if (body.otherDocuments2 instanceof File) {
-                    const otherDoc2Path = await uploadFile(body.otherDocuments2, 'other2');
+                    const otherDoc2Path = await uploadFile(body.otherDocuments2, 'other2', 2 * 1024 * 1024, ['pdf']);
                     if (otherDoc2Path) {
                         const existingOther2 = await prisma.upload.findFirst({
                             where: { requestId, fileType: 'OTHER_DOCUMENT_2' }

@@ -1,0 +1,19 @@
+10:37 AM 12/24/2025
+========================
+
+API #1: Post Gatepass (CreateNewGatepass)  - UAT:
+https://uat-api.soharportandfreezone.om/api/gatepass/post?entity=port
+
+API #2: Get Gatepass Status (GetByPassNumber) - UAT:
+https://uat-api.soharportandfreezone.om/api/getpassdetails/get?passNumber=XXXXXXXXX&entity=port
+
+Note that:
+ - XXXXXXXXX = Gatepass Number
+ - You will be only able to inquiry for any gate pass created by a shared username.
+ - You will not be able to check the status of any other GatePass even those created by Majees users using our application from the front end.
+
+UAT Username: Majees.API
+UAT Password: M@jee$@p1
+Authentication Type: Basic 
+
+

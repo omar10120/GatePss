@@ -309,10 +309,10 @@ export const GatePassForm: React.FC = () => {
             newFieldErrors['passportIdImage'] = `${fieldLabel} ${getBilingualNested(['errors', 'required'])}`;
             isValid = false;
         } else {
-            // Validate passport ID image size (max 1MB)
-            const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+            // Validate passport ID image size (max 2MB)
+            const maxSize = 2 * 1024 * 1024; // 2MB in bytes
             if (passportIdImage.size > maxSize) {
-                newFieldErrors['passportIdImage'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 1MB limit';
+                newFieldErrors['passportIdImage'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (2MB)';
                 isValid = false;
             }
             // Validate file type
@@ -326,16 +326,16 @@ export const GatePassForm: React.FC = () => {
         // Photo validation (optional but if provided, validate it)
         const photo = formData.get('photo') as File | null;
         if (photo && photo.size > 0) {
-            // Validate photo size (max 100KB to match Sohar Port)
-            const maxSize = 100 * 1024; // 100KB in bytes
+            // Validate photo size (max 250KB)
+            const maxSize = 250 * 1024; // 250KB in bytes
             if (photo.size > maxSize) {
-                newFieldErrors['photo'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (100KB)';
+                newFieldErrors['photo'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (250KB)';
                 isValid = false;
             }
-            // Validate file type
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+            // Validate file type (jpg, png only)
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
             if (!allowedTypes.includes(photo.type)) {
-                newFieldErrors['photo'] = getBilingualNested(['errors', 'invalidFileType']) || 'Only JPG, PNG, and PDF files are allowed';
+                newFieldErrors['photo'] = getBilingualNested(['errors', 'invalidFileType']) || 'Only JPG and PNG files are allowed';
                 isValid = false;
             }
         }
@@ -343,30 +343,30 @@ export const GatePassForm: React.FC = () => {
         // Other Documents validation (optional but if provided, validate them)
         const otherDocuments1 = formData.get('otherDocuments1') as File | null;
         if (otherDocuments1 && otherDocuments1.size > 0) {
-            const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+            const maxSize = 2 * 1024 * 1024; // 2MB in bytes
             if (otherDocuments1.size > maxSize) {
-                newFieldErrors['otherDocuments1'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 1MB limit';
+                newFieldErrors['otherDocuments1'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (2MB)';
                 isValid = false;
             }
-            const allowedTypes = ['doc', 'docx', 'pdf', 'zip'];
+            const allowedTypes = ['pdf'];
             const fileExt = otherDocuments1.name.split('.').pop()?.toLowerCase().trim();
             if (!fileExt || !allowedTypes.includes(fileExt)) {
-                newFieldErrors['otherDocuments1'] = 'Only .doc,.pdf,.zip filetypes are allowed.';
+                newFieldErrors['otherDocuments1'] = 'Only PDF files are allowed.';
                 isValid = false;
             }
         }
 
         const otherDocuments2 = formData.get('otherDocuments2') as File | null;
         if (otherDocuments2 && otherDocuments2.size > 0) {
-            const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+            const maxSize = 2 * 1024 * 1024; // 2MB in bytes
             if (otherDocuments2.size > maxSize) {
-                newFieldErrors['otherDocuments2'] = getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds 1MB limit';
+                newFieldErrors['otherDocuments2'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (2MB)';
                 isValid = false;
             }
-            const allowedTypes = ['doc', 'docx', 'pdf', 'zip'];
+            const allowedTypes = ['pdf'];
             const fileExt = otherDocuments2.name.split('.').pop()?.toLowerCase().trim();
             if (!fileExt || !allowedTypes.includes(fileExt)) {
-                newFieldErrors['otherDocuments2'] = 'Only .doc,.pdf,.zip filetypes are allowed.';
+                newFieldErrors['otherDocuments2'] = 'Only PDF files are allowed.';
                 isValid = false;
             }
         }
@@ -1046,7 +1046,8 @@ export const GatePassForm: React.FC = () => {
                             label={getBilingualNested(['fields', 'copyOfCivilId'])}
                             placeholder={getBilingualNested(['placeholders', 'choosePhoto'])}
                             required
-                            accept=".png,.jpg,.jpeg"
+                            accept=".png,.jpg,.jpeg,.pdf"
+                            helperText="(jpg, png, pdf) max 2MB"
                             error={fieldErrors.passportIdImage}
                         />
                     </div>
@@ -1056,6 +1057,7 @@ export const GatePassForm: React.FC = () => {
                         label={getBilingualNested(['fields', 'photo'])}
                         placeholder={getBilingualNested(['placeholders', 'choosePhoto'])}
                         accept=".png,.jpg,.jpeg"
+                        helperText="(jpg, png) max 250KB"
                         error={fieldErrors.photo}
                     />
                     <FileUpload
@@ -1063,7 +1065,8 @@ export const GatePassForm: React.FC = () => {
                         name="otherDocuments1"
                         label={getBilingualNested(['fields', 'otherDocuments1'])}
                         placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
-                        accept=".doc,.pdf,.zip"
+                        accept=".pdf"
+                        helperText="(pdf) max 2MB"
                         error={fieldErrors.otherDocuments1}
                     />
 
@@ -1072,7 +1075,8 @@ export const GatePassForm: React.FC = () => {
                         name="otherDocuments2"
                         label={getBilingualNested(['fields', 'otherDocuments2'])}
                         placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
-                        accept=".doc,.pdf,.zip"
+                        accept=".pdf"
+                        helperText="(pdf) max 2MB"
                         error={fieldErrors.otherDocuments2}
                     />
                 </div>

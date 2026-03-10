@@ -140,31 +140,22 @@ export async function POST(request: NextRequest) {
         }
 
         // Handle file uploads
-        const uploadFile = async (file: File | null, prefix: string) => {
+        const uploadFile = async (file: File | null, prefix: string, customMaxSize?: number, allowedExts: string[] = ['jpg', 'jpeg', 'png', 'pdf']) => {
             if (!file || file.size === 0 || file.name === undefined || file.name === '') return null;
 
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
 
-
-            const maxSize = parseInt(process.env.MAX_FILE_SIZE || '1048576');
+            const maxSize = customMaxSize || parseInt(process.env.MAX_FILE_SIZE || '1048576');
             if (buffer.length > maxSize) {
-                throw new Error(`File ${file.name} size exceeds 1MB limit`);
+                const sizeLabel = maxSize >= 1024 * 1024 ? `${(maxSize / (1024 * 1024)).toFixed(0)}MB` : `${(maxSize / 1024).toFixed(0)}KB`;
+                throw new Error(`File ${file.name} size exceeds ${sizeLabel} limit`);
             }
 
-
-            const allowedTypes = ['jpg', 'jpeg', 'png', 'pdf'];
             const fileExt = file.name.split('.').pop()?.toLowerCase().trim();
 
-            if (prefix === 'other1' || prefix === 'other2') {
-                const otherAllowedTypes = ['doc', 'docx', 'pdf', 'zip'];
-                if (!fileExt || !otherAllowedTypes.includes(fileExt)) {
-                    throw new Error(`Only .doc,.pdf,.zip filetypes are allowed.`);
-                }
-            } else {
-                if (!fileExt || !allowedTypes.includes(fileExt)) {
-                    throw new Error(`Only JPG, PNG, and PDF files are allowed for ${file.name}`);
-                }
+            if (!fileExt || !allowedExts.includes(fileExt)) {
+                throw new Error(`Invalid file type for ${file.name}. Allowed types: ${allowedExts.join(', ')}`);
             }
 
 
@@ -214,11 +205,11 @@ export async function POST(request: NextRequest) {
         console.log(' Photo extraction - photo instanceof File:', photo instanceof File);
 
         try {
-            imagePath = await uploadFile(passportIdImage, 'passport');
-            photoPath = await uploadFile(photo, 'photo');
+            imagePath = await uploadFile(passportIdImage, 'passport', 2 * 1024 * 1024, ['jpg', 'jpeg', 'png', 'pdf']);
+            photoPath = await uploadFile(photo, 'photo', 250 * 1024, ['jpg', 'jpeg', 'png']);
             console.log('📸 After uploadFile - photoPath:', photoPath);
-            otherDoc1Path = await uploadFile(formData.get('otherDocuments1') as File | null, 'other1');
-            otherDoc2Path = await uploadFile(formData.get('otherDocuments2') as File | null, 'other2');
+            otherDoc1Path = await uploadFile(formData.get('otherDocuments1') as File | null, 'other1', 2 * 1024 * 1024, ['pdf']);
+            otherDoc2Path = await uploadFile(formData.get('otherDocuments2') as File | null, 'other2', 2 * 1024 * 1024, ['pdf']);
         } catch (err: any) {
             console.error('❌ File upload error:', err);
             return NextResponse.json(
