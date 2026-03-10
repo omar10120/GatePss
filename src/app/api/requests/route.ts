@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
         const passFor = formData.get('passFor') as string | null;
         const passTypeId = formData.get('passTypeId') as string | null;
         const entityType = (formData.get('entityType') as string) || 'port';
+        const applicantPhone = (formData.get('telephone') as string) || (formData.get('applicantPhone') as string) || '';
 
         // Validate required fields using BRD requirements
         const errors: string[] = [];
@@ -293,7 +294,7 @@ export async function POST(request: NextRequest) {
                 applicantNameEn: applicantNameEn?.trim() || null,
                 applicantNameAr: applicantNameAr.trim(),
                 applicantEmail: applicantEmail.toLowerCase().trim(),
-                applicantPhone: "+96892104795",
+                applicantPhone: applicantPhone || "+96892104795",
                 gender: gender,
                 profession: profession.trim(),
                 passportIdNumber: passportIdNumber.toUpperCase().trim(),
