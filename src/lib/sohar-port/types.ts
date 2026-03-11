@@ -125,13 +125,13 @@ export interface GetGatePassRequest {
 export interface GatePassData {
     externalReference: string;
     status: GatePassStatus;
-    requestNumber: string;
-    applicantName: string;
-    applicantEmail: string;
-    passportIdNumber: string;
-    purposeOfVisit: string;
-    dateOfVisit: string;
-    requestType: GatePassType;
+    requestNumber?: string;
+    applicantName?: string;
+    applicantEmail?: string;
+    passportIdNumber?: string;
+    purposeOfVisit?: string;
+    dateOfVisit?: string;
+    requestType?: GatePassType | string;
     qrCodePdfUrl?: string;
     validFrom?: string;
     validUntil?: string;

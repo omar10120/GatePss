@@ -105,7 +105,8 @@ export default function RequestDetailsPage() {
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    const [integrationError, setIntegrationError] = useState<any>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [integrationError, setIntegrationError] = useState<{ error: string, message: string, details?: any } | null>(null);
     const [rejectionReason, setRejectionReason] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -585,6 +586,33 @@ export default function RequestDetailsPage() {
         }
     };
 
+    const handleSync = async () => {
+        if (!request?.externalReference || isSyncing) return;
+        
+        setIsSyncing(true);
+        setError('');
+        setSuccess('');
+        
+        try {
+            const response = await authenticatedFetch(`/api/admin/requests/${requestId}/sync`, {
+                method: 'POST',
+            });
+            
+            const result = await response.json().catch(() => ({}));
+            
+            if (response.ok && result.success) {
+                setSuccess(result.message || 'Status synced successfully');
+                fetchRequestDetails(requestId, false);
+            } else {
+                setError(result.message || 'Failed to sync status');
+            }
+        } catch (err: any) {
+            setError(err.message || 'An error occurred during sync');
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
     const handleCancel = () => {
         if (request) {
             setEditData({ ...request }); // Reset to original data
@@ -767,6 +795,8 @@ export default function RequestDetailsPage() {
                                 <div className="flex items-center justify-between mb-8">
                                     <RequestHeader
                                         requestNumber={request.requestNumber}
+                                        onSync={request.externalReference ? handleSync : undefined}
+                                        isSyncing={isSyncing}
                                     />
                                     <div className="flex items-center gap-3">
                                         {isEditMode && request.status === 'PENDING' ? (
