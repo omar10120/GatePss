@@ -83,6 +83,8 @@ function mapVisitorType(requestType: string): string {
     const visitorTypeMap: Record<string, string> = {
         'VISITOR': '8',
         'CONTRACTOR': '7',
+        'SUB_CONTRACTOR': '7',
+        'SERVICE_PROVIDER': '5',
         'EMPLOYEE': '6',
         'VEHICLE': '9',
     };
@@ -135,7 +137,7 @@ export async function createGatePass(
             email: request.applicantEmail,
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
             identification_number: request.passportIdNumber,
-            visitor_type: mapVisitorType(request.requestType),
+            visitor_type: mapVisitorType(gateRequest?.passFor || 'VISITOR'),
             blood_type: gateRequest?.bloodType || 'O+',
             start_date: formatDate(request.dateOfVisit),
             end_date: gateRequest?.validTo
@@ -229,23 +231,25 @@ export async function createGatePass(
         });
 
         // Map fields to normalized response, handling both PascalCase (API) and camelCase (Mock/Legacy)
-        const isSuccess = response.Result === 'SUCCESS';
+        const isSuccess = response.Result === 'SUCCESS' || response.result === 'SUCCESS';
+        const isError = response.Result === 'ERROR' || response.result === 'ERROR' || response.Result === 'FAILED' || response.result === 'FAILED';
         
         const result: CreateGatePassResponse = {
-            success: true, // We reached this point, so it's a success in terms of request/response flow
-            statusCode: 200,
-            message: (isSuccess ? `Gate pass created successfully` : 'Request received with issues'),
+            success: isSuccess,
+            statusCode: isSuccess ? 200 : 400,
+            message: isSuccess 
+                ? 'Gate pass created successfully' 
+                : (response.ErrorDetails || response.message || 'Request received with issues'),
             externalReference: response.PassNumber,
             so_status: response.PassStatus,
             qrCodePdfUrl: response.qrCodePdfUrl || response.qrCode,
         };
 
-        // If explicitly failed in the body despite 200 OK
-        if (response.Result === 'FAILED' || response.result === 'FAILED') {
-            result.success = false;
+        if (isSuccess) {
+            logSuccess('createGatePass', `Gate pass created: ${result.externalReference}`);
+        } else {
+            logError('createGatePass', new Error(result.message));
         }
-
-        logSuccess('createGatePass', `Gate pass created: ${result.externalReference}`);
 
         return result;
 

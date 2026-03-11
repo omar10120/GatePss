@@ -15,7 +15,7 @@
  */
 
 import { SoharPortHttpClient } from '../client';
-import { GetGatePassRequest, GetGatePassResponse, GatePassStatus, SoharPortNotFoundError } from '../types';
+import { GetGatePassRequest, GetGatePassResponse, GatePassStatus, SoharPortNotFoundError, GatePassData } from '../types';
 import { getEndpointUrl } from '../config';
 import { logSuccess, logError } from '../utils/logger';
 
@@ -59,32 +59,20 @@ export async function getGatePass(
 
         // Map API response to our internal structure
         // The API response structure may vary, so we handle multiple possible field names
-        const mappedStatus = mapSoharStatusToInternal(response.status);
-        const gatePassData = {
-            externalReference: response.passNumber || response.externalReference || response.id || request.externalReference,
-            status: mappedStatus || 'PENDING' as GatePassStatus, // Default to PENDING if status not found
-            requestNumber: response.requestNumber || response.passNumber || request.externalReference,
-            applicantName: response.name || response.applicantName || response.applicant_name,
-            applicantEmail: response.email || response.applicantEmail || response.applicant_email,
-            passportIdNumber: response.identification_number || response.passportIdNumber || response.passport_id_number,
-            purposeOfVisit: response.reason_for_visit || response.purposeOfVisit || response.purpose_of_visit,
-            dateOfVisit: response.date_of_visit || response.dateOfVisit,
-            requestType: response.visitor_type || response.requestType || response.request_type,
-            qrCodePdfUrl: response.qr_code_pdf_url || response.qrCodePdfUrl || response.qr_code_url,
-            validFrom: response.start_date || response.validFrom || response.valid_from,
-            validUntil: response.end_date || response.validUntil || response.valid_until || response.valid_to,
-            createdAt: response.created_at || response.createdAt,
-            updatedAt: response.updated_at || response.updatedAt,
+        const statusValue = response.status || response.PassStatus || response.externalStatus;
+        const mappedStatus = mapSoharStatusToInternal(statusValue);
+        const gatePassData: GatePassData = {
+            externalReference: response.Barcode || response.PassNumber || request.externalReference,
+            status: mappedStatus || 'PENDING' as GatePassStatus,
             metadata: {
                 ...response,
-                // Preserve any additional fields from the API response
             },
         };
 
         const result: GetGatePassResponse = {
             success: true,
             statusCode: 200,
-            message: 'Gate pass retrieved successfully',
+            message: `Status is ${statusValue || 'PENDING'}`,
             data: gatePassData,
         };
 
