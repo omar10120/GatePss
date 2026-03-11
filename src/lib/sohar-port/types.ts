@@ -231,6 +231,7 @@ export interface RequestOptions {
     data?: any;
     params?: Record<string, string | number | boolean>;
     headers?: Record<string, string>;
+    externalReference?: string;
 }
 
 // ============================================================================

@@ -25,6 +25,8 @@ export async function logApiCall(log: SoharPortActivityLog): Promise<void> {
                     externalReference: log.externalReference,
                     duration: log.duration,
                     error: log.error,
+                    requestData: log.requestData,
+                    responseData: log.responseData,
                     timestamp: new Date().toISOString(),
                 }),
             },
