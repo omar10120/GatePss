@@ -159,6 +159,7 @@ export class SoharPortHttpClient {
                 operation: `${options.method} ${options.endpoint}`,
                 statusCode: response.status,
                 duration,
+                externalReference: options.externalReference,
                 requestData: options.data,
                 responseData: response.data,
             });
@@ -173,6 +174,7 @@ export class SoharPortHttpClient {
                 operation: `${options.method} ${options.endpoint}`,
                 statusCode: error.response?.status || 0,
                 duration,
+                externalReference: options.externalReference,
                 error: error.message,
                 requestData: options.data,
             });

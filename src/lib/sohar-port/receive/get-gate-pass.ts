@@ -18,6 +18,7 @@ import { SoharPortHttpClient } from '../client';
 import { GetGatePassRequest, GetGatePassResponse, GatePassStatus, SoharPortNotFoundError, GatePassData } from '../types';
 import { getEndpointUrl } from '../config';
 import { logSuccess, logError } from '../utils/logger';
+import { logger } from '../../logger';
 
 /**
  * Get a single gate pass from Sohar Port system
@@ -48,6 +49,15 @@ export async function getGatePass(
 
         // Make GET request to Sohar Port API
         // Endpoint: /api/getpassdetails/get?passNumber={externalReference}&entity=port
+        logger.info(`Sohar Port Get Gate Pass Request: ${request.externalReference}`, {
+            type: 'SOHAR_PORT_GET_GATE_PASS_REQUEST',
+            externalReference: request.externalReference,
+            params: {
+                passNumber: request.externalReference.trim(),
+                entity: 'port',
+            }
+        });
+
         const response = await client.request<any>({
             method: 'GET',
             endpoint: getEndpointUrl('v1', 'GET_GATE_PASS'),
@@ -55,6 +65,14 @@ export async function getGatePass(
                 passNumber: request.externalReference.trim(),
                 entity: 'port', // Always "port" as per API specification
             },
+            externalReference: request.externalReference,
+        });
+
+        // Log the raw response from Sohar Port
+        logger.info(`Sohar Port Get Gate Pass Response: ${request.externalReference}`, {
+            type: 'SOHAR_PORT_GET_GATE_PASS_RESPONSE',
+            externalReference: request.externalReference,
+            response,
         });
 
         // Map API response to our internal structure
