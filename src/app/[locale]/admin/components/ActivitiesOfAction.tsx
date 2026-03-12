@@ -32,20 +32,20 @@ export const ActivitiesOfAction: React.FC = () => {
             setLoading(true);
             try {
                 let url = '/api/admin/dashboard/charts';
-    
+
                 if (filter === 'Custom' && appliedStartDate && appliedEndDate) {
                     url += `?startDate=${appliedStartDate}&endDate=${appliedEndDate}`;
                 } else {
                     const days =
                         filter === 'Day' ? 1 :
-                        filter === 'Week' ? 7 :
-                        30;
-    
+                            filter === 'Week' ? 7 :
+                                30;
+
                     url += `?days=${days}`;
                 }
-    
+
                 const result = await apiFetch<{ lineChart: ChartDataPoint[] }>(url);
-    
+
                 if (result?.lineChart) {
                     setChartData(result.lineChart);
                 }
@@ -55,10 +55,10 @@ export const ActivitiesOfAction: React.FC = () => {
                 setLoading(false);
             }
         };
-    
+
         fetchChartData();
     }, [filter, appliedStartDate, appliedEndDate]);
-    
+
 
 
     const handleFilterClick = (f: 'Day' | 'Week' | 'Month') => {
@@ -76,22 +76,22 @@ export const ActivitiesOfAction: React.FC = () => {
 
     const handleCustomDateApply = () => {
         if (!tempStartDate || !tempEndDate) return;
-    
+
         const start = new Date(tempStartDate);
         const end = new Date(tempEndDate);
-    
+
         if (start > end) {
             alert('Start date must be before end date');
             return;
         }
-    
+
         // Apply the temporary dates to the actual filter state
         setAppliedStartDate(tempStartDate);
         setAppliedEndDate(tempEndDate);
         setFilter('Custom');
         setIsDatePickerOpen(false);
     };
-    
+
 
     const handleClearCustomDate = () => {
         setTempStartDate('');
@@ -118,7 +118,7 @@ export const ActivitiesOfAction: React.FC = () => {
             const x = padding + index * stepX;
             const value = getValue(point);
             const y = height - padding - (value / maxValue) * chartHeight;
-            
+
             if (index === 0) {
                 path = `M ${x} ${y}`;
             } else {
@@ -137,7 +137,7 @@ export const ActivitiesOfAction: React.FC = () => {
     // Get month labels based on data
     const getXAxisLabels = () => {
         if (chartData.length === 0) return [];
-    
+
         if (filter === 'Day' || filter === 'Week' || filter === 'Custom') {
             return chartData.map(item =>
                 new Date(item.date).toLocaleDateString('en-US', {
@@ -146,7 +146,7 @@ export const ActivitiesOfAction: React.FC = () => {
                 })
             );
         }
-    
+
         // Month
         return chartData.map(item =>
             new Date(item.date).toLocaleDateString('en-US', {
@@ -154,7 +154,7 @@ export const ActivitiesOfAction: React.FC = () => {
             })
         );
     };
-    
+
     const xAxisLabels = getXAxisLabels();
 
     // Calculate points for interaction
@@ -186,7 +186,7 @@ export const ActivitiesOfAction: React.FC = () => {
         if (chartData.length > 0) {
             const middleIndex = Math.floor(chartData.length / 2);
             const middleData = chartData[middleIndex];
-            
+
             if (middleData) {
                 // Calculate position for middle point (use requests line)
                 const maxValue = Math.max(...chartData.map(p => p.approved + p.pending + p.rejected), 1);
@@ -195,16 +195,16 @@ export const ActivitiesOfAction: React.FC = () => {
                 const padding = 20;
                 const chartHeight = height - padding * 2;
                 const stepX = (width - padding * 2) / Math.max(chartData.length - 1, 1);
-                
+
                 const x = padding + middleIndex * stepX;
                 const value = middleData.approved + middleData.pending + middleData.rejected;
                 const y = height - padding - (value / maxValue) * chartHeight;
-                
-                setHoveredPoint({ 
-                    x, 
-                    y, 
-                    data: middleData, 
-                    type: 'requests' 
+
+                setHoveredPoint({
+                    x,
+                    y,
+                    data: middleData,
+                    type: 'requests'
                 });
             }
         }
@@ -226,90 +226,89 @@ export const ActivitiesOfAction: React.FC = () => {
                         </button>
                     ))}
                     <div className="bg-gray-100 p-2 rounded-lg ml-2 cursor-pointer hover:bg-gray-200 transition-colors">
-                    <div className="relative">
-                        <button
-                            onClick={handleCalendarClick}
-                            className={`bg-gray-100 p-1.5 rounded-lg hover:bg-gray-200 flex items-center justify-center ${
-                                filter === 'Custom' ? 'bg-blue-100' : ''
-                            }`}
-                        >
-                            <svg className={`w-5 h-5 ${filter === 'Custom' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </button>
-                        {/* Date Picker Popover */}
-                        {isDatePickerOpen && (
-                            <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-gray-200 p-4 z-[10000] min-w-[280px]">
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h4 className="text-sm font-semibold text-gray-900">{t('selectDateRange')}</h4>
-                                        <button
-                                            onClick={() => setIsDatePickerOpen(false)}
-                                            className="text-gray-400 hover:text-gray-600 transition-colors"
-                                            aria-label="Close"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    
-                                    <div className="space-y-3">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                {t('startDate')}
-                                            </label>
-                                            <input
-                                                type="date"
-                                                value={tempStartDate}
-                                                onChange={(e) => setTempStartDate(e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                style={{ color: '#111827' }}
-                                            />
-                                        </div>
-                                        
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                {t('endDate')}
-                                            </label>
-                                            <input
-                                                type="date"
-                                                value={tempEndDate}
-                                                onChange={(e) => setTempEndDate(e.target.value)}
-                                                min={tempStartDate || undefined}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                style={{ color: '#111827' }}
-                                            />
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                                        <button
-                                            onClick={handleCustomDateApply}
-                                            disabled={!tempStartDate || !tempEndDate}
-                                            className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            {t('applyNow')}
-                                        </button>
-                                        {(tempStartDate || tempEndDate || filter === 'Custom') && (
+                        <div className="relative">
+                            <button
+                                onClick={handleCalendarClick}
+                                className={`bg-gray-100 p-1.5 rounded-lg hover:bg-gray-200 flex items-center justify-center ${filter === 'Custom' ? 'bg-blue-100' : ''
+                                    }`}
+                            >
+                                <svg className={`w-5 h-5 ${filter === 'Custom' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </button>
+                            {/* Date Picker Popover */}
+                            {isDatePickerOpen && (
+                                <div className="absolute left-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-gray-200 p-4 z-[10000] min-w-[280px]">
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h4 className="text-sm font-semibold text-gray-900">{t('selectDateRange')}</h4>
                                             <button
-                                                onClick={handleClearCustomDate}
-                                                className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                                                onClick={() => setIsDatePickerOpen(false)}
+                                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                                                aria-label="Close"
                                             >
-                                                {t('clear')}
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
                                             </button>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                    {t('startDate')}
+                                                </label>
+                                                <input
+                                                    type="date"
+                                                    value={tempStartDate}
+                                                    onChange={(e) => setTempStartDate(e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    style={{ color: '#111827' }}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                    {t('endDate')}
+                                                </label>
+                                                <input
+                                                    type="date"
+                                                    value={tempEndDate}
+                                                    onChange={(e) => setTempEndDate(e.target.value)}
+                                                    min={tempStartDate || undefined}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    style={{ color: '#111827' }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                                            <button
+                                                onClick={handleCustomDateApply}
+                                                disabled={!tempStartDate || !tempEndDate}
+                                                className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {t('applyNow')}
+                                            </button>
+                                            {(tempStartDate || tempEndDate || filter === 'Custom') && (
+                                                <button
+                                                    onClick={handleClearCustomDate}
+                                                    className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                                                >
+                                                    {t('clear')}
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {filter === 'Custom' && appliedStartDate && appliedEndDate && (
+                                            <div className="text-xs text-gray-500 pt-1 border-t border-gray-100">
+                                                <span className="font-medium">{t('active')}:</span> {new Date(appliedStartDate).toLocaleDateString()} - {new Date(appliedEndDate).toLocaleDateString()}
+                                            </div>
                                         )}
                                     </div>
-                                    
-                                    {filter === 'Custom' && appliedStartDate && appliedEndDate && (
-                                        <div className="text-xs text-gray-500 pt-1 border-t border-gray-100">
-                                            <span className="font-medium">{t('active')}:</span> {new Date(appliedStartDate).toLocaleDateString()} - {new Date(appliedEndDate).toLocaleDateString()}
-                                        </div>
-                                    )}
                                 </div>
-                            </div>
-                        )}
-                        
+                            )}
+
                         </div>
                     </div>
                 </div>
@@ -382,11 +381,11 @@ export const ActivitiesOfAction: React.FC = () => {
                                         const middleIndex = Math.floor(chartData.length / 2);
                                         const middlePoint = requestsPoints[middleIndex];
                                         if (middlePoint) {
-                                            setHoveredPoint({ 
-                                                x: middlePoint.x, 
-                                                y: middlePoint.y, 
-                                                data: middlePoint.data, 
-                                                type: 'requests' 
+                                            setHoveredPoint({
+                                                x: middlePoint.x,
+                                                y: middlePoint.y,
+                                                data: middlePoint.data,
+                                                type: 'requests'
                                             });
                                         }
                                     }}
@@ -410,11 +409,11 @@ export const ActivitiesOfAction: React.FC = () => {
                                         const middleIndex = Math.floor(chartData.length / 2);
                                         const middlePoint = requestsPoints[middleIndex];
                                         if (middlePoint) {
-                                            setHoveredPoint({ 
-                                                x: middlePoint.x, 
-                                                y: middlePoint.y, 
-                                                data: middlePoint.data, 
-                                                type: 'requests' 
+                                            setHoveredPoint({
+                                                x: middlePoint.x,
+                                                y: middlePoint.y,
+                                                data: middlePoint.data,
+                                                type: 'requests'
                                             });
                                         }
                                     }}
@@ -437,7 +436,7 @@ export const ActivitiesOfAction: React.FC = () => {
                                     {new Date(hoveredPoint.data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                 </p>
                                 <p className="text-xs font-bold text-gray-900">
-                                    {hoveredPoint.type === 'requests' 
+                                    {hoveredPoint.type === 'requests'
                                         ? `${hoveredPoint.data.approved + hoveredPoint.data.pending + hoveredPoint.data.rejected} ${t('requests')}`
                                         : `${hoveredPoint.data.adminApproved} ${t('permits')}`
                                     }
