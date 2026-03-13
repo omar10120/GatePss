@@ -127,7 +127,7 @@ export async function POST(
 
             if (!apiResponse.success) {
                 console.error('Sohar Port Integration Failed:', apiResponse);
-                
+
                 // Persist the failure status to the database so admins can see why it failed
                 await prisma.request.update({
                     where: { id: requestId },

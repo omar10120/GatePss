@@ -122,6 +122,7 @@ export async function GET(request: NextRequest) {
 
             // Get total count
             const total = await prisma.request.count({ where });
+            console.log(total);
 
             // Get requests
             const requests = await prisma.request.findMany({

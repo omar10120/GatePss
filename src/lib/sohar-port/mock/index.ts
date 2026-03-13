@@ -119,9 +119,9 @@ export async function mockListGatePasses(
     if (request.searchQuery) {
         const query = request.searchQuery.toLowerCase();
         gatePasses = gatePasses.filter(gp =>
-            gp.requestNumber.toLowerCase().includes(query) ||
-            gp.applicantName.toLowerCase().includes(query) ||
-            gp.passportIdNumber.toLowerCase().includes(query)
+            gp.requestNumber?.toLowerCase().includes(query) ||
+            gp.applicantName?.toLowerCase().includes(query) ||
+            gp.passportIdNumber?.toLowerCase().includes(query)
         );
     }
 
