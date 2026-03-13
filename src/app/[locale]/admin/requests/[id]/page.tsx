@@ -359,11 +359,11 @@ export default function RequestDetailsPage() {
                             const file = files[key];
                             if (file) {
                                 if (key === 'photo' || key === 'passportIdImage') {
-                                    const options = key === 'photo' 
+                                    const options = key === 'photo'
                                         ? { maxWidth: 300, maxHeight: 300, quality: 0.4 }
                                         : { maxWidth: 600, maxHeight: 600, quality: 0.5 };
                                     const compressedFile = await compressImage(file, options);
-                                    console.log(`[handleSave-Approve] Compressed ${key}: ${file.size} -> ${compressedFile.size} bytes`);
+
                                     formData.append(key, compressedFile);
                                 } else {
                                     formData.append(key, file);
@@ -420,11 +420,11 @@ export default function RequestDetailsPage() {
                                 const file = files[key];
                                 if (file) {
                                     if (key === 'photo' || key === 'passportIdImage') {
-                                        const options = key === 'photo' 
+                                        const options = key === 'photo'
                                             ? { maxWidth: 300, maxHeight: 300, quality: 0.4 }
                                             : { maxWidth: 600, maxHeight: 600, quality: 0.5 };
                                         const compressedFile = await compressImage(file, options);
-                                        console.log(`[handleSave-Reject] Compressed ${key}: ${file.size} -> ${compressedFile.size} bytes`);
+
                                         formData.append(key, compressedFile);
                                     } else {
                                         formData.append(key, file);
@@ -484,7 +484,7 @@ export default function RequestDetailsPage() {
                             const file = files[key];
                             if (file) {
                                 if (key === 'photo' || key === 'passportIdImage') {
-                                    const options = key === 'photo' 
+                                    const options = key === 'photo'
                                         ? { maxWidth: 300, maxHeight: 300, quality: 0.4 }
                                         : { maxWidth: 600, maxHeight: 600, quality: 0.5 };
                                     const compressedFile = await compressImage(file, options);
@@ -537,7 +537,7 @@ export default function RequestDetailsPage() {
                         const file = files[key];
                         if (file) {
                             if (key === 'photo' || key === 'passportIdImage') {
-                                const options = key === 'photo' 
+                                const options = key === 'photo'
                                     ? { maxWidth: 300, maxHeight: 300, quality: 0.4 }
                                     : { maxWidth: 600, maxHeight: 600, quality: 0.5 };
                                 const compressedFile = await compressImage(file, options);
@@ -588,18 +588,18 @@ export default function RequestDetailsPage() {
 
     const handleSync = async () => {
         if (!request?.externalReference || isSyncing) return;
-        
+
         setIsSyncing(true);
         setError('');
         setSuccess('');
-        
+
         try {
             const response = await authenticatedFetch(`/api/admin/requests/${requestId}/sync`, {
                 method: 'POST',
             });
-            
+
             const result = await response.json().catch(() => ({}));
-            
+
             if (response.ok && result.success) {
                 setSuccess(result.message || 'Status synced successfully');
                 fetchRequestDetails(requestId, false);
@@ -877,7 +877,7 @@ export default function RequestDetailsPage() {
                                             >
                                                 {processing ? t('saving') : t('saveChanges')}
                                             </button>
-                                            {t('saveChanges')}
+
                                         </div>
                                     </div>
                                 )}
@@ -911,20 +911,20 @@ export default function RequestDetailsPage() {
                                                 }
                                             }}
                                             data={[
-                                                    {
-                                                        label: t('fields.entityType') || "Entity Type",
-                                                        value: isEditMode && request.status === 'PENDING'
-                                                            ? (editData.entityType || request.entityType)
-                                                            : (dt(`entityTypes.${request.entityType}`) || request.entityType),
-                                                        fieldName: 'entityType',
-                                                        fieldType: 'select',
-                                                        options: [
-                                                            { value: 'port', label: 'Port' },
-                                                            { value: 'freezone', label: 'Freezone' }
-                                                        ]
-                                                    },
-                                                    {
-                                                        label: gt('fields.passType') || "Identification Card",
+                                                {
+                                                    label: t('fields.entityType') || "Entity Type",
+                                                    value: isEditMode && request.status === 'PENDING'
+                                                        ? (editData.entityType || request.entityType)
+                                                        : (dt(`entityTypes.${request.entityType}`) || request.entityType),
+                                                    fieldName: 'entityType',
+                                                    fieldType: 'select',
+                                                    options: [
+                                                        { value: 'port', label: 'Port' },
+                                                        { value: 'freezone', label: 'Freezone' }
+                                                    ]
+                                                },
+                                                {
+                                                    label: gt('fields.passType') || "Identification Card",
                                                     value: isEditMode
                                                         ? (editData.passTypeId !== undefined ? editData.passTypeId?.toString() : request.passTypeId?.toString() || '')
                                                         : (request.passTypeId && passTypes.find(pt => pt.id === request.passTypeId)
@@ -1181,7 +1181,7 @@ export default function RequestDetailsPage() {
                                                 },
                                                 // Show Full Name (AR) only for Temporary passes
                                                 ...(!isPermanent(isEditMode ? (editData.passTypeId !== undefined ? editData.passTypeId : request.passTypeId) : request.passTypeId) ? [{
-                                                    
+
 
                                                     label: gt('fields.fullNameEn') || "Holder Name(En)",
                                                     value: isEditMode ? (editData.applicantNameEn !== undefined ? editData.applicantNameEn : request.applicantNameEn) : request.applicantNameEn,
@@ -1316,7 +1316,7 @@ export default function RequestDetailsPage() {
                                                             setImageModal({
                                                                 isOpen: true,
                                                                 imageUrl: upload.filePath,
-                                                                 title: idx === 0 ? (gt('fields.otherDocuments1') || "Other Documents 1") : (gt('fields.otherDocuments2') || "Other Documents 2")
+                                                                title: idx === 0 ? (gt('fields.otherDocuments1') || "Other Documents 1") : (gt('fields.otherDocuments2') || "Other Documents 2")
                                                             });
                                                         }
                                                     }}
@@ -1327,7 +1327,7 @@ export default function RequestDetailsPage() {
                                         {isEditMode && request.uploads.filter(u => u.fileType.startsWith('OTHER')).length === 0 && (
                                             <>
                                                 <DocumentCard
-                                                     title={gt('fields.otherDocuments1') || "Other Documents 1"}
+                                                    title={gt('fields.otherDocuments1') || "Other Documents 1"}
                                                     imageUrl={null}
                                                     isEditable={isEditMode && request.status === 'PENDING'}
                                                     fieldName="otherDocuments1"
@@ -1341,7 +1341,7 @@ export default function RequestDetailsPage() {
                                                     onRemove={handleRemoveFile}
                                                 />
                                                 <DocumentCard
-                                                     title={gt('fields.otherDocuments2') || "Other Documents 2"}
+                                                    title={gt('fields.otherDocuments2') || "Other Documents 2"}
                                                     imageUrl={null}
                                                     isEditable={isEditMode && request.status === 'PENDING'}
                                                     fieldName="otherDocuments2"
@@ -1483,9 +1483,9 @@ export default function RequestDetailsPage() {
                                             </div>
                                             <div className="text-center">
                                                 <p className="text-lg font-medium text-gray-900 mb-2">{url.split('/').pop()?.split('-').pop()}</p>
-                                                <a 
-                                                    href={url} 
-                                                    download 
+                                                <a
+                                                    href={url}
+                                                    download
                                                     className="btn btn-primary inline-flex items-center gap-2"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
