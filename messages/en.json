@@ -415,6 +415,7 @@
             "male": "Male",
             "female": "Female",
             "engineer": "Engineer",
+            "technician": "Technician",
             "visitor": "Visitor",
             "manager": "Manager",
             "driver": "Driver",
@@ -505,6 +506,11 @@
                 "visitDate": "Visit Date",
                 "date": "Date"
             },
+            "entityTypes": {
+                "port": "Port",
+                "freezone": "Freezone",
+                "industrial": "Industrial Area"
+            },
             "work": "Work"
         },
         "requests": {
@@ -583,6 +589,8 @@
             "cancel": "Cancel",
             "confirmReject": "Confirm Rejection",
             "submittedOn": "Submitted On",
+            "rejectionNotification": "The user was informed of the reason for the rejection via his Email.",
+            "soharSuccessMock": "Gate pass created successfully (MOCK)",
             "lastUpdated": "Last Updated",
             "permissionDenied": "You do not have permission to view this request.",
             "requestUpdatedSuccessfully": "Request updated successfully!",
@@ -695,7 +703,25 @@
             "userUpdatedSuccessfully": "Saved Successfully",
             "userNotFound": "User not found",
             "noPermissions": "No permissions assigned",
-            "leaveEmptyToKeepCurrent": "Leave empty to keep current password"
+            "leaveEmptyToKeepCurrent": "Leave empty to keep current password",
+            "errors": {
+                "cannotModifySelf": "Cannot modify your own account"
+            },
+            "pagination": {
+                "showing": "Showing",
+                "of": "of",
+                "results": "results",
+                "previous": "Previous",
+                "next": "Next"
+            },
+            "permissions_list": {
+                "VIEW_DASHBOARD": "View Dashboard and Statistics",
+                "MANAGE_REQUESTS": "Create, edit, approve, and reject gate pass requests",
+                "MANAGE_USERS": "Create and manage admin users",
+                "VIEW_LOGS": "View activity logs and audit trail",
+                "MANAGE_PERMITS": "Manage Permits",
+                "MANAGE_SETTINGS": "Manage system settings"
+            }
         },
         "permits": {
             "title": "Permits",

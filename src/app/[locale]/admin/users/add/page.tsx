@@ -177,7 +177,7 @@ export default function AddUserPage() {
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading...</p>
+                    <p className="text-gray-600">{t('loading')}</p>
                 </div>
             </div>
         );
@@ -204,7 +204,7 @@ export default function AddUserPage() {
                             {/* Full Name */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Full Name of Pass Holder(En)
+                                    {t('fullName')}
                                 </label>
                                 <div className="relative">
                                     <input
@@ -308,7 +308,9 @@ export default function AddUserPage() {
                                             onChange={() => handlePermissionToggle(permission.id)}
                                             className="w-5 h-5 rounded border-gray-300 text-[#00B09C] focus:ring-[#00B09C] focus:ring-2"
                                         />
-                                        <span className="text-sm text-gray-700">{permission.description}</span>
+                                        <span className="text-sm text-gray-700">
+                                            {t(`permissions_list.${permission.key}`) || permission.description}
+                                        </span>
                                     </label>
                                 ))}
                             </div>

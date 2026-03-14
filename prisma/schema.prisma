@@ -22,6 +22,7 @@ model ActivityLog {
   @@index([actionType])
   @@index([timestamp])
   @@index([userId])
+  @@index([affectedEntityType, affectedEntityId])
   @@map("activity_logs")
 }
 

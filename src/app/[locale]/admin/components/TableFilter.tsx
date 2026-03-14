@@ -36,6 +36,7 @@ interface TableFilterProps {
     statusOptions?: Array<{ value: string; label: string }>;
     statusLabel?: string;
     hideDate?: boolean;
+    disabled?: boolean;
 }
 
 export const TableFilter: React.FC<TableFilterProps> = ({
@@ -47,6 +48,7 @@ export const TableFilter: React.FC<TableFilterProps> = ({
     statusOptions,
     statusLabel,
     hideDate = false,
+    disabled = false,
 }) => {
     const t = useTranslations('Admin.requests');
     const dt = useTranslations('Admin.dashboard');
@@ -179,7 +181,8 @@ export const TableFilter: React.FC<TableFilterProps> = ({
                     placeholder={t('searchPlaceholder')}
                     value={currentFilters.search}
                     onChange={(e) => onSearch(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-[#222222] text-[14px] font-medium placeholder:text-[#A1A1A1]"
+                    disabled={disabled}
+                    className="w-full bg-transparent border-none outline-none text-[#222222] text-[14px] font-medium placeholder:text-[#A1A1A1] disabled:opacity-50"
                 />
             </div>
 
@@ -192,11 +195,12 @@ export const TableFilter: React.FC<TableFilterProps> = ({
                 >
                     <button
                         type="button"
+                        disabled={disabled}
                         onClick={() => {
                             setIsDateOpen(!isDateOpen);
                             setIsStatusOpen(false);
                         }}
-                        className="flex items-center justify-between w-full bg-transparent border-none outline-none cursor-pointer"
+                        className="flex items-center justify-between w-full bg-transparent border-none outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <span className="text-gray-900 text-[14px] font-bold">
                             {getDateDisplayText()}
@@ -322,11 +326,12 @@ export const TableFilter: React.FC<TableFilterProps> = ({
             >
                 <button
                     type="button"
+                    disabled={disabled}
                     onClick={() => {
                         setIsStatusOpen(!isStatusOpen);
                         setIsDateOpen(false);
                     }}
-                    className="flex items-center justify-between w-full bg-transparent border-none outline-none cursor-pointer"
+                    className="flex items-center justify-between w-full bg-transparent border-none outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <span className="text-gray-900 text-[14px] font-bold">
                         {getStatusDisplayText()}
@@ -384,7 +389,8 @@ export const TableFilter: React.FC<TableFilterProps> = ({
             {/* Reset Button */}
             <button
                 onClick={onReset}
-                className={`flex items-center gap-2 px-6 h-full border-l border-gray-100 hover:bg-gray-50 transition-colors ${isRtl ? 'border-r border-l-0' : 'border-l'}`}
+                disabled={disabled}
+                className={`flex items-center gap-2 px-6 h-full border-l border-gray-100 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isRtl ? 'border-r border-l-0' : 'border-l'}`}
             >
                 <svg className="w-5 h-5 text-danger-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M23 4v6h-6"></path>

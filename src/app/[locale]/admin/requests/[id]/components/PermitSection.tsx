@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface PermitSectionProps {
     status: string;
@@ -10,13 +11,15 @@ interface PermitSectionProps {
 }
 
 export const PermitSection: React.FC<PermitSectionProps> = ({ status, requestType, title, subtitle, qrCodePdfUrl }) => {
+    const t = useTranslations('Admin.requestDetails');
+    const pt = useTranslations('Admin.permits');
 
     // Example logic handling
     if (status === 'REJECTED') {
         return (
             <div className="bg-[#FAF9FB] rounded-[12px] p-6 mt-8 font-['Rubik'] border border-gray-100">
                 <h3 className="text-[#3E4259] text-[18px] font-medium mb-2">{title}</h3>
-                <p className="text-[#747474] text-[14px]">{subtitle || "The user was informed of the reason for the rejection via his Email."}</p>
+                <p className="text-[#747474] text-[14px]">{subtitle || t('rejectionNotification') || "The user was informed of the reason for the rejection via his Email."}</p>
             </div>
         );
     }
@@ -44,7 +47,7 @@ export const PermitSection: React.FC<PermitSectionProps> = ({ status, requestTyp
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        Download
+                        {pt('downloadInfo') || 'Download'}
                     </button>
                 </div>
             </div>
@@ -54,7 +57,7 @@ export const PermitSection: React.FC<PermitSectionProps> = ({ status, requestTyp
             <div className="bg-white rounded-[8px] h-[300px] w-full flex items-center justify-center border border-dashed border-gray-200">
                 <div className="text-center">
                     {/* You would render the actual permit HTML/Image here */}
-                        <p className="text-gray-400">Permit Preview / QR Code</p>
+                        <p className="text-gray-400">{t('permitsQrCode') || 'Permit Preview / QR Code'}</p>
                     </div>
                 </div>
             

@@ -41,7 +41,14 @@ export async function GET(request: NextRequest) {
             // Get logs with user relation
             const logs = await prisma.activityLog.findMany({
                 where,
-                include: {
+                select: {
+                    id: true,
+                    timestamp: true,
+                    userId: true,
+                    actionType: true,
+                    actionPerformed: true,
+                    affectedEntityType: true,
+                    affectedEntityId: true,
                     user: {
                         select: {
                             id: true,
@@ -97,7 +104,7 @@ export async function GET(request: NextRequest) {
                     actionPerformed: log.actionPerformed,
                     affectedEntityType: log.affectedEntityType,
                     affectedEntityId: log.affectedEntityId || requestId, // Use requestId if affectedEntityId is null
-                    details: log.details,
+                    details: null,
                     requestId, // Add requestId to response
                     user: log.user
                         ? {
