@@ -91,25 +91,6 @@ export default function AdminRequestsPage() {
     };
 
     useEffect(() => {
-        const status = searchParams.get('status');
-        const requestType = searchParams.get('requestType');
-        const search = searchParams.get('search');
-        const date = searchParams.get('date');
-        const page = searchParams.get('page');
-
-        if (status || requestType || search || date || page) {
-            setFilters(prev => ({
-                ...prev,
-                status: status || prev.status,
-                requestType: requestType || prev.requestType,
-                search: search || prev.search,
-                date: date || prev.date,
-                page: page ? parseInt(page) : prev.page,
-            }));
-        }
-    }, []);
-
-    useEffect(() => {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
 
@@ -355,15 +336,14 @@ export default function AdminRequestsPage() {
                                 onStatusChange={(val) => handleFilterChange('status', val)}
                                 onDateChange={(val) => handleFilterChange('date', val)}
                                 onReset={handleResetFilters}
-                                disabled={loading}
                             />
 
-                            <div className="bg-white rounded-[12px] border border-gray-100 shadow-sm relative overflow-visible">
+                            <div className="bg-white rounded-[12px] border border-gray-100 shadow-sm relative overflow-hidden" style={{ minHeight: '400px' }}>
                                 {loading && requests.length > 0 && (
-                                    <div className="absolute inset-0 bg-white/60 z-20 flex items-center justify-center rounded-[12px] backdrop-blur-[2px]">
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-2"></div>
-                                            <p className="text-sm font-bold text-gray-700">{t('Loadingrequests')}</p>
+                                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-50 flex items-center justify-center transition-opacity duration-300">
+                                        <div className="text-center">
+                                            <div className="w-12 h-12 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin mx-auto mb-2"></div>
+                                            <p className="text-[#00B09C] font-semibold text-sm">{t('Loadingrequests')}</p>
                                         </div>
                                     </div>
                                 )}
@@ -497,6 +477,30 @@ export default function AdminRequestsPage() {
                                                 </tbody>
                                             </table>
                                         </div>
+
+                                        {pagination && pagination.totalPages > 1 && (
+                                            <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100">
+                                                <div className="text-[14px] text-[#A1A1A1] font-medium">
+                                                    {t('pagination.showing')} {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} {t('pagination.of')} {pagination.total} {t('pagination.results')}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handlePageChange(pagination.page - 1)}
+                                                        disabled={pagination.page === 1}
+                                                        className="px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                                    >
+                                                        {t('pagination.previous')}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handlePageChange(pagination.page + 1)}
+                                                        disabled={pagination.page === pagination.totalPages}
+                                                        className="px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                                    >
+                                                        {t('pagination.next')}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-20">
@@ -506,38 +510,6 @@ export default function AdminRequestsPage() {
                                             </svg>
                                         </div>
                                         <p className="text-[#A1A1A1] text-[16px] font-medium">{t('noResults')}</p>
-                                    </div>
-                                )}
-
-                                {pagination && Number(pagination.total) > 0 && (
-                                    <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100">
-                                        <div className="text-[14px] text-[#A1A1A1] font-medium">
-                                            {t('pagination.showing')} {Math.min(((Number(pagination.page) - 1) * Number(pagination.limit)) + 1, Number(pagination.total))} - {Math.min(Number(pagination.page) * Number(pagination.limit), Number(pagination.total))} {t('pagination.of')} {Number(pagination.total)} {t('pagination.results')}
-                                        </div>
-                                        {(Number(pagination.totalPages) > 1 || Number(pagination.page) > 1) && (
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handlePageChange(Number(pagination.page) - 1)}
-                                                    disabled={Number(pagination.page) <= 1 || loading}
-                                                    className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                                >
-                                                    <svg className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                                    </svg>
-                                                    {t('pagination.previous')}
-                                                </button>
-                                                <button
-                                                    onClick={() => handlePageChange(Number(pagination.page) + 1)}
-                                                    disabled={Number(pagination.page) >= Number(pagination.totalPages) || loading}
-                                                    className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                                >
-                                                    {t('pagination.next')}
-                                                    <svg className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        )}
                                     </div>
                                 )}
                             </div>
