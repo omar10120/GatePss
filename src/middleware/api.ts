@@ -72,15 +72,37 @@ export async function requireAuth(
 
     const user = payload;
 
-    // Check if user is still active
+    // Check if user is still active and if role/permissions have changed
     const dbUser = await prisma.user.findUnique({
         where: { id: user.userId },
+        include: {
+            userPermissions: {
+                include: {
+                    permission: true,
+                },
+            },
+        },
     });
 
     if (!dbUser || !dbUser.isActive) {
         return NextResponse.json(
             { error: 'Forbidden', message: 'User account is inactive' },
             { status: 403 }
+        );
+    }
+
+    // Verify that the role and permissions in the token still match the database
+    const dbPermissionKeys = dbUser.userPermissions.map((up: any) => up.permission.key);
+    
+    const roleMismatch = dbUser.role !== user.role;
+    const permissionsMismatch = 
+        dbPermissionKeys.length !== user.permissions.length ||
+        !dbPermissionKeys.every(key => user.permissions.includes(key));
+
+    if (roleMismatch || permissionsMismatch) {
+        return NextResponse.json(
+            { error: 'Unauthorized', message: 'Session expired due to role or permission changes. Please login again.', code: 'TOKEN_EXPIRED' },
+            { status: 401 }
         );
     }
 
