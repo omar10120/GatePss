@@ -60,6 +60,7 @@ export default function AdminRequestsPage() {
     const searchParams = useSearchParams();
     const isRtl = locale === 'ar';
     const t = useTranslations('Admin.requests');
+    const rdt = useTranslations('Admin.requestDetails');
     const dt = useTranslations('Admin.dashboard'); // For types and statuses if needed
     const ot = useTranslations('GatePassPage.options');
     const pt = useTranslations('Admin.permits');
@@ -82,6 +83,7 @@ export default function AdminRequestsPage() {
     const [successMessage, setSuccessMessage] = useState('');
     const [integrationError, setIntegrationError] = useState<any>(null);
     const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+    const [isSyncingBatch, setIsSyncingBatch] = useState(false);
 
     // Helper function to check if user has a specific permission
     const hasPermission = (permissionKey: string) => {
@@ -180,6 +182,30 @@ export default function AdminRequestsPage() {
             } else {
                 throw error;
             }
+        }
+    };
+
+    const handleSyncAll = async () => {
+        if (isSyncingBatch) return;
+        setIsSyncingBatch(true);
+        try {
+            const result = await apiFetch<any>('/api/admin/requests/sync-all', {
+                method: 'POST'
+            });
+            if (result.success) {
+                setSuccessMessage(result.message);
+                setShowSuccessModal(true);
+                await fetchRequests();
+            }
+        } catch (error: any) {
+            console.error('Error syncing all requests:', error);
+            setIntegrationError({
+                error: 'Batch Sync Error',
+                message: error.message || 'Failed to sync requests from Sohar Port',
+                details: error.details
+            });
+        } finally {
+            setIsSyncingBatch(false);
         }
     };
 
@@ -312,7 +338,26 @@ export default function AdminRequestsPage() {
                 <Header />
 
                 <main className="px-6 py-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('title')}</h2>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
+                        {hasPermission('MANAGE_REQUESTS') && (
+                            <button
+                                onClick={handleSyncAll}
+                                disabled={isSyncingBatch}
+                                className="flex items-center gap-2 px-4 py-2 bg-white border border-[#00B09C] rounded-[10px] text-[#00B09C] text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
+                            >
+                                <svg 
+                                    className={`w-5 h-5 ${isSyncingBatch ? 'animate-spin' : ''}`} 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                {isSyncingBatch ? t('updating') : t('updateFromSohar')}
+                            </button>
+                        )}
+                    </div>
 
                     {permissionDenied ? (
                         <div className="card p-12 text-center">
@@ -405,9 +450,18 @@ export default function AdminRequestsPage() {
                                                                         </div>
                                                                     </td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
-                                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${request.externalStatus ? 'bg-blue-50 text-blue-700' : 'bg-gray-50 text-gray-500'}`}>
-                                                                            {request.externalStatus || '-'}
-                                                                        </span>
+                                                                        <div className="flex flex-col items-center gap-1">
+                                                                            <span className={`px-2 py-1 rounded text-xs font-medium ${request.externalStatus ? 'bg-blue-50 text-blue-700' : 'bg-gray-50 text-gray-500'}`}>
+                                                                                {request.externalStatus || '-'}
+                                                                            </span>
+                                                                            {request.lastIntegrationStatusMessage && (
+                                                                                <span className="text-[10px] text-gray-400 max-w-[120px] truncate" title={request.lastIntegrationStatusMessage}>
+                                                                                    {request.lastIntegrationStatusMessage === 'Gate pass created successfully (MOCK)' 
+                                                                                        ? rdt('soharSuccessMock') 
+                                                                                        : request.lastIntegrationStatusMessage}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
                                                                     </td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
                                                                         <Link
