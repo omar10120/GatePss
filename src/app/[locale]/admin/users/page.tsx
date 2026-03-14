@@ -242,39 +242,47 @@ export default function AdminUsersPage() {
                                                 </tbody>
                                             </table>
                                         </div>
+                                    </>
+                                ) : (
+                                        <p className="text-gray-500 text-center py-12">{t('noUsers')}</p>
+                                    )}
 
-                                        {/* Pagination */}
-                                        {pagination && pagination.totalPages > 1 && (
-                                            <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4 px-4">
-                                                <div className="text-sm text-gray-600">
-                                                    {t('pagination.showing')} {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} {t('pagination.of')} {pagination.total} {t('pagination.results')}
-                                                </div>
+                                    {/* Pagination */}
+                                    {pagination && Number(pagination.total) > 0 && (
+                                        <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4 px-4 pb-4">
+                                            <div className="text-[14px] text-[#A1A1A1] font-medium">
+                                                {t('pagination.showing')} {Math.min(((Number(pagination.page) - 1) * Number(pagination.limit)) + 1, Number(pagination.total))} - {Math.min(Number(pagination.page) * Number(pagination.limit), Number(pagination.total))} {t('pagination.of')} {Number(pagination.total)} {t('pagination.results')}
+                                            </div>
+                                            {(Number(pagination.totalPages) > 1 || Number(pagination.page) > 1) && (
                                                 <div className="flex gap-2">
                                                     <button
-                                                        onClick={() => handlePageChange(pagination.page - 1)}
-                                                        disabled={pagination.page === 1}
-                                                        className="btn btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        onClick={() => handlePageChange(Number(pagination.page) - 1)}
+                                                        disabled={Number(pagination.page) <= 1 || loading}
+                                                        className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                                     >
+                                                        <svg className={`w-4 h-4 ${locale === 'ar' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                        </svg>
                                                         {t('pagination.previous')}
                                                     </button>
                                                     <button
-                                                        onClick={() => handlePageChange(pagination.page + 1)}
-                                                        disabled={pagination.page === pagination.totalPages}
-                                                        className="btn btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        onClick={() => handlePageChange(Number(pagination.page) + 1)}
+                                                        disabled={Number(pagination.page) >= Number(pagination.totalPages) || loading}
+                                                        className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                                     >
                                                         {t('pagination.next')}
+                                                        <svg className={`w-4 h-4 ${locale === 'ar' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                        </svg>
                                                     </button>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </>
-                                ) : (
-                                    <p className="text-gray-500 text-center py-12">{t('noUsers')}</p>
-                                )}
-                            </div>
-                        </>
-                    )}
-                </main>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </main>
             </div>
         </div>
     );

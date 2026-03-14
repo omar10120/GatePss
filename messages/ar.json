@@ -419,6 +419,7 @@
             "male": "ذكر",
             "female": "أنثى",
             "engineer": "مهندس",
+            "technician": "فني",
             "visitor": "مقيم",
             "manager": "مدير",
             "driver": "سائق",
@@ -509,6 +510,11 @@
                 "visitDate": "تاريخ الزيارة",
                 "date": "التاريخ"
             },
+            "entityTypes": {
+                "port": "ميناء",
+                "freezone": "منطقة حرة",
+                "industrial": "منطقة صناعية"
+            },
             "work": "عمل"
         },
         "requests": {
@@ -593,6 +599,8 @@
             "cancel": "إلغاء",
             "confirmReject": "تأكيد الرفض",
             "submittedOn": "تم التقديم في",
+            "rejectionNotification": "تم إبلاغ المستخدم بـ سبب الرفض عبر بريده الإلكتروني.",
+            "soharSuccessMock": "تم إنشاء تصريح البوابة بنجاح (MOCK)",
             "lastUpdated": "آخر تحديث",
             "permissionDenied": "ليس لديك صلاحية لعرض هذا الطلب.",
             "contactAdmin": "يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.",
@@ -700,7 +708,25 @@
             "userUpdatedSuccessfully": "تم الحفظ بنجاح",
             "userNotFound": "المستخدم غير موجود",
             "noPermissions": "لا توجد صلاحيات معينة",
-            "leaveEmptyToKeepCurrent": "اتركه فارغاً للاحتفاظ بكلمة المرور الحالية"
+            "leaveEmptyToKeepCurrent": "اتركه فارغاً للاحتفاظ بكلمة المرور الحالية",
+            "errors": {
+                "cannotModifySelf": "لا يمكنك تعديل حسابك الخاص"
+            },
+            "pagination": {
+                "showing": "عرض",
+                "of": "من",
+                "results": "نتيجة",
+                "previous": "السابق",
+                "next": "التالي"
+            },
+            "permissions_list": {
+                "VIEW_DASHBOARD": "مشاهدة لوحة التحكم والإحصائيات",
+                "MANAGE_REQUESTS": "إنشاء وتعديل والموافقة ورفض طلبات تصاريح الدخول",
+                "MANAGE_USERS": "إنشاء وإدارة مستخدمي المسؤول",
+                "VIEW_LOGS": "عرض سجلات النشاط وتدقيق العمليات",
+                "MANAGE_PERMITS": "إدارة التصاريح",
+                "MANAGE_SETTINGS": "إدارة إعدادات النظام"
+            }
         },
         "permits": {
             "title": "التصاريح",

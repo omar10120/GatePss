@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname, Link } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import Header from '../components/Header';
@@ -56,9 +57,12 @@ export default function AdminRequestsPage() {
     const router = useRouter();
     const pathname = usePathname();
     const locale = useLocale();
+    const searchParams = useSearchParams();
     const isRtl = locale === 'ar';
     const t = useTranslations('Admin.requests');
     const dt = useTranslations('Admin.dashboard'); // For types and statuses if needed
+    const ot = useTranslations('GatePassPage.options');
+    const pt = useTranslations('Admin.permits');
 
     const [loading, setLoading] = useState(true);
     const [requests, setRequests] = useState<Request[]>([]);
@@ -85,6 +89,25 @@ export default function AdminRequestsPage() {
         if (user.role === 'SUPER_ADMIN') return true;
         return user.permissions?.includes(permissionKey) || false;
     };
+
+    useEffect(() => {
+        const status = searchParams.get('status');
+        const requestType = searchParams.get('requestType');
+        const search = searchParams.get('search');
+        const date = searchParams.get('date');
+        const page = searchParams.get('page');
+
+        if (status || requestType || search || date || page) {
+            setFilters(prev => ({
+                ...prev,
+                status: status || prev.status,
+                requestType: requestType || prev.requestType,
+                search: search || prev.search,
+                date: date || prev.date,
+                page: page ? parseInt(page) : prev.page,
+            }));
+        }
+    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -217,11 +240,28 @@ export default function AdminRequestsPage() {
 
     const getPassTypeLabel = (passFor: string | null | undefined) => {
         if (!passFor) return '-';
-        return passFor === 'TEMPORARY' ? 'Temporary' : passFor === 'PERMANENT' ? 'Permanent' : passFor;
+        
+        // Try to get from Admin.permits (for TEMPORARY/PERMANENT)
+        const lowerPassFor = passFor.toLowerCase();
+        if (lowerPassFor === 'temporary' || lowerPassFor === 'permanent') {
+            try {
+                return pt(lowerPassFor);
+            } catch (e) {}
+        }
+
+        // Try to get from GatePassPage.options (for SUB_CONTRACTOR, etc.)
+        try {
+            return ot(passFor);
+        } catch (e) {
+            // Fallback for hardcoded values if still in English
+            if (passFor === 'TEMPORARY') return 'Temporary';
+            if (passFor === 'PERMANENT') return 'Permanent';
+            return passFor;
+        }
     };
 
     const getPassForLabel = (requestType: string) => {
-        return dt(`types.${requestType}`) || requestType;
+        return dt(`types.${requestType}`) || ot(requestType) || requestType;
     };
 
     const getImageUrl = (imagePath: string | null | undefined) => {
@@ -315,9 +355,18 @@ export default function AdminRequestsPage() {
                                 onStatusChange={(val) => handleFilterChange('status', val)}
                                 onDateChange={(val) => handleFilterChange('date', val)}
                                 onReset={handleResetFilters}
+                                disabled={loading}
                             />
 
-                            <div className="bg-white rounded-[12px] border border-gray-100 shadow-sm" style={{ overflow: 'visible' }}>
+                            <div className="bg-white rounded-[12px] border border-gray-100 shadow-sm relative overflow-visible">
+                                {loading && requests.length > 0 && (
+                                    <div className="absolute inset-0 bg-white/60 z-20 flex items-center justify-center rounded-[12px] backdrop-blur-[2px]">
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-2"></div>
+                                            <p className="text-sm font-bold text-gray-700">{t('Loadingrequests')}</p>
+                                        </div>
+                                    </div>
+                                )}
                                 {requests.length > 0 ? (
                                     <>
                                         <div className="overflow-x-auto" style={{ overflowY: 'visible' }}>
@@ -448,30 +497,6 @@ export default function AdminRequestsPage() {
                                                 </tbody>
                                             </table>
                                         </div>
-
-                                        {pagination && pagination.totalPages > 1 && (
-                                            <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100">
-                                                <div className="text-[14px] text-[#A1A1A1] font-medium">
-                                                    {t('pagination.showing')} {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} {t('pagination.of')} {pagination.total} {t('pagination.results')}
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => handlePageChange(pagination.page - 1)}
-                                                        disabled={pagination.page === 1}
-                                                        className="px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                                    >
-                                                        {t('pagination.previous')}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handlePageChange(pagination.page + 1)}
-                                                        disabled={pagination.page === pagination.totalPages}
-                                                        className="px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                                    >
-                                                        {t('pagination.next')}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
                                     </>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-20">
@@ -481,6 +506,38 @@ export default function AdminRequestsPage() {
                                             </svg>
                                         </div>
                                         <p className="text-[#A1A1A1] text-[16px] font-medium">{t('noResults')}</p>
+                                    </div>
+                                )}
+
+                                {pagination && Number(pagination.total) > 0 && (
+                                    <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100">
+                                        <div className="text-[14px] text-[#A1A1A1] font-medium">
+                                            {t('pagination.showing')} {Math.min(((Number(pagination.page) - 1) * Number(pagination.limit)) + 1, Number(pagination.total))} - {Math.min(Number(pagination.page) * Number(pagination.limit), Number(pagination.total))} {t('pagination.of')} {Number(pagination.total)} {t('pagination.results')}
+                                        </div>
+                                        {(Number(pagination.totalPages) > 1 || Number(pagination.page) > 1) && (
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handlePageChange(Number(pagination.page) - 1)}
+                                                    disabled={Number(pagination.page) <= 1 || loading}
+                                                    className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                                >
+                                                    <svg className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                    </svg>
+                                                    {t('pagination.previous')}
+                                                </button>
+                                                <button
+                                                    onClick={() => handlePageChange(Number(pagination.page) + 1)}
+                                                    disabled={Number(pagination.page) >= Number(pagination.totalPages) || loading}
+                                                    className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-[8px] text-[14px] font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                                >
+                                                    {t('pagination.next')}
+                                                    <svg className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

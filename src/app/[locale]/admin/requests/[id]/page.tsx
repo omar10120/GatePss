@@ -821,12 +821,12 @@ export default function RequestDetailsPage() {
                                                 {(editData.status !== undefined ? editData.status : request.status) === 'REJECTED' && (
                                                     <div className="mt-2">
                                                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                            Rejection Reason
+                                                            {t('rejectionReason') || "Rejection Reason"}
                                                         </label>
                                                         <textarea
                                                             value={editData.rejectionReason !== undefined ? (editData.rejectionReason || '') : (request.rejectionReason || '')}
                                                             onChange={(e) => setEditData(prev => ({ ...prev, rejectionReason: e.target.value }))}
-                                                            placeholder="Enter rejection reason (minimum 10 characters)"
+                                                            placeholder={t('rejectReasonPlaceholder') || "Enter rejection reason (minimum 10 characters)"}
                                                             rows={3}
                                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                             minLength={10}
@@ -919,8 +919,8 @@ export default function RequestDetailsPage() {
                                                     fieldName: 'entityType',
                                                     fieldType: 'select',
                                                     options: [
-                                                        { value: 'port', label: 'Port' },
-                                                        { value: 'freezone', label: 'Freezone' }
+                                                        { value: 'port', label: dt('entityTypes.port') || 'Port' },
+                                                        { value: 'freezone', label: dt('entityTypes.freezone') || 'Freezone' }
                                                     ]
                                                 },
                                                 {
@@ -942,7 +942,7 @@ export default function RequestDetailsPage() {
                                                 },
                                                 {
                                                     label: gt('fields.requestType') || "Identification Card",
-                                                    value: isEditMode ? (editData.requestType !== undefined ? editData.requestType : request.requestType) : request.requestType,
+                                                    value: isEditMode ? (editData.requestType !== undefined ? editData.requestType : request.requestType) : (dt(`types.${request.requestType}`) || request.requestType),
                                                     fieldName: 'requestType',
                                                     fieldType: 'select',
                                                     options: [
@@ -953,7 +953,7 @@ export default function RequestDetailsPage() {
                                                 },
                                                 {
                                                     label: gt('fields.nationality') || "Nationality",
-                                                    value: isEditMode ? (editData.nationality !== undefined ? editData.nationality : request.nationality) : request.nationality,
+                                                    value: isEditMode ? (editData.nationality !== undefined ? editData.nationality : request.nationality) : (gt(`options.${request.nationality.toLowerCase()}`) || request.nationality),
                                                     fieldName: 'nationality',
                                                     fieldType: 'select',
                                                     options: [
@@ -1069,7 +1069,7 @@ export default function RequestDetailsPage() {
                                                 },
                                                 {
                                                     label: gt('fields.identification') || "Identification",
-                                                    value: isEditMode ? (editData.identification !== undefined ? editData.identification : request.identification) : request.identification,
+                                                    value: isEditMode ? (editData.identification !== undefined ? editData.identification : request.identification) : (gt(`options.${request.identification === 'ID' ? 'idCard' : 'passport'}`) || request.identification),
                                                     fieldName: 'identification',
                                                     fieldType: 'select',
                                                     options: [
@@ -1101,8 +1101,18 @@ export default function RequestDetailsPage() {
                                                     value: isEditMode
                                                         ? (editData.visitduration !== undefined ? editData.visitduration : request.visitduration || '')
                                                         : (request.visitduration === '1_DAY' ? gt('options.oneDay') || '1 Day' :
-                                                            request.visitduration === '1_WEEK' ? gt('options.oneWeek') || '1 Week' :
-                                                                request.visitduration === '1_MONTH' ? gt('options.oneMonth') || '1 Month' : request.visitduration || '-'),
+                                                            request.visitduration === '2_DAY' ? gt('options.twoDay') || '2 Days' :
+                                                                request.visitduration === '3_DAY' ? gt('options.threeDay') || '3 Days' :
+                                                                    request.visitduration === '4_DAY' ? gt('options.fourDay') || '4 Days' :
+                                                                        request.visitduration === '5_DAY' ? gt('options.fiveDay') || '5 Days' :
+                                                                            request.visitduration === '10_DAY' ? gt('options.tenDay') || '10 Days' :
+                                                                                request.visitduration === '1_WEEK' ? gt('options.oneWeek') || '1 Week' :
+                                                                                    request.visitduration === '2_WEEK' ? gt('options.twoWeek') || '2 Weeks' :
+                                                                                        request.visitduration === '3_WEEK' ? gt('options.threeWeek') || '3 Weeks' :
+                                                                                            request.visitduration === '1_MONTH' ? gt('options.oneMonth') || '1 Month' :
+                                                                                                request.visitduration === '2_MONTH' ? gt('options.twoMonth') || '2 Months' :
+                                                                                                    request.visitduration === '3_MONTH' ? gt('options.threeMonth') || '3 Months' :
+                                                                                                        request.visitduration || '-'),
                                                     fieldName: 'visitduration',
                                                     fieldType: 'select' as const,
                                                     options: [
@@ -1154,7 +1164,9 @@ export default function RequestDetailsPage() {
                                                 },
                                                 {
                                                     label: t('fields.soharMessage') || "Sohar Message",
-                                                    value: request.lastIntegrationStatusMessage || '-',
+                                                    value: request.lastIntegrationStatusMessage === 'Gate pass created successfully (MOCK)'
+                                                        ? t('soharSuccessMock')
+                                                        : (request.lastIntegrationStatusMessage || '-'),
                                                 },
                                             ]}
                                         />
@@ -1206,7 +1218,9 @@ export default function RequestDetailsPage() {
                                                 },
                                                 {
                                                     label: gt('fields.profession') || "Profession",
-                                                    value: isEditMode ? (editData.profession !== undefined ? editData.profession : request.profession) : request.profession,
+                                                    value: isEditMode 
+                                                        ? (editData.profession !== undefined ? editData.profession : request.profession) 
+                                                        : (gt(`options.${request.profession?.toLowerCase()}`) || request.profession),
                                                     fieldName: 'profession',
                                                     fieldType: 'select',
                                                     options: [
@@ -1368,7 +1382,7 @@ export default function RequestDetailsPage() {
                                     title={t('permitsQrCode') || "Permits(QR Code)"}
                                     subtitle={request.status === 'REJECTED' && request.rejectionReason
                                         ? request.rejectionReason
-                                        : "The user was informed of the reason for the rejection via his Email."}
+                                        : (t('rejectionNotification') || "The user was informed of the reason for the rejection via his Email.")}
                                 />
                             </div>
 

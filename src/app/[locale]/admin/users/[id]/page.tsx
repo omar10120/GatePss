@@ -146,7 +146,12 @@ export default function ViewUserPage() {
             setIsEditMode(false);
             setShowSuccessModal(true);
         } catch (err: any) {
-            setError(err.message || 'Failed to update user');
+            const errorMessage = err.message || 'Failed to update user';
+            if (errorMessage === 'Cannot modify your own account') {
+                setError(t('errors.cannotModifySelf'));
+            } else {
+                setError(errorMessage);
+            }
             // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setSaving(false);
@@ -388,7 +393,9 @@ export default function ViewUserPage() {
                                                     onChange={() => handlePermissionToggle(permission.id)}
                                                     className={`w-5 h-5 rounded border-gray-300 text-[#00B09C] focus:ring-[#00B09C] focus:ring-2 ${isSelf ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                                 />
-                                                <span className="text-sm text-gray-700">{permission.description}</span>
+                                                <span className="text-sm text-gray-700">
+                                                    {t(`permissions_list.${permission.key}`) || permission.description}
+                                                </span>
                                             </label>
                                         );
                                     })
@@ -401,7 +408,9 @@ export default function ViewUserPage() {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 </div>
-                                                <span className="text-sm text-gray-700">{permission.description}</span>
+                                                <span className="text-sm text-gray-700">
+                                                    {t(`permissions_list.${permission.key}`) || permission.description}
+                                                </span>
                                             </div>
                                         ))
                                     ) : (
