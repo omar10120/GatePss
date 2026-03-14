@@ -517,6 +517,8 @@
             "applyNow": "Apply Now",
             "title": "Requests",
             "Loadingrequests": "Loading requests...",
+            "updateFromSohar": "Update Status from Sohar",
+            "updating": "Updating...",
             "searchPlaceholder": "Search By Name, Email, ID Number",
             "filterBy": "Filter By",
             "date": "Date",
