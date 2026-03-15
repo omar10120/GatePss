@@ -14,6 +14,7 @@ async function main() {
         { key: 'VIEW_LOGS', description: 'View activity logs and audit trail' },
         { key: 'MANAGE_USERS', description: 'Create and manage admin users' },
         { key: 'MANAGE_SETTINGS', description: 'Manage system settings' },
+        { key: 'VIEW_NOTIFICATIONS', description: 'View notifications' },
     ];
 
     console.log('Creating permissions...');
