@@ -24,6 +24,7 @@ interface RequestDetails {
     applicantNameEn: string;
     applicantNameAr: string;
     applicantEmail: string;
+    applicantPhone: string | null;
     gender: string;
     profession: string;
     passportIdNumber: string;
@@ -244,6 +245,9 @@ export default function RequestDetailsPage() {
             }
             if (editData.applicantEmail !== undefined && editData.applicantEmail !== request.applicantEmail) {
                 updatePayload.applicantEmail = editData.applicantEmail;
+            }
+            if (editData.applicantPhone !== undefined && editData.applicantPhone !== request.applicantPhone) {
+                updatePayload.applicantPhone = editData.applicantPhone;
             }
             if (editData.passportIdNumber !== undefined && editData.passportIdNumber !== request.passportIdNumber) {
                 updatePayload.passportIdNumber = editData.passportIdNumber;
@@ -1204,6 +1208,11 @@ export default function RequestDetailsPage() {
                                                     label: gt('fields.email') || "Email",
                                                     value: isEditMode ? (editData.applicantEmail !== undefined ? editData.applicantEmail : request.applicantEmail) : request.applicantEmail,
                                                     fieldName: 'applicantEmail'
+                                                },
+                                                {
+                                                    label: gt('fields.telephone') || "Telephone",
+                                                    value: isEditMode ? (editData.applicantPhone !== undefined ? editData.applicantPhone : request.applicantPhone) : request.applicantPhone,
+                                                    fieldName: 'applicantPhone'
                                                 },
                                                 {
                                                     label: gt('fields.gender') || "Gender",

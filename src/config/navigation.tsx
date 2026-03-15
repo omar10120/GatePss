@@ -8,6 +8,7 @@ export const PERMISSIONS = {
     MANAGE_USERS: 'MANAGE_USERS',
     VIEW_LOGS: 'VIEW_LOGS',
     MANAGE_SETTINGS: 'MANAGE_SETTINGS',
+    VIEW_NOTIFICATIONS: 'VIEW_NOTIFICATIONS',
 } as const;
 
 export type PermissionKey = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -20,6 +21,7 @@ export const PERMISSION_LABELS = {
         [PERMISSIONS.MANAGE_USERS]: 'Manage Users',
         [PERMISSIONS.VIEW_LOGS]: 'View Activity Logs',
         [PERMISSIONS.MANAGE_SETTINGS]: 'Manage Settings',
+        [PERMISSIONS.VIEW_NOTIFICATIONS]: 'View Notifications',
     },
     ar: {
         [PERMISSIONS.VIEW_DASHBOARD]: 'عرض لوحة التحكم',
@@ -28,6 +30,7 @@ export const PERMISSION_LABELS = {
         [PERMISSIONS.MANAGE_USERS]: 'إدارة المستخدمين',
         [PERMISSIONS.VIEW_LOGS]: 'عرض سجل النشاط',
         [PERMISSIONS.MANAGE_SETTINGS]: 'إدارة الإعدادات',
+        [PERMISSIONS.VIEW_NOTIFICATIONS]: 'عرض الإشعارات',
     },
 };
 
@@ -43,13 +46,15 @@ export const getNavItems = (
         return isSuperAdmin || userPermissions.includes(permission);
     };
 
-    const items: NavItem[] = [
-        {
+    const items: NavItem[] = [];
+    
+    if (hasPermission(PERMISSIONS.VIEW_DASHBOARD)) {
+        items.push({
             label: locale === 'en' ? 'Dashboard' : 'لوحة التحكم',
             href: '/admin/dashboard',
             active: currentPath === '/admin/dashboard',
-        },
-    ];
+        });
+    }
 
     if (hasPermission(PERMISSIONS.MANAGE_REQUESTS)) {
         items.push({
@@ -101,8 +106,10 @@ export const getSidebarItems = (
         return isSuperAdmin || userPermissions.includes(permission);
     };
 
-    const items: SidebarItem[] = [
-        {
+    const items: SidebarItem[] = [];
+    
+    if (hasPermission(PERMISSIONS.VIEW_DASHBOARD)) {
+        items.push({
             label: locale === 'en' ? 'Dashboard' : 'لوحة التحكم',
             href: '/admin/dashboard',
             active: currentPath === '/admin/dashboard',
@@ -111,8 +118,8 @@ export const getSidebarItems = (
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
             ),
-        },
-    ];
+        });
+    }
 
     if (hasPermission(PERMISSIONS.MANAGE_REQUESTS)) {
         items.push({
@@ -171,17 +178,20 @@ export const getSidebarItems = (
         });
     }
 
-    // Add Notifications (always visible)
-    items.push({
-        label: locale === 'en' ? 'Notifications' : 'الإشعارات',
-        href: '/admin/notifications',
-        active: currentPath === '/admin/notifications',
-        icon: (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-        ),
-    });
+    // Add Notifications (requires VIEW_NOTIFICATIONS permission)
+    if (hasPermission(PERMISSIONS.VIEW_NOTIFICATIONS)) {
+        items.push({
+            label: locale === 'en' ? 'Notifications' : 'الإشعارات',
+            href: '/admin/notifications',
+            active: currentPath === '/admin/notifications',
+            permission: PERMISSIONS.VIEW_NOTIFICATIONS,
+            icon: (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+            ),
+        });
+    }
 
     // Add Settings (requires MANAGE_SETTINGS permission)
     if (hasPermission(PERMISSIONS.MANAGE_SETTINGS)) {
