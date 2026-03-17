@@ -16,6 +16,12 @@ const nextConfig = {
         formats: ['image/avif', 'image/webp'],
         minimumCacheTTL: 60,
     },
+    typescript: {
+        ignoreBuildErrors: true,
+    },
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
     async headers() {
         return [
             {

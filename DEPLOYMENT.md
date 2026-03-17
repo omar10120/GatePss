@@ -238,6 +238,55 @@ Create `vercel.json`:
    sudo ufw enable
    ```
 
+### Option 4: Shared Hosting / cPanel (Local Build & Upload)
+
+This method is required for cPanel servers with strict resource limits (avoiding `EAGAIN` errors during build).
+
+#### Steps
+
+1. **Local Build (On your computer)**
+   ```bash
+   # 1. Clean old build
+   rm -rf .next
+   
+   # 2. Build the project
+   npm run build
+   ```
+
+2. **Prepare Zip File**
+   Create a zip called `GatePss.zip` containing:
+   - `.next/` folder (entire folder)
+   - `public/` folder
+   - `package.json`
+   - `next.config.js`
+   - `.env`
+
+3. **Upload & Extract**
+   - Upload `GatePss.zip` to your cPanel `public_html/GatePss` (or your project root).
+   - Extract it. Choose **Overwrite** if prompted.
+   - use terminal to extract `unzip -o GatePss.zip`
+
+4. **Setup Files/Assets (Crucial for cPanel)**
+   Because Next.js standalone stays in a subfolder, run these in cPanel Terminal:
+   ```bash
+   # Move assets to where standalone expects them
+   cp -r public .next/standalone/GatePss/
+   mkdir -p .next/standalone/GatePss/.next/static
+   cp -r .next/static/* .next/standalone/GatePss/.next/static/
+   ```
+
+5. **Create Bridge `server.js`**
+   If it doesn't exist, create `server.js` in the project root with:
+   ```javascript
+   require('./.next/standalone/GatePss/server.js');
+   ```
+
+6. **Finalize**
+   - In cPanel Terminal: `npm install --omit=dev`
+   - In cPanel Node.js App: Click **RESTART**.
+
+---
+
 ### Option 3: Docker Deployment
 
 #### Dockerfile
