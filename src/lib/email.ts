@@ -1,45 +1,44 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.office365.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false, // false for port 587 (STARTTLS), true for port 465 (SSL)
-    requireTLS: true, // Require TLS encryption for Office365
-    auth: {
-        user: process.env.SMTP_USER || 'gatepass@miscoman.com',
-        pass: process.env.SMTP_PASSWORD,
-    },
+  host: process.env.SMTP_HOST || 'gatepass.majis.om',
+  port: parseInt(process.env.SMTP_PORT || '465'),
+  secure: true, // required for port 465
+  auth: {
+    user: process.env.SMTP_USER || '_mainaccount@gatepass.majis.om',
+    pass: process.env.SMTP_PASSWORD,
+  },
 });
 
 export interface EmailOptions {
-    to: string | string[];
-    subject: string;
-    html: string;
-    text?: string;
+  to: string | string[];
+  subject: string;
+  html: string;
+  text?: string;
 }
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
-    try {
-        await transporter.sendMail({
-            from: process.env.EMAIL_FROM,
-            to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
-            subject: options.subject,
-            html: options.html,
-            text: options.text,
-        });
-        console.log(`✅ Email sent to ${options.to}`);
-    } catch (error) {
-        console.error('❌ Error sending email:', error);
-        throw error;
-    }
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+    });
+    console.log(`✅ Email sent to ${options.to}`);
+  } catch (error) {
+    console.error('❌ Error sending email:', error);
+    throw error;
+  }
 }
 
 export async function sendRequestConfirmationEmail(
-    applicantEmail: string,
-    applicantName: string,
-    requestNumber: string
+  applicantEmail: string,
+  applicantName: string,
+  requestNumber: string
 ): Promise<void> {
-    const html = `
+  const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -76,20 +75,20 @@ export async function sendRequestConfirmationEmail(
     </html>
   `;
 
-    await sendEmail({
-        to: applicantEmail,
-        subject: `Gate Pass Request Confirmation - ${requestNumber}`,
-        html,
-    });
+  await sendEmail({
+    to: applicantEmail,
+    subject: `Gate Pass Request Confirmation - ${requestNumber}`,
+    html,
+  });
 }
 
 export async function sendRequestApprovalEmail(
-    applicantEmail: string,
-    applicantName: string,
-    requestNumber: string,
-    dateOfVisit: string
+  applicantEmail: string,
+  applicantName: string,
+  requestNumber: string,
+  dateOfVisit: string
 ): Promise<void> {
-    const html = `
+  const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -127,20 +126,20 @@ export async function sendRequestApprovalEmail(
     </html>
   `;
 
-    await sendEmail({
-        to: applicantEmail,
-        subject: `Gate Pass Approved - ${requestNumber}`,
-        html,
-    });
+  await sendEmail({
+    to: applicantEmail,
+    subject: `Gate Pass Approved - ${requestNumber}`,
+    html,
+  });
 }
 
 export async function sendRequestRejectionEmail(
-    applicantEmail: string,
-    applicantName: string,
-    requestNumber: string,
-    rejectionReason: string
+  applicantEmail: string,
+  applicantName: string,
+  requestNumber: string,
+  rejectionReason: string
 ): Promise<void> {
-    const html = `
+  const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -177,27 +176,27 @@ export async function sendRequestRejectionEmail(
     </html>
   `;
 
-    await sendEmail({
-        to: applicantEmail,
-        subject: `Gate Pass Request Update - ${requestNumber}`,
-        html,
-    });
+  await sendEmail({
+    to: applicantEmail,
+    subject: `Gate Pass Request Update - ${requestNumber}`,
+    html,
+  });
 }
 
 export async function sendAdminNotificationEmail(
-    requestNumber: string,
-    applicantName: string,
-    requestType: string,
-    dateOfVisit: string
+  requestNumber: string,
+  applicantName: string,
+  requestType: string,
+  dateOfVisit: string
 ): Promise<void> {
-    const adminEmails = process.env.ADMIN_EMAIL_GROUP?.split(',') || [];
+  const adminEmails = process.env.ADMIN_EMAIL_GROUP?.split(',') || [];
 
-    if (adminEmails.length === 0) {
-        console.warn('⚠️ No admin emails configured');
-        return;
-    }
+  if (adminEmails.length === 0) {
+    console.warn('⚠️ No admin emails configured');
+    return;
+  }
 
-    const html = `
+  const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -231,19 +230,19 @@ export async function sendAdminNotificationEmail(
     </html>
   `;
 
-    await sendEmail({
-        to: adminEmails,
-        subject: `New Gate Pass Request - ${requestNumber}`,
-        html,
-    });
+  await sendEmail({
+    to: adminEmails,
+    subject: `New Gate Pass Request - ${requestNumber}`,
+    html,
+  });
 }
 
 export async function sendOTPEmail(
-    userEmail: string,
-    userName: string,
-    otpCode: string
+  userEmail: string,
+  userName: string,
+  otpCode: string
 ): Promise<void> {
-    const html = `
+  const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -284,27 +283,27 @@ export async function sendOTPEmail(
     </html>
   `;
 
-    await sendEmail({
-        to: userEmail,
-        subject: 'Your Login Verification Code',
-        html,
-    });
+  await sendEmail({
+    to: userEmail,
+    subject: 'Your Login Verification Code',
+    html,
+  });
 }
 
 export async function sendContactFormEmail(
-    fullName: string,
-    email: string,
-    passType: string,
-    phoneNumber: string,
-    message: string,
-    adminEmails: string[]
+  fullName: string,
+  email: string,
+  passType: string,
+  phoneNumber: string,
+  message: string,
+  adminEmails: string[]
 ): Promise<void> {
-    if (adminEmails.length === 0) {
-        console.warn('⚠️ No admin emails provided for contact form notification');
-        return;
-    }
+  if (adminEmails.length === 0) {
+    console.warn('⚠️ No admin emails provided for contact form notification');
+    return;
+  }
 
-    const html = `
+  const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -362,9 +361,9 @@ export async function sendContactFormEmail(
     </html>
   `;
 
-    await sendEmail({
-        to: adminEmails,
-        subject: `New Contact Form Submission from ${fullName}`,
-        html,
-    });
+  await sendEmail({
+    to: adminEmails,
+    subject: `New Contact Form Submission from ${fullName}`,
+    html,
+  });
 }
