@@ -7,7 +7,12 @@ const nextConfig = {
     compress: true,
     poweredByHeader: false,
     images: {
-        domains: ['localhost'],
+        remotePatterns: [
+            {
+                protocol: 'http',
+                hostname: 'localhost',
+            },
+        ],
         formats: ['image/avif', 'image/webp'],
         minimumCacheTTL: 60,
     },
@@ -23,6 +28,10 @@ const nextConfig = {
                 ],
             },
         ];
+    },
+    experimental: {
+        workerThreads: false,
+        cpus: 1
     },
     output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
 };
