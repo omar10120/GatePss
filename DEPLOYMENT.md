@@ -596,4 +596,11 @@ For deployment issues:
 
 ---
 
+## Notes for cPanel Deployment
+
+Enter to the virtual environment.To enter to virtual environment, run the command: 
+```bash
+source /home/gatepassmaj/nodevenv/public_html/GatePss/20/bin/activate && cd /home/gatepassmaj/public_html/GatePss
+```
+
 **Last Updated:** November 2024
