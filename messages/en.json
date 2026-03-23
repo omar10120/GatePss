@@ -589,7 +589,7 @@
             "rejectModalDesc": "Please provide a reason for rejecting this request:",
             "rejectReasonPlaceholder": "Enter rejection reason (minimum 10 characters)",
             "cancel": "Cancel",
-            "confirmReject": "Confirm Rejection",
+            "confirmReject": "Confirm Rejection.",
             "submittedOn": "Submitted On",
             "rejectionNotification": "The user was informed of the reason for the rejection via his Email.",
             "soharSuccessMock": "Gate pass created successfully (MOCK)",
