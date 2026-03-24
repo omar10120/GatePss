@@ -104,6 +104,10 @@ export async function POST(request: NextRequest) {
             await sendOTPEmail(user.email, user.name, otpCode);
         } catch (emailError) {
             console.error('Error sending OTP email:', emailError);
+            return NextResponse.json(
+                { error: 'Internal Server Error', emailError: 'An error occurred during login' },
+                { status: 500 }
+            );
             // Continue even if email fails
         }
 
@@ -116,7 +120,7 @@ export async function POST(request: NextRequest) {
                 affectedEntityId: user.id,
                 userId: user.id,
                 details: JSON.stringify({ email }),
-        },
+            },
         });
 
         return NextResponse.json({
