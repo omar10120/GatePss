@@ -592,7 +592,7 @@
             "confirmReject": "Confirm Rejection.",
             "submittedOn": "Submitted On",
             "rejectionNotification": "The user was informed of the reason for the rejection via his Email.",
-            "soharSuccessMock": "Gate pass created successfully (MOCK)",
+            "soharSuccessMock": "Gate pass created successfully (MOCK).",
             "lastUpdated": "Last Updated",
             "permissionDenied": "You do not have permission to view this request.",
             "requestUpdatedSuccessfully": "Request updated successfully!",
