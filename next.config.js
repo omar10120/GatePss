@@ -38,8 +38,8 @@ const nextConfig = {
     experimental: {
         workerThreads: false,
         cpus: 1
-    },
-    output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
+    }
+    // output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
 };
 
 module.exports = withNextIntl(nextConfig);
