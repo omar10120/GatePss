@@ -1,11 +1,12 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'gatepass.majis.om',
-  port: parseInt(process.env.SMTP_PORT || '465'),
-  secure: true, // required for port 465
+  host: process.env.SMTP_HOST || 'smtp.office365.com',
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: false, // false for port 587 (STARTTLS), true for port 465 (SSL)
+  requireTLS: true, // Require TLS encryption for Office365
   auth: {
-    user: process.env.SMTP_USER || '_mainaccount@gatepass.majis.om',
+    user: process.env.SMTP_USER || 'gatepass@miscoman.com',
     pass: process.env.SMTP_PASSWORD,
   },
 });
