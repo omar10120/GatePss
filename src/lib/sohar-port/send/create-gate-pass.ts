@@ -137,8 +137,7 @@ export async function createGatePass(
             email: request.applicantEmail,
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
             identification_number: request.passportIdNumber,
-            // visitor_type: mapVisitorType(gateRequest?.passFor || 'VISITOR'),
-            visitor_type: "8",
+            visitor_type: mapVisitorType('VISITOR'),
             blood_type: gateRequest?.bloodType || 'O+',
             start_date: formatDate(request.dateOfVisit),
             end_date: gateRequest?.validTo
