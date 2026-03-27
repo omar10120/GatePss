@@ -82,8 +82,10 @@ function mapGender(gender: string): string {
 function mapVisitorType(requestType: string): string {
     const visitorTypeMap: Record<string, string> = {
         'VISITOR': '8',
-        'CONTRACTOR': '7',
-        'SUB_CONTRACTOR': '7',
+        // 'CONTRACTOR': '7',
+        'Permanent': '7',
+        // 'SUB_CONTRACTOR': '7',
+        'Tmporary': '7',
         'SERVICE_PROVIDER': '5',
         'EMPLOYEE': '6',
         'VEHICLE': '9',
@@ -137,7 +139,7 @@ export async function createGatePass(
             email: request.applicantEmail,
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
             identification_number: request.passportIdNumber,
-            visitor_type: mapVisitorType('VISITOR'),
+            visitor_type: mapVisitorType(gateRequest?.passFor || 'VISITOR'),
             blood_type: gateRequest?.bloodType || 'O+',
             start_date: formatDate(request.dateOfVisit),
             end_date: gateRequest?.validTo
