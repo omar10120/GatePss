@@ -131,7 +131,7 @@ export async function createGatePass(
                 : '30',
             pass_for: mapPassFor(gateRequest?.passFor || extraFields.passFor),
             company: gateRequest?.organization || 'Majis Industrial Services',
-            name: request.applicantName,
+            name: request.applicantName || gateRequest?.applicantNameAr,
             phone: gateRequest?.applicantPhone || '',
             name_in_arabic: gateRequest?.applicantNameAr,
             email: request.applicantEmail,
@@ -206,7 +206,7 @@ export async function createGatePass(
         const debugPayload = { ...soharPortPayload };
         // Don't remove them from the real payload, just from the debug log if they are too big
         // but for now let's keep the existing logger call below as is.
-        
+
         logger.info(`Sohar Port Integration Payload: ${request.requestNumber}`, {
             type: 'SOHAR_PORT_DEBUG_REQUEST',
             requestNumber: request.requestNumber,
@@ -233,12 +233,12 @@ export async function createGatePass(
         // Map fields to normalized response, handling both PascalCase (API) and camelCase (Mock/Legacy)
         const isSuccess = response.Result === 'SUCCESS' || response.result === 'SUCCESS';
         const isError = response.Result === 'ERROR' || response.result === 'ERROR' || response.Result === 'FAILED' || response.result === 'FAILED';
-        
+
         const result: CreateGatePassResponse = {
             success: isSuccess,
             statusCode: isSuccess ? 200 : 400,
-            message: isSuccess 
-                ? 'Gate pass created successfully' 
+            message: isSuccess
+                ? 'Gate pass created successfully'
                 : (response.ErrorDetails || response.message || 'Request received with issues'),
             externalReference: response.PassNumber,
             so_status: response.PassStatus,
@@ -259,7 +259,7 @@ export async function createGatePass(
         // Include detailed error message if available (e.g., ModelState validation errors)
         const errorMessage = error.details?.Message || error.details?.message || error.message || 'Failed to create gate pass';
         const modelState = error.details?.ModelState || error.details?.modelState;
-        
+
         let detailedError = errorMessage;
         if (modelState) {
             const issues = Object.entries(modelState)
