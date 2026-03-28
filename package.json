@@ -15,7 +15,8 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "node prisma/seed.mjs",
-    "compile": "next build"
+    "compile": "next build",
+    "setup:storage": "ln -sfn /home/u530917156/domains/gatepass.majis.om/storage/uploads public/uploads && ln -sfn /home/u530917156/domains/gatepass.majis.om/storage/images public/images || true"
   },
   "dependencies": {
     "@prisma/client": "^6.0.1",
