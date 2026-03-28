@@ -159,8 +159,11 @@ export async function POST(request: NextRequest) {
                 throw new Error(`Invalid file type for ${file.name}. Allowed types: ${allowedExts.join(', ')}`);
             }
 
-            // Fallback to base64 if VERCEL is set (database storage)
-            if (process.env.VERCEL) {
+            // Fallback to base64 ONLY if VERCEL is explicitly enabled
+            // Robust check for string "false" which is common in environment settings on Hostinger
+            const isVercel = process.env.VERCEL && process.env.VERCEL !== 'false';
+            
+            if (isVercel) {
                 const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
                 return `data:${mimeType};base64,${buffer.toString('base64')}`;
             }
@@ -169,7 +172,7 @@ export async function POST(request: NextRequest) {
                 // Save to local storage (honors STORAGE_UPLOAD_PATH environment variable)
                 return await Storage.saveFile(file, prefix, 'passports');
             } catch (fsError: any) {
-                console.warn('File system write failed, falling back to base64:', fsError.message);
+                console.error(`❌ File system write failed for ${file.name}:`, fsError.message);
                 const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
                 return `data:${mimeType};base64,${buffer.toString('base64')}`;
             }

@@ -2,8 +2,10 @@ import { createLogger, format, transports, Logger } from 'winston';
 import path from 'path';
 import fs from 'fs';
 
+import { Storage } from './storage';
+
 // Ensure log directory exists
-const logDir = path.join(process.cwd(), 'logs');
+const logDir = Storage.getLogsRoot();
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
