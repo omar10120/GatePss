@@ -6,16 +6,39 @@ import { mkdir, writeFile, readFile } from 'fs/promises';
  */
 export const Storage = {
     /**
+     * Get the absolute path to the root storage directory
+     */
+    getStorageRoot(): string {
+        // Preference: Environment variable (useful for Hostinger persistent storage)
+        if (process.env.STORAGE_UPLOAD_PATH) {
+            // Path provided usually points to 'uploads' - get its parent
+            return path.dirname(process.env.STORAGE_UPLOAD_PATH);
+        }
+        return path.join(process.cwd(), 'public'); // Fallback if no storage path is set
+    },
+
+    /**
      * Get the absolute path to the root uploads directory
      */
     getUploadRoot(): string {
-        // Preference: Environment variable (useful for Hostinger persistent storage)
         if (process.env.STORAGE_UPLOAD_PATH) {
             return process.env.STORAGE_UPLOAD_PATH;
         }
 
         // Default: public/uploads in current working directory
         return path.join(process.cwd(), 'public', 'uploads');
+    },
+
+    /**
+     * Get the absolute path to the logs directory
+     */
+    getLogsRoot(): string {
+        const storageRoot = this.getStorageRoot();
+        // If storage root is 'public', then stay in the app root for logs
+        if (storageRoot === path.join(process.cwd(), 'public')) {
+            return path.join(process.cwd(), 'logs');
+        }
+        return path.join(storageRoot, 'logs');
     },
 
     /**
@@ -46,7 +69,13 @@ export const Storage = {
         const filename = `${prefix}_${timestamp}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
         
         const uploadDir = this.getUploadPath(subfolder);
-        await this.ensureDir(uploadDir);
+        // Ensure folder exists (logs if failure happens on Hostinger)
+        try {
+            await this.ensureDir(uploadDir);
+        } catch (err: any) {
+            console.error(`[Storage] FAILED to create directory ${uploadDir}:`, err.message);
+            throw err;
+        }
         
         const filepath = path.join(uploadDir, filename);
         await writeFile(filepath, buffer);
