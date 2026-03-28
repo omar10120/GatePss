@@ -587,7 +587,7 @@
             "reject": "Reject Request",
             "approving": "Approving...",
             "rejecting": "Rejecting...",
-            "rejectModalTitle": "Reject Request",
+            "rejectModalTitle": "Reject Request.",
             "rejectModalDesc": "Please provide a reason for rejecting this request:",
             "rejectReasonPlaceholder": "Enter rejection reason (minimum 10 characters)",
             "cancel": "Cancel",
