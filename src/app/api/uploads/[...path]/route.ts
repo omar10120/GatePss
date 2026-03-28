@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { Storage } from '@/lib/storage';
 
 
 export async function GET(
@@ -21,7 +22,7 @@ export async function GET(
                 const mimeType = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
                 const buffer = Buffer.from(base64Match[1], 'base64');
                 
-                return new NextResponse(buffer, {
+                return new NextResponse(new Uint8Array(buffer), {
                     headers: {
                         'Content-Type': mimeType,
                         'Content-Length': buffer.length.toString(),
@@ -32,18 +33,17 @@ export async function GET(
             return new NextResponse('Invalid data URL', { status: 400 });
         }
 
-        // Regular file path - read from file system (local development)
-        const fullPath = path.join(process.cwd(), 'public', 'uploads', filePath);
-        
-        // Security: Prevent directory traversal
-        const normalizedPath = path.normalize(fullPath);
-        const publicPath = path.join(process.cwd(), 'public', 'uploads');
-        if (!normalizedPath.startsWith(publicPath)) {
-            return new NextResponse('Forbidden', { status: 403 });
+        // Regular file path - read from storage
+        // Handle both old paths (/uploads/...) and new paths (...)
+        let storagePath = filePath;
+        if (storagePath.startsWith('uploads/')) {
+            storagePath = storagePath.substring(8);
+        } else if (storagePath.startsWith('/uploads/')) {
+            storagePath = storagePath.substring(9);
         }
 
-        const fileBuffer = await readFile(normalizedPath);
-        const ext = path.extname(normalizedPath).toLowerCase();
+        const fileBuffer = await Storage.readFile(storagePath);
+        const ext = path.extname(storagePath).toLowerCase();
         
         // Determine MIME type
         const mimeTypes: Record<string, string> = {
@@ -55,7 +55,7 @@ export async function GET(
         
         const mimeType = mimeTypes[ext] || 'application/octet-stream';
 
-        return new NextResponse(fileBuffer, {
+        return new NextResponse(new Uint8Array(fileBuffer), {
             headers: {
                 'Content-Type': mimeType,
                 'Content-Length': fileBuffer.length.toString(),

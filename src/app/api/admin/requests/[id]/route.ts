@@ -5,6 +5,7 @@ import { createRequestNotifications } from '@/utils/notification-helper';
 import { ActionType } from '@/lib/enums';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { Storage } from '@/lib/storage';
 
 export async function GET(
     request: NextRequest,
@@ -132,7 +133,7 @@ export async function PUT(
 
             // Allow editing for all statuses (removed restriction)
 
-            // Handle file uploads
+            // Unified file upload helper using Storage utility
             const uploadFile = async (file: File | null, prefix: string, customMaxSize?: number, allowedExts: string[] = ['jpg', 'jpeg', 'png', 'pdf']) => {
                 if (!file || file.size === 0 || file.name === undefined || file.name === '') return null;
 
@@ -146,36 +147,23 @@ export async function PUT(
                 }
 
                 const fileExt = file.name.split('.').pop()?.toLowerCase().trim();
-
                 if (!fileExt || !allowedExts.includes(fileExt)) {
                     throw new Error(`Invalid file type for ${file.name}. Allowed types: ${allowedExts.join(', ')}`);
                 }
 
-                const isVercel = !!process.env.VERCEL;
-
-                if (isVercel) {
+                // Fallback to base64 if VERCEL is set (database storage)
+                if (process.env.VERCEL) {
                     const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
-                    const base64 = buffer.toString('base64');
-                    const dataUrl = `data:${mimeType};base64,${base64}`;
-                    return dataUrl;
-                } else {
-                    try {
-                        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'passports');
-                        await mkdir(uploadDir, { recursive: true });
+                    return `data:${mimeType};base64,${buffer.toString('base64')}`;
+                }
 
-                        const timestamp = Date.now();
-                        const filename = `${prefix}_${timestamp}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-                        const filepath = path.join(uploadDir, filename);
-
-                        await writeFile(filepath, buffer);
-                        return `/uploads/passports/${filename}`;
-                    } catch (fsError: any) {
-                        console.warn('File system write failed, falling back to base64:', fsError.message);
-                        const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
-                        const base64 = buffer.toString('base64');
-                        const dataUrl = `data:${mimeType};base64,${base64}`;
-                        return dataUrl;
-                    }
+                try {
+                    // Save to local storage (honors STORAGE_UPLOAD_PATH environment variable)
+                    return await Storage.saveFile(file, prefix, 'passports');
+                } catch (fsError: any) {
+                    console.warn('File system write failed, falling back to base64:', fsError.message);
+                    const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
+                    return `data:${mimeType};base64,${buffer.toString('base64')}`;
                 }
             };
 

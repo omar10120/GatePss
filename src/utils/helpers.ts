@@ -137,6 +137,26 @@ export function getRequestTypeLabel(type: string): string {
 }
 
 /**
+ * Resolves a stored file path to a valid public URL
+ */
+export function getInternalUrl(path: string | null): string {
+    if (!path) return '';
+    if (path.startsWith('data:') || path.startsWith('http')) return path;
+    
+    // Ensure path starts with /api/uploads/
+    let cleanPath = path;
+    if (cleanPath.startsWith('/uploads/')) {
+        cleanPath = cleanPath.substring(9);
+    } else if (cleanPath.startsWith('uploads/')) {
+        cleanPath = cleanPath.substring(8);
+    } else if (cleanPath.startsWith('/')) {
+        cleanPath = cleanPath.substring(1);
+    }
+    
+    return `/api/uploads/${cleanPath}`;
+}
+
+/**
  * Compresses an image file using Canvas API
  */
 export async function compressImage(file: File, options?: { maxWidth?: number, maxHeight?: number, quality?: number }): Promise<File> {

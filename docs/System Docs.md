@@ -213,7 +213,7 @@ Located in: `src/lib/sohar-port/`
 
 ---
 
-### 8. FILE UPLOAD FUNCTIONALITY
+### 8. FILE UPLOAD AND STORAGE SYSTEM
 
 **Upload Endpoint**: `/api/uploads/[...path]`
 
@@ -223,12 +223,26 @@ Located in: `src/lib/sohar-port/`
 
 **Max File Size**: 1MB (configurable via `MAX_FILE_SIZE`)
 
+**Centralized Storage Utility (`src/lib/storage.ts`)**:
+The system uses a centralized `Storage` utility to manage all file operations, providing consistency across the application.
+
+- **Root Directory**: Defaults to `public/uploads/` in the project root.
+- **Persistent Storage**: Can be overridden using the `STORAGE_UPLOAD_PATH` environment variable. This is essential for deployments (like Hostinger or Docker) where the application code is replaced during updates but uploads must persist.
+- **Security**: Includes protection against directory traversal attacks by normalizing and validating paths against the root storage directory.
+
 **Upload Process**:
-1. Files submitted via FormData in request body
-2. Server validates file type and size
-3. Files saved to `public/uploads/passports/` (local) or as base64 (Vercel)
-4. File paths stored in database (Upload model)
-5. Files served via `/api/uploads/**` route
+1. Files submitted via `FormData` in request body.
+2. Server validates file type, size, and extension.
+3. Storage Strategy:
+   - **Local Storage**: Files saved to the configured storage path (e.g., `passports/filename.ext`). This is the preferred method for most deployments.
+   - **Database (Base64)**: If `process.env.VERCEL` is set or local storage fails, files are stored as base64 data URLs in the database.
+4. File paths/data URLs are stored in the database (`Upload` and `Request` models).
+
+**File Serving (`/api/uploads/**`)**:
+The serving route dynamically handles different storage methods:
+- **Base64 Decoding**: If the stored path is a data URL (`data:...`), it decodes the base64 content and serves it with the correct MIME type.
+- **Filesystem Retrieval**: If it's a standard path, it reads from the configured storage directory.
+- **Compatibility**: Uses `Uint8Array` conversion for `NextResponse` to ensure compatibility with Next.js App Router's Web API requirements.
 
 **Stored File Types**:
 - `PHOTO` - Applicant photo

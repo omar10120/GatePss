@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { getInternalUrl } from '@/utils/helpers';
 
 interface DocumentCardProps {
     title: string;
@@ -36,7 +37,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
     
     const isRemoved = forceRemoved || internalIsRemoved;
     
-    const src = isRemoved ? null : (previewUrl || imageUrl);
+    const src = isRemoved ? null : (previewUrl || getInternalUrl(imageUrl));
 
     const isImage = (url: string | null) => {
         if (!url) return false;
