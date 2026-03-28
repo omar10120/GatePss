@@ -1274,7 +1274,7 @@ export default function RequestDetailsPage() {
                                             imageUrl={request.passportIdImagePath}
                                             isEditable={isEditMode && request.status === 'PENDING'}
                                             fieldName="passportIdImage"
-                                            placeholder={gt('placeholders.choosePhoto') || "Choose Photo"}
+                                            placeholder={gt('placeholders.choosePhotoOrPdf') || "Choose Photo/PDF"}
                                             onChange={(fieldName, file) => {
                                                 setFiles(prev => ({ ...prev, [fieldName]: file }));
                                                 setRemovedFiles(prev => ({ ...prev, [fieldName]: false }));
