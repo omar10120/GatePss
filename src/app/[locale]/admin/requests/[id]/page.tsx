@@ -339,6 +339,20 @@ export default function RequestDetailsPage() {
             // Handle status changes using approve/reject endpoints (matching list page logic)
             if (statusChanged) {
                 if (newStatus === 'APPROVED') {
+                    // Pre-validation: Check for past date before approval
+                    const dateToValidate = editData.dateOfVisit || request.dateOfVisit;
+                    if (dateToValidate) {
+                        const visitDate = new Date(dateToValidate);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        
+                        if (visitDate < today) {
+                            setError(gt('errors.invalidDate') || 'The starting date cannot be in the past');
+                            setProcessing(false);
+                            return;
+                        }
+                    }
+
                     // Use approve endpoint with updates
                     const approvePayload: any = {};
                     if (hasOtherChanges) {
