@@ -16,7 +16,7 @@ import { PermitSection } from './components/PermitSection';
 import SuccessModal from '@/components/ui/SuccessModal';
 import IntegrationErrorModal from '@/components/ui/IntegrationErrorModal';
 import { apiFetch, authenticatedFetch } from '@/lib/api-client';
-import { compressImage } from '@/utils/helpers';
+import { compressImage, getInternalUrl } from '@/utils/helpers';
 
 interface RequestDetails {
     id: number;
@@ -1297,7 +1297,7 @@ export default function RequestDetailsPage() {
                                                 if (request.passportIdImagePath) {
                                                     setImageModal({
                                                         isOpen: true,
-                                                        imageUrl: request.passportIdImagePath,
+                                                        imageUrl: getInternalUrl(request.passportIdImagePath),
                                                         title: gt('fields.copyOfCivilId') || "Copy of Civil ID"
                                                     });
                                                 }
@@ -1323,7 +1323,7 @@ export default function RequestDetailsPage() {
                                                 if (photoUrl) {
                                                     setImageModal({
                                                         isOpen: true,
-                                                        imageUrl: photoUrl,
+                                                        imageUrl: getInternalUrl(photoUrl),
                                                         title: gt('fields.photo') || "Photo"
                                                     });
                                                 }
@@ -1352,7 +1352,7 @@ export default function RequestDetailsPage() {
                                                         if (upload.filePath) {
                                                             setImageModal({
                                                                 isOpen: true,
-                                                                imageUrl: upload.filePath,
+                                                                imageUrl: getInternalUrl(upload.filePath),
                                                                 title: idx === 0 ? (gt('fields.otherDocuments1') || "Other Documents 1") : (gt('fields.otherDocuments2') || "Other Documents 2")
                                                             });
                                                         }
