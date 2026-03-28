@@ -7,14 +7,15 @@ import { logSuccess, logError } from '../utils/logger';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { logger } from '../../logger';
+import { Storage } from '../../storage';
 
 
 async function fileToBase64(filePath: string): Promise<string | null> {
     try {
         if (!filePath) return null;
 
+        // Handle data URLs
         if (filePath.startsWith('data:')) {
-
             const base64Match = filePath.match(/base64,(.+)$/);
             if (base64Match && base64Match[1]) {
                 return base64Match[1];
@@ -22,12 +23,21 @@ async function fileToBase64(filePath: string): Promise<string | null> {
             return null;
         }
 
-        // Regular file path - read from file system (local development)
-        const fullPath = path.join(process.cwd(), 'public', filePath);
-        const fileBuffer = await readFile(fullPath);
+        // Clean path (remove leading slashes and common prefixes)
+        let storagePath = filePath;
+        if (storagePath.startsWith('/uploads/')) {
+            storagePath = storagePath.substring(9);
+        } else if (storagePath.startsWith('uploads/')) {
+            storagePath = storagePath.substring(8);
+        } else if (storagePath.startsWith('/')) {
+            storagePath = storagePath.substring(1);
+        }
+
+        // Read from storage (honors STORAGE_UPLOAD_PATH)
+        const fileBuffer = await Storage.readFile(storagePath);
         return fileBuffer.toString('base64');
-    } catch (error) {
-        console.error(`Failed to read file ${filePath}:`, error);
+    } catch (error: any) {
+        console.error(`❌ Failed to read file ${filePath}:`, error.message);
         return null;
     }
 }
