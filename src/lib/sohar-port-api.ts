@@ -78,11 +78,12 @@ export async function sendToSoharPort(
     } catch (error: any) {
         console.error('❌ Sohar Port API call failed:', error.message);
 
+        const errorData = error.response?.data;
         const errorResponse: SoharPortResponse = {
             success: false,
             statusCode: error.response?.status || 500,
-            message: error.response?.data?.message || error.message || 'API call failed',
-            error: error.response?.data?.error || error.message,
+            message: errorData?.ErrorDetails || errorData?.message || error.message || 'API call failed',
+            error: errorData?.ErrorDetails || errorData?.error || error.message,
         };
 
         // Log failed integration

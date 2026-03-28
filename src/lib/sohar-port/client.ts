@@ -218,19 +218,19 @@ export class SoharPortHttpClient {
 
                 case HTTP_STATUS.BAD_REQUEST:
                     return new SoharPortValidationError(
-                        data?.message || ERROR_MESSAGES.VALIDATION_ERROR,
+                        data?.ErrorDetails || data?.message || data?.Message || ERROR_MESSAGES.VALIDATION_ERROR,
                         data
                     );
 
                 case HTTP_STATUS.NOT_FOUND:
                     return new SoharPortNotFoundError(
-                        data?.message || ERROR_MESSAGES.NOT_FOUND,
+                        data?.ErrorDetails || data?.message || data?.Message || ERROR_MESSAGES.NOT_FOUND,
                         data
                     );
 
                 default:
                     return new SoharPortError(
-                        data?.message || ERROR_MESSAGES.UNKNOWN_ERROR,
+                        data?.ErrorDetails || data?.message || data?.Message || ERROR_MESSAGES.UNKNOWN_ERROR,
                         status,
                         data?.errorCode,
                         data

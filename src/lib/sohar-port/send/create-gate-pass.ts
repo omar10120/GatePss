@@ -267,7 +267,7 @@ export async function createGatePass(
         logError('createGatePass', error);
 
         // Include detailed error message if available (e.g., ModelState validation errors)
-        const errorMessage = error.details?.Message || error.details?.message || error.message || 'Failed to create gate pass';
+        const errorMessage = error.details?.ErrorDetails || error.details?.Message || error.details?.message || error.message || 'Failed to create gate pass';
         const modelState = error.details?.ModelState || error.details?.modelState;
 
         let detailedError = errorMessage;
