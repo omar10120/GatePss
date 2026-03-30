@@ -11,6 +11,8 @@ export default function GeneralSettings() {
     const [saving, setSaving] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [applicantPhone, setApplicantPhone] = useState('');
+    const [contactEmail, setContactEmail] = useState('');
+    const [contactPhone, setContactPhone] = useState('');
 
     useEffect(() => {
         fetchSettings();
@@ -21,9 +23,13 @@ export default function GeneralSettings() {
         try {
             const settings = await apiFetch<any[]>(`/api/admin/settings`);
             const phoneSetting = settings.find(s => s.key === 'applicant_phone');
-            if (phoneSetting) {
-                setApplicantPhone(phoneSetting.value);
-            }
+            if (phoneSetting) setApplicantPhone(phoneSetting.value);
+
+            const emailSetting = settings.find(s => s.key === 'contact_email');
+            if (emailSetting) setContactEmail(emailSetting.value);
+
+            const contactPhoneSetting = settings.find(s => s.key === 'contact_phone');
+            if (contactPhoneSetting) setContactPhone(contactPhoneSetting.value);
         } catch (error) {
             console.error('Error fetching settings:', error);
         } finally {
@@ -34,13 +40,20 @@ export default function GeneralSettings() {
     const handleSave = async () => {
         setSaving(true);
         try {
-            await apiFetch('/api/admin/settings', {
-                method: 'POST',
-                body: JSON.stringify({
-                    key: 'applicant_phone',
-                    value: applicantPhone,
+            await Promise.all([
+                apiFetch('/api/admin/settings', {
+                    method: 'POST',
+                    body: JSON.stringify({ key: 'applicant_phone', value: applicantPhone }),
                 }),
-            });
+                apiFetch('/api/admin/settings', {
+                    method: 'POST',
+                    body: JSON.stringify({ key: 'contact_email', value: contactEmail }),
+                }),
+                apiFetch('/api/admin/settings', {
+                    method: 'POST',
+                    body: JSON.stringify({ key: 'contact_phone', value: contactPhone }),
+                }),
+            ]);
             setShowSuccessModal(true);
         } catch (error: any) {
             alert(error.message || 'Failed to save settings');
@@ -75,6 +88,38 @@ export default function GeneralSettings() {
                     />
                     <p className="mt-2 text-sm text-gray-500">
                         {t('applicantPhoneHelp')}
+                    </p>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('contactEmailLabel')}
+                    </label>
+                    <input
+                        type="email"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20 outline-none transition-all"
+                        placeholder="support@example.com"
+                    />
+                    <p className="mt-2 text-sm text-gray-500">
+                        {t('contactEmailHelp')}
+                    </p>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('contactPhoneLabel')}
+                    </label>
+                    <input
+                        type="text"
+                        value={contactPhone}
+                        onChange={(e) => setContactPhone(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#00B09C] focus:ring-2 focus:ring-[#00B09C]/20 outline-none transition-all"
+                        placeholder="+968XXXXXXXX"
+                    />
+                    <p className="mt-2 text-sm text-gray-500">
+                        {t('contactPhoneHelp')}
                     </p>
                 </div>
 

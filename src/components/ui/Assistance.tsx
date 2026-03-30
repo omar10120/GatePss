@@ -20,10 +20,33 @@ export default function Assistance() {
     const [faqs, setFaqs] = useState<FAQ[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
+    const [contactEmail, setContactEmail] = useState('');
+    const [contactPhone, setContactPhone] = useState('');
 
     useEffect(() => {
         fetchFAQs();
+        fetchSettings();
     }, []);
+
+    const fetchSettings = async () => {
+        try {
+            const [emailRes, phoneRes] = await Promise.all([
+                fetch('/api/settings/contact_email'),
+                fetch('/api/settings/contact_phone')
+            ]);
+
+            if (emailRes.ok) {
+                const data = await emailRes.json();
+                setContactEmail(data.value);
+            }
+            if (phoneRes.ok) {
+                const data = await phoneRes.json();
+                setContactPhone(data.value);
+            }
+        } catch (error) {
+            console.error('Error fetching settings:', error);
+        }
+    };
 
     const fetchFAQs = async () => {
         setLoading(true);
@@ -140,7 +163,7 @@ export default function Assistance() {
                                     </div>
                                     <div className="text-start">
                                         <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">{locale === 'ar' ? 'البريد الإلكتروني' : 'Email'}</p>
-                                        <p className="font-bold text-gray-800">{t('assistance.supportEmail')}</p>
+                                        <p className="font-bold text-gray-800">{contactEmail || t('assistance.supportEmail')}</p>
                                     </div>
                                 </div>
 
@@ -152,7 +175,7 @@ export default function Assistance() {
                                     </div>
                                     <div className="text-start">
                                         <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">{locale === 'ar' ? 'الهاتف' : 'Phone'}</p>
-                                        <p className="font-bold text-gray-800 tracking-wider font-sans">{t('assistance.supportPhone')}</p>
+                                        <p className="font-bold text-gray-800 tracking-wider font-sans">{contactPhone || t('assistance.supportPhone')}</p>
                                     </div>
                                 </div>
                             </div>
