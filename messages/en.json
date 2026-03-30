@@ -814,6 +814,10 @@
                 "title": "General Settings",
                 "applicantPhoneLabel": "Applicant Phone Number",
                 "applicantPhoneHelp": "This phone number will be displayed on the Gate Pass form for applicants to contact.",
+                "contactEmailLabel": "Contact Email",
+                "contactEmailHelp": "This email will be displayed in the Contact Us section on the home page.",
+                "contactPhoneLabel": "Contact Phone",
+                "contactPhoneHelp": "This phone number will be displayed in the Contact Us section on the home page.",
                 "save": "Save Settings",
                 "saving": "Saving...",
                 "savedSuccessfully": "Settings saved successfully"
