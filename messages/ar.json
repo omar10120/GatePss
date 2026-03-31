@@ -745,7 +745,8 @@
                 "MANAGE_USERS": "إنشاء وإدارة مستخدمي المسؤول",
                 "VIEW_LOGS": "عرض سجلات النشاط وتدقيق العمليات",
                 "MANAGE_PERMITS": "إدارة التصاريح",
-                "MANAGE_SETTINGS": "إدارة إعدادات النظام"
+                "MANAGE_SETTINGS": "إدارة إعدادات النظام",
+                "VIEW_NOTIFICATIONBS": "عرض الإشعارات"
             }
         },
         "permits": {

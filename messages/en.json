@@ -739,7 +739,8 @@
                 "MANAGE_USERS": "Create and manage admin users",
                 "VIEW_LOGS": "View activity logs and audit trail",
                 "MANAGE_PERMITS": "Manage Permits",
-                "MANAGE_SETTINGS": "Manage system settings"
+                "MANAGE_SETTINGS": "Manage system settings",
+                "VIEW_NOTIFICATIONBS": "View Notifications"
             }
         },
         "permits": {
