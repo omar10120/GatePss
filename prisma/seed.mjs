@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-
+import 'dotenv/config';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -161,7 +161,7 @@ async function main() {
             isActive: true,
         },
     });
-    
+
 
     // Assign limited permissions to Sub Admin 2 (VIEW_DASHBOARD and MANAGE_REQUESTS)
     for (const permission of subAdminPermissions) {
