@@ -27,7 +27,7 @@ export default function AddUserPage() {
         name: '',
         email: '',
         phoneNumber: '',
-        password: '',   
+        password: '',
         permissionIds: [] as number[],
     });
     const [error, setError] = useState('');
@@ -60,7 +60,7 @@ export default function AddUserPage() {
                 // Fetch user data from API
                 try {
                     const data = await apiFetch<{ user: any }>('/api/auth/me');
-                    
+
                     if (data.user) {
                         currentUser = data.user;
                         localStorage.setItem('user', JSON.stringify(currentUser));
@@ -113,7 +113,7 @@ export default function AddUserPage() {
 
             // If not found in localStorage, fetch from API
             const result = await apiFetch<Permission[]>(`/api/admin/permissions`);
-            
+
             // Store permissions in localStorage for future use
             localStorage.setItem('permissions', JSON.stringify(result));
             setPermissions(result);
@@ -309,6 +309,7 @@ export default function AddUserPage() {
                                             className="w-5 h-5 rounded border-gray-300 text-[#00B09C] focus:ring-[#00B09C] focus:ring-2"
                                         />
                                         <span className="text-sm text-gray-700">
+
                                             {t(`permissions_list.${permission.key}`) || permission.description}
                                         </span>
                                     </label>
@@ -328,7 +329,7 @@ export default function AddUserPage() {
                         </div>
                     </div>
                 </main>
-            </div>  
+            </div>
 
             {showSuccessModal && (
                 <SuccessModal

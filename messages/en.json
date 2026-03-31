@@ -345,6 +345,20 @@
             "danish": "Danish",
             "czech": "Czech",
             "dutch": "Dutch",
+            "lao": "Lao",
+            "latvian": "Latvian",
+            "malian": "Malian",
+            "mauritanian": "Mauritanian",
+            "new_zealand": "New_zealand",
+            "nicaraguan": "Nicaraguan",
+            "nigerien": "Nigerien",
+            "panamanian": "Panamanian",
+            "saudi_arabian": "Saudi_arabian",
+            "scottish": "Saudi_arabian",
+            "slovak": "Slovak",
+            "somalian": "Somalian",
+            "thai": "Thai",
+            "turkmen": "Turkmen",
             "dominican": "Dominican",
             "ecuadorian": "Ecuadorean",
             "egyptian": "Egyptian",
@@ -740,7 +754,7 @@
                 "VIEW_LOGS": "View activity logs and audit trail",
                 "MANAGE_PERMITS": "Manage Permits",
                 "MANAGE_SETTINGS": "Manage system settings",
-                "VIEW_NOTIFICATIONBS": "View Notifications"
+                "VIEW_NOTIFICATIONS": "View Notifications"
             }
         },
         "permits": {

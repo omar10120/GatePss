@@ -414,6 +414,20 @@
             "yemeni": "يمني",
             "czech": "تشيكي",
             "dutch": "هولندي",
+            "lao": "لاوي",
+            "latvian": "لاتفي",
+            "malian": "مالي",
+            "mauritanian": "موريتاني",
+            "new_zealand": "نيوزيلندي",
+            "nicaraguan": "نيكاراجوان",
+            "nigerien": "نيجيري",
+            "panamanian": "بانيمانين",
+            "saudi_arabian": "السعودية",
+            "scottish": "الاسكتلندية",
+            "slovak": "السلوفاكية",
+            "somalian": "الصومالية",
+            "thai": "التايلاندية",
+            "turkmen": "التركمانية",
             "cypriot": "كيبروتيك",
             "lithuanian": "ليتواني",
             "idCard": "بطاقة هوية",
@@ -746,7 +760,7 @@
                 "VIEW_LOGS": "عرض سجلات النشاط وتدقيق العمليات",
                 "MANAGE_PERMITS": "إدارة التصاريح",
                 "MANAGE_SETTINGS": "إدارة إعدادات النظام",
-                "VIEW_NOTIFICATIONBS": "عرض الإشعارات"
+                "VIEW_NOTIFICATIONS": "عرض الإشعارات"
             }
         },
         "permits": {
