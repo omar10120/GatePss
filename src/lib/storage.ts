@@ -36,9 +36,9 @@ export const Storage = {
         const storageRoot = this.getStorageRoot();
         // If storage root is 'public', then stay in the app root for logs
         if (storageRoot === path.join(process.cwd(), 'public')) {
-            return path.join(process.cwd(), 'logs');
+            return path.join(process.cwd(), 'public');
         }
-        return path.join(storageRoot, 'logs');
+        return path.join(storageRoot, 'public');
     },
 
     /**
@@ -63,11 +63,11 @@ export const Storage = {
     async saveFile(file: File, prefix: string, subfolder: string = 'passports'): Promise<string> {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        
+
         const fileExt = file.name.split('.').pop()?.toLowerCase().trim() || 'bin';
         const timestamp = Date.now();
         const filename = `${prefix}_${timestamp}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-        
+
         const uploadDir = this.getUploadPath(subfolder);
         // Ensure folder exists (logs if failure happens on Hostinger)
         try {
@@ -76,10 +76,10 @@ export const Storage = {
             console.error(`[Storage] FAILED to create directory ${uploadDir}:`, err.message);
             throw err;
         }
-        
+
         const filepath = path.join(uploadDir, filename);
         await writeFile(filepath, buffer);
-        
+
         // Always return the path relative to the uploads root for consistency in DB
         return `${subfolder}/${filename}`;
     },
@@ -92,11 +92,11 @@ export const Storage = {
         // Security: Prevent directory traversal (basic check)
         const normalizedPath = path.normalize(fullPath);
         const rootPath = path.normalize(this.getUploadRoot());
-        
+
         if (!normalizedPath.startsWith(rootPath)) {
             throw new Error('Access denied: Directory traversal attempted');
         }
-        
+
         return await readFile(normalizedPath);
     }
 };
