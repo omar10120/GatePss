@@ -1157,7 +1157,7 @@ export default function RequestDetailsPage() {
                                                         { value: '', label: gt('placeholders.selectBeneficiary') || 'Select Beneficiary' },
                                                         { value: 'VISITOR', label: gt('options.VISITOR') || 'Visitor' },
                                                         { value: 'SUB_CONTRACTOR', label: gt('options.SUB_CONTRACTOR') || 'Sub contractor' },
-                                                        // { value: 'SERVICE_PROVIDER', label: gt('options.SERVICE_PROVIDER') || 'Service provider' },
+                                                        { value: 'SERVICE_PROVIDER', label: gt('options.SERVICE_PROVIDER') || 'Service provider' },
                                                     ]
                                                 },
                                                 {
@@ -1246,21 +1246,21 @@ export default function RequestDetailsPage() {
                                                     fieldType: 'select',
                                                     options: [
                                                         { value: '', label: gt('placeholders.select') || 'Select' },
-                                                        // { value: 'Engineer', label: gt('options.engineer') || 'Engineer' },
-                                                        // { value: 'Technician', label: gt('options.technician') || 'Technician' },
-                                                        // { value: 'Visitor', label: gt('options.visitor') || 'Visitor' },
-                                                        { value: 'Technical', label: gt('options.technical') || 'Technical' }
-                                                        // ,{ value: 'Manager', label: gt('options.manager') || 'Manager' },
-                                                        // { value: 'Administrator', label: gt('options.administrator') || 'Administrator' },
-                                                        // { value: 'Driver', label: gt('options.driver') || 'Driver' },
-                                                        // { value: 'Pro', label: gt('options.pro') || 'Pro' },
-                                                        // { value: 'Financial', label: gt('options.financial') || 'Financial' },
-                                                        // { value: 'Hr', label: gt('options.hr') || 'HR' },
-                                                        // { value: 'Marine', label: gt('options.marine') || 'Marine' },
-                                                        // { value: 'Security', label: gt('options.security') || 'Security' },
-                                                        // { value: 'Marketing', label: gt('options.marketing') || 'Marketing' },
-                                                        // { value: 'Procurement', label: gt('options.procurement') || 'Procurement' },
-                                                        // { value: 'Other', label: gt('options.other') || 'Other' }
+                                                        { value: 'Engineer', label: gt('options.engineer') || 'Engineer' },
+                                                        { value: 'Technician', label: gt('options.technician') || 'Technician' },
+                                                        { value: 'Visitor', label: gt('options.visitor') || 'Visitor' },
+                                                        { value: 'Technical', label: gt('options.technical') || 'Technical' },
+                                                        { value: 'Manager', label: gt('options.manager') || 'Manager' },
+                                                        { value: 'Administrator', label: gt('options.administrator') || 'Administrator' },
+                                                        { value: 'Driver', label: gt('options.driver') || 'Driver' },
+                                                        { value: 'Pro', label: gt('options.pro') || 'Pro' },
+                                                        { value: 'Financial', label: gt('options.financial') || 'Financial' },
+                                                        { value: 'Hr', label: gt('options.hr') || 'HR' },
+                                                        { value: 'Marine', label: gt('options.marine') || 'Marine' },
+                                                        { value: 'Security', label: gt('options.security') || 'Security' },
+                                                        { value: 'Marketing', label: gt('options.marketing') || 'Marketing' },
+                                                        { value: 'Procurement', label: gt('options.procurement') || 'Procurement' },
+                                                        { value: 'Other', label: gt('options.other') || 'Other' }
 
                                                     ]
                                                 },
