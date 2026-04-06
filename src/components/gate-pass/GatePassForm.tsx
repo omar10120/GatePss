@@ -849,7 +849,7 @@ export const GatePassForm: React.FC = () => {
 
                                         // Calculate minimum end date (4 months after start date)
                                         const minEndDate = new Date(startDate);
-                                        minEndDate.setMonth(minEndDate.getMonth() + 4);
+                                        minEndDate.setMonth(minEndDate.getMonth() + 3);
                                         minEndDate.setHours(0, 0, 0, 0);
 
                                         if (endDate < minEndDate) {
