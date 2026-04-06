@@ -92,11 +92,8 @@ function mapGender(gender: string): string {
 function mapVisitorType(requestType: string): string {
     const visitorTypeMap: Record<string, string> = {
         'VISITOR': '8',
-        'CONTRACTOR': '7',
         'SUB_CONTRACTOR': '7',
-        'SERVICE_PROVIDER': '5',
-        'EMPLOYEE': '6',
-        'VEHICLE': '9',
+        'SERVICE_PROVIDER': '5'
     };
     return visitorTypeMap[requestType.toUpperCase()] || '8';
 }
@@ -156,8 +153,8 @@ export async function createGatePass(
             reason_for_visit: request.purposeOfVisit,
             gender: mapGender(gateRequest?.gender || 'MALE'),
             citizenship: gateRequest?.nationality || 'Omani',
-            professions: gateRequest?.profession || 'Technical',
-            other_professions: gateRequest?.otherProfessions || extraFields.otherProfessions || '',
+            professions: 'Other',
+            other_professions: gateRequest?.otherProfessions || gateRequest?.profession || '',
             api_used_by: process.env.SOHAR_PORT_API_USED_BY || 'GatePass System',
         };
 

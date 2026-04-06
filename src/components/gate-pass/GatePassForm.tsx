@@ -1014,17 +1014,17 @@ export const GatePassForm: React.FC = () => {
                         error={fieldErrors.profession}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
-                            // { value: 'Driver', label: getBilingualNested(['options', 'driver']) },
-                            // { value: 'Pro', label: getBilingualNested(['options', 'pro']) },
-                            // { value: 'Administrator', label: getBilingualNested(['options', 'administrator']) },
-                            // { value: 'Financial', label: getBilingualNested(['options', 'financial']) },
+                            { value: 'Driver', label: getBilingualNested(['options', 'driver']) },
+                            { value: 'Pro', label: getBilingualNested(['options', 'pro']) },
+                            { value: 'Administrator', label: getBilingualNested(['options', 'administrator']) },
+                            { value: 'Financial', label: getBilingualNested(['options', 'financial']) },
                             { value: 'Technical', label: getBilingualNested(['options', 'technical']) },
-                            // { value: 'Hr', label: getBilingualNested(['options', 'hr']) },
-                            // { value: 'Marine', label: getBilingualNested(['options', 'marine']) },
-                            // { value: 'Security', label: getBilingualNested(['options', 'security']) },
-                            // { value: 'Marketing', label: getBilingualNested(['options', 'marketing']) },
-                            // { value: 'Procurement', label: getBilingualNested(['options', 'procurement']) },
-                            // { value: 'Other', label: getBilingualNested(['options', 'other']) },
+                            { value: 'Hr', label: getBilingualNested(['options', 'hr']) },
+                            { value: 'Marine', label: getBilingualNested(['options', 'marine']) },
+                            { value: 'Security', label: getBilingualNested(['options', 'security']) },
+                            { value: 'Marketing', label: getBilingualNested(['options', 'marketing']) },
+                            { value: 'Procurement', label: getBilingualNested(['options', 'procurement']) },
+                            { value: 'Other', label: getBilingualNested(['options', 'other']) },
                         ]}
                         required
                     />
