@@ -580,7 +580,7 @@ export const GatePassForm: React.FC = () => {
                         {getBilingualNested(['sections', 'passPermitInfo'])}
                     </h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 ">
+                <div className="grid grid-cols-1 gap-x-6 gap-y-6 ">
 
                     <Select
                         name="entityType"
@@ -913,7 +913,7 @@ export const GatePassForm: React.FC = () => {
                         {getBilingualNested(['sections', 'passHolderInfo'])}
                     </h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 text-gray-900">
+                <div className="grid grid-cols-1 gap-x-6 gap-y-6 text-gray-900">
                     {(entityType === 'freezone' || (entityType === 'port' && isPermanent(selectedPassType))) && (
                         <Input
                             name="applicantName"
