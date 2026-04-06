@@ -55,8 +55,8 @@ export const Input: React.FC<InputProps> = ({
                 />
                 {rightIcon && (
                     <div 
-                        className={`absolute inset-y-0 right-0 pr-4 flex items-center ${props.type === 'date' ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'pointer-events-none'}`}
-                        onClick={props.type === 'date' ? (e) => {
+                        className={`absolute inset-y-0 right-0 pr-4 flex items-center ${props.type === 'date' && !props.readOnly && !props.disabled ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'pointer-events-none'}`}
+                        onClick={props.type === 'date' && !props.readOnly && !props.disabled ? (e) => {
                             e.preventDefault();
                             const input = document.getElementById(inputId) as HTMLInputElement;
                             if (input) {
@@ -70,9 +70,9 @@ export const Input: React.FC<InputProps> = ({
                                 }
                             }
                         } : undefined}
-                        role={props.type === 'date' ? 'button' : undefined}
-                        tabIndex={props.type === 'date' ? 0 : undefined}
-                        onKeyDown={props.type === 'date' ? (e) => {
+                        role={props.type === 'date' && !props.readOnly && !props.disabled ? 'button' : undefined}
+                        tabIndex={props.type === 'date' && !props.readOnly && !props.disabled ? 0 : undefined}
+                        onKeyDown={props.type === 'date' && !props.readOnly && !props.disabled ? (e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
                                 const input = document.getElementById(inputId) as HTMLInputElement;

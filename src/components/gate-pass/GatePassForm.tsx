@@ -151,6 +151,13 @@ export const GatePassForm: React.FC = () => {
     const [organizationValue, setOrganizationValue] = useState('');
     const [selectedPassType, setSelectedPassType] = useState<PassType | null>(null);
     const [entityType, setEntityType] = useState<string>('port');
+    const [dateOfVisit, setDateOfVisit] = useState(() => {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    });
     const [passEndDate, setPassEndDate] = useState('');
 
 
@@ -498,6 +505,11 @@ export const GatePassForm: React.FC = () => {
             setOrganizationValue('');
             setSelectedPassType(null);
             setPassEndDate('');
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            setDateOfVisit(`${yyyy}-${mm}-${dd}`);
 
 
             setConfirmed(false);
@@ -524,7 +536,11 @@ export const GatePassForm: React.FC = () => {
         setErrors([]);
         setSelectedPassType(null);
         setPassEndDate('');
-
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        setDateOfVisit(`${yyyy}-${mm}-${dd}`);
     };
 
     if (success) {
@@ -537,7 +553,7 @@ export const GatePassForm: React.FC = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 px-4 sm:px-6 md:px-8 lg:px-10 py-6 md:py-8 max-w-7xl mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-8 px-4 sm:px-6 md:px-8 lg:px-10 py-6 md:py-8 max-w-7xl max-auto">
             {(error || errors.length > 0) && (
                 <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-lg text-red-700 animate-fade-in text-sm font-medium font-['Rubik'] shadow-sm">
                     {error && <p className="mb-2 font-semibold flex items-center gap-2">
@@ -772,52 +788,11 @@ export const GatePassForm: React.FC = () => {
                         type="date"
                         label={getBilingualNested(['fields', 'passStartingDate'])}
                         placeholder={getBilingualNested(['placeholders', 'selectDate'])}
+                        value={dateOfVisit}
                         error={fieldErrors.dateOfVisit}
                         required
-                        onChange={(e) => {
-                            const selectedDate = e.target.value;
-                            if (selectedDate) {
-                                const date = new Date(selectedDate);
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
-                                date.setHours(0, 0, 0, 0);
-
-                                if (date < today) {
-                                    setFieldErrors(prev => ({
-                                        ...prev,
-                                        dateOfVisit: getBilingualNested(['errors', 'invalidDate'])
-                                    }));
-                                } else {
-                                    setFieldErrors(prev => {
-                                        const newErrors = { ...prev };
-                                        delete newErrors.dateOfVisit;
-                                        return newErrors;
-                                    });
-
-                                    // Re-validate passEndDate if it's already set and pass type is permanent
-                                    if (isPermanent(selectedPassType) && passEndDate) {
-                                        const endDate = new Date(passEndDate);
-                                        endDate.setHours(0, 0, 0, 0);
-                                        const minEndDate = new Date(date);
-                                        minEndDate.setMonth(minEndDate.getMonth() + 4);
-                                        minEndDate.setHours(0, 0, 0, 0);
-
-                                        if (endDate < minEndDate) {
-                                            setFieldErrors(prev => ({
-                                                ...prev,
-                                                passEndDate: getBilingualNested(['errors', 'passEndDateMin4Months'])
-                                            }));
-                                        } else {
-                                            setFieldErrors(prev => {
-                                                const newErrors = { ...prev };
-                                                delete newErrors.passEndDate;
-                                                return newErrors;
-                                            });
-                                        }
-                                    }
-                                }
-                            }
-                        }}
+                        readOnly
+                        onChange={() => { }}
                         rightIcon={
                             <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -838,9 +813,7 @@ export const GatePassForm: React.FC = () => {
 
                                 // Real-time validation: check if end date is at least 4 months after start date
                                 if (selectedEndDate) {
-                                    const dateOfVisitInput = document.querySelector('input[name="dateOfVisit"]') as HTMLInputElement;
-                                    const dateOfVisitValue = dateOfVisitInput?.value;
-
+                                    const dateOfVisitValue = dateOfVisit;
                                     if (dateOfVisitValue) {
                                         const startDate = new Date(dateOfVisitValue);
                                         startDate.setHours(0, 0, 0, 0);
@@ -849,7 +822,7 @@ export const GatePassForm: React.FC = () => {
 
                                         // Calculate minimum end date (4 months after start date)
                                         const minEndDate = new Date(startDate);
-                                        minEndDate.setMonth(minEndDate.getMonth() + 3);
+                                        minEndDate.setMonth(minEndDate.getMonth() + 4);
                                         minEndDate.setHours(0, 0, 0, 0);
 
                                         if (endDate < minEndDate) {
@@ -875,7 +848,6 @@ export const GatePassForm: React.FC = () => {
                                 }
                             }}
                             min={(() => {
-                                const dateOfVisit = (document.querySelector('input[name="dateOfVisit"]') as HTMLInputElement)?.value;
                                 if (dateOfVisit) {
                                     const date = new Date(dateOfVisit);
                                     date.setMonth(date.getMonth() + 4);
