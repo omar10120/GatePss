@@ -159,6 +159,7 @@ export const GatePassForm: React.FC = () => {
         return `${yyyy}-${mm}-${dd}`;
     });
     const [passEndDate, setPassEndDate] = useState('');
+    const [professionValue, setProfessionValue] = useState('');
 
 
     const isPermanent = (pt: PassType | null) => {
@@ -216,6 +217,7 @@ export const GatePassForm: React.FC = () => {
             { name: 'applicantEmail', value: formData.get('applicantEmail') },
             { name: 'gender', value: formData.get('gender') },
             { name: 'profession', value: formData.get('profession') },
+            ...(formData.get('profession') === 'Other' ? [{ name: 'otherProfessions', value: formData.get('otherProfessions') }] : []),
         ];
 
         requiredFields.forEach(({ name, value }) => {
@@ -983,6 +985,7 @@ export const GatePassForm: React.FC = () => {
                     <Select
                         name="profession"
                         label={getBilingualNested(['fields', 'profession'])}
+                        value={professionValue}
                         error={fieldErrors.profession}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'select']) },
@@ -999,12 +1002,17 @@ export const GatePassForm: React.FC = () => {
                             { value: 'Other', label: getBilingualNested(['options', 'other']) },
                         ]}
                         required
+                        onChange={(e) => setProfessionValue(e.target.value)}
                     />
-                    <Input
-                        name="otherProfessions"
-                        label={getBilingualNested(['fields', 'otherProfessions'])}
-                        placeholder={getBilingualNested(['placeholders', 'otherProfessions'])}
-                    />
+                    {professionValue === 'Other' && (
+                        <Input
+                            name="otherProfessions"
+                            label={getBilingualNested(['fields', 'otherProfessions'])}
+                            placeholder={getBilingualNested(['placeholders', 'otherProfessions'])}
+                            error={fieldErrors.otherProfessions}
+                            required
+                        />
+                    )}
 
                     <Select
                         name="identification"
