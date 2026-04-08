@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
                 } else {
                     endDate.setHours(0, 0, 0, 0);
                     const minEndDate = new Date(visitDate);
-                    minEndDate.setMonth(minEndDate.getMonth() + 4);
+                    minEndDate.setMonth(minEndDate.getMonth() + 3);
                     minEndDate.setHours(0, 0, 0, 0);
 
                     if (endDate < minEndDate) {
