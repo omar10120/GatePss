@@ -281,7 +281,7 @@
             "validPassTypeRequired": "Valid pass type is required",
             "validRequestTypeRequired": "Valid Identification card is required (Resident, Not Resident)",
             "invalidDate": "Please select a valid date (cannot be in the past)",
-            "passEndDateMin4Months": "Pass end date must be at least 4 months after start date",
+            "passEndDateMin4Months": "Pass end date must be at least 3 months after start date",
             "visitdurationRequired": "Visit duration is required",
             "invalidFileType": "Only JPG, PNG, and PDF files are allowed"
         },
