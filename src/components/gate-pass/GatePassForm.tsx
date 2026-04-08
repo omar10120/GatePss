@@ -805,23 +805,6 @@ export const GatePassForm: React.FC = () => {
                             <p className="mt-1 text-sm text-red-600 font-['Rubik']">{fieldErrors.organization}</p>
                         )}
                     </div>
-
-                    <Input
-                        name="dateOfVisit"
-                        type="date"
-                        label={getBilingualNested(['fields', 'passStartingDate'])}
-                        placeholder={getBilingualNested(['placeholders', 'selectDate'])}
-                        value={dateOfVisit}
-                        error={fieldErrors.dateOfVisit}
-                        required
-                        readOnly
-                        onChange={() => { }}
-                        rightIcon={
-                            <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        }
-                    />
                     {isPermanent(selectedPassType) ? (
                         <Input
                             name="passEndDate"
@@ -915,6 +898,23 @@ export const GatePassForm: React.FC = () => {
                             required
                         />
                     )}
+                    <Input
+                        name="dateOfVisit"
+                        type="date"
+                        label={getBilingualNested(['fields', 'passStartingDate'])}
+                        placeholder={getBilingualNested(['placeholders', 'selectDate'])}
+                        value={dateOfVisit}
+                        error={fieldErrors.dateOfVisit}
+                        required
+                        readOnly
+                        onChange={() => { }}
+                        rightIcon={
+                            <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        }
+                    />
+
                     <Select
                         name="passFor"
                         label={getBilingualNested(['fields', 'passFor'])}
