@@ -91,21 +91,31 @@ function mapGender(gender: string): string {
  */
 function mapVisitorType(requestType: string): string {
     const visitorTypeMap: Record<string, string> = {
-        'VISITOR': '8',
-        'SUB_CONTRACTOR': '7',
-        'SERVICE_PROVIDER': '5'
+        'VISITOR': '1',
+        'SERVICE_PROVIDER': '2',
+        'SUB_CONTRACTOR': '3',
+        'EMPLOYEE': '4',
     };
-    return visitorTypeMap[requestType.toUpperCase()] || '8';
+    return visitorTypeMap[requestType.toUpperCase()] || '2';
 }
 
 /**
  * Calculate months validity from validFrom and validTo dates
  */
-function calculateMonthsValidity(validFrom: Date, validTo: Date): string {
-    const diffTime = validTo.getTime() - validFrom.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const months = Math.ceil(diffDays / 30);
-    return months.toString();
+function calculateMonthsValidity(gateRequest: any): string {
+    const duration = gateRequest?.visitduration;
+    const validityMap: Record<string, string> = {
+        '1_DAY': '1',
+        '2_DAY': '2',
+        '3_DAY': '3',
+        '4_DAY': '4',
+        '5_DAY': '5',
+        '10_DAY': '10',
+        '1_MONTH': '30',
+        '2_MONTH': '60',
+        '3_MONTH': '90',
+    };
+    return validityMap[duration] || '1';
 }
 
 /**
@@ -130,13 +140,37 @@ export async function createGatePass(
         const extraFields = request.extraFields || {};
         const gateRequest = extraFields.gateRequest as any; // Full request object from database
         const entityType = extraFields.entityType || gateRequest?.entityType || 'port';
+        // Determine if it's Permanent or Temporary based on passTypeId or presence of visitduration
+        // Rule: Pass Type 1 = Permanent, Pass Type 2 = Temporary
+        const isPermanentPass = !gateRequest?.visitduration || gateRequest?.passEndDate;
+        const passType = isPermanentPass ? '1' : '2';
+
+        // Map pass_for based on pass type
+        // Permanent: 2=Service Provider, 3=Sub Contractor, 4=Employee
+        // Temporary: 1=Visitor, 2=Service Provider, 3=Sub Contractor
+        const rawPassFor = gateRequest?.passFor || extraFields.passFor;
+        let passForMapped = '2'; // Default to Service Provider
+        
+        if (isPermanentPass) {
+            const permMap: Record<string, string> = {
+                'SERVICE_PROVIDER': '2',
+                'SUB_CONTRACTOR': '3',
+                'EMPLOYEE': '4'
+            };
+            passForMapped = permMap[rawPassFor] || '2';
+        } else {
+            const tempMap: Record<string, string> = {
+                'VISITOR': '1',
+                'SERVICE_PROVIDER': '2',
+                'SUB_CONTRACTOR': '3'
+            };
+            passForMapped = tempMap[rawPassFor] || '1';
+        }
+
         // Map fields to Sohar Port API format
         const soharPortPayload: any = {
-            pass_type: mapRequestType(request.requestType),
-            months_validity: gateRequest?.validFrom && gateRequest?.validTo
-                ? calculateMonthsValidity(new Date(gateRequest.validFrom), new Date(gateRequest.validTo))
-                : '30',
-            pass_for: mapPassFor(gateRequest?.passFor || extraFields.passFor),
+            pass_type: passType,
+            pass_for: passForMapped,
             company: gateRequest?.organization || 'Majis Industrial Services',
             name: request.applicantName || gateRequest?.applicantNameAr,
             phone: gateRequest?.applicantPhone || '',
@@ -144,12 +178,13 @@ export async function createGatePass(
             email: request.applicantEmail,
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
             identification_number: request.passportIdNumber,
-            visitor_type: mapVisitorType(gateRequest?.passFor || 'VISITOR'),
+            // visitor_type: Removed as per guide (Not Required)
+            // months_validity: Included only for Temporary
             blood_type: gateRequest?.bloodType || 'O+',
             start_date: formatDate(request.dateOfVisit),
             end_date: gateRequest?.validTo
                 ? formatDate(gateRequest.validTo)
-                : formatDate(new Date(new Date(request.dateOfVisit).getTime() + 30 * 24 * 60 * 60 * 1000)),
+                : formatDate(new Date(new Date(request.dateOfVisit).getTime() + 24 * 60 * 60 * 1000)), // Default 1 day
             reason_for_visit: request.purposeOfVisit,
             gender: mapGender(gateRequest?.gender || 'MALE'),
             citizenship: gateRequest?.nationality || 'Omani',
@@ -157,6 +192,11 @@ export async function createGatePass(
             other_professions: gateRequest?.otherProfessions || gateRequest?.profession || '',
             api_used_by: process.env.SOHAR_PORT_API_USED_BY || 'GatePass System',
         };
+
+        // Add months_validity only for Temporary passes
+        if (!isPermanentPass) {
+            soharPortPayload.months_validity = calculateMonthsValidity(gateRequest);
+        }
 
         // Handle file attachments (convert to base64)
         if (gateRequest?.passportIdImagePath) {

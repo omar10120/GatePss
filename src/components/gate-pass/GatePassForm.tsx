@@ -245,7 +245,7 @@ export const GatePassForm: React.FC = () => {
                 isValid = false;
             }
 
-            // 4-month rule for permanent passes and hide Full Name of Pass Holder(EN) / الاسم الكامل لحامل التصريح (EN)
+            // end_date rule: > 3 months and < 2 years for permanent passes
             if (isPermanent(selectedPassType)) {
                 const passEndDateValue = formData.get('passEndDate') as string;
                 if (!passEndDateValue) {
@@ -254,12 +254,20 @@ export const GatePassForm: React.FC = () => {
                 } else {
                     const endDate = new Date(passEndDateValue);
                     endDate.setHours(0, 0, 0, 0);
-                    const minEndDate = new Date(selectedDate);
-                    minEndDate.setMonth(minEndDate.getMonth() + 4);
-                    minEndDate.setHours(0, 0, 0, 0);
+                    const startDate = new Date(dateOfVisit);
+                    startDate.setHours(0, 0, 0, 0);
 
-                    if (endDate < minEndDate) {
-                        newFieldErrors['passEndDate'] = getBilingualNested(['errors', 'passEndDateMin4Months']);
+                    // Requirement: > 3 months and < 2 years
+                    const minEndDate = new Date(startDate);
+                    minEndDate.setMonth(minEndDate.getMonth() + 3);
+                    minEndDate.setDate(minEndDate.getDate() + 1); // strictly greater than 3 months
+                    
+                    const maxEndDate = new Date(startDate);
+                    maxEndDate.setFullYear(maxEndDate.getFullYear() + 2);
+                    maxEndDate.setHours(0, 0, 0, 0);
+
+                    if (endDate < minEndDate || endDate >= maxEndDate) {
+                        newFieldErrors['passEndDate'] = getBilingualNested(['errors', 'passEndDateInvalidRange']) || 'Pass End Date must be greater than 3 months and less than 2 years from today';
                         isValid = false;
                     }
                 }
@@ -852,7 +860,17 @@ export const GatePassForm: React.FC = () => {
                             min={(() => {
                                 if (dateOfVisit) {
                                     const date = new Date(dateOfVisit);
-                                    date.setMonth(date.getMonth() + 4);
+                                    date.setMonth(date.getMonth() + 3);
+                                    date.setDate(date.getDate() + 1);
+                                    return date.toISOString().split('T')[0];
+                                }
+                                return undefined;
+                            })()}
+                            max={(() => {
+                                if (dateOfVisit) {
+                                    const date = new Date(dateOfVisit);
+                                    date.setFullYear(date.getFullYear() + 2);
+                                    date.setDate(date.getDate() - 1);
                                     return date.toISOString().split('T')[0];
                                 }
                                 return undefined;
@@ -890,9 +908,18 @@ export const GatePassForm: React.FC = () => {
                         error={fieldErrors.passFor}
                         options={[
                             { value: '', label: getBilingualNested(['placeholders', 'selectBeneficiary']) },
-                            { value: 'VISITOR', label: getBilingualNested(['options', 'VISITOR']) },
-                            { value: 'SERVICE_PROVIDER', label: getBilingualNested(['options', 'SERVICE_PROVIDER']) },
-                            { value: 'SUB_CONTRACTOR', label: getBilingualNested(['options', 'SUB_CONTRACTOR']) },
+                            ...(isPermanent(selectedPassType)
+                                ? [
+                                    { value: 'SERVICE_PROVIDER', label: getBilingualNested(['options', 'SERVICE_PROVIDER']) },
+                                    { value: 'SUB_CONTRACTOR', label: getBilingualNested(['options', 'SUB_CONTRACTOR']) },
+                                    { value: 'EMPLOYEE', label: getBilingualNested(['options', 'EMPLOYEE']) }
+                                ]
+                                : [
+                                    { value: 'VISITOR', label: getBilingualNested(['options', 'VISITOR']) },
+                                    { value: 'SERVICE_PROVIDER', label: getBilingualNested(['options', 'SERVICE_PROVIDER']) },
+                                    { value: 'SUB_CONTRACTOR', label: getBilingualNested(['options', 'SUB_CONTRACTOR']) }
+                                ]
+                            )
                         ]}
                         required
                     />
