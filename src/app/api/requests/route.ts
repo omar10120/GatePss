@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
                     minEndDate.setHours(0, 0, 0, 0);
 
                     if (endDate < minEndDate) {
-                        errors.push('Pass End Date must be at least 4 months after Pass Starting Date');
+                        errors.push('Pass End Date must be at least 3 months after Pass Starting Date');
                     }
                 }
             }
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
             // Fallback to base64 ONLY if VERCEL is explicitly enabled
             // Robust check for string "false" which is common in environment settings on Hostinger
             const isVercel = process.env.VERCEL && process.env.VERCEL !== 'false';
-            
+
             if (isVercel) {
                 const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
                 return `data:${mimeType};base64,${buffer.toString('base64')}`;
