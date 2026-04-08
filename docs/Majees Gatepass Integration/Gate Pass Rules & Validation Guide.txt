@@ -1,0 +1,38 @@
+====== Gate Pass Rules & Validation Guide ======
+
+Permanent Gatepass:
+--------------------
+Pass Type = 1
+Visitor type  (No need to pass - Not Required)
+months_validity (No need to pass - Not Required)
+pass_for=[2,3,4]
+	2= Service Provider  مزود الخدمة 
+	3= Sub Contractor مقاول الباطن
+	4= Employee موظف الشركة
+
+Important Notes:
+	end_date: Pass End date must be greater than 3 months and less than 2 years from the starting date.
+============================================================================================================================================================
+
+Temporary Gatepass:
+----------
+Pass Type = 2
+Visitor type  (No need to pass - Not Required)
+months_validity= [1,2,3,4,5,10,30,60,90]
+	1= 1 day
+	2= 2 days
+	3= 3 days
+	4= 4 days
+	5= 5 days
+	10= 10 days
+	30= One Month
+	60= Two Months
+	90= Three Months
+
+pass_for=[1,2,3]
+	1= Visitor زائر
+	2= Service Provider  مزود الخدمة 
+	3= Sub Contractor مقاول الباطن
+
+Important Notes:
+	“The difference between start_date and end_date must exactly match the selected months_validity, as enforced by the validation rules.”
