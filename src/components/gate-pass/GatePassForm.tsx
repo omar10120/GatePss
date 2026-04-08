@@ -181,7 +181,7 @@ export const GatePassForm: React.FC = () => {
             'passportIdImage': 'copyOfCivilId',
             'passportIdNumber': 'idPassportNumber',
             'otherDocuments1': 'otherDocuments1',
-
+            'otherDocuments2': 'otherDocuments2',
         };
         const fieldKey = fieldMap[name] || name;
         return getBilingualNested(['fields', fieldKey]) || name;
@@ -363,9 +363,16 @@ export const GatePassForm: React.FC = () => {
             }
         }
 
-        // Other Documents validation (optional but if provided, validate them)
+        // Other Documents validation
         const otherDocuments1 = formData.get('otherDocuments1') as File | null;
-        if (otherDocuments1 && otherDocuments1.size > 0) {
+        const permanentPass = isPermanent(selectedPassType);
+
+        // Required for permanent passes
+        if (permanentPass && (!otherDocuments1 || otherDocuments1.size === 0)) {
+            const fieldLabel = getFieldLabel('otherDocuments1');
+            newFieldErrors['otherDocuments1'] = `${fieldLabel} ${getBilingualNested(['errors', 'required'])}`;
+            isValid = false;
+        } else if (otherDocuments1 && otherDocuments1.size > 0) {
             const maxSize = 2 * 1024 * 1024; // 2MB in bytes
             if (otherDocuments1.size > maxSize) {
                 newFieldErrors['otherDocuments1'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (2MB)';
@@ -380,7 +387,13 @@ export const GatePassForm: React.FC = () => {
         }
 
         const otherDocuments2 = formData.get('otherDocuments2') as File | null;
-        if (otherDocuments2 && otherDocuments2.size > 0) {
+
+        // Required for permanent passes
+        if (permanentPass && (!otherDocuments2 || otherDocuments2.size === 0)) {
+            const fieldLabel = getFieldLabel('otherDocuments2');
+            newFieldErrors['otherDocuments2'] = `${fieldLabel} ${getBilingualNested(['errors', 'required'])}`;
+            isValid = false;
+        } else if (otherDocuments2 && otherDocuments2.size > 0) {
             const maxSize = 2 * 1024 * 1024; // 2MB in bytes
             if (otherDocuments2.size > maxSize) {
                 newFieldErrors['otherDocuments2'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (2MB)';
@@ -1088,6 +1101,7 @@ export const GatePassForm: React.FC = () => {
                         placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
                         accept=".pdf"
                         helperText="(pdf) max 2MB"
+                        required={isPermanent(selectedPassType)}
                         error={fieldErrors.otherDocuments1}
                     />
 
@@ -1098,6 +1112,7 @@ export const GatePassForm: React.FC = () => {
                         placeholder={getBilingualNested(['placeholders', 'chooseFile'])}
                         accept=".pdf"
                         helperText="(pdf) max 2MB"
+                        required={isPermanent(selectedPassType)}
                         error={fieldErrors.otherDocuments2}
                     />
                 </div>

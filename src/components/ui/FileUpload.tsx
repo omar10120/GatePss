@@ -27,6 +27,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         <div className="w-full">
             <label htmlFor={id} className="block text-[16px] font-normal text-[#222222] mb-1 font-['Rubik']">
                 {label}
+                {required && <span className="text-red-500 ml-1">*</span>}
             </label>
             {helperText && (
                 <p className="text-[12px] text-[#747474] mb-2 font-['Rubik'] font-light">
