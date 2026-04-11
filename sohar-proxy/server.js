@@ -7,7 +7,7 @@ const dns = require('dns');
 // =========================
 // CONFIG
 // =========================
-const TARGET_HOST = 'uat-api.soharportandfreezone.om';
+const TARGET_HOST = 'gpass.soharportandfreezone.om';
 const TARGET_PORT = 443;
 
 const LOG_DIR = path.join(__dirname, 'logs');
@@ -114,7 +114,7 @@ const server = http.createServer((req, res) => {
 
         headers.host = TARGET_HOST;
 
-        const auth = Buffer.from('Majees.API:M@jee$@p1').toString('base64');
+        const auth = Buffer.from('MISC.API:@p1_2M@jee$').toString('base64');
         headers['Authorization'] = `Basic ${auth}`;
 
         const options = {
