@@ -2,6 +2,7 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns');
 
 // =========================
 // CONFIG
@@ -27,7 +28,7 @@ function getTimestamp() {
 }
 
 // =========================
-// LOG ROTATION (keep 7 days)
+// LOG ROTATION (7 days)
 // =========================
 function cleanOldLogs() {
     const files = fs.readdirSync(LOG_DIR);
@@ -38,40 +39,31 @@ function cleanOldLogs() {
         const stat = fs.statSync(filePath);
 
         const ageDays = (now - stat.mtimeMs) / (1000 * 60 * 60 * 24);
-
-        if (ageDays > 7) {
-            fs.unlinkSync(filePath);
-        }
+        if (ageDays > 7) fs.unlinkSync(filePath);
     });
 }
 
-// run on startup
 cleanOldLogs();
 
 // =========================
 // LOGGER
 // =========================
-function writeLog(type, data) {
+function writeLog(level, data) {
     const date = getDate();
-
-    const file =
-        type === 'ERROR'
-            ? `error-${date}.log`
-            : `access-${date}.log`;
+    const file = level === 'ERROR'
+        ? `error-${date}.log`
+        : `access-${date}.log`;
 
     const filePath = path.join(LOG_DIR, file);
 
-    const logEntry = {
-        ...data,
-        type,
-        timestamp: getTimestamp()
+    const entry = {
+        level,
+        timestamp: getTimestamp(),
+        ...data
     };
 
-    fs.appendFile(filePath, JSON.stringify(logEntry) + '\n', (err) => {
-        if (err) console.error('Log write error:', err);
-    });
-
-    console.log(logEntry);
+    fs.appendFile(filePath, JSON.stringify(entry) + '\n', () => {});
+    console.log(JSON.stringify(entry, null, 2));
 }
 
 // =========================
@@ -79,9 +71,8 @@ function writeLog(type, data) {
 // =========================
 const server = http.createServer((req, res) => {
 
-    const start = Date.now();
+    const startTime = Date.now();
 
-    // 🔥 TRACE ID (important)
     const traceId =
         req.headers['x-trace-id'] ||
         Math.random().toString(36).substring(2, 12);
@@ -95,33 +86,33 @@ const server = http.createServer((req, res) => {
         body = Buffer.concat(body).toString();
 
         let pathUrl = req.url;
-
         if (pathUrl.startsWith('/gatepassproxy')) {
             pathUrl = pathUrl.replace('/gatepassproxy', '') || '/';
         }
 
         // =========================
-        // REQUEST LOG
+        // CLIENT REQUEST LOG
         // =========================
         writeLog('REQUEST', {
             traceId,
+            stage: 'CLIENT_REQUEST',
             method: req.method,
             url: req.url,
             forwardTo: pathUrl,
+            clientIp: req.socket.remoteAddress,
             headers: req.headers,
-            body: body ? body.substring(0, 2000) : null
+            bodyPreview: body ? body.substring(0, 1000) : null
         });
 
         // =========================
-        // HEADERS
+        // PREPARE UPSTREAM
         // =========================
         const headers = { ...req.headers };
-
-        delete headers['host'];
-        delete headers['connection'];
+        delete headers.host;
+        delete headers.connection;
         delete headers['content-length'];
 
-        headers['host'] = TARGET_HOST;
+        headers.host = TARGET_HOST;
 
         const auth = Buffer.from('Majees.API:M@jee$@p1').toString('base64');
         headers['Authorization'] = `Basic ${auth}`;
@@ -133,8 +124,37 @@ const server = http.createServer((req, res) => {
             method: req.method,
             headers,
             timeout: 30000,
-            rejectUnauthorized: false
+            rejectUnauthorized: false,
+
+            // DNS DEBUG
+            lookup: (hostname, opts, cb) => {
+                dns.lookup(hostname, opts, (err, address, family) => {
+                    writeLog('DNS', {
+                        traceId,
+                        hostname,
+                        address,
+                        family,
+                        error: err ? err.message : null
+                    });
+                    cb(err, address, family);
+                });
+            }
         };
+
+        // =========================
+        // UPSTREAM LOG
+        // =========================
+        writeLog('UPSTREAM', {
+            traceId,
+            stage: 'PROXY_TO_TARGET',
+            target: {
+                host: TARGET_HOST,
+                port: TARGET_PORT,
+                path: pathUrl,
+                method: req.method
+            },
+            headersSent: headers
+        });
 
         const proxyReq = https.request(options, (proxyRes) => {
 
@@ -146,17 +166,13 @@ const server = http.createServer((req, res) => {
 
                 responseBody = Buffer.concat(responseBody).toString();
 
-                const duration = Date.now() - start;
-
-                // =========================
-                // RESPONSE LOG
-                // =========================
                 writeLog('RESPONSE', {
                     traceId,
-                    status: proxyRes.statusCode,
-                    duration: duration + 'ms',
+                    stage: 'TARGET_RESPONSE',
+                    statusCode: proxyRes.statusCode,
+                    durationMs: Date.now() - startTime,
                     headers: proxyRes.headers,
-                    body: responseBody.substring(0, 1000)
+                    bodyPreview: responseBody.substring(0, 1000)
                 });
 
                 res.writeHead(proxyRes.statusCode, proxyRes.headers);
@@ -164,14 +180,17 @@ const server = http.createServer((req, res) => {
             });
         });
 
+        // =========================
+        // ERRORS
+        // =========================
         proxyReq.on('error', (err) => {
-
-            const duration = Date.now() - start;
 
             writeLog('ERROR', {
                 traceId,
-                duration: duration + 'ms',
-                error: err.message,
+                stage: 'UPSTREAM_ERROR',
+                durationMs: Date.now() - startTime,
+                message: err.message,
+                code: err.code,
                 stack: err.stack
             });
 
@@ -183,14 +202,13 @@ const server = http.createServer((req, res) => {
         });
 
         proxyReq.on('timeout', () => {
-
             writeLog('ERROR', {
                 traceId,
-                error: 'Timeout'
+                stage: 'TIMEOUT',
+                message: 'Upstream timeout'
             });
 
             proxyReq.destroy();
-
             res.writeHead(504);
             res.end('Gateway Timeout');
         });
@@ -201,7 +219,6 @@ const server = http.createServer((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Proxy running on port ${PORT}`);
 });
