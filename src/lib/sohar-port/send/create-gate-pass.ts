@@ -4,7 +4,6 @@ import { SoharPortHttpClient } from '../client';
 import { CreateGatePassRequest, CreateGatePassResponse } from '../types';
 import { getEndpointUrl } from '../config';
 import { logSuccess, logError } from '../utils/logger';
-import { readFile } from 'fs/promises';
 import path from 'path';
 import { logger } from '../../logger';
 import { Storage } from '../../storage';
@@ -54,14 +53,6 @@ function mapRequestType(requestType: string): string {
 }
 
 /**
- * Map Beneficiary of the permit value
- */
-function mapPassFor(passFor: string | null | undefined): string {
-    if (!passFor) return '2';
-    return passFor === 'SELF' ? '1' : '2';
-}
-
-/**
  * Map identification type
  */
 function mapIdentificationType(identification: string): string {
@@ -87,16 +78,20 @@ function mapGender(gender: string): string {
 }
 
 /**
- * Map visitor type (default to 8 for visitor)
+ * Sohar pass_type 1 = permanent, 2 = temporary (discrete validity days in months_validity).
+ * Prefer DB pass type name when present; otherwise infer from validity_period.
  */
-function mapVisitorType(requestType: string): string {
-    const visitorTypeMap: Record<string, string> = {
-        'VISITOR': '1',
-        'SERVICE_PROVIDER': '2',
-        'SUB_CONTRACTOR': '3',
-        'EMPLOYEE': '4',
-    };
-    return visitorTypeMap[requestType.toUpperCase()] || '2';
+function isPermanentSoharPass(gateRequest: any, extraFields: Record<string, any>): boolean {
+    if (typeof extraFields.isPermanentForSohar === 'boolean') {
+        return extraFields.isPermanentForSohar;
+    }
+    const passType = extraFields.passType as { name_en?: string; name_ar?: string } | undefined;
+    if (passType?.name_en) {
+        const nameEn = passType.name_en.toLowerCase();
+        const nameAr = passType.name_ar || '';
+        return nameEn.includes('permanent') || nameAr.includes('دائم');
+    }
+    return !gateRequest?.visitduration;
 }
 
 /**
@@ -140,9 +135,8 @@ export async function createGatePass(
         const extraFields = request.extraFields || {};
         const gateRequest = extraFields.gateRequest as any; // Full request object from database
         const entityType = extraFields.entityType || gateRequest?.entityType || 'port';
-        // Determine if it's Permanent or Temporary based on passTypeId or presence of visitduration
-        // Rule: Pass Type 1 = Permanent, Pass Type 2 = Temporary
-        const isPermanentPass = !gateRequest?.visitduration || gateRequest?.passEndDate;
+        // Sohar: pass_type 1 = permanent, 2 = temporary
+        const isPermanentPass = isPermanentSoharPass(gateRequest, extraFields);
         const passType = isPermanentPass ? '1' : '2';
 
         // Map pass_for based on pass type
@@ -168,18 +162,23 @@ export async function createGatePass(
         }
 
         // Map fields to Sohar Port API format
+        const displayName =
+            gateRequest?.applicantNameEn?.trim() ||
+            request.applicantName?.trim() ||
+            gateRequest?.applicantNameAr ||
+            '';
+
         const soharPortPayload: any = {
             pass_type: passType,
             pass_for: passForMapped,
             company: gateRequest?.organization || 'Majis Industrial Services',
-            name: request.applicantName || gateRequest?.applicantNameAr,
+            name: displayName,
             phone: gateRequest?.applicantPhone || '',
             name_in_arabic: gateRequest?.applicantNameAr,
             email: request.applicantEmail,
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
             identification_number: request.passportIdNumber,
-            // visitor_type: Removed as per guide (Not Required)
-            // months_validity: Included only for Temporary
+            // visitor_type / emp_no: omitted per Sohar guide for pass_type 1 and 2
             blood_type: gateRequest?.bloodType || 'O+',
             start_date: formatDate(request.dateOfVisit),
             end_date: gateRequest?.validTo
@@ -190,12 +189,16 @@ export async function createGatePass(
             citizenship: gateRequest?.nationality || 'Omani',
             professions: 'Other',
             other_professions: gateRequest?.otherProfessions || gateRequest?.profession || '',
-            api_used_by: process.env.SOHAR_PORT_API_USED_BY || 'GatePass System',
+            api_used_by: process.env.SOHAR_PORT_API_USED_BY?.trim() || 'GatePass System',
         };
 
-        // Add months_validity only for Temporary passes
-        if (!isPermanentPass) {
-            soharPortPayload.months_validity = calculateMonthsValidity(gateRequest);
+        // Permanent: Sohar requires months_validity present as "". Temporary: day codes [1,2,3,4,5,10,30,60,90]
+        soharPortPayload.months_validity = isPermanentPass
+            ? ''
+            : calculateMonthsValidity(gateRequest);
+
+        if (!process.env.SOHAR_PORT_API_USED_BY?.trim()) {
+            logger.warn('Sohar Port: SOHAR_PORT_API_USED_BY is not set; api_used_by should be the VMS login or display name');
         }
 
         // Handle file attachments (convert to base64)
