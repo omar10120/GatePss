@@ -475,7 +475,7 @@
     },
     "Admin": {
         "dashboard": {
-            "applyNow": "Apply Now",
+            "applyNow": "Apply Now.",
             "clear": "Clear",
             "selectDateRange": "Select Date Range",
             "startDate": "Start Date",
