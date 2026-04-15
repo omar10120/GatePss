@@ -27,6 +27,191 @@ function getTimestamp() {
     return new Date().toISOString();
 }
 
+function safeJsonParse(text) {
+    if (!text) return null;
+    try {
+        return JSON.parse(text);
+    } catch (error) {
+        return null;
+    }
+}
+
+function toComparableAttributes(parsedBody) {
+    if (!parsedBody || typeof parsedBody !== 'object') return null;
+
+    const payload = parsedBody.gatePass || parsedBody.payload || parsedBody.data || parsedBody;
+    if (!payload || typeof payload !== 'object') return null;
+
+    const result = {};
+    Object.entries(payload).forEach(([key, value]) => {
+        if (value === null || value === undefined) return;
+        if (typeof value === 'string' && value.length > 500) {
+            result[key] = `[string:${value.length}]`;
+            return;
+        }
+        result[key] = value;
+    });
+
+    return result;
+}
+
+function validateSoharPayload(attributes) {
+    if (!attributes || typeof attributes !== 'object') {
+        return { ok: false, errors: ['Payload is missing or invalid JSON object'] };
+    }
+
+    const errors = [];
+    const requiredFields = [
+        'pass_type',
+        'months_validity',
+        'pass_for',
+        'company',
+        'name',
+        'phone',
+        'name_in_arabic',
+        'email',
+        'identification_type',
+        'identification_number',
+        'blood_type',
+        'start_date',
+        'end_date',
+        'reason_for_visit',
+        'api_used_by',
+        'citizenship',
+        'professions',
+        'gender'
+    ];
+
+    requiredFields.forEach((field) => {
+        if (attributes[field] === undefined || attributes[field] === null || attributes[field] === '') {
+            errors.push(`Missing or empty required field: ${field}`);
+        }
+    });
+
+    const passType = String(attributes.pass_type || '');
+    const passFor = String(attributes.pass_for || '');
+    const monthsValidity = attributes.months_validity;
+    const monthsValidityString = monthsValidity === undefined || monthsValidity === null
+        ? ''
+        : String(monthsValidity);
+
+    if (passType !== '1' && passType !== '2') {
+        errors.push('pass_type must be "1" (permanent) or "2" (temporary)');
+    }
+
+    if (passType === '1') {
+        if (!['2', '3', '4'].includes(passFor)) {
+            errors.push('For pass_type=1, pass_for must be one of [2,3,4]');
+        }
+        if (monthsValidityString !== '') {
+            errors.push('For pass_type=1, months_validity must be an empty string');
+        }
+    }
+
+    if (passType === '2') {
+        if (!['1', '2', '3'].includes(passFor)) {
+            errors.push('For pass_type=2, pass_for must be one of [1,2,3]');
+        }
+        if (!['1', '2', '3', '4', '5', '10', '30', '60', '90'].includes(monthsValidityString)) {
+            errors.push('For pass_type=2, months_validity must be one of [1,2,3,4,5,10,30,60,90]');
+        }
+    }
+
+    return {
+        ok: errors.length === 0,
+        errors
+    };
+}
+
+function normalizeBase64Value(value) {
+    if (typeof value !== 'string') return '';
+    const trimmed = value.trim();
+    const dataUrlMatch = trimmed.match(/^data:[^;]+;base64,(.+)$/i);
+    const raw = dataUrlMatch ? dataUrlMatch[1] : trimmed;
+    return raw.replace(/\s+/g, '');
+}
+
+function detectImageType(buffer) {
+    if (!buffer || buffer.length < 4) return 'unknown';
+    const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+    const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
+    const isPdf = buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46;
+    if (isJpeg) return 'jpeg';
+    if (isPng) return 'png';
+    if (isPdf) return 'pdf';
+    return 'unknown';
+}
+
+function validateBase64Attachment(name, value) {
+    if (value === undefined || value === null || value === '') {
+        return { name, present: false, ok: true, errors: [] };
+    }
+
+    const normalized = normalizeBase64Value(value);
+    const errors = [];
+
+    if (!normalized) {
+        errors.push('Empty base64 after normalization');
+        return { name, present: true, ok: false, errors };
+    }
+
+    if (normalized.length % 4 !== 0) {
+        errors.push('Base64 length is not divisible by 4');
+    }
+
+    if (!/^[A-Za-z0-9+/=]+$/.test(normalized)) {
+        errors.push('Base64 has invalid characters');
+    }
+
+    let buffer = null;
+    try {
+        buffer = Buffer.from(normalized, 'base64');
+    } catch (error) {
+        errors.push(`Base64 decode error: ${error.message}`);
+    }
+
+    if (!buffer || buffer.length === 0) {
+        errors.push('Decoded buffer is empty');
+    }
+
+    const mime = detectImageType(buffer);
+    if (name.includes('photo') || name.includes('identification')) {
+        if (!['jpeg', 'png'].includes(mime)) {
+            errors.push(`Decoded file is not JPEG/PNG (detected: ${mime})`);
+        }
+    }
+
+    return {
+        name,
+        present: true,
+        ok: errors.length === 0,
+        mime,
+        decodedBytes: buffer ? buffer.length : 0,
+        base64Length: normalized.length,
+        errors
+    };
+}
+
+function validateAttachmentFields(attributes) {
+    if (!attributes || typeof attributes !== 'object') {
+        return { ok: false, errors: ['Cannot validate attachments without payload attributes'] };
+    }
+
+    const checks = [
+        validateBase64Attachment('identification_attachment', attributes.identification_attachment),
+        validateBase64Attachment('photo_attachment', attributes.photo_attachment),
+        validateBase64Attachment('other_attachment', attributes.other_attachment),
+        validateBase64Attachment('other_attachment2', attributes.other_attachment2)
+    ];
+
+    const errors = checks.flatMap((check) => check.errors.map((msg) => `${check.name}: ${msg}`));
+    return {
+        ok: errors.length === 0,
+        errors,
+        checks
+    };
+}
+
 // =========================
 // LOG ROTATION (7 days)
 // =========================
@@ -84,6 +269,10 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
 
         body = Buffer.concat(body).toString();
+        const parsedBody = safeJsonParse(body);
+        const attributes = toComparableAttributes(parsedBody);
+        const validation = validateSoharPayload(attributes);
+        const attachmentValidation = validateAttachmentFields(attributes);
 
         let pathUrl = req.url;
         if (pathUrl.startsWith('/gatepassproxy')) {
@@ -101,7 +290,20 @@ const server = http.createServer((req, res) => {
             forwardTo: pathUrl,
             clientIp: req.socket.remoteAddress,
             headers: req.headers,
-            bodyPreview: body ? body.substring(0, 1000) : null
+            bodyIsJson: Boolean(parsedBody),
+            attributes
+        });
+
+        writeLog(validation.ok ? 'REQUEST' : 'ERROR', {
+            traceId,
+            stage: 'REQUEST_VALIDATION',
+            validation
+        });
+
+        writeLog(attachmentValidation.ok ? 'REQUEST' : 'ERROR', {
+            traceId,
+            stage: 'ATTACHMENT_VALIDATION',
+            attachmentValidation
         });
 
         // =========================
