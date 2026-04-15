@@ -9,6 +9,24 @@ import { logger } from '../../logger';
 import { Storage } from '../../storage';
 
 
+function normalizeBase64(input: string): string {
+    return input.replace(/\s/g, '');
+}
+
+function isValidBase64(input: string): boolean {
+    const normalized = normalizeBase64(input);
+    return normalized.length > 0 &&
+        normalized.length % 4 === 0 &&
+        /^[A-Za-z0-9+/]+={0,2}$/.test(normalized);
+}
+
+function getBase64Preview(base64: string): string {
+    const normalized = normalizeBase64(base64);
+    const start = normalized.substring(0, 24);
+    const end = normalized.slice(-24);
+    return `${start}...${end}`;
+}
+
 async function fileToBase64(filePath: string): Promise<string | null> {
     try {
         if (!filePath) return null;
@@ -17,7 +35,12 @@ async function fileToBase64(filePath: string): Promise<string | null> {
         if (filePath.startsWith('data:')) {
             const base64Match = filePath.match(/base64,(.+)$/);
             if (base64Match && base64Match[1]) {
-                return base64Match[1];
+                const normalized = normalizeBase64(base64Match[1]);
+                if (!isValidBase64(normalized)) {
+                    logger.error(`Invalid data URL base64 for ${filePath}`);
+                    return null;
+                }
+                return normalized;
             }
             return null;
         }
@@ -33,8 +56,28 @@ async function fileToBase64(filePath: string): Promise<string | null> {
         }
 
         // Read from storage (honors STORAGE_UPLOAD_PATH)
-        const fileBuffer = await Storage.readFile(storagePath);
-        return fileBuffer.toString('base64');
+        const fileData: unknown = await Storage.readFile(storagePath);
+
+        if (Buffer.isBuffer(fileData)) {
+            const encoded = fileData.toString('base64');
+            if (!isValidBase64(encoded)) {
+                logger.error(`Invalid encoded base64 generated from file ${filePath}`);
+                return null;
+            }
+            return encoded;
+        }
+
+        if (typeof fileData === 'string') {
+            const normalized = normalizeBase64(fileData.trim());
+            if (!isValidBase64(normalized)) {
+                logger.error(`Invalid string base64 content for ${filePath}`);
+                return null;
+            }
+            return normalized;
+        }
+
+        logger.error(`Unsupported file data type for ${filePath}`);
+        return null;
     } catch (error: any) {
         console.error(`❌ Failed to read file ${filePath}:`, error.message);
         return null;
@@ -207,6 +250,7 @@ export async function createGatePass(
             if (passportBase64) {
                 soharPortPayload.identification_attachment = passportBase64;
                 soharPortPayload.identification_document = path.basename(gateRequest.passportIdImagePath);
+                logger.info(`Passport base64 preview for ${request.requestNumber}: ${getBase64Preview(passportBase64)}`);
             }
         }
 
@@ -218,12 +262,14 @@ export async function createGatePass(
                 if (doc1) {
                     soharPortPayload.other_attachment = doc1;
                     soharPortPayload.other_documents = path.basename(otherDocs[0].filePath);
+                    logger.info(`Other doc1 base64 preview for ${request.requestNumber}: ${getBase64Preview(doc1)}`);
                 }
                 if (otherDocs.length > 1) {
                     const doc2 = await fileToBase64(otherDocs[1].filePath);
                     if (doc2) {
                         soharPortPayload.other_attachment2 = doc2;
                         soharPortPayload.other_documents2 = path.basename(otherDocs[1].filePath);
+                        logger.info(`Other doc2 base64 preview for ${request.requestNumber}: ${getBase64Preview(doc2)}`);
                     }
                 }
             }
@@ -236,6 +282,7 @@ export async function createGatePass(
             if (photoBase64) {
                 soharPortPayload.photo_attachment = photoBase64;
                 soharPortPayload.photo = path.basename(photoUpload.filePath);
+                logger.info(`Photo base64 preview for ${request.requestNumber}: ${getBase64Preview(photoBase64)}`);
             }
         } else if (gateRequest?.passportIdImagePath && soharPortPayload.identification_attachment) {
             // Fallback to passport image if no separate photo
