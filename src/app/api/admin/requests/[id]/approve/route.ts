@@ -67,6 +67,16 @@ export async function POST(
                 );
             }
 
+            let passTypeForSohar: { name_en: string; name_ar: string } | null = null;
+            if (gateRequest.passTypeId && prisma.pass_types) {
+                const pt = await prisma.pass_types.findUnique({
+                    where: { id: gateRequest.passTypeId },
+                });
+                if (pt) {
+                    passTypeForSohar = { name_en: pt.name_en, name_ar: pt.name_ar };
+                }
+            }
+
             if (gateRequest.status !== 'PENDING') {
                 return NextResponse.json(
                     { error: 'Invalid Operation', message: 'Only pending requests can be approved' },
@@ -122,6 +132,7 @@ export async function POST(
                     passFor: gateRequest.passFor,
                     entityType: gateRequest.entityType,
                     gateRequest: gateRequest, // Pass full request object for mapping
+                    passType: passTypeForSohar,
                 },
             });
 

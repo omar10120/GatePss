@@ -129,6 +129,18 @@ export async function POST(request: NextRequest) {
             data: {
                 requiresOTP: true,
                 email: user.email,
+                user: {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    permissions: user.userPermissions.map((up) => up.permission.key),
+                    permissionsDetails: user.userPermissions.map((up) => ({
+                        id: up.permission.id,
+                        key: up.permission.key,
+                        description: up.permission.description,
+                    })),
+                },
             },
         });
 

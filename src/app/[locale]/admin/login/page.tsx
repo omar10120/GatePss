@@ -19,6 +19,16 @@ export default function AdminLoginPage() {
     const t = useTranslations('HomePage.login');
     const locale = useLocale();
 
+    const saveAuthSession = (token: unknown, user: unknown): boolean => {
+        if (typeof token !== 'string' || !token.trim() || !user || typeof user !== 'object') {
+            return false;
+        }
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        return true;
+    };
+
 
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -38,9 +48,7 @@ export default function AdminLoginPage() {
                 },
                 body: JSON.stringify({ email, password }),
             });
-            console.log(response);
             const data = await response.json();
-            console.log(data);
             if (!response.ok) {
                 const errorMessage = data.message || data.error || 'Login failed. Please check your credentials and try again.';
                 setError(errorMessage);
@@ -57,8 +65,11 @@ export default function AdminLoginPage() {
 
             // If no OTP required (shouldn't happen with new flow, but keep for backward compatibility)
             if (data.data?.token) {
-                localStorage.setItem('token', data.data.token);
-                localStorage.setItem('user', JSON.stringify(data.data.user));
+                const isSaved = saveAuthSession(data.data.token, data.data.user);
+                if (!isSaved) {
+                    setError('Authentication data is invalid. Please try again.');
+                    return;
+                }
                 router.push('/admin/dashboard');
             }
         } catch (err) {
@@ -97,9 +108,11 @@ export default function AdminLoginPage() {
             }
 
             // Store token in localStorage
-            localStorage.setItem('token', data.data.token);
-            localStorage.setItem('user', JSON.stringify(data.data.user));
-            console.log(response);
+            const isSaved = saveAuthSession(data.data?.token, data.data?.user);
+            if (!isSaved) {
+                setOtpError('Authentication data is invalid. Please try again.');
+                return;
+            }
             // Redirect to dashboard
             router.push('/admin/dashboard');
         } catch (err) {
@@ -130,7 +143,6 @@ export default function AdminLoginPage() {
             });
 
             const data = await response.json();
-            console.log(response);
             if (!response.ok) {
                 const errorMessage = data.message || data.error || 'Failed to resend OTP. Please try again.';
                 setOtpError(errorMessage);
