@@ -44,6 +44,9 @@ interface Request {
     } | null;
     externalStatus?: string | null;
     lastIntegrationStatusMessage?: string | null;
+    lastIntegrationStatusCode?: number | null;
+    externalReference?: string | null;
+    qrCodePdfUrl?: string | null;
 }
 
 interface Pagination {
@@ -300,6 +303,33 @@ export default function AdminRequestsPage() {
         });
     };
 
+    /** Sohar Port integration summary for the table (uses fields already on the request — no extra DB column). */
+    const formatSoharPortApiResponseCell = (request: Request) => {
+        const parts: Record<string, unknown> = {};
+        if (request.lastIntegrationStatusCode != null) {
+            parts.statusCode = request.lastIntegrationStatusCode;
+        }
+        if (request.externalStatus) {
+            parts.externalStatus = request.externalStatus;
+        }
+        if (request.externalReference) {
+            parts.externalReference = request.externalReference;
+        }
+        if (request.lastIntegrationStatusMessage) {
+            parts.message =
+                request.lastIntegrationStatusMessage === 'Gate pass created successfully (MOCK)'
+                    ? rdt('soharSuccessMock')
+                    : request.lastIntegrationStatusMessage;
+        }
+        if (request.qrCodePdfUrl) {
+            parts.qrCodePdfUrl = request.qrCodePdfUrl;
+        }
+        if (Object.keys(parts).length === 0) {
+            return '—';
+        }
+        return JSON.stringify(parts, null, 2);
+    };
+
     const toggleRowExpansion = (requestId: number) => {
         setExpandedRows(prev => {
             const newSet = new Set(prev);
@@ -403,6 +433,7 @@ export default function AdminRequestsPage() {
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.holderName')}</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.status')}</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.soharStatus')}</th>
+                                                        <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider min-w-[200px] max-w-[320px]">{t('columns.soharApiResponse')}</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.actions')}</th>
                                                     </tr>
                                                 </thead>
@@ -463,6 +494,11 @@ export default function AdminRequestsPage() {
                                                                             )}
                                                                         </div>
                                                                     </td>
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-start align-top">
+                                                                        <pre className="m-0 font-mono text-[10px] sm:text-[11px] text-[#374151] whitespace-pre-wrap break-words max-h-36 overflow-y-auto max-w-[320px]">
+                                                                            {formatSoharPortApiResponseCell(request)}
+                                                                        </pre>
+                                                                    </td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
                                                                         <Link
                                                                             href={`/admin/requests/${request.id}`}
@@ -474,7 +510,7 @@ export default function AdminRequestsPage() {
                                                                 </tr>
                                                                 {isExpanded && (
                                                                     <tr className="bg-gray-50/30">
-                                                                        <td colSpan={5} className="px-4 sm:px-6 md:px-8 py-4">
+                                                                        <td colSpan={7} className="px-4 sm:px-6 md:px-8 py-4">
                                                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                                                                                 <div>
                                                                                     <span className="font-semibold text-gray-700">{t('columns.date')}: </span>
