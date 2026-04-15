@@ -9,6 +9,7 @@ const dns = require('dns');
 // =========================
 const TARGET_HOST = 'gpass.soharportandfreezone.om';
 const TARGET_PORT = 443;
+const PROXY_BUILD = '2026-04-15-b64-raw-attributes-v2';
 
 const LOG_DIR = path.join(__dirname, 'logs');
 if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR);
@@ -212,6 +213,18 @@ function validateAttachmentFields(attributes) {
     };
 }
 
+function attachmentPreview(value) {
+    if (typeof value !== 'string') return { present: false, type: typeof value };
+    const normalized = normalizeBase64Value(value);
+    return {
+        present: true,
+        rawLength: value.length,
+        normalizedLength: normalized.length,
+        previewStart: value.substring(0, 24),
+        previewEnd: value.slice(-24)
+    };
+}
+
 // =========================
 // LOG ROTATION (7 days)
 // =========================
@@ -287,6 +300,7 @@ const server = http.createServer((req, res) => {
         writeLog('REQUEST', {
             traceId,
             stage: 'CLIENT_REQUEST',
+            proxyBuild: PROXY_BUILD,
             method: req.method,
             url: req.url,
             forwardTo: pathUrl,
@@ -305,6 +319,13 @@ const server = http.createServer((req, res) => {
         writeLog(attachmentValidation.ok ? 'REQUEST' : 'ERROR', {
             traceId,
             stage: 'ATTACHMENT_VALIDATION',
+            proxyBuild: PROXY_BUILD,
+            attachmentInputPreview: {
+                identification_attachment: attachmentPreview(rawAttributes?.identification_attachment),
+                photo_attachment: attachmentPreview(rawAttributes?.photo_attachment),
+                other_attachment: attachmentPreview(rawAttributes?.other_attachment),
+                other_attachment2: attachmentPreview(rawAttributes?.other_attachment2)
+            },
             attachmentValidation
         });
 
