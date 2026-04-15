@@ -4,20 +4,63 @@ import { SoharPortHttpClient } from '../client';
 import { CreateGatePassRequest, CreateGatePassResponse } from '../types';
 import { getEndpointUrl } from '../config';
 import { logSuccess, logError } from '../utils/logger';
-import path from 'path';
 import { logger } from '../../logger';
 import { Storage } from '../../storage';
 
+type ByteBuffer = {
+    length: number;
+    [index: number]: number;
+    toString: (encoding?: string) => string;
+};
+
+const RuntimeBuffer = (globalThis as {
+    Buffer?: {
+        from: (input: string, encoding?: string) => ByteBuffer;
+        isBuffer: (value: unknown) => boolean;
+    };
+}).Buffer;
+const env = ((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {};
+
 
 function normalizeBase64(input: string): string {
-    return input.replace(/\s/g, '');
+    const withoutWhitespace = input.replace(/\s/g, '');
+    const urlSafeNormalized = withoutWhitespace.replace(/-/g, '+').replace(/_/g, '/');
+    const remainder = urlSafeNormalized.length % 4;
+    if (remainder === 0) return urlSafeNormalized;
+    return urlSafeNormalized + '='.repeat(4 - remainder);
 }
 
-function isValidBase64(input: string): boolean {
+function decodeBase64Strict(input: string): ByteBuffer | null {
     const normalized = normalizeBase64(input);
-    return normalized.length > 0 &&
-        normalized.length % 4 === 0 &&
-        /^[A-Za-z0-9+/]+={0,2}$/.test(normalized);
+    if (!normalized || !/^[A-Za-z0-9+/=]+$/.test(normalized)) {
+        return null;
+    }
+    if (!RuntimeBuffer) return null;
+
+    try {
+        const buffer = RuntimeBuffer.from(normalized, 'base64');
+        if (!buffer.length) return null;
+
+        // Ensure input was truly valid base64 and not silently coerced.
+        const normalizedNoPad = normalized.replace(/=+$/, '');
+        const reEncodedNoPad = buffer.toString('base64').replace(/=+$/, '');
+        return normalizedNoPad === reEncodedNoPad ? buffer : null;
+    } catch {
+        return null;
+    }
+}
+
+function detectAttachmentType(buffer: ByteBuffer): 'jpeg' | 'png' | 'pdf' | 'unknown' {
+    if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+        return 'jpeg';
+    }
+    if (buffer.length >= 4 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
+        return 'png';
+    }
+    if (buffer.length >= 4 && buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46) {
+        return 'pdf';
+    }
+    return 'unknown';
 }
 
 function getBase64Preview(base64: string): string {
@@ -27,20 +70,36 @@ function getBase64Preview(base64: string): string {
     return `${start}...${end}`;
 }
 
-async function fileToBase64(filePath: string): Promise<string | null> {
+function getFileName(filePath: string): string {
+    const normalized = String(filePath || '').replace(/\\/g, '/');
+    const parts = normalized.split('/');
+    return parts[parts.length - 1] || '';
+}
+
+async function fileToBase64(filePath: string, options: { requireImage?: boolean } = {}): Promise<string | null> {
     try {
         if (!filePath) return null;
+        const { requireImage = false } = options;
 
         // Handle data URLs
         if (filePath.startsWith('data:')) {
             const base64Match = filePath.match(/base64,(.+)$/);
             if (base64Match && base64Match[1]) {
-                const normalized = normalizeBase64(base64Match[1]);
-                if (!isValidBase64(normalized)) {
+                const decoded = decodeBase64Strict(base64Match[1]);
+                if (!decoded) {
                     logger.error(`Invalid data URL base64 for ${filePath}`);
                     return null;
                 }
-                return normalized;
+
+                if (requireImage) {
+                    const mime = detectAttachmentType(decoded);
+                    if (!['jpeg', 'png'].includes(mime)) {
+                        logger.error(`Invalid image attachment MIME from data URL for ${filePath}. Detected: ${mime}`);
+                        return null;
+                    }
+                }
+
+                return decoded.toString('base64');
             }
             return null;
         }
@@ -58,22 +117,39 @@ async function fileToBase64(filePath: string): Promise<string | null> {
         // Read from storage (honors STORAGE_UPLOAD_PATH)
         const fileData: unknown = await Storage.readFile(storagePath);
 
-        if (Buffer.isBuffer(fileData)) {
-            const encoded = fileData.toString('base64');
-            if (!isValidBase64(encoded)) {
-                logger.error(`Invalid encoded base64 generated from file ${filePath}`);
+        if (RuntimeBuffer?.isBuffer(fileData)) {
+            const binaryFileData = fileData as ByteBuffer;
+            if (requireImage) {
+                const mime = detectAttachmentType(binaryFileData);
+                if (!['jpeg', 'png'].includes(mime)) {
+                    logger.error(`Invalid image attachment MIME from file ${filePath}. Detected: ${mime}`);
+                    return null;
+                }
+            }
+            const encoded = binaryFileData.toString('base64');
+            if (!decodeBase64Strict(encoded)) {
+                logger.error(`Invalid encoded base64 generated from file bytes ${filePath}`);
                 return null;
             }
             return encoded;
         }
 
         if (typeof fileData === 'string') {
-            const normalized = normalizeBase64(fileData.trim());
-            if (!isValidBase64(normalized)) {
+            const decoded = decodeBase64Strict(fileData.trim());
+            if (!decoded) {
                 logger.error(`Invalid string base64 content for ${filePath}`);
                 return null;
             }
-            return normalized;
+
+            if (requireImage) {
+                const mime = detectAttachmentType(decoded);
+                if (!['jpeg', 'png'].includes(mime)) {
+                    logger.error(`Invalid image attachment MIME from base64 string ${filePath}. Detected: ${mime}`);
+                    return null;
+                }
+            }
+
+            return decoded.toString('base64');
         }
 
         logger.error(`Unsupported file data type for ${filePath}`);
@@ -232,7 +308,7 @@ export async function createGatePass(
             citizenship: gateRequest?.nationality || 'Omani',
             professions: 'Other',
             other_professions: gateRequest?.otherProfessions || gateRequest?.profession || '',
-            api_used_by: process.env.SOHAR_PORT_API_USED_BY?.trim() || 'GatePass System',
+            api_used_by: env.SOHAR_PORT_API_USED_BY?.trim() || 'GatePass System',
         };
 
         // Permanent: Sohar requires months_validity present as "". Temporary: day codes [1,2,3,4,5,10,30,60,90]
@@ -240,16 +316,16 @@ export async function createGatePass(
             ? ''
             : calculateMonthsValidity(gateRequest);
 
-        if (!process.env.SOHAR_PORT_API_USED_BY?.trim()) {
+        if (!env.SOHAR_PORT_API_USED_BY?.trim()) {
             logger.warn('Sohar Port: SOHAR_PORT_API_USED_BY is not set; api_used_by should be the VMS login or display name');
         }
 
         // Handle file attachments (convert to base64)
         if (gateRequest?.passportIdImagePath) {
-            const passportBase64 = await fileToBase64(gateRequest.passportIdImagePath);
+            const passportBase64 = await fileToBase64(gateRequest.passportIdImagePath, { requireImage: true });
             if (passportBase64) {
                 soharPortPayload.identification_attachment = passportBase64;
-                soharPortPayload.identification_document = path.basename(gateRequest.passportIdImagePath);
+                soharPortPayload.identification_document = getFileName(gateRequest.passportIdImagePath);
                 logger.info(`Passport base64 preview for ${request.requestNumber}: ${getBase64Preview(passportBase64)}`);
             }
         }
@@ -261,14 +337,14 @@ export async function createGatePass(
                 const doc1 = await fileToBase64(otherDocs[0].filePath);
                 if (doc1) {
                     soharPortPayload.other_attachment = doc1;
-                    soharPortPayload.other_documents = path.basename(otherDocs[0].filePath);
+                    soharPortPayload.other_documents = getFileName(otherDocs[0].filePath);
                     logger.info(`Other doc1 base64 preview for ${request.requestNumber}: ${getBase64Preview(doc1)}`);
                 }
                 if (otherDocs.length > 1) {
                     const doc2 = await fileToBase64(otherDocs[1].filePath);
                     if (doc2) {
                         soharPortPayload.other_attachment2 = doc2;
-                        soharPortPayload.other_documents2 = path.basename(otherDocs[1].filePath);
+                        soharPortPayload.other_documents2 = getFileName(otherDocs[1].filePath);
                         logger.info(`Other doc2 base64 preview for ${request.requestNumber}: ${getBase64Preview(doc2)}`);
                     }
                 }
@@ -278,15 +354,15 @@ export async function createGatePass(
         // Handle photo from uploads
         const photoUpload = gateRequest?.uploads?.find((u: any) => u.fileType === 'PHOTO');
         if (photoUpload) {
-            const photoBase64 = await fileToBase64(photoUpload.filePath);
+            const photoBase64 = await fileToBase64(photoUpload.filePath, { requireImage: true });
             if (photoBase64) {
                 soharPortPayload.photo_attachment = photoBase64;
-                soharPortPayload.photo = path.basename(photoUpload.filePath);
+                soharPortPayload.photo = getFileName(photoUpload.filePath);
                 logger.info(`Photo base64 preview for ${request.requestNumber}: ${getBase64Preview(photoBase64)}`);
             }
         } else if (gateRequest?.passportIdImagePath && soharPortPayload.identification_attachment) {
             // Fallback to passport image if no separate photo
-            soharPortPayload.photo = path.basename(gateRequest.passportIdImagePath);
+            soharPortPayload.photo = getFileName(gateRequest.passportIdImagePath);
             soharPortPayload.photo_attachment = soharPortPayload.identification_attachment;
         }
 
