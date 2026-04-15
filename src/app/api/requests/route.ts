@@ -3,13 +3,21 @@ import prisma from '@/lib/prisma';
 import { generateRequestNumber, validateEmail, validatePassportId } from '@/utils/helpers';
 import { sendRequestConfirmationEmail, sendAdminNotificationEmail } from '@/lib/email';
 import { ActionType, RequestType } from '@/lib/enums';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 import { Storage } from '@/lib/storage';
 
 export async function POST(request: NextRequest) {
+    const env = ((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {};
     try {
         const formData = await request.formData();
+        const arrayBufferToBase64 = (input: ArrayBuffer): string => {
+            const bytes = new Uint8Array(input);
+            const chunkSize = 0x8000;
+            let binary = '';
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+                binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+            }
+            return btoa(binary);
+        };
 
         // Extract form fields
         const applicantNameEn = (formData.get('applicantName') as string) || '';
@@ -146,10 +154,9 @@ export async function POST(request: NextRequest) {
             if (!file || file.size === 0 || file.name === undefined || file.name === '') return null;
 
             const bytes = await file.arrayBuffer();
-            const buffer = Buffer.from(bytes);
 
-            const maxSize = customMaxSize || parseInt(process.env.MAX_FILE_SIZE || '1048576');
-            if (buffer.length > maxSize) {
+            const maxSize = customMaxSize || parseInt(env.MAX_FILE_SIZE || '1048576');
+            if (bytes.byteLength > maxSize) {
                 const sizeLabel = maxSize >= 1024 * 1024 ? `${(maxSize / (1024 * 1024)).toFixed(0)}MB` : `${(maxSize / 1024).toFixed(0)}KB`;
                 throw new Error(`File ${file.name} size exceeds ${sizeLabel} limit`);
             }
@@ -161,11 +168,11 @@ export async function POST(request: NextRequest) {
 
             // Fallback to base64 ONLY if VERCEL is explicitly enabled
             // Robust check for string "false" which is common in environment settings on Hostinger
-            const isVercel = process.env.VERCEL && process.env.VERCEL !== 'false';
+            const isVercel = env.VERCEL && env.VERCEL !== 'false';
 
             if (isVercel) {
                 const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
-                return `data:${mimeType};base64,${buffer.toString('base64')}`;
+                return `data:${mimeType};base64,${arrayBufferToBase64(bytes)}`;
             }
 
             try {
@@ -174,7 +181,7 @@ export async function POST(request: NextRequest) {
             } catch (fsError: any) {
                 console.error(`❌ File system write failed for ${file.name}:`, fsError.message);
                 const mimeType = file.type || (fileExt === 'pdf' ? 'application/pdf' : `image/${fileExt}`);
-                return `data:${mimeType};base64,${buffer.toString('base64')}`;
+                return `data:${mimeType};base64,${arrayBufferToBase64(bytes)}`;
             }
         };
 
@@ -188,7 +195,7 @@ export async function POST(request: NextRequest) {
         console.log(' Photo extraction - photo instanceof File:', photo instanceof File);
 
         try {
-            imagePath = await uploadFile(passportIdImage, 'passport', 2 * 1024 * 1024, ['jpg', 'jpeg', 'png', 'pdf']);
+            imagePath = await uploadFile(passportIdImage, 'passport', 2 * 1024 * 1024, ['jpg', 'jpeg', 'png']);
             photoPath = await uploadFile(photo, 'photo', 250 * 1024, ['jpg', 'jpeg', 'png']);
             console.log('📸 After uploadFile - photoPath:', photoPath);
             otherDoc1Path = await uploadFile(formData.get('otherDocuments1') as File | null, 'other1', 2 * 1024 * 1024, ['pdf']);
@@ -482,7 +489,7 @@ export async function POST(request: NextRequest) {
             {
                 error: 'Internal Server Error',
                 message: error instanceof Error ? error.message : 'Failed to submit request. Please try again.',
-                details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : String(error)) : undefined
+                details: env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : String(error)) : undefined
             },
             { status: 500 }
         );
