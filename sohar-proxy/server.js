@@ -36,7 +36,7 @@ function safeJsonParse(text) {
     }
 }
 
-function toComparableAttributes(parsedBody) {
+function extractAttributes(parsedBody, maskLargeStrings = false) {
     if (!parsedBody || typeof parsedBody !== 'object') return null;
 
     const payload = parsedBody.gatePass || parsedBody.payload || parsedBody.data || parsedBody;
@@ -45,7 +45,7 @@ function toComparableAttributes(parsedBody) {
     const result = {};
     Object.entries(payload).forEach(([key, value]) => {
         if (value === null || value === undefined) return;
-        if (typeof value === 'string' && value.length > 500) {
+        if (maskLargeStrings && typeof value === 'string' && value.length > 500) {
             result[key] = `[string:${value.length}]`;
             return;
         }
@@ -262,17 +262,19 @@ const server = http.createServer((req, res) => {
         req.headers['x-trace-id'] ||
         Math.random().toString(36).substring(2, 12);
 
-    let body = [];
+    let chunks = [];
 
-    req.on('data', chunk => body.push(chunk));
+    req.on('data', chunk => chunks.push(chunk));
 
     req.on('end', () => {
 
-        body = Buffer.concat(body).toString();
+        const rawBodyBuffer = Buffer.concat(chunks);
+        const body = rawBodyBuffer.toString('utf8');
         const parsedBody = safeJsonParse(body);
-        const attributes = toComparableAttributes(parsedBody);
-        const validation = validateSoharPayload(attributes);
-        const attachmentValidation = validateAttachmentFields(attributes);
+        const rawAttributes = extractAttributes(parsedBody, false);
+        const logAttributes = extractAttributes(parsedBody, true);
+        const validation = validateSoharPayload(rawAttributes);
+        const attachmentValidation = validateAttachmentFields(rawAttributes);
 
         let pathUrl = req.url;
         if (pathUrl.startsWith('/gatepassproxy')) {
@@ -291,7 +293,7 @@ const server = http.createServer((req, res) => {
             clientIp: req.socket.remoteAddress,
             headers: req.headers,
             bodyIsJson: Boolean(parsedBody),
-            attributes
+            attributes: logAttributes
         });
 
         writeLog(validation.ok ? 'REQUEST' : 'ERROR', {
@@ -415,7 +417,7 @@ const server = http.createServer((req, res) => {
             res.end('Gateway Timeout');
         });
 
-        if (body) proxyReq.write(body);
+        if (rawBodyBuffer.length > 0) proxyReq.write(rawBodyBuffer);
         proxyReq.end();
     });
 });
