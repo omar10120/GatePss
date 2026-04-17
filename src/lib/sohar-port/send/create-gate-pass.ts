@@ -76,12 +76,14 @@ function getFileName(filePath: string): string {
     return parts[parts.length - 1] || '';
 }
 
-async function fileToBase64(filePath: string, options: { requireImage?: boolean } = {}): Promise<string | null> {
+async function readValidatedAttachment(
+    filePath: string,
+    options: { requireImage?: boolean } = {}
+): Promise<ByteBuffer | null> {
     try {
         if (!filePath) return null;
         const { requireImage = false } = options;
 
-        // Handle data URLs
         if (filePath.startsWith('data:')) {
             const base64Match = filePath.match(/base64,(.+)$/);
             if (base64Match && base64Match[1]) {
@@ -99,12 +101,11 @@ async function fileToBase64(filePath: string, options: { requireImage?: boolean 
                     }
                 }
 
-                return decoded.toString('base64');
+                return decoded;
             }
             return null;
         }
 
-        // Clean path (remove leading slashes and common prefixes)
         let storagePath = filePath;
         if (storagePath.startsWith('/uploads/')) {
             storagePath = storagePath.substring(9);
@@ -114,7 +115,6 @@ async function fileToBase64(filePath: string, options: { requireImage?: boolean 
             storagePath = storagePath.substring(1);
         }
 
-        // Read from storage (honors STORAGE_UPLOAD_PATH)
         const fileData: unknown = await Storage.readFile(storagePath);
 
         if (RuntimeBuffer?.isBuffer(fileData)) {
@@ -131,7 +131,7 @@ async function fileToBase64(filePath: string, options: { requireImage?: boolean 
                 logger.error(`Invalid encoded base64 generated from file bytes ${filePath}`);
                 return null;
             }
-            return encoded;
+            return binaryFileData;
         }
 
         if (typeof fileData === 'string') {
@@ -149,7 +149,7 @@ async function fileToBase64(filePath: string, options: { requireImage?: boolean 
                 }
             }
 
-            return decoded.toString('base64');
+            return decoded;
         }
 
         logger.error(`Unsupported file data type for ${filePath}`);
@@ -320,80 +320,153 @@ export async function createGatePass(
             logger.warn('Sohar Port: SOHAR_PORT_API_USED_BY is not set; api_used_by should be the VMS login or display name');
         }
 
-        // Handle file attachments (convert to base64)
+        type LoadedPart = { buf: ByteBuffer; name: string };
+        const loaded: {
+            identification?: LoadedPart;
+            other1?: LoadedPart;
+            other2?: LoadedPart;
+            photo?: LoadedPart;
+        } = {};
+        const useMultipart = client.usesGatepassMultipart();
+
         if (gateRequest?.passportIdImagePath) {
-            const passportBase64 = await fileToBase64(gateRequest.passportIdImagePath, { requireImage: true });
-            if (passportBase64) {
-                soharPortPayload.identification_attachment = passportBase64;
-                soharPortPayload.identification_document = getFileName(gateRequest.passportIdImagePath);
-                logger.info(`Passport base64 preview for ${request.requestNumber}: ${getBase64Preview(passportBase64)}`);
+            const buf = await readValidatedAttachment(gateRequest.passportIdImagePath, { requireImage: true });
+            if (buf) {
+                loaded.identification = { buf, name: getFileName(gateRequest.passportIdImagePath) };
+                if (!useMultipart) {
+                    const passportBase64 = buf.toString('base64');
+                    soharPortPayload.identification_attachment = passportBase64;
+                    soharPortPayload.identification_document = loaded.identification.name;
+                    logger.info(`Passport base64 preview for ${request.requestNumber}: ${getBase64Preview(passportBase64)}`);
+                } else {
+                    soharPortPayload.identification_document = loaded.identification.name;
+                }
             }
         }
 
-        // Handle other documents
         if (gateRequest?.uploads && Array.isArray(gateRequest.uploads)) {
             const otherDocs = gateRequest.uploads.filter((u: any) => u.fileType.startsWith('OTHER'));
             if (otherDocs.length > 0) {
-                const doc1 = await fileToBase64(otherDocs[0].filePath);
-                if (doc1) {
-                    soharPortPayload.other_attachment = doc1;
-                    soharPortPayload.other_documents = getFileName(otherDocs[0].filePath);
-                    logger.info(`Other doc1 base64 preview for ${request.requestNumber}: ${getBase64Preview(doc1)}`);
+                const buf1 = await readValidatedAttachment(otherDocs[0].filePath);
+                if (buf1) {
+                    loaded.other1 = { buf: buf1, name: getFileName(otherDocs[0].filePath) };
+                    if (!useMultipart) {
+                        const doc1 = buf1.toString('base64');
+                        soharPortPayload.other_attachment = doc1;
+                        soharPortPayload.other_documents = loaded.other1.name;
+                        logger.info(`Other doc1 base64 preview for ${request.requestNumber}: ${getBase64Preview(doc1)}`);
+                    } else {
+                        soharPortPayload.other_documents = loaded.other1.name;
+                    }
                 }
                 if (otherDocs.length > 1) {
-                    const doc2 = await fileToBase64(otherDocs[1].filePath);
-                    if (doc2) {
-                        soharPortPayload.other_attachment2 = doc2;
-                        soharPortPayload.other_documents2 = getFileName(otherDocs[1].filePath);
-                        logger.info(`Other doc2 base64 preview for ${request.requestNumber}: ${getBase64Preview(doc2)}`);
+                    const buf2 = await readValidatedAttachment(otherDocs[1].filePath);
+                    if (buf2) {
+                        loaded.other2 = { buf: buf2, name: getFileName(otherDocs[1].filePath) };
+                        if (!useMultipart) {
+                            const doc2 = buf2.toString('base64');
+                            soharPortPayload.other_attachment2 = doc2;
+                            soharPortPayload.other_documents2 = loaded.other2.name;
+                            logger.info(`Other doc2 base64 preview for ${request.requestNumber}: ${getBase64Preview(doc2)}`);
+                        } else {
+                            soharPortPayload.other_documents2 = loaded.other2.name;
+                        }
                     }
                 }
             }
         }
 
-        // Handle photo from uploads
         const photoUpload = gateRequest?.uploads?.find((u: any) => u.fileType === 'PHOTO');
+        let explicitPhotoUpload = false;
         if (photoUpload) {
-            const photoBase64 = await fileToBase64(photoUpload.filePath, { requireImage: true });
-            if (photoBase64) {
-                soharPortPayload.photo_attachment = photoBase64;
-                soharPortPayload.photo = getFileName(photoUpload.filePath);
-                logger.info(`Photo base64 preview for ${request.requestNumber}: ${getBase64Preview(photoBase64)}`);
+            const buf = await readValidatedAttachment(photoUpload.filePath, { requireImage: true });
+            if (buf) {
+                explicitPhotoUpload = true;
+                loaded.photo = { buf, name: getFileName(photoUpload.filePath) };
+                if (!useMultipart) {
+                    const photoBase64 = buf.toString('base64');
+                    soharPortPayload.photo_attachment = photoBase64;
+                    soharPortPayload.photo = loaded.photo.name;
+                    logger.info(`Photo base64 preview for ${request.requestNumber}: ${getBase64Preview(photoBase64)}`);
+                } else {
+                    soharPortPayload.photo = loaded.photo.name;
+                }
             }
-        } else if (gateRequest?.passportIdImagePath && soharPortPayload.identification_attachment) {
-            // Fallback to passport image if no separate photo
-            soharPortPayload.photo = getFileName(gateRequest.passportIdImagePath);
-            soharPortPayload.photo_attachment = soharPortPayload.identification_attachment;
+        } else if (gateRequest?.passportIdImagePath && loaded.identification) {
+            loaded.photo = { buf: loaded.identification.buf, name: loaded.identification.name };
+            if (!useMultipart) {
+                soharPortPayload.photo = loaded.photo.name;
+                soharPortPayload.photo_attachment = loaded.identification.buf.toString('base64');
+            } else {
+                soharPortPayload.photo = loaded.photo.name;
+            }
         }
 
-        // Log attachment sizes for debugging
+        const bufferToBlob = (buf: ByteBuffer) => new Blob([buf as unknown as Buffer]);
+
+        let requestBody: FormData | typeof soharPortPayload = soharPortPayload;
+        let endpoint = getEndpointUrl('v1', 'CREATE_GATE_PASS');
+        let multipart = false;
+        let multipartMetadataForLog: Record<string, unknown> | null = null;
+
+        if (useMultipart) {
+            const metadataPayload = { ...soharPortPayload };
+            delete metadataPayload.identification_attachment;
+            delete metadataPayload.photo_attachment;
+            delete metadataPayload.other_attachment;
+            delete metadataPayload.other_attachment2;
+            multipartMetadataForLog = metadataPayload;
+
+            const fd = new FormData();
+            fd.append('metadata', JSON.stringify(metadataPayload));
+
+            if (loaded.identification) {
+                fd.append('identification_file', bufferToBlob(loaded.identification.buf), loaded.identification.name);
+            }
+            if (explicitPhotoUpload && loaded.photo) {
+                fd.append('photo_file', bufferToBlob(loaded.photo.buf), loaded.photo.name);
+            }
+            if (loaded.other1) {
+                fd.append('other_file_1', bufferToBlob(loaded.other1.buf), loaded.other1.name);
+            }
+            if (loaded.other2) {
+                fd.append('other_file_2', bufferToBlob(loaded.other2.buf), loaded.other2.name);
+            }
+
+            requestBody = fd;
+            endpoint = getEndpointUrl('v1', 'CREATE_GATE_PASS_MULTIPART');
+            multipart = true;
+        }
+
         const attachmentsSize = {
-            identification: soharPortPayload.identification_attachment?.length ? Math.round(soharPortPayload.identification_attachment.length / 1024) + 'KB' : 'N/A',
-            photo: soharPortPayload.photo_attachment?.length ? Math.round(soharPortPayload.photo_attachment.length / 1024) + 'KB' : 'N/A',
-            other1: soharPortPayload.other_attachment?.length ? Math.round(soharPortPayload.other_attachment.length / 1024) + 'KB' : 'N/A',
-            other2: soharPortPayload.other_attachment2?.length ? Math.round(soharPortPayload.other_attachment2.length / 1024) + 'KB' : 'N/A',
+            identification: loaded.identification
+                ? Math.round(loaded.identification.buf.length / 1024) + 'KB'
+                : 'N/A',
+            photo: loaded.photo ? Math.round(loaded.photo.buf.length / 1024) + 'KB' : 'N/A',
+            other1: loaded.other1 ? Math.round(loaded.other1.buf.length / 1024) + 'KB' : 'N/A',
+            other2: loaded.other2 ? Math.round(loaded.other2.buf.length / 1024) + 'KB' : 'N/A',
         };
         logger.info(`Attachment sizes for ${request.requestNumber}:`, attachmentsSize);
 
-        // Log the final payload being sent (excluding attachments for cleaner logs if needed)
-        const debugPayload = { ...soharPortPayload };
-        // Don't remove them from the real payload, just from the debug log if they are too big
-        // but for now let's keep the existing logger call below as is.
+        const debugLogPayload = multipartMetadataForLog
+            ? { ...multipartMetadataForLog, _multipart: true }
+            : soharPortPayload;
 
         logger.info(`Sohar Port Integration Payload: ${request.requestNumber}`, {
             type: 'SOHAR_PORT_DEBUG_REQUEST',
             requestNumber: request.requestNumber,
             entityType,
-            payload: soharPortPayload,
+            payload: debugLogPayload,
         });
 
         const response = await client.requestWithRetry<any>({
             method: 'POST',
-            endpoint: getEndpointUrl('v1', 'CREATE_GATE_PASS'),
+            endpoint,
             params: {
                 entity: entityType,
             },
-            data: soharPortPayload,
+            data: requestBody,
+            multipart,
         });
 
         // Log the raw response from Sohar Port

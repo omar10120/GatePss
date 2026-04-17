@@ -218,6 +218,8 @@ Create `vercel.json`:
    }
    ```
 
+   **Sohar gate pass proxy (`/gatepassproxy`) and multipart uploads:** If you enable `SOHAR_PORT_GATEPASS_MULTIPART=true` in the Next.js app, create requests use `POST .../api/gatepass/post-multipart` with `multipart/form-data` (binary files) instead of a single large JSON body. The Node proxy in `sohar-proxy/server.js` assembles the JSON expected by Sohar. On Nginx in front of that proxy, allow enough body size and time for the largest expected multipart payload (for example `client_max_body_size 25m;` and `proxy_read_timeout 120s;` on the `location` that forwards to the proxy). Tune values to your file limits.
+
    Enable site:
    ```bash
    sudo ln -s /etc/nginx/sites-available/gate-pass /etc/nginx/sites-enabled/
