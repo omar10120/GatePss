@@ -1,9 +1,15 @@
 {
   "name": "sohar-proxy",
   "version": "1.0.0",
-  "description": "Lightweight proxy",
+  "description": "Lightweight proxy (Node 14 compatible)",
   "main": "server.js",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "busboy": "1.6.0"
   }
 }

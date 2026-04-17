@@ -22,6 +22,7 @@ export const DEFAULT_CONFIG: Required<SoharPortConfig> = {
     password: process.env.SOHAR_PORT_PASSWORD || '',
     // Connection Proxy
     proxyUrl: process.env.SOHAR_PORT_PROXY_URL || '',
+    gatepassMultipart: process.env.SOHAR_PORT_GATEPASS_MULTIPART === 'true',
 };
 
 /**
@@ -33,6 +34,8 @@ export const API_ENDPOINTS = {
         CREATE_GATE_PASS: '/api/gatepass/post',
         UPDATE_GATE_PASS: '/api/gatepass/update',
         CANCEL_GATE_PASS: '/api/gatepass/cancel',
+        /** Proxied multipart upload; server rewrites to Sohar POST /api/gatepass/post */
+        CREATE_GATE_PASS_MULTIPART: '/api/gatepass/post-multipart',
 
         // Receive operations
         GET_GATE_PASS: '/api/getpassdetails/get',
@@ -42,6 +45,7 @@ export const API_ENDPOINTS = {
     v2: {
         // Future version endpoints
         CREATE_GATE_PASS: '/api/gatepass/post',
+        CREATE_GATE_PASS_MULTIPART: '/api/gatepass/post-multipart',
         UPDATE_GATE_PASS: '/api/gatepass/update',
         CANCEL_GATE_PASS: '/api/gatepass/cancel',
         GET_GATE_PASS: '/api/getpassdetails/get',

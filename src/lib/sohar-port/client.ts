@@ -32,6 +32,11 @@ export class SoharPortHttpClient {
         this.axiosInstance = this.createAxiosInstance();
     }
 
+    /** When true, createGatePass sends multipart to the gate pass proxy for assembly into Sohar JSON */
+    usesGatepassMultipart(): boolean {
+        return this.config.gatepassMultipart === true;
+    }
+
     /**
      * Create configured Axios instance
      */
@@ -77,6 +82,10 @@ export class SoharPortHttpClient {
 
                 // Structured log for request
                 const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
+                const logData =
+                    config.data instanceof FormData
+                        ? { type: 'multipart/form-data', fields: [...config.data.keys()] }
+                        : config.data;
                 logger.info(`📤 Sohar Port API Request: ${config.method?.toUpperCase()} ${fullUrl}`, {
                     type: 'SOHAR_PORT_REQUEST',
                     requestId,
@@ -84,7 +93,7 @@ export class SoharPortHttpClient {
                     url: fullUrl,
                     params: config.params,
                     headers: { ...config.headers, Authorization: '***MASKED***' },
-                    data: config.data,
+                    data: logData,
                 });
 
                 return config;
@@ -147,8 +156,13 @@ export class SoharPortHttpClient {
                 url: options.endpoint,
                 data: options.data,
                 params: options.params,
-                headers: options.headers,
+                headers: { ...options.headers },
             };
+
+            if (options.multipart) {
+                // Let axios set multipart boundary (do not send default JSON Content-Type)
+                (axiosConfig.headers as Record<string, unknown>)['Content-Type'] = false;
+            }
 
             const response: AxiosResponse<T> = await this.axiosInstance.request(axiosConfig);
 
@@ -160,7 +174,7 @@ export class SoharPortHttpClient {
                 statusCode: response.status,
                 duration,
                 externalReference: options.externalReference,
-                requestData: options.data,
+                requestData: options.multipart ? { multipart: true, endpoint: options.endpoint } : options.data,
                 responseData: response.data,
             });
 
@@ -176,7 +190,7 @@ export class SoharPortHttpClient {
                 duration,
                 externalReference: options.externalReference,
                 error: error.message,
-                requestData: options.data,
+                requestData: options.multipart ? { multipart: true, endpoint: options.endpoint } : options.data,
             });
 
             throw error;

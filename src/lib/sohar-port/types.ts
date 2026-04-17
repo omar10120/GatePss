@@ -220,6 +220,8 @@ export interface SoharPortConfig {
     username?: string;
     password?: string;
     proxyUrl?: string;
+    /** Send create-gate-pass as multipart to the gate pass proxy; proxy assembles JSON for Sohar */
+    gatepassMultipart?: boolean;
 }
 
 /**
@@ -232,6 +234,8 @@ export interface RequestOptions {
     params?: Record<string, string | number | boolean>;
     headers?: Record<string, string>;
     externalReference?: string;
+    /** When true, data is FormData; JSON Content-Type is not forced so boundary is set correctly */
+    multipart?: boolean;
 }
 
 // ============================================================================
