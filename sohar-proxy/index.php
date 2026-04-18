@@ -82,9 +82,19 @@ function sanitizeUtf8String($s) {
     if (!is_string($s)) {
         return $s;
     }
+    // Prefer mb_scrub / mb_convert_encoding — iconv false + preg fallback left invalid UTF-8 bytes (0xFF etc.), which broke ASP.NET model bind.
+    if (function_exists('mb_scrub')) {
+        return mb_scrub($s, 'UTF-8');
+    }
+    if (function_exists('mb_convert_encoding')) {
+        $t = @mb_convert_encoding($s, 'UTF-8', 'UTF-8');
+        if ($t !== false) {
+            return $t;
+        }
+    }
     if (function_exists('iconv')) {
         $clean = @iconv('UTF-8', 'UTF-8//IGNORE', $s);
-        if ($clean !== false && $clean !== '') {
+        if ($clean !== false) {
             return $clean;
         }
     }
