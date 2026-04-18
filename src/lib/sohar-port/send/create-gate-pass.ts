@@ -63,13 +63,6 @@ function detectAttachmentType(buffer: ByteBuffer): 'jpeg' | 'png' | 'pdf' | 'unk
     return 'unknown';
 }
 
-function getBase64Preview(base64: string): string {
-    const normalized = normalizeBase64(base64);
-    const start = normalized.substring(0, 24);
-    const end = normalized.slice(-24);
-    return `${start}...${end}`;
-}
-
 function getFileName(filePath: string): string {
     const normalized = String(filePath || '').replace(/\\/g, '/');
     const parts = normalized.split('/');
@@ -327,20 +320,12 @@ export async function createGatePass(
             other2?: LoadedPart;
             photo?: LoadedPart;
         } = {};
-        const useMultipart = client.usesGatepassMultipart();
-
+        /** Always multipart → `/api/gatepass/post-multipart` (PHP proxy assembles JSON for Sohar). Avoids huge JSON + base64 timeouts. */
         if (gateRequest?.passportIdImagePath) {
             const buf = await readValidatedAttachment(gateRequest.passportIdImagePath, { requireImage: true });
             if (buf) {
                 loaded.identification = { buf, name: getFileName(gateRequest.passportIdImagePath) };
-                if (!useMultipart) {
-                    const passportBase64 = buf.toString('base64');
-                    soharPortPayload.identification_attachment = passportBase64;
-                    soharPortPayload.identification_document = loaded.identification.name;
-                    logger.info(`Passport base64 preview for ${request.requestNumber}: ${getBase64Preview(passportBase64)}`);
-                } else {
-                    soharPortPayload.identification_document = loaded.identification.name;
-                }
+                soharPortPayload.identification_document = loaded.identification.name;
             }
         }
 
@@ -350,27 +335,13 @@ export async function createGatePass(
                 const buf1 = await readValidatedAttachment(otherDocs[0].filePath);
                 if (buf1) {
                     loaded.other1 = { buf: buf1, name: getFileName(otherDocs[0].filePath) };
-                    if (!useMultipart) {
-                        const doc1 = buf1.toString('base64');
-                        soharPortPayload.other_attachment = doc1;
-                        soharPortPayload.other_documents = loaded.other1.name;
-                        logger.info(`Other doc1 base64 preview for ${request.requestNumber}: ${getBase64Preview(doc1)}`);
-                    } else {
-                        soharPortPayload.other_documents = loaded.other1.name;
-                    }
+                    soharPortPayload.other_documents = loaded.other1.name;
                 }
                 if (otherDocs.length > 1) {
                     const buf2 = await readValidatedAttachment(otherDocs[1].filePath);
                     if (buf2) {
                         loaded.other2 = { buf: buf2, name: getFileName(otherDocs[1].filePath) };
-                        if (!useMultipart) {
-                            const doc2 = buf2.toString('base64');
-                            soharPortPayload.other_attachment2 = doc2;
-                            soharPortPayload.other_documents2 = loaded.other2.name;
-                            logger.info(`Other doc2 base64 preview for ${request.requestNumber}: ${getBase64Preview(doc2)}`);
-                        } else {
-                            soharPortPayload.other_documents2 = loaded.other2.name;
-                        }
+                        soharPortPayload.other_documents2 = loaded.other2.name;
                     }
                 }
             }
@@ -383,61 +354,42 @@ export async function createGatePass(
             if (buf) {
                 explicitPhotoUpload = true;
                 loaded.photo = { buf, name: getFileName(photoUpload.filePath) };
-                if (!useMultipart) {
-                    const photoBase64 = buf.toString('base64');
-                    soharPortPayload.photo_attachment = photoBase64;
-                    soharPortPayload.photo = loaded.photo.name;
-                    logger.info(`Photo base64 preview for ${request.requestNumber}: ${getBase64Preview(photoBase64)}`);
-                } else {
-                    soharPortPayload.photo = loaded.photo.name;
-                }
+                soharPortPayload.photo = loaded.photo.name;
             }
         } else if (gateRequest?.passportIdImagePath && loaded.identification) {
             loaded.photo = { buf: loaded.identification.buf, name: loaded.identification.name };
-            if (!useMultipart) {
-                soharPortPayload.photo = loaded.photo.name;
-                soharPortPayload.photo_attachment = loaded.identification.buf.toString('base64');
-            } else {
-                soharPortPayload.photo = loaded.photo.name;
-            }
+            soharPortPayload.photo = loaded.photo.name;
         }
 
         const bufferToBlob = (buf: ByteBuffer): Blob =>
             new Blob([Uint8Array.from(buf as ArrayLike<number>)]);
 
-        let requestBody: FormData | typeof soharPortPayload = soharPortPayload;
-        let endpoint = getEndpointUrl('v1', 'CREATE_GATE_PASS');
-        let multipart = false;
-        let multipartMetadataForLog: Record<string, unknown> | null = null;
+        const metadataPayload = { ...soharPortPayload };
+        delete metadataPayload.identification_attachment;
+        delete metadataPayload.photo_attachment;
+        delete metadataPayload.other_attachment;
+        delete metadataPayload.other_attachment2;
 
-        if (useMultipart) {
-            const metadataPayload = { ...soharPortPayload };
-            delete metadataPayload.identification_attachment;
-            delete metadataPayload.photo_attachment;
-            delete metadataPayload.other_attachment;
-            delete metadataPayload.other_attachment2;
-            multipartMetadataForLog = metadataPayload;
+        const fd = new FormData();
+        fd.append('metadata', JSON.stringify(metadataPayload));
 
-            const fd = new FormData();
-            fd.append('metadata', JSON.stringify(metadataPayload));
-
-            if (loaded.identification) {
-                fd.append('identification_file', bufferToBlob(loaded.identification.buf), loaded.identification.name);
-            }
-            if (explicitPhotoUpload && loaded.photo) {
-                fd.append('photo_file', bufferToBlob(loaded.photo.buf), loaded.photo.name);
-            }
-            if (loaded.other1) {
-                fd.append('other_file_1', bufferToBlob(loaded.other1.buf), loaded.other1.name);
-            }
-            if (loaded.other2) {
-                fd.append('other_file_2', bufferToBlob(loaded.other2.buf), loaded.other2.name);
-            }
-
-            requestBody = fd;
-            endpoint = getEndpointUrl('v1', 'CREATE_GATE_PASS_MULTIPART');
-            multipart = true;
+        if (loaded.identification) {
+            fd.append('identification_file', bufferToBlob(loaded.identification.buf), loaded.identification.name);
         }
+        if (explicitPhotoUpload && loaded.photo) {
+            fd.append('photo_file', bufferToBlob(loaded.photo.buf), loaded.photo.name);
+        }
+        if (loaded.other1) {
+            fd.append('other_file_1', bufferToBlob(loaded.other1.buf), loaded.other1.name);
+        }
+        if (loaded.other2) {
+            fd.append('other_file_2', bufferToBlob(loaded.other2.buf), loaded.other2.name);
+        }
+
+        const requestBody: FormData = fd;
+        const endpoint = getEndpointUrl('v1', 'CREATE_GATE_PASS_MULTIPART');
+        const multipart = true;
+        const multipartMetadataForLog: Record<string, unknown> | null = metadataPayload;
 
         const attachmentsSize = {
             identification: loaded.identification

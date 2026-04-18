@@ -32,11 +32,6 @@ export class SoharPortHttpClient {
         this.axiosInstance = this.createAxiosInstance();
     }
 
-    /** When true, createGatePass sends multipart to the gate pass proxy for assembly into Sohar JSON */
-    usesGatepassMultipart(): boolean {
-        return this.config.gatepassMultipart === true;
-    }
-
     /**
      * Create configured Axios instance
      */

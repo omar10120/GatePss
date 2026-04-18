@@ -1,4 +1,44 @@
 <?php
+/**
+ * Bootstrap: يشتغل قبل أي ثابت/دوال. لو مفيش أي ملف يتحدّث والـ PHP وصل هنا، شوف الصلاحيات.
+ * لو مفيش حتى proxy-last-hit.json → الطلب ما وصلش لـ index.php (ريرايت / دومين).
+ */
+$__gpHitPayload = [
+    'ts' => gmdate('Y-m-d\TH:i:s.v\Z'),
+    'REQUEST_URI' => $_SERVER['REQUEST_URI'] ?? '',
+    'METHOD' => $_SERVER['REQUEST_METHOD'] ?? '',
+    'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'] ?? '',
+    'SCRIPT_FILENAME' => $_SERVER['SCRIPT_FILENAME'] ?? '',
+];
+$__gpHitLine = json_encode($__gpHitPayload, JSON_UNESCAPED_UNICODE) . "\n";
+
+$__gpBootstrapDir = __DIR__ . '/logs';
+if (!is_dir($__gpBootstrapDir) && !@mkdir($__gpBootstrapDir, 0775, true) && !is_dir($__gpBootstrapDir)) {
+    error_log('[gatepassproxy] cannot mkdir logs: ' . $__gpBootstrapDir);
+}
+
+$__written = false;
+// 1) ملف يومي داخل logs
+$__p1 = $__gpBootstrapDir . '/hit-' . date('Y-m-d') . '.log';
+if (@file_put_contents($__p1, $__gpHitLine, FILE_APPEND | LOCK_EX) !== false) {
+    $__written = true;
+}
+// 2) ملف واحد جنب index.php يُستبدل كل طلب — سهل تشوفه من cPanel
+$__p2 = __DIR__ . '/proxy-last-hit.json';
+if (@file_put_contents($__p2, json_encode($__gpHitPayload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false) {
+    $__written = true;
+}
+// 3) احتياط لو مجلد logs مش قابل للكتابة
+if (!$__written) {
+    $__p3 = __DIR__ . '/hit-fallback.log';
+    if (@file_put_contents($__p3, $__gpHitLine, FILE_APPEND | LOCK_EX) !== false) {
+        $__written = true;
+    }
+}
+if (!$__written) {
+    error_log('[gatepassproxy] bootstrap write failed all targets; check permissions on ' . __DIR__);
+}
+
 // =========================
 // CONFIG
 // =========================

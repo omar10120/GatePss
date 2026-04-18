@@ -2,6 +2,14 @@
 
 Server path: `gatepassproxy/` (Apache routes here via `.htaccess`).
 
+## Bootstrap hits (runs before any other proxy logic)
+
+- **`logs/hit-YYYY-MM-DD.log`** — append per request  
+- **`proxy-last-hit.json`** — next to `index.php`, overwritten each request (easy to spot in File Manager)  
+- **`hit-fallback.log`** — only if `logs/` is not writable  
+
+If **none** of these change when you call the proxy URL, the request **never reaches** `index.php` (fix root `.htaccess` / domain). If **`error_log`** on the server shows `[gatepassproxy] bootstrap write failed`, fix **permissions** on `gatepassproxy/` (owner + chmod).
+
 ## JSON lines (`logs/access-YYYY-MM-DD.log`, `logs/error-YYYY-MM-DD.log`)
 
 Each request logs:
