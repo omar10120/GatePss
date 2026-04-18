@@ -6,7 +6,9 @@ const TARGET_HOST = 'gpass.soharportandfreezone.om';
 const TARGET_PORT = 443;
 const LOG_DIR = __DIR__ . '/logs';
 
-if (!is_dir(LOG_DIR)) mkdir(LOG_DIR, 0777, true);
+if (!is_dir(LOG_DIR)) {
+    @mkdir(LOG_DIR, 0775, true);
+}
 
 // =========================
 // HELPERS
@@ -25,7 +27,10 @@ function writeLog($level, $data) {
         'timestamp' => getTimestamp()
     ], $data);
 
-    file_put_contents($filePath, json_encode($entry) . "\n", FILE_APPEND);
+    $written = @file_put_contents($filePath, json_encode($entry) . "\n", FILE_APPEND | LOCK_EX);
+    if ($written === false) {
+        error_log('[gatepassproxy] log write failed: ' . $filePath);
+    }
 }
 
 function maskHeaders($headers) {
@@ -37,11 +42,32 @@ function maskHeaders($headers) {
     return $headers;
 }
 
-// Clean logs older than 7 days
-foreach (glob(LOG_DIR . "/*.log") as $file) {
-    if (time() - filemtime($file) > (7 * 86400)) {
-        unlink($file);
+// Clean logs older than 7 days (glob can return false — must not foreach it on PHP 8+)
+$logFiles = glob(LOG_DIR . '/*.log');
+if (is_array($logFiles)) {
+    foreach ($logFiles as $file) {
+        if (is_file($file) && time() - filemtime($file) > (7 * 86400)) {
+            @unlink($file);
+        }
     }
+}
+
+// Diagnostic only: GET .../gatepassproxy/?proxy_ping=1 — confirms rewrite + writable logs (remove in production if desired)
+if (!empty($_GET['proxy_ping'])) {
+    writeLog('REQUEST', [
+        'proxy_ping' => true,
+        'uri' => $_SERVER['REQUEST_URI'] ?? '',
+        'remote' => $_SERVER['REMOTE_ADDR'] ?? '',
+    ]);
+    header('Content-Type: application/json; charset=utf-8');
+    header('X-Gatepass-Proxy: php');
+    echo json_encode([
+        'ok' => true,
+        'logDir' => LOG_DIR,
+        'dirExists' => is_dir(LOG_DIR),
+        'writable' => is_writable(LOG_DIR),
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 // =========================
