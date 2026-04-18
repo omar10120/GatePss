@@ -283,7 +283,7 @@ export async function createGatePass(
         const soharPortPayload: any = {
             pass_type: passType,
             pass_for: passForMapped,
-            company: gateRequest?.organization || 'Majis Industrial Services',
+            company: 'Majis Industrial Services',
             name: displayName,
             phone: gateRequest?.applicantPhone || '',
             name_in_arabic: gateRequest?.applicantNameAr,
