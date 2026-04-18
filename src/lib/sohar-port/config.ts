@@ -23,8 +23,8 @@ export function getEnvDefaults(): Required<SoharPortConfig> {
         username: process.env.SOHAR_PORT_USERNAME || 'Majees.API',
         password: process.env.SOHAR_PORT_PASSWORD || '',
         proxyUrl: process.env.SOHAR_PORT_PROXY_URL || '',
-        /** Kept for config shape; `createGatePass` always uses multipart + post-multipart. */
-        gatepassMultipart: true,
+        /** Kept for config shape; `createGatePass` sends JSON to post-multipart + `_gatepassProxy` URLs. */
+        gatepassMultipart: false,
     };
 }
 

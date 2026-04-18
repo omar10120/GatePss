@@ -220,7 +220,7 @@ export interface SoharPortConfig {
     username?: string;
     password?: string;
     proxyUrl?: string;
-    /** Send create-gate-pass as multipart to the gate pass proxy; proxy assembles JSON for Sohar */
+    /** Legacy flag; create uses JSON + `_gatepassProxy` on post-multipart route */
     gatepassMultipart?: boolean;
 }
 
