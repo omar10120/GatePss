@@ -402,7 +402,8 @@ export async function createGatePass(
             }
         }
 
-        const bufferToBlob = (buf: ByteBuffer) => new Blob([buf as unknown as Buffer]);
+        const bufferToBlob = (buf: ByteBuffer): Blob =>
+            new Blob([Uint8Array.from(buf as ArrayLike<number>)]);
 
         let requestBody: FormData | typeof soharPortPayload = soharPortPayload;
         let endpoint = getEndpointUrl('v1', 'CREATE_GATE_PASS');

@@ -7,23 +7,26 @@
 import { ApiVersion, SoharPortConfig } from './types';
 
 /**
- * Default configuration values
+ * Env-backed defaults — must be read inside this function so values are not
+ * frozen at module load (Next/serverless can evaluate modules before `.env`
+ * is applied; otherwise `baseUrl` could stick to UAT instead of SOHAR_PORT_API_URL).
  */
-export const DEFAULT_CONFIG: Required<SoharPortConfig> = {
-    baseUrl: process.env.SOHAR_PORT_API_URL || 'https://uat-api.soharportandfreezone.om',
-    apiKey: process.env.SOHAR_PORT_API_KEY || '',
-    version: (process.env.SOHAR_PORT_API_VERSION as ApiVersion) || 'v1',
-    timeout: parseInt(process.env.SOHAR_PORT_TIMEOUT || '30000', 10),
-    useMock: process.env.SOHAR_PORT_MOCK_MODE === 'true',
-    retryAttempts: 3,
-    retryDelay: 1000, // 1 second
-    // Basic Auth credentials
-    username: process.env.SOHAR_PORT_USERNAME || 'Majees.API',
-    password: process.env.SOHAR_PORT_PASSWORD || '',
-    // Connection Proxy
-    proxyUrl: process.env.SOHAR_PORT_PROXY_URL || '',
-    gatepassMultipart: process.env.SOHAR_PORT_GATEPASS_MULTIPART === 'true',
-};
+export function getEnvDefaults(): Required<SoharPortConfig> {
+    return {
+        baseUrl: process.env.SOHAR_PORT_API_URL || 'https://uat-api.soharportandfreezone.om',
+        apiKey: process.env.SOHAR_PORT_API_KEY || '',
+        version: (process.env.SOHAR_PORT_API_VERSION as ApiVersion) || 'v1',
+        timeout: parseInt(process.env.SOHAR_PORT_TIMEOUT || '30000', 10),
+        useMock: process.env.SOHAR_PORT_MOCK_MODE === 'true',
+        retryAttempts: 3,
+        retryDelay: 1000,
+        username: process.env.SOHAR_PORT_USERNAME || 'Majees.API',
+        password: process.env.SOHAR_PORT_PASSWORD || '',
+        proxyUrl: process.env.SOHAR_PORT_PROXY_URL || '',
+        gatepassMultipart: process.env.SOHAR_PORT_GATEPASS_MULTIPART === 'true',
+    };
+}
+
 
 /**
  * API endpoint paths for different versions
@@ -87,7 +90,7 @@ export const ERROR_MESSAGES = {
  */
 export function getConfig(overrides?: Partial<SoharPortConfig>): Required<SoharPortConfig> {
     return {
-        ...DEFAULT_CONFIG,
+        ...getEnvDefaults(),
         ...overrides,
     };
 }

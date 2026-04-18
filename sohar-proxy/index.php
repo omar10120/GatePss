@@ -42,6 +42,31 @@ function maskHeaders($headers) {
     return $headers;
 }
 
+/** Client → proxy: safe header subset for troubleshooting (no secrets). */
+function incomingHeadersForLog() {
+    return array_filter([
+        'User-Agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+        'X-Forwarded-For' => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null,
+        'X-Real-IP' => $_SERVER['HTTP_X_REAL_IP'] ?? null,
+        'X-Trace-Id' => $_SERVER['HTTP_X_TRACE_ID'] ?? null,
+        'Authorization' => !empty($_SERVER['HTTP_AUTHORIZATION']) ? '***MASKED***' : null,
+        'Referer' => $_SERVER['HTTP_REFERER'] ?? null,
+        'Accept' => $_SERVER['HTTP_ACCEPT'] ?? null,
+    ], function ($v) {
+        return $v !== null && $v !== '';
+    });
+}
+
+function truncateForLog($str, $max) {
+    if ($str === '' || $str === null) {
+        return '';
+    }
+    if (strlen($str) <= $max) {
+        return $str;
+    }
+    return substr($str, 0, $max) . '…[truncated,len=' . strlen($str) . ']';
+}
+
 // Clean logs older than 7 days (glob can return false — must not foreach it on PHP 8+)
 $logFiles = glob(LOG_DIR . '/*.log');
 if (is_array($logFiles)) {
@@ -79,8 +104,12 @@ $traceId = $_SERVER['HTTP_X_TRACE_ID'] ?? bin2hex(random_bytes(5));
 // Capture Request Path
 $requestUri = $_SERVER['REQUEST_URI'];
 $pathUrl = parse_url($requestUri, PHP_URL_PATH);
-$queryString = parse_url($requestUri, PHP_URL_QUERY);
-$queryString = $queryString ? '?' . $queryString : '';
+$queryRaw = parse_url($requestUri, PHP_URL_QUERY);
+$queryString = $queryRaw ? '?' . $queryRaw : '';
+$queryParams = [];
+if ($queryRaw !== null && $queryRaw !== '') {
+    parse_str($queryRaw, $queryParams);
+}
 
 // Handle prefix stripping
 if (strpos($pathUrl, '/gatepassproxy') === 0) {
@@ -127,14 +156,27 @@ if ($isMultipartCreate) {
     $outgoingBodyStr = file_get_contents('php://input');
 }
 
-// Log Request
+// Log incoming request (full enough to debug 404 / path issues; body truncated)
+$incomingBodyLog = $isMultipart
+    ? '[multipart parsed to JSON upstream; metadata keys: ' . implode(',', array_keys($_POST)) . ']'
+    : truncateForLog($outgoingBodyStr, 16000);
+
 writeLog('REQUEST', [
     'traceId' => $traceId,
     'method' => $_SERVER['REQUEST_METHOD'],
-    'url' => $requestUri,
+    'clientIp' => $_SERVER['REMOTE_ADDR'] ?? '',
+    'host' => $_SERVER['HTTP_HOST'] ?? '',
+    'https' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+    'requestUri' => $requestUri,
+    'pathAfterProxy' => $pathUrl,
+    'queryString' => $queryRaw !== null && $queryRaw !== '' ? $queryRaw : '',
+    'queryParams' => $queryParams,
+    'contentType' => $contentType,
+    'contentLengthIncoming' => $_SERVER['CONTENT_LENGTH'] ?? null,
+    'clientHeaders' => incomingHeadersForLog(),
+    'forwardPath' => $forwardPath,
     'forwardTo' => $upstreamUrl,
-    'clientIp' => $_SERVER['REMOTE_ADDR'],
-    'bodyPreview' => $isMultipart ? '[multipart parsed]' : substr($outgoingBodyStr, 0, 1000)
+    'bodyPreview' => $incomingBodyLog,
 ]);
 
 // =========================
@@ -179,13 +221,30 @@ $resBody = substr($response, $headerSize);
 
 curl_close($ch);
 
-// Log Response
-writeLog('RESPONSE', [
+// Log upstream response (larger body slice on errors for 404 diagnosis)
+$httpCode = (int) $info['http_code'];
+$resBodyLimit = ($httpCode >= 400) ? 48000 : 4000;
+$responseEntry = [
     'traceId' => $traceId,
-    'statusCode' => $info['http_code'],
+    'statusCode' => $httpCode,
+    'curlEffectiveUrl' => $info['url'] ?? '',
     'durationMs' => round((microtime(true) - $startTime) * 1000),
-    'bodyPreview' => substr($resBody, 0, 1000)
-]);
+    'responseBodyBytes' => strlen($resBody),
+    'bodyPreview' => truncateForLog($resBody, $resBodyLimit),
+];
+if ($httpCode >= 400) {
+    $responseEntry['upstreamResponseHeadersPreview'] = truncateForLog($resHeaders, 4000);
+}
+writeLog('RESPONSE', $responseEntry);
+if ($httpCode >= 400) {
+    writeLog('ERROR', [
+        'traceId' => $traceId,
+        'stage' => 'UPSTREAM_HTTP_ERROR',
+        'statusCode' => $httpCode,
+        'forwardTo' => $upstreamUrl,
+        'message' => 'Upstream returned ' . $httpCode . '; see RESPONSE row for body',
+    ]);
+}
 
 // Finalize Output
 http_response_code($info['http_code']);
