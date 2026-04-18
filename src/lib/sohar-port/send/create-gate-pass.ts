@@ -1,72 +1,24 @@
 
-
 import { SoharPortHttpClient } from '../client';
 import { CreateGatePassRequest, CreateGatePassResponse } from '../types';
 import { getEndpointUrl } from '../config';
 import { logSuccess, logError } from '../utils/logger';
 import { logger } from '../../logger';
-import { Storage } from '../../storage';
 
-type ByteBuffer = {
-    length: number;
-    [index: number]: number;
-    toString: (encoding?: string) => string;
-};
-
-const RuntimeBuffer = (globalThis as {
-    Buffer?: {
-        from: (input: string, encoding?: string) => ByteBuffer;
-        isBuffer: (value: unknown) => boolean;
-    };
-}).Buffer;
 const env = ((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {};
 
-/** When true: send multipart with JSON metadata only — no identification/photo/other files (debug UTF-8 vs attachments). */
+/** Debug: omit attachment filenames + `_gatepassProxy`. */
 function shouldSkipAttachmentsForDebug(): boolean {
     const v = env.SOHAR_PORT_SKIP_ATTACHMENTS?.trim()?.toLowerCase();
     return v === 'true' || v === '1' || v === 'yes';
 }
 
-
-function normalizeBase64(input: string): string {
-    const withoutWhitespace = input.replace(/\s/g, '');
-    const urlSafeNormalized = withoutWhitespace.replace(/-/g, '+').replace(/_/g, '/');
-    const remainder = urlSafeNormalized.length % 4;
-    if (remainder === 0) return urlSafeNormalized;
-    return urlSafeNormalized + '='.repeat(4 - remainder);
-}
-
-function decodeBase64Strict(input: string): ByteBuffer | null {
-    const normalized = normalizeBase64(input);
-    if (!normalized || !/^[A-Za-z0-9+/=]+$/.test(normalized)) {
-        return null;
-    }
-    if (!RuntimeBuffer) return null;
-
-    try {
-        const buffer = RuntimeBuffer.from(normalized, 'base64');
-        if (!buffer.length) return null;
-
-        // Ensure input was truly valid base64 and not silently coerced.
-        const normalizedNoPad = normalized.replace(/=+$/, '');
-        const reEncodedNoPad = buffer.toString('base64').replace(/=+$/, '');
-        return normalizedNoPad === reEncodedNoPad ? buffer : null;
-    } catch {
-        return null;
-    }
-}
-
-function detectAttachmentType(buffer: ByteBuffer): 'jpeg' | 'png' | 'pdf' | 'unknown' {
-    if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
-        return 'jpeg';
-    }
-    if (buffer.length >= 4 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
-        return 'png';
-    }
-    if (buffer.length >= 4 && buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46) {
-        return 'pdf';
-    }
-    return 'unknown';
+function getGatepassFilesPublicBaseUrl(): string {
+    return (
+        env.GATEPASS_FILES_BASE_URL?.trim() ||
+        env.NEXT_PUBLIC_APP_URL?.trim() ||
+        ''
+    );
 }
 
 function getFileName(filePath: string): string {
@@ -75,131 +27,73 @@ function getFileName(filePath: string): string {
     return parts[parts.length - 1] || '';
 }
 
-async function readValidatedAttachment(
-    filePath: string,
-    options: { requireImage?: boolean } = {}
-): Promise<ByteBuffer | null> {
-    try {
-        if (!filePath) return null;
-        const { requireImage = false } = options;
-
-        if (filePath.startsWith('data:')) {
-            const base64Match = filePath.match(/base64,(.+)$/);
-            if (base64Match && base64Match[1]) {
-                const decoded = decodeBase64Strict(base64Match[1]);
-                if (!decoded) {
-                    logger.error(`Invalid data URL base64 for ${filePath}`);
-                    return null;
-                }
-
-                if (requireImage) {
-                    const mime = detectAttachmentType(decoded);
-                    if (!['jpeg', 'png'].includes(mime)) {
-                        logger.error(`Invalid image attachment MIME from data URL for ${filePath}. Detected: ${mime}`);
-                        return null;
-                    }
-                }
-
-                return decoded;
-            }
-            return null;
-        }
-
-        let storagePath = filePath;
-        if (storagePath.startsWith('/uploads/')) {
-            storagePath = storagePath.substring(9);
-        } else if (storagePath.startsWith('uploads/')) {
-            storagePath = storagePath.substring(8);
-        } else if (storagePath.startsWith('/')) {
-            storagePath = storagePath.substring(1);
-        }
-
-        const fileData: unknown = await Storage.readFile(storagePath);
-
-        if (RuntimeBuffer?.isBuffer(fileData)) {
-            const binaryFileData = fileData as ByteBuffer;
-            if (requireImage) {
-                const mime = detectAttachmentType(binaryFileData);
-                if (!['jpeg', 'png'].includes(mime)) {
-                    logger.error(`Invalid image attachment MIME from file ${filePath}. Detected: ${mime}`);
-                    return null;
-                }
-            }
-            const encoded = binaryFileData.toString('base64');
-            if (!decodeBase64Strict(encoded)) {
-                logger.error(`Invalid encoded base64 generated from file bytes ${filePath}`);
-                return null;
-            }
-            return binaryFileData;
-        }
-
-        if (typeof fileData === 'string') {
-            const decoded = decodeBase64Strict(fileData.trim());
-            if (!decoded) {
-                logger.error(`Invalid string base64 content for ${filePath}`);
-                return null;
-            }
-
-            if (requireImage) {
-                const mime = detectAttachmentType(decoded);
-                if (!['jpeg', 'png'].includes(mime)) {
-                    logger.error(`Invalid image attachment MIME from base64 string ${filePath}. Detected: ${mime}`);
-                    return null;
-                }
-            }
-
-            return decoded;
-        }
-
-        logger.error(`Unsupported file data type for ${filePath}`);
-        return null;
-    } catch (error: any) {
-        console.error(`❌ Failed to read file ${filePath}:`, error.message);
+/**
+ * Public URL under `/uploads/...` for the PHP proxy to GET (allowlist host on proxy).
+ */
+function storagePathToPublicUploadUrl(localPath: string): string | null {
+    const base = getGatepassFilesPublicBaseUrl();
+    if (!base || !localPath) return null;
+    let p = String(localPath).replace(/\\/g, '/').trim();
+    if (/^https?:\/\//i.test(p)) return p;
+    if (p.startsWith('/uploads/')) {
+        p = p.replace(/^\//, '');
+    } else if (p.includes('/uploads/')) {
+        const i = p.indexOf('/uploads/');
+        p = p.slice(i + 1);
+    } else if (!p.startsWith('uploads/')) {
         return null;
     }
+    return `${base.replace(/\/$/, '')}/${p}`;
 }
 
-/**
- * Map Identification Card to Sohar Port format
- */
-function mapRequestType(requestType: string): string {
-    const typeMap: Record<string, string> = {
-        'Resident': '2',
-        'Not Resident': '1',
-    };
-    return typeMap[requestType.toUpperCase()] || '2';
+export interface GatepassProxyPayload {
+    identificationUrl?: string;
+    photoUrl?: string;
+    other1Url?: string;
+    other2Url?: string;
 }
 
-/**
- * Map identification type
- */
+/** Same shape as `extraFields.gateRequest` rows we read from the DB. */
+interface GateRequestSource {
+    entityType?: string;
+    passportIdImagePath?: string;
+    uploads?: Array<{ fileType: string; filePath: string }>;
+    applicantNameEn?: string;
+    applicantNameAr?: string;
+    applicantPhone?: string;
+    identification?: string;
+    bloodType?: string;
+    validTo?: string | Date;
+    gender?: string;
+    nationality?: string;
+    otherProfessions?: string;
+    profession?: string;
+    visitduration?: string;
+    passFor?: string;
+}
+
 function mapIdentificationType(identification: string): string {
-    // Map identification types (1 = Passport, 2 = ID Card, etc.)
     const idMap: Record<string, string> = {
-        'PASSPORT': '1',
-        'ID_CARD': '2',
-        'ID': '2', // Also map "ID" to ID Card
-        'RESIDENCE': '3',
+        PASSPORT: '1',
+        ID_CARD: '2',
+        ID: '2',
+        RESIDENCE: '3',
     };
     return idMap[identification.toUpperCase()] || '1';
 }
 
-/**
- * Map gender to Sohar Port format (Male/Female)
- */
 function mapGender(gender: string): string {
     const genderMap: Record<string, string> = {
-        'MALE': 'Male',
-        'FEMALE': 'Female',
+        MALE: 'Male',
+        FEMALE: 'Female',
     };
     return genderMap[gender.toUpperCase()] || 'Male';
 }
 
-/**
- * Sohar pass_type 1 = permanent, 2 = temporary (discrete validity days in months_validity).
- * Prefer DB pass type name when present; otherwise infer from validity_period.
- */
-function isPermanentSoharPass(gateRequest: any, extraFields: Record<string, any>): boolean {
+function isPermanentSoharPass(
+    gateRequest: GateRequestSource | undefined,
+    extraFields: Record<string, unknown>,
+): boolean {
     if (typeof extraFields.isPermanentForSohar === 'boolean') {
         return extraFields.isPermanentForSohar;
     }
@@ -212,10 +106,7 @@ function isPermanentSoharPass(gateRequest: any, extraFields: Record<string, any>
     return !gateRequest?.visitduration;
 }
 
-/**
- * Calculate months validity from validFrom and validTo dates
- */
-function calculateMonthsValidity(gateRequest: any): string {
+function calculateMonthsValidity(gateRequest: GateRequestSource | undefined): string {
     const duration = gateRequest?.visitduration;
     const validityMap: Record<string, string> = {
         '1_DAY': '1',
@@ -228,65 +119,143 @@ function calculateMonthsValidity(gateRequest: any): string {
         '2_MONTH': '60',
         '3_MONTH': '90',
     };
-    return validityMap[duration] || '1';
+    return validityMap[duration || ''] || '1';
 }
 
-/**
- * Format date to YYYY-MM-DD
- */
 function formatDate(date: Date | string): string {
     const d = typeof date === 'string' ? new Date(date) : date;
     return d.toISOString().split('T')[0];
 }
 
+/** Redact PII for structured logs (proxy still receives real values). */
+function maskPayloadForLog(payload: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = { ...payload };
+    if (typeof out.identification_number === 'string') {
+        out.identification_number = '[redacted]';
+    }
+    if (typeof out.email === 'string') {
+        out.email = '[redacted]';
+    }
+    if (typeof out.phone === 'string') {
+        out.phone = '[redacted]';
+    }
+    if (out._gatepassProxy && typeof out._gatepassProxy === 'object') {
+        out._gatepassProxy = {
+            ...(out._gatepassProxy as Record<string, unknown>),
+            identificationUrl: (out._gatepassProxy as GatepassProxyPayload).identificationUrl ? '[url]' : undefined,
+            photoUrl: (out._gatepassProxy as GatepassProxyPayload).photoUrl ? '[url]' : undefined,
+            other1Url: (out._gatepassProxy as GatepassProxyPayload).other1Url ? '[url]' : undefined,
+            other2Url: (out._gatepassProxy as GatepassProxyPayload).other2Url ? '[url]' : undefined,
+        };
+    }
+    return out;
+}
+
 /**
- * Create a new gate pass in Sohar Port system
+ * Attach `_gatepassProxy` URLs + Sohar filename fields from storage paths (no file I/O).
+ */
+function attachProxyRefsAndFilenames(
+    payload: Record<string, unknown>,
+    gateRequest: GateRequestSource | undefined,
+    skipAttachments: boolean,
+    requestNumber: string,
+): void {
+    if (skipAttachments || !gateRequest) {
+        return;
+    }
+
+    const baseOk = !!getGatepassFilesPublicBaseUrl();
+    if (!baseOk) {
+        logger.warn(
+            `Sohar Port: GATEPASS_FILES_BASE_URL / NEXT_PUBLIC_APP_URL missing — _gatepassProxy URLs cannot be built for ${requestNumber}`,
+        );
+    }
+
+    const proxy: GatepassProxyPayload = {};
+
+    if (gateRequest.passportIdImagePath) {
+        payload.identification_document = getFileName(gateRequest.passportIdImagePath);
+        const u = storagePathToPublicUploadUrl(gateRequest.passportIdImagePath);
+        if (u) {
+            proxy.identificationUrl = u;
+        }
+    }
+
+    const uploads = gateRequest.uploads;
+    if (Array.isArray(uploads)) {
+        const otherDocs = uploads.filter((u) => u.fileType.startsWith('OTHER'));
+        if (otherDocs[0]?.filePath) {
+            payload.other_documents = getFileName(otherDocs[0].filePath);
+            const u = storagePathToPublicUploadUrl(otherDocs[0].filePath);
+            if (u) proxy.other1Url = u;
+        }
+        if (otherDocs[1]?.filePath) {
+            payload.other_documents2 = getFileName(otherDocs[1].filePath);
+            const u = storagePathToPublicUploadUrl(otherDocs[1].filePath);
+            if (u) proxy.other2Url = u;
+        }
+
+        const photoUpload = uploads.find((u) => u.fileType === 'PHOTO');
+        if (photoUpload?.filePath) {
+            payload.photo = getFileName(photoUpload.filePath);
+            const u = storagePathToPublicUploadUrl(photoUpload.filePath);
+            if (u) proxy.photoUrl = u;
+        }
+    }
+
+    if (!payload.photo && proxy.identificationUrl) {
+        payload.photo =
+            (payload.identification_document as string) || getFileName(gateRequest.passportIdImagePath || '');
+        proxy.photoUrl = proxy.identificationUrl;
+    }
+
+    if (Object.keys(proxy).length > 0) {
+        payload._gatepassProxy = proxy;
+    }
+}
+
+/**
+ * Create a new gate pass in Sohar Port system (JSON body + `_gatepassProxy` URLs; PHP proxy fetches files).
  */
 export async function createGatePass(
     client: SoharPortHttpClient,
-    request: CreateGatePassRequest
+    request: CreateGatePassRequest,
 ): Promise<CreateGatePassResponse> {
     try {
         logSuccess('createGatePass', `Creating gate Beneficiary of the permit ${request.requestNumber}`);
 
-        // Extract extra fields
         const extraFields = request.extraFields || {};
-        const gateRequest = extraFields.gateRequest as any; // Full request object from database
+        const gateRequest = extraFields.gateRequest as GateRequestSource | undefined;
         const entityType = extraFields.entityType || gateRequest?.entityType || 'port';
-        // Sohar: pass_type 1 = permanent, 2 = temporary
         const isPermanentPass = isPermanentSoharPass(gateRequest, extraFields);
         const passType = isPermanentPass ? '1' : '2';
 
-        // Map pass_for based on pass type
-        // Permanent: 2=Service Provider, 3=Sub Contractor, 4=Employee
-        // Temporary: 1=Visitor, 2=Service Provider, 3=Sub Contractor
         const rawPassFor = gateRequest?.passFor || extraFields.passFor;
-        let passForMapped = '2'; // Default to Service Provider
-        
+        let passForMapped = '2';
+
         if (isPermanentPass) {
             const permMap: Record<string, string> = {
-                'SERVICE_PROVIDER': '2',
-                'SUB_CONTRACTOR': '3',
-                'EMPLOYEE': '4'
+                SERVICE_PROVIDER: '2',
+                SUB_CONTRACTOR: '3',
+                EMPLOYEE: '4',
             };
-            passForMapped = permMap[rawPassFor] || '2';
+            passForMapped = permMap[String(rawPassFor)] || '2';
         } else {
             const tempMap: Record<string, string> = {
-                'VISITOR': '1',
-                'SERVICE_PROVIDER': '2',
-                'SUB_CONTRACTOR': '3'
+                VISITOR: '1',
+                SERVICE_PROVIDER: '2',
+                SUB_CONTRACTOR: '3',
             };
-            passForMapped = tempMap[rawPassFor] || '1';
+            passForMapped = tempMap[String(rawPassFor)] || '1';
         }
 
-        // Map fields to Sohar Port API format
         const displayName =
             gateRequest?.applicantNameEn?.trim() ||
             request.applicantName?.trim() ||
             gateRequest?.applicantNameAr ||
             '';
 
-        const soharPortPayload: any = {
+        const soharPortPayload: Record<string, unknown> = {
             pass_type: passType,
             pass_for: passForMapped,
             company: 'Majis Industrial Services',
@@ -296,12 +265,11 @@ export async function createGatePass(
             email: request.applicantEmail,
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
             identification_number: request.passportIdNumber,
-            // visitor_type / emp_no: omitted per Sohar guide for pass_type 1 and 2
             blood_type: gateRequest?.bloodType || 'O+',
             start_date: formatDate(request.dateOfVisit),
             end_date: gateRequest?.validTo
                 ? formatDate(gateRequest.validTo)
-                : formatDate(new Date(new Date(request.dateOfVisit).getTime() + 24 * 60 * 60 * 1000)), // Default 1 day
+                : formatDate(new Date(new Date(request.dateOfVisit).getTime() + 24 * 60 * 60 * 1000)),
             reason_for_visit: request.purposeOfVisit,
             gender: mapGender(gateRequest?.gender || 'MALE'),
             citizenship: gateRequest?.nationality || 'Omani',
@@ -310,10 +278,7 @@ export async function createGatePass(
             api_used_by: env.SOHAR_PORT_API_USED_BY?.trim() || 'GatePass System',
         };
 
-        // Permanent: Sohar requires months_validity present as "". Temporary: day codes [1,2,3,4,5,10,30,60,90]
-        soharPortPayload.months_validity = isPermanentPass
-            ? ''
-            : calculateMonthsValidity(gateRequest);
+        soharPortPayload.months_validity = isPermanentPass ? '' : calculateMonthsValidity(gateRequest);
 
         if (!env.SOHAR_PORT_API_USED_BY?.trim()) {
             logger.warn('Sohar Port: SOHAR_PORT_API_USED_BY is not set; api_used_by should be the VMS login or display name');
@@ -322,147 +287,60 @@ export async function createGatePass(
         const skipAttachments = shouldSkipAttachmentsForDebug();
         if (skipAttachments) {
             logger.warn(
-                `Sohar Port: SOHAR_PORT_SKIP_ATTACHMENTS — metadata-only multipart (no files) for ${request.requestNumber}`,
+                `Sohar Port: SOHAR_PORT_SKIP_ATTACHMENTS — JSON without attachment refs for ${request.requestNumber}`,
             );
         }
 
-        type LoadedPart = { buf: ByteBuffer; name: string };
-        const loaded: {
-            identification?: LoadedPart;
-            other1?: LoadedPart;
-            other2?: LoadedPart;
-            photo?: LoadedPart;
-        } = {};
-        /** Always multipart → `/api/gatepass/post-multipart` (PHP proxy assembles JSON for Sohar). Avoids huge JSON + base64 timeouts. */
-        if (!skipAttachments && gateRequest?.passportIdImagePath) {
-            const buf = await readValidatedAttachment(gateRequest.passportIdImagePath, { requireImage: true });
-            if (buf) {
-                loaded.identification = { buf, name: getFileName(gateRequest.passportIdImagePath) };
-                soharPortPayload.identification_document = loaded.identification.name;
-            }
-        }
+        delete soharPortPayload.identification_attachment;
+        delete soharPortPayload.photo_attachment;
+        delete soharPortPayload.other_attachment;
+        delete soharPortPayload.other_attachment2;
 
-        if (!skipAttachments && gateRequest?.uploads && Array.isArray(gateRequest.uploads)) {
-            const otherDocs = gateRequest.uploads.filter((u: any) => u.fileType.startsWith('OTHER'));
-            if (otherDocs.length > 0) {
-                const buf1 = await readValidatedAttachment(otherDocs[0].filePath);
-                if (buf1) {
-                    loaded.other1 = { buf: buf1, name: getFileName(otherDocs[0].filePath) };
-                    soharPortPayload.other_documents = loaded.other1.name;
-                }
-                if (otherDocs.length > 1) {
-                    const buf2 = await readValidatedAttachment(otherDocs[1].filePath);
-                    if (buf2) {
-                        loaded.other2 = { buf: buf2, name: getFileName(otherDocs[1].filePath) };
-                        soharPortPayload.other_documents2 = loaded.other2.name;
-                    }
-                }
-            }
-        }
+        attachProxyRefsAndFilenames(soharPortPayload, gateRequest, skipAttachments, request.requestNumber);
 
-        const photoUpload = skipAttachments ? undefined : gateRequest?.uploads?.find((u: any) => u.fileType === 'PHOTO');
-        let explicitPhotoUpload = false;
-        if (!skipAttachments && photoUpload) {
-            const buf = await readValidatedAttachment(photoUpload.filePath, { requireImage: true });
-            if (buf) {
-                explicitPhotoUpload = true;
-                loaded.photo = { buf, name: getFileName(photoUpload.filePath) };
-                soharPortPayload.photo = loaded.photo.name;
-            }
-        } else if (!skipAttachments && gateRequest?.passportIdImagePath && loaded.identification) {
-            loaded.photo = { buf: loaded.identification.buf, name: loaded.identification.name };
-            soharPortPayload.photo = loaded.photo.name;
-        }
-
-        const bufferToBlob = (buf: ByteBuffer): Blob =>
-            new Blob([Uint8Array.from(buf as ArrayLike<number>)]);
-
-        const metadataPayload = { ...soharPortPayload };
-        delete metadataPayload.identification_attachment;
-        delete metadataPayload.photo_attachment;
-        delete metadataPayload.other_attachment;
-        delete metadataPayload.other_attachment2;
-
-        const fd = new FormData();
-        const metadataJson = JSON.stringify(metadataPayload);
-        if (typeof Blob !== 'undefined') {
-            fd.append(
-                'metadata',
-                new Blob([metadataJson], { type: 'application/json; charset=UTF-8' }),
-            );
-        } else {
-            fd.append('metadata', metadataJson);
-        }
-
-        if (loaded.identification) {
-            fd.append('identification_file', bufferToBlob(loaded.identification.buf), loaded.identification.name);
-        }
-        if (explicitPhotoUpload && loaded.photo) {
-            fd.append('photo_file', bufferToBlob(loaded.photo.buf), loaded.photo.name);
-        }
-        if (loaded.other1) {
-            fd.append('other_file_1', bufferToBlob(loaded.other1.buf), loaded.other1.name);
-        }
-        if (loaded.other2) {
-            fd.append('other_file_2', bufferToBlob(loaded.other2.buf), loaded.other2.name);
-        }
-
-        const requestBody: FormData = fd;
         const endpoint = getEndpointUrl('v1', 'CREATE_GATE_PASS_MULTIPART');
-        const multipart = true;
-        const multipartMetadataForLog: Record<string, unknown> | null = metadataPayload;
 
-        const attachmentsSize = {
-            identification: loaded.identification
-                ? Math.round(loaded.identification.buf.length / 1024) + 'KB'
-                : 'N/A',
-            photo: loaded.photo ? Math.round(loaded.photo.buf.length / 1024) + 'KB' : 'N/A',
-            other1: loaded.other1 ? Math.round(loaded.other1.buf.length / 1024) + 'KB' : 'N/A',
-            other2: loaded.other2 ? Math.round(loaded.other2.buf.length / 1024) + 'KB' : 'N/A',
-        };
-        logger.info(`Attachment sizes for ${request.requestNumber}:`, attachmentsSize);
-
-        const debugLogPayload = multipartMetadataForLog
-            ? { ...multipartMetadataForLog, _multipart: true, _attachmentsSkipped: skipAttachments }
-            : soharPortPayload;
+        logger.info(`Sohar Port attachment refs for ${request.requestNumber}:`, {
+            hasProxy: !!soharPortPayload._gatepassProxy,
+            identification_document: soharPortPayload.identification_document ?? null,
+            photo: soharPortPayload.photo ?? null,
+            other_documents: soharPortPayload.other_documents ?? null,
+            other_documents2: soharPortPayload.other_documents2 ?? null,
+        });
 
         logger.info(`Sohar Port Integration Payload: ${request.requestNumber}`, {
             type: 'SOHAR_PORT_DEBUG_REQUEST',
             requestNumber: request.requestNumber,
             entityType,
-            payload: debugLogPayload,
+            payload: maskPayloadForLog(soharPortPayload),
         });
 
-        const response = await client.requestWithRetry<any>({
+        const response = await client.requestWithRetry<Record<string, unknown>>({
             method: 'POST',
             endpoint,
             params: {
                 entity: entityType,
             },
-            data: requestBody,
-            multipart,
+            data: soharPortPayload,
         });
 
-        // Log the raw response from Sohar Port
         logger.info(`Sohar Port Integration Response: ${request.requestNumber}`, {
             type: 'SOHAR_PORT_DEBUG_RESPONSE',
             requestNumber: request.requestNumber,
             response,
         });
 
-        // Map fields to normalized response, handling both PascalCase (API) and camelCase (Mock/Legacy)
         const isSuccess = response.Result === 'SUCCESS' || response.result === 'SUCCESS';
-        const isError = response.Result === 'ERROR' || response.result === 'ERROR' || response.Result === 'FAILED' || response.result === 'FAILED';
 
         const result: CreateGatePassResponse = {
             success: isSuccess,
             statusCode: isSuccess ? 200 : 400,
             message: isSuccess
                 ? 'Gate pass created successfully'
-                : (response.ErrorDetails || response.message || 'Request received with issues'),
-            externalReference: response.PassNumber,
-            so_status: response.PassStatus,
-            qrCodePdfUrl: response.qrCodePdfUrl || response.qrCode,
+                : ((response.ErrorDetails || response.message || 'Request received with issues') as string),
+            externalReference: response.PassNumber as string | undefined,
+            so_status: response.PassStatus as string | undefined,
+            qrCodePdfUrl: (response.qrCodePdfUrl || response.qrCode) as string | undefined,
         };
 
         if (isSuccess) {
@@ -472,21 +350,28 @@ export async function createGatePass(
         }
 
         return result;
-
-    } catch (error: any) {
+    } catch (error: unknown) {
         logError('createGatePass', error);
 
-        // Include detailed error message if available (e.g., ModelState validation errors)
-        const errorMessage = error.details?.ErrorDetails || error.details?.Message || error.details?.message || error.message || 'Failed to create gate pass';
-        const modelState = error.details?.ModelState || error.details?.modelState;
+        const err = error as {
+            details?: Record<string, unknown>;
+            statusCode?: number;
+            message?: string;
+        };
+        const errorMessage =
+            (err.details?.ErrorDetails as string) ||
+            (err.details?.Message as string) ||
+            (err.details?.message as string) ||
+            err.message ||
+            'Failed to create gate pass';
+        const modelState = (err.details?.ModelState || err.details?.modelState) as Record<string, string[]> | undefined;
 
         let detailedError = errorMessage;
         if (modelState) {
             const issues = Object.entries(modelState)
                 .map(([key, value]) => {
-                    // Strip "gatePass." prefix for cleaner display
                     const cleanKey = key.replace(/^gatePass\./, '');
-                    return `${cleanKey}: ${(value as string[]).join(', ')}`;
+                    return `${cleanKey}: ${value.join(', ')}`;
                 })
                 .join('; ');
             detailedError = `${errorMessage} Details: ${issues}`;
@@ -494,9 +379,9 @@ export async function createGatePass(
 
         return {
             success: false,
-            statusCode: error.statusCode || 500,
+            statusCode: err.statusCode || 500,
             message: detailedError,
-            error: error.message,
+            error: err.message,
         };
     }
 }
