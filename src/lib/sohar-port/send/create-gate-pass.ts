@@ -21,6 +21,13 @@ function getGatepassFilesPublicBaseUrl(): string {
     );
 }
 
+/** Path segment before `/uploads/` on the public site (e.g. Next route `app/api/uploads`). Default `api` → `https://host/api/uploads/...`. */
+function getPublicUploadUrlPrefix(): string {
+    const raw = env.GATEPASS_PUBLIC_UPLOAD_PREFIX?.trim();
+    if (raw === '' || raw === undefined) return 'api';
+    return raw.replace(/^\/+|\/+$/g, '');
+}
+
 function getFileName(filePath: string): string {
     const normalized = String(filePath || '').replace(/\\/g, '/');
     const parts = normalized.split('/');
@@ -28,22 +35,35 @@ function getFileName(filePath: string): string {
 }
 
 /**
- * Public URL under `/uploads/...` for the PHP proxy to GET (allowlist host on proxy).
+ * Build public URL for a stored file. DB paths from `Storage.saveFile` are like `passports/foo.jpg`.
+ * Production serves files at `{origin}/api/uploads/...` (not bare `/uploads/...`).
  */
 function storagePathToPublicUploadUrl(localPath: string): string | null {
     const base = getGatepassFilesPublicBaseUrl();
     if (!base || !localPath) return null;
     let p = String(localPath).replace(/\\/g, '/').trim();
     if (/^https?:\/\//i.test(p)) return p;
-    if (p.startsWith('/uploads/')) {
-        p = p.replace(/^\//, '');
-    } else if (p.includes('/uploads/')) {
-        const i = p.indexOf('/uploads/');
-        p = p.slice(i + 1);
-    } else if (!p.startsWith('uploads/')) {
-        return null;
+    /** Proxy cannot fetch embedded files; omit URL (filenames may still be sent). */
+    if (/^data:/i.test(p)) return null;
+
+    const apiUploads = '/api/uploads/';
+    if (p.includes(apiUploads)) {
+        p = p.slice(p.indexOf(apiUploads) + apiUploads.length);
+    } else if (p.startsWith('api/uploads/')) {
+        p = p.slice('api/uploads/'.length);
     }
-    return `${base.replace(/\/$/, '')}/${p}`;
+
+    if (p.startsWith('/uploads/')) {
+        p = p.slice('/uploads/'.length);
+    } else if (p.startsWith('uploads/')) {
+        p = p.slice('uploads/'.length);
+    }
+
+    p = p.replace(/^\/+/, '');
+    if (p === '') return null;
+
+    const prefix = getPublicUploadUrlPrefix();
+    return `${base.replace(/\/$/, '')}/${prefix}/uploads/${p}`;
 }
 
 export interface GatepassProxyPayload {
@@ -56,7 +76,11 @@ export interface GatepassProxyPayload {
 /** Same shape as `extraFields.gateRequest` rows we read from the DB. */
 interface GateRequestSource {
     entityType?: string;
+    /** Company / organization name for Sohar `company` when set. */
+    organization?: string;
     passportIdImagePath?: string;
+    /** Optional; may duplicate PHOTO upload row — see `uploads`. */
+    photoPath?: string | null;
     uploads?: Array<{ fileType: string; filePath: string }>;
     applicantNameEn?: string;
     applicantNameAr?: string;
@@ -203,6 +227,12 @@ function attachProxyRefsAndFilenames(
         }
     }
 
+    if (!payload.photo && gateRequest.photoPath) {
+        payload.photo = getFileName(gateRequest.photoPath);
+        const u = storagePathToPublicUploadUrl(gateRequest.photoPath);
+        if (u) proxy.photoUrl = u;
+    }
+
     if (!payload.photo && proxy.identificationUrl) {
         payload.photo =
             (payload.identification_document as string) || getFileName(gateRequest.passportIdImagePath || '');
@@ -258,7 +288,7 @@ export async function createGatePass(
         const soharPortPayload: Record<string, unknown> = {
             pass_type: passType,
             pass_for: passForMapped,
-            company: 'Majis Industrial Services',
+            company: gateRequest?.organization || 'Majis Industrial Services',
             name: displayName,
             phone: gateRequest?.applicantPhone || '',
             name_in_arabic: gateRequest?.applicantNameAr,
