@@ -21,6 +21,12 @@ const RuntimeBuffer = (globalThis as {
 }).Buffer;
 const env = ((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {};
 
+/** When true: send multipart with JSON metadata only — no identification/photo/other files (debug UTF-8 vs attachments). */
+function shouldSkipAttachmentsForDebug(): boolean {
+    const v = env.SOHAR_PORT_SKIP_ATTACHMENTS?.trim()?.toLowerCase();
+    return v === 'true' || v === '1' || v === 'yes';
+}
+
 
 function normalizeBase64(input: string): string {
     const withoutWhitespace = input.replace(/\s/g, '');
@@ -313,6 +319,13 @@ export async function createGatePass(
             logger.warn('Sohar Port: SOHAR_PORT_API_USED_BY is not set; api_used_by should be the VMS login or display name');
         }
 
+        const skipAttachments = shouldSkipAttachmentsForDebug();
+        if (skipAttachments) {
+            logger.warn(
+                `Sohar Port: SOHAR_PORT_SKIP_ATTACHMENTS — metadata-only multipart (no files) for ${request.requestNumber}`,
+            );
+        }
+
         type LoadedPart = { buf: ByteBuffer; name: string };
         const loaded: {
             identification?: LoadedPart;
@@ -321,7 +334,7 @@ export async function createGatePass(
             photo?: LoadedPart;
         } = {};
         /** Always multipart → `/api/gatepass/post-multipart` (PHP proxy assembles JSON for Sohar). Avoids huge JSON + base64 timeouts. */
-        if (gateRequest?.passportIdImagePath) {
+        if (!skipAttachments && gateRequest?.passportIdImagePath) {
             const buf = await readValidatedAttachment(gateRequest.passportIdImagePath, { requireImage: true });
             if (buf) {
                 loaded.identification = { buf, name: getFileName(gateRequest.passportIdImagePath) };
@@ -329,7 +342,7 @@ export async function createGatePass(
             }
         }
 
-        if (gateRequest?.uploads && Array.isArray(gateRequest.uploads)) {
+        if (!skipAttachments && gateRequest?.uploads && Array.isArray(gateRequest.uploads)) {
             const otherDocs = gateRequest.uploads.filter((u: any) => u.fileType.startsWith('OTHER'));
             if (otherDocs.length > 0) {
                 const buf1 = await readValidatedAttachment(otherDocs[0].filePath);
@@ -347,16 +360,16 @@ export async function createGatePass(
             }
         }
 
-        const photoUpload = gateRequest?.uploads?.find((u: any) => u.fileType === 'PHOTO');
+        const photoUpload = skipAttachments ? undefined : gateRequest?.uploads?.find((u: any) => u.fileType === 'PHOTO');
         let explicitPhotoUpload = false;
-        if (photoUpload) {
+        if (!skipAttachments && photoUpload) {
             const buf = await readValidatedAttachment(photoUpload.filePath, { requireImage: true });
             if (buf) {
                 explicitPhotoUpload = true;
                 loaded.photo = { buf, name: getFileName(photoUpload.filePath) };
                 soharPortPayload.photo = loaded.photo.name;
             }
-        } else if (gateRequest?.passportIdImagePath && loaded.identification) {
+        } else if (!skipAttachments && gateRequest?.passportIdImagePath && loaded.identification) {
             loaded.photo = { buf: loaded.identification.buf, name: loaded.identification.name };
             soharPortPayload.photo = loaded.photo.name;
         }
@@ -371,7 +384,15 @@ export async function createGatePass(
         delete metadataPayload.other_attachment2;
 
         const fd = new FormData();
-        fd.append('metadata', JSON.stringify(metadataPayload));
+        const metadataJson = JSON.stringify(metadataPayload);
+        if (typeof Blob !== 'undefined') {
+            fd.append(
+                'metadata',
+                new Blob([metadataJson], { type: 'application/json; charset=UTF-8' }),
+            );
+        } else {
+            fd.append('metadata', metadataJson);
+        }
 
         if (loaded.identification) {
             fd.append('identification_file', bufferToBlob(loaded.identification.buf), loaded.identification.name);
@@ -402,7 +423,7 @@ export async function createGatePass(
         logger.info(`Attachment sizes for ${request.requestNumber}:`, attachmentsSize);
 
         const debugLogPayload = multipartMetadataForLog
-            ? { ...multipartMetadataForLog, _multipart: true }
+            ? { ...multipartMetadataForLog, _multipart: true, _attachmentsSkipped: skipAttachments }
             : soharPortPayload;
 
         logger.info(`Sohar Port Integration Payload: ${request.requestNumber}`, {
