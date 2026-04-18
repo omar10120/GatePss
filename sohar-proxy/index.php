@@ -4,6 +4,15 @@
 // =========================
 const TARGET_HOST = 'gpass.soharportandfreezone.om';
 const LOG_DIR = __DIR__ . '/logs';
+
+/**
+ * إعدادات محلية (cPanel غالبًا لا يمرّر SetEnv لـ getenv): عيّن القيم هنا إذا لم تُضبط على الخادم.
+ * متغيرات البيئة على السيرفر تبقى لها الأولوية إذا كانت معرّفة وغير فارغة.
+ */
+const GATEPASS_LOCAL_TRUSTED_UPLOAD_DOMAIN = 'majis.om'; // أو '' ثم ضبط على الخادم فقط
+const GATEPASS_LOCAL_FETCH_ALLOWED_HOSTS = ''; // مثال: 'gatepass.majis.om'
+const GATEPASS_LOCAL_PROXY_MAX_ATTACHMENT_BYTES = '';
+
 /** Save raw JSON body + multipart files under logs/incoming/{traceId}/ */
 const SAVE_INCOMING_PAYLOADS = true;
 /** Max bytes written per upstream response dump file (avoid filling disk) */
@@ -17,9 +26,39 @@ function gatepassMaxAttachmentBytes() {
     return 15728640;
 }
 
+/**
+ * يطبّق GATEPASS_LOCAL_* عبر putenv فقط عندما لا يكون المفتاح معرّفًا من الخادم (Apache SetEnv / php-fpm pool).
+ */
+function gatepassBootstrapLocalEnvFromConstants() {
+    if (GATEPASS_LOCAL_TRUSTED_UPLOAD_DOMAIN !== '') {
+        $cur = getenv('GATEPASS_TRUSTED_UPLOAD_DOMAIN');
+        if ($cur === false || trim((string) $cur) === '') {
+            putenv('GATEPASS_TRUSTED_UPLOAD_DOMAIN=' . GATEPASS_LOCAL_TRUSTED_UPLOAD_DOMAIN);
+            $_ENV['GATEPASS_TRUSTED_UPLOAD_DOMAIN'] = GATEPASS_LOCAL_TRUSTED_UPLOAD_DOMAIN;
+        }
+    }
+    if (GATEPASS_LOCAL_FETCH_ALLOWED_HOSTS !== '') {
+        $cur = getenv('GATEPASS_FETCH_ALLOWED_HOSTS');
+        if ($cur === false || trim((string) $cur) === '') {
+            putenv('GATEPASS_FETCH_ALLOWED_HOSTS=' . GATEPASS_LOCAL_FETCH_ALLOWED_HOSTS);
+            $_ENV['GATEPASS_FETCH_ALLOWED_HOSTS'] = GATEPASS_LOCAL_FETCH_ALLOWED_HOSTS;
+        }
+    }
+    if (GATEPASS_LOCAL_PROXY_MAX_ATTACHMENT_BYTES !== '' && ctype_digit(trim(GATEPASS_LOCAL_PROXY_MAX_ATTACHMENT_BYTES))) {
+        $cur = getenv('GATEPASS_PROXY_MAX_ATTACHMENT_BYTES');
+        if ($cur === false || trim((string) $cur) === '') {
+            $v = trim(GATEPASS_LOCAL_PROXY_MAX_ATTACHMENT_BYTES);
+            putenv('GATEPASS_PROXY_MAX_ATTACHMENT_BYTES=' . $v);
+            $_ENV['GATEPASS_PROXY_MAX_ATTACHMENT_BYTES'] = $v;
+        }
+    }
+}
+
 if (!is_dir(LOG_DIR)) {
     @mkdir(LOG_DIR, 0775, true);
 }
+
+gatepassBootstrapLocalEnvFromConstants();
 
 // =========================
 // HELPERS
@@ -120,11 +159,10 @@ function sanitizeTraceDirId($traceId) {
 }
 
 /**
- * Hosts allowed for gatepass attachment HTTP fetch (comma-separated env GATEPASS_FETCH_ALLOWED_HOSTS).
- * Empty = deny all remote URL fetches (configure for your public GatePass origin).
+ * Parse comma-separated host list from env (lowercase, deduped).
  */
-function gatepassAllowedFetchHosts() {
-    $raw = getenv('GATEPASS_FETCH_ALLOWED_HOSTS');
+function gatepassParseHostListEnv($envName) {
+    $raw = getenv($envName);
     if ($raw === false || trim($raw) === '') {
         return [];
     }
@@ -138,10 +176,44 @@ function gatepassAllowedFetchHosts() {
     return array_keys($hosts);
 }
 
+/**
+ * Hosts allowed for gatepass attachment HTTP fetch (comma-separated GATEPASS_FETCH_ALLOWED_HOSTS).
+ * Additionally: GATEPASS_TRUSTED_UPLOAD_DOMAIN suffix (e.g. majis.om) allows *.majis.om without listing each host.
+ */
+function gatepassAllowedFetchHosts() {
+    return gatepassParseHostListEnv('GATEPASS_FETCH_ALLOWED_HOSTS');
+}
+
+/**
+ * True if host equals domain or is a subdomain of domain (e.g. gatepass.majis.om under majis.om).
+ */
+function gatepassHostUnderTrustedDomain($host, $registeredDomain) {
+    $host = strtolower((string) $host);
+    $registeredDomain = strtolower(trim((string) $registeredDomain));
+    if ($host === '' || $registeredDomain === '') {
+        return false;
+    }
+    if ($host === $registeredDomain) {
+        return true;
+    }
+    $suffix = '.' . $registeredDomain;
+    return strlen($host) > strlen($suffix) && substr($host, -strlen($suffix)) === $suffix;
+}
+
 function gatepassHostAllowedForFetch($host) {
     $host = strtolower((string) $host);
+    if ($host === '') {
+        return false;
+    }
     $allowed = gatepassAllowedFetchHosts();
-    return $host !== '' && in_array($host, $allowed, true);
+    if (in_array($host, $allowed, true)) {
+        return true;
+    }
+    $trusted = getenv('GATEPASS_TRUSTED_UPLOAD_DOMAIN');
+    if (is_string($trusted) && trim($trusted) !== '' && gatepassHostUnderTrustedDomain($host, $trusted)) {
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -166,58 +238,53 @@ function gatepassFetchAttachmentFromUrl($url, $traceId) {
             'traceId' => $traceId,
             'stage' => 'ATTACHMENT_FETCH_HOST_DENIED',
             'host' => $p['host'],
-            'hint' => 'Set GATEPASS_FETCH_ALLOWED_HOSTS to include this host',
+            'hint' => 'Set GATEPASS_FETCH_ALLOWED_HOSTS or GATEPASS_TRUSTED_UPLOAD_DOMAIN (e.g. majis.om)',
         ]);
         return null;
     }
+    if (!function_exists('curl_init')) {
+        writeLog('ERROR', ['traceId' => $traceId, 'stage' => 'ATTACHMENT_FETCH_NO_CURL', 'url' => truncateForLog($url, 200)]);
+        return null;
+    }
     $max = gatepassMaxAttachmentBytes();
-    $ctx = stream_context_create([
-        'http' => ['timeout' => 45, 'follow_location' => 1, 'max_redirects' => 3],
-        'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS => 5,
+        CURLOPT_CONNECTTIMEOUT => 20,
+        CURLOPT_TIMEOUT => 60,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => 0,
+        CURLOPT_HTTPHEADER => ['Accept: */*'],
     ]);
-    $data = @file_get_contents($url, false, $ctx);
-    if ($data === false || $data === '') {
-        writeLog('ERROR', ['traceId' => $traceId, 'stage' => 'ATTACHMENT_FETCH_HTTP_FAILED', 'url' => truncateForLog($url, 200)]);
+    $data = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($data === false) {
+        $data = null;
+    }
+    if ($httpCode !== null && ($httpCode < 200 || $httpCode >= 300)) {
+        writeLog('ERROR', [
+            'traceId' => $traceId,
+            'stage' => 'ATTACHMENT_FETCH_HTTP_FAILED',
+            'url' => truncateForLog($url, 200),
+            'http_code' => $httpCode,
+        ]);
+        return null;
+    }
+    if ($data === null || $data === '') {
+        writeLog('ERROR', [
+            'traceId' => $traceId,
+            'stage' => 'ATTACHMENT_FETCH_HTTP_FAILED',
+            'url' => truncateForLog($url, 200),
+            'http_code' => $httpCode,
+            'hint' => 'Empty response; check URL from proxy server network',
+        ]);
         return null;
     }
     if (strlen($data) > $max) {
         writeLog('ERROR', ['traceId' => $traceId, 'stage' => 'ATTACHMENT_FETCH_TOO_LARGE', 'bytes' => strlen($data), 'max' => $max]);
-        return null;
-    }
-    return $data;
-}
-
-/**
- * Read file under GATEPASS_PROXY_UPLOAD_ROOT + relative path (no ..).
- */
-function gatepassReadLocalRelativeAttachment($relativePath, $traceId) {
-    $root = getenv('GATEPASS_PROXY_UPLOAD_ROOT');
-    if (!is_string($root) || $root === '') {
-        return null;
-    }
-    $root = rtrim($root, '/\\');
-    if ($relativePath === '' || !is_string($relativePath)) {
-        return null;
-    }
-    $rel = str_replace(["\0", '\\'], ['', '/'], $relativePath);
-    if (strpos($rel, '..') !== false) {
-        writeLog('ERROR', ['traceId' => $traceId, 'stage' => 'ATTACHMENT_LOCAL_PATH_REJECTED', 'path' => truncateForLog($rel, 200)]);
-        return null;
-    }
-    $rel = ltrim($rel, '/');
-    $full = $root . '/' . $rel;
-    if (!is_file($full) || !is_readable($full)) {
-        writeLog('ERROR', ['traceId' => $traceId, 'stage' => 'ATTACHMENT_LOCAL_NOT_READABLE', 'full' => truncateForLog($full, 240)]);
-        return null;
-    }
-    $max = gatepassMaxAttachmentBytes();
-    $len = @filesize($full);
-    if ($len !== false && $len > $max) {
-        writeLog('ERROR', ['traceId' => $traceId, 'stage' => 'ATTACHMENT_LOCAL_TOO_LARGE', 'bytes' => $len, 'max' => $max]);
-        return null;
-    }
-    $data = @file_get_contents($full);
-    if ($data === false || $data === '') {
         return null;
     }
     return $data;
@@ -236,8 +303,7 @@ function gatepassGuessBasenameFromUrl($url) {
 }
 
 /**
- * Merge _gatepassProxy URLs/local paths into base64 attachment fields (multipart uploads run first).
- * Removes _gatepassProxy from payload before upstream.
+ * Merge _gatepassProxy HTTPS URLs into base64 attachment fields. Removes _gatepassProxy before upstream.
  */
 function gatepassMergeProxyFetchedAttachments(&$payload, $traceId) {
     $gp = $payload['_gatepassProxy'] ?? null;
@@ -248,61 +314,33 @@ function gatepassMergeProxyFetchedAttachments(&$payload, $traceId) {
     unset($payload['_gatepassProxy']);
 
     $slots = [
-        [
-            'urlKey' => 'identificationUrl',
-            'localKey' => 'identificationLocalRel',
-            'attachment' => 'identification_attachment',
-            'name' => 'identification_document',
-        ],
-        [
-            'urlKey' => 'photoUrl',
-            'localKey' => 'photoLocalRel',
-            'attachment' => 'photo_attachment',
-            'name' => 'photo',
-        ],
-        [
-            'urlKey' => 'other1Url',
-            'localKey' => 'other1LocalRel',
-            'attachment' => 'other_attachment',
-            'name' => 'other_documents',
-        ],
-        [
-            'urlKey' => 'other2Url',
-            'localKey' => 'other2LocalRel',
-            'attachment' => 'other_attachment2',
-            'name' => 'other_documents2',
-        ],
+        ['urlKey' => 'identificationUrl', 'attachment' => 'identification_attachment', 'name' => 'identification_document'],
+        ['urlKey' => 'photoUrl', 'attachment' => 'photo_attachment', 'name' => 'photo'],
+        ['urlKey' => 'other1Url', 'attachment' => 'other_attachment', 'name' => 'other_documents'],
+        ['urlKey' => 'other2Url', 'attachment' => 'other_attachment2', 'name' => 'other_documents2'],
     ];
 
     foreach ($slots as $slot) {
         if (!empty($payload[$slot['attachment']])) {
             continue;
         }
-        $bytes = null;
-        if (!empty($gp[$slot['urlKey']]) && is_string($gp[$slot['urlKey']])) {
-            $bytes = gatepassFetchAttachmentFromUrl($gp[$slot['urlKey']], $traceId);
+        if (empty($gp[$slot['urlKey']]) || !is_string($gp[$slot['urlKey']])) {
+            continue;
         }
-        if (($bytes === null || $bytes === '') && !empty($gp[$slot['localKey']]) && is_string($gp[$slot['localKey']])) {
-            $bytes = gatepassReadLocalRelativeAttachment($gp[$slot['localKey']], $traceId);
-        }
+        $bytes = gatepassFetchAttachmentFromUrl($gp[$slot['urlKey']], $traceId);
         if ($bytes !== null && $bytes !== '') {
             $payload[$slot['attachment']] = base64_encode($bytes);
             if (empty($payload[$slot['name']])) {
-                if (!empty($gp[$slot['urlKey']])) {
-                    $guess = gatepassGuessBasenameFromUrl($gp[$slot['urlKey']]);
-                    if ($guess !== '') {
-                        $payload[$slot['name']] = $guess;
-                    }
-                }
-                if (empty($payload[$slot['name']]) && !empty($gp[$slot['localKey']])) {
-                    $payload[$slot['name']] = basename(str_replace('\\', '/', $gp[$slot['localKey']]));
+                $guess = gatepassGuessBasenameFromUrl($gp[$slot['urlKey']]);
+                if ($guess !== '') {
+                    $payload[$slot['name']] = $guess;
                 }
             }
         }
     }
 }
 
-/** Sanitize UTF-8 and json_encode for upstream Sohar POST body (multipart + JSON routes). */
+/** Sanitize UTF-8 and json_encode for upstream Sohar POST body. */
 function gatepassJsonEncodeUpstreamBody(array $payload) {
     $payload = sanitizeUtf8Deep($payload);
     $jsonFlags = JSON_UNESCAPED_UNICODE;
@@ -316,7 +354,7 @@ function gatepassJsonEncodeUpstreamBody(array $payload) {
     return ($encoded !== false && $encoded !== '') ? $encoded : '{}';
 }
 
-/** Merge `_gatepassProxy`, apply photo-from-ID fallback, encode for upstream (multipart + JSON create). */
+/** Merge `_gatepassProxy`, apply photo-from-ID fallback, encode for upstream JSON create. */
 function gatepassFinalizeGatepassPayload(array &$payload, $traceId) {
     gatepassMergeProxyFetchedAttachments($payload, $traceId);
     if (!isset($payload['photo_attachment']) && isset($payload['identification_attachment'])) {
@@ -368,49 +406,6 @@ function curlInfoForLog($info) {
     return $pick;
 }
 
-/**
- * Copy multipart upload to logs/incoming/{traceId}/ for verification.
- * @return array<int, array<string, mixed>>
- */
-function saveIncomingMultipartFiles($traceId, array $fileKeys) {
-    $saved = [];
-    $dir = LOG_DIR . '/incoming/' . sanitizeTraceDirId($traceId);
-    if (!is_dir($dir)) {
-        @mkdir($dir, 0775, true);
-    }
-    foreach ($fileKeys as $fieldKey) {
-        if (empty($_FILES[$fieldKey]) || !is_array($_FILES[$fieldKey])) {
-            continue;
-        }
-        $f = $_FILES[$fieldKey];
-        if (($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || empty($f['tmp_name'])) {
-            $saved[] = ['field' => $fieldKey, 'error' => 'upload_err_' . ($f['error'] ?? '?')];
-            continue;
-        }
-        if (!is_uploaded_file($f['tmp_name'])) {
-            $saved[] = ['field' => $fieldKey, 'error' => 'not_uploaded_file'];
-            continue;
-        }
-        $safeBase = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($f['name']));
-        $destName = $fieldKey . '_' . $safeBase;
-        $dest = $dir . '/' . $destName;
-        if (!@copy($f['tmp_name'], $dest)) {
-            $saved[] = ['field' => $fieldKey, 'error' => 'copy_failed'];
-            continue;
-        }
-        $bytes = @filesize($dest) ?: 0;
-        $sha256 = @hash_file('sha256', $dest);
-        $saved[] = [
-            'field' => $fieldKey,
-            'savedPath' => $dest,
-            'originalName' => $f['name'],
-            'bytes' => $bytes,
-            'sha256' => $sha256 ?: null,
-        ];
-    }
-    return $saved;
-}
-
 function saveIncomingJsonBody($traceId, $rawJson) {
     if (!SAVE_INCOMING_PAYLOADS || $rawJson === '' || $rawJson === null) {
         return null;
@@ -423,19 +418,6 @@ function saveIncomingJsonBody($traceId, $rawJson) {
     if (@file_put_contents($path, $rawJson) === false) {
         return null;
     }
-    return $path;
-}
-
-function saveMetadataSnapshot($traceId, $metadataJsonString) {
-    if (!SAVE_INCOMING_PAYLOADS || $metadataJsonString === '') {
-        return null;
-    }
-    $dir = LOG_DIR . '/incoming/' . sanitizeTraceDirId($traceId);
-    if (!is_dir($dir)) {
-        @mkdir($dir, 0775, true);
-    }
-    $path = $dir . '/metadata.json';
-    @file_put_contents($path, $metadataJsonString);
     return $path;
 }
 
@@ -514,24 +496,6 @@ if (is_array($upstreamDays)) {
     }
 }
 
-// Diagnostic only: GET .../gatepassproxy/?proxy_ping=1 — confirms rewrite + writable logs (remove in production if desired)
-if (!empty($_GET['proxy_ping'])) {
-    writeLog('REQUEST', [
-        'proxy_ping' => true,
-        'uri' => $_SERVER['REQUEST_URI'] ?? '',
-        'remote' => $_SERVER['REMOTE_ADDR'] ?? '',
-    ]);
-    header('Content-Type: application/json; charset=utf-8');
-    header('X-Gatepass-Proxy: php');
-    echo json_encode([
-        'ok' => true,
-        'logDir' => LOG_DIR,
-        'dirExists' => is_dir(LOG_DIR),
-        'writable' => is_writable(LOG_DIR),
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
 // =========================
 // PROXY LOGIC
 // =========================
@@ -557,8 +521,8 @@ $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 $ctLower = strtolower($contentType);
 $isMultipart = (strpos($ctLower, 'multipart/form-data') !== false);
 $isApplicationJson = (strpos($ctLower, 'application/json') !== false);
-$isMultipartCreate = ($pathUrl === '/api/gatepass/post-multipart' && $isMultipart);
-/** Node sends pure JSON (+ `_gatepassProxy` URLs); same upstream as multipart path. */
+$isPostMultipartRoute = ($pathUrl === '/api/gatepass/post-multipart');
+/** JSON body + `_gatepassProxy` URLs → fetch attachments → POST upstream /api/gatepass/post */
 $isJsonGatepassCreate = ($isPostMultipartRoute && $isApplicationJson && !$isMultipart);
 
 $forwardPath = ($pathUrl === '/api/gatepass/post-multipart') ? '/api/gatepass/post' : $pathUrl;
@@ -566,47 +530,9 @@ $upstreamUrl = "https://" . TARGET_HOST . $forwardPath . $queryString;
 
 // Process Body
 $outgoingBodyStr = '';
-$incomingAttachmentsSaved = [];
-$metadataSavedPath = null;
 $incomingJsonSavedPath = null;
 
-if ($isMultipartCreate) {
-    // Preserve raw metadata + uploaded files on disk before building upstream JSON
-    if (SAVE_INCOMING_PAYLOADS) {
-        $metadataSavedPath = saveMetadataSnapshot($traceId, $_POST['metadata'] ?? '');
-        $incomingAttachmentsSaved = saveIncomingMultipartFiles($traceId, [
-            'identification_file',
-            'photo_file',
-            'other_file_1',
-            'other_file_2',
-        ]);
-    }
-
-    // PHP automatically parses multipart into $_POST and $_FILES
-    $meta = json_decode($_POST['metadata'] ?? '{}', true);
-    if (!is_array($meta)) {
-        $meta = [];
-    }
-    $payload = $meta;
-
-    $fileMappings = [
-        'identification_file' => ['attachment' => 'identification_attachment', 'name' => 'identification_document'],
-        'photo_file'          => ['attachment' => 'photo_attachment',          'name' => 'photo'],
-        'other_file_1'        => ['attachment' => 'other_attachment',          'name' => 'other_documents'],
-        'other_file_2'        => ['attachment' => 'other_attachment2',         'name' => 'other_documents2'],
-    ];
-
-    foreach ($fileMappings as $formKey => $outKeys) {
-        if (isset($_FILES[$formKey]) && $_FILES[$formKey]['size'] > 0) {
-            $payload[$outKeys['attachment']] = base64_encode(file_get_contents($_FILES[$formKey]['tmp_name']));
-            if (empty($payload[$outKeys['name']])) {
-                $payload[$outKeys['name']] = basename($_FILES[$formKey]['name']);
-            }
-        }
-    }
-
-    $outgoingBodyStr = gatepassFinalizeGatepassPayload($payload, $traceId);
-} elseif ($isJsonGatepassCreate) {
+if ($isJsonGatepassCreate) {
     $rawIncoming = file_get_contents('php://input');
     if (SAVE_INCOMING_PAYLOADS && $rawIncoming !== '' && $rawIncoming !== false) {
         $incomingJsonSavedPath = saveIncomingJsonBody($traceId, $rawIncoming);
@@ -631,9 +557,7 @@ if (
 }
 
 // Log incoming request (full enough to debug 404 / path issues; body truncated)
-$incomingBodyLog = $isMultipart
-    ? '[multipart parsed to JSON upstream; POST keys: ' . implode(',', array_keys($_POST)) . '; files saved: ' . count($incomingAttachmentsSaved) . ']'
-    : truncateForLog($outgoingBodyStr, 16000);
+$incomingBodyLog = truncateForLog($outgoingBodyStr, 16000);
 
 writeLog('REQUEST', [
     'traceId' => $traceId,
@@ -651,8 +575,8 @@ writeLog('REQUEST', [
     'forwardPath' => $forwardPath,
     'forwardTo' => $upstreamUrl,
     'bodyPreview' => $incomingBodyLog,
-    'incomingMetadataPath' => $metadataSavedPath,
-    'incomingAttachments' => $incomingAttachmentsSaved,
+    'incomingMetadataPath' => null,
+    'incomingAttachments' => [],
     'incomingJsonBodyPath' => $incomingJsonSavedPath,
 ]);
 
