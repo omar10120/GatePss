@@ -225,13 +225,20 @@ export default function AdminRequestsPage() {
     };
 
     const getStatusColor = (status: string) => {
-        switch (status) {
+        const normalizedStatus = status?.toUpperCase?.().trim() || '';
+
+        switch (normalizedStatus) {
             case 'APPROVED':
+            case 'ACTIVE':
                 return 'bg-success-100 text-success-700';
             case 'REJECTED':
+            case 'CANCELLED':
+            case 'CANCELED':
                 return 'bg-danger-100 text-danger-700';
             case 'PENDING':
                 return 'bg-warning-100 text-warning-700';
+            case 'EXPIRED':
+                return 'bg-gray-200 text-gray-700';
             default:
                 return 'bg-gray-100 text-gray-700';
         }
@@ -451,7 +458,7 @@ export default function AdminRequestsPage() {
                                                                     </td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
                                                                         <div className="flex flex-col items-center gap-1">
-                                                                            <span className={`px-2 py-1 rounded text-xs font-medium ${request.externalStatus ? 'bg-blue-50 text-blue-700' : 'bg-gray-50 text-gray-500'}`}>
+                                                                            <span className={`px-2 py-1 rounded text-xs font-medium ${request.externalStatus ? getStatusColor(request.externalStatus) : 'bg-gray-50 text-gray-500'}`}>
                                                                                 {request.externalStatus || '-'}
                                                                             </span>
                                                                             {request.lastIntegrationStatusMessage && (
