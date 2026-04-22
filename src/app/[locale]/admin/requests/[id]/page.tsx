@@ -1498,6 +1498,9 @@ export default function RequestDetailsPage() {
                                     const isDataUrl = url.startsWith('data:image/');
                                     const extensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp'];
                                     const isImage = isDataUrl || extensions.some(ext => url.toLowerCase().split('?')[0].endsWith(ext));
+                                    const isPdf =
+                                        url.startsWith('data:application/pdf') ||
+                                        url.toLowerCase().split('?')[0].endsWith('.pdf');
 
                                     if (isImage) {
                                         return (
@@ -1505,6 +1508,16 @@ export default function RequestDetailsPage() {
                                                 src={url}
                                                 alt={imageModal.title}
                                                 className="max-w-full max-h-full object-contain"
+                                            />
+                                        );
+                                    }
+
+                                    if (isPdf) {
+                                        return (
+                                            <iframe
+                                                title={imageModal.title || 'PDF preview'}
+                                                src={url}
+                                                className="w-full min-h-[70vh] max-h-[calc(80vh-6rem)] rounded-md border border-gray-100"
                                             />
                                         );
                                     }
