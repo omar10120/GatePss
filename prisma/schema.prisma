@@ -91,7 +91,7 @@ model Request {
   validFrom                    DateTime @map("valid_from")
   validTo                      DateTime @map("valid_to")
   purposeOfVisit               String   @map("purpose_of_visit") @db.Text
-  dateOfVisit DateTime? @map("date_of_visit")
+  dateOfVisit                  DateTime @map("date_of_visit")
   requestType                  String   @map("request_type")
   status                       String   @default("PENDING")
   rejectionReason              String?  @map("rejection_reason") @db.Text

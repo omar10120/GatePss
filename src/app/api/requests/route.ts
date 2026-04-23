@@ -104,9 +104,9 @@ export async function POST(request: NextRequest) {
             errors.push('Visit Duration or Pass End Date is required');
         }
 
-        if (!purposeOfVisit || purposeOfVisit.trim().length < 10) {
-            errors.push('Purpose of visit is required (minimum 10 characters)');
-        }
+        // if (!purposeOfVisit || purposeOfVisit.trim().length < 10) {
+        //     errors.push('Purpose of visit is required (minimum 10 characters)');
+        // }
 
         let visitDate: Date | null = null;
         if (dateOfVisitRaw) {

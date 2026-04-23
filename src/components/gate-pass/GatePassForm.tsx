@@ -151,13 +151,7 @@ export const GatePassForm: React.FC = () => {
     const [organizationValue, setOrganizationValue] = useState('');
     const [selectedPassType, setSelectedPassType] = useState<PassType | null>(null);
     const [entityType, setEntityType] = useState<string>('port');
-    const [dateOfVisit, setDateOfVisit] = useState(() => {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-    });
+    const [dateOfVisit, setDateOfVisit] = useState('');
     const [passEndDate, setPassEndDate] = useState('');
     const [professionValue, setProfessionValue] = useState('');
 
@@ -166,7 +160,6 @@ export const GatePassForm: React.FC = () => {
         if (!pt) return false;
         const nameEn = pt.name_en.toLowerCase();
         const nameAr = pt.name_ar;
-        
         return nameEn.includes('permanent') || nameAr.includes('دائم');
     };
 
@@ -306,14 +299,16 @@ export const GatePassForm: React.FC = () => {
             isValid = false;
         }
 
-                // Purpose of Visit validation (minimum 10 characters)
+        // Purpose of Visit validation:
+        // - Temporary: no minimum length check
+        // - Permanent: minimum 10 characters
         const purposeOfVisit = formData.get('purposeOfVisit') as string;
-        if (!purposeOfVisit || purposeOfVisit.trim().length < 10) {
-        newFieldErrors['purposeOfVisit'] = getBilingualNested(['errors', 'purposeOfVisitRequired']);
-        isValid = false;
-        }``
-        if (!purposeOfVisit || purposeOfVisit.trim().length < 10) {
-            errors.push('Purpose of visit is required (minimum 10 characters)');
+        if (!purposeOfVisit || purposeOfVisit.trim() === '') {
+            newFieldErrors['purposeOfVisit'] = getBilingualNested(['errors', 'purposeOfVisitRequired']);
+            isValid = false;
+        } else if (isPermanent(selectedPassType) && purposeOfVisit.trim().length < 10) {
+            newFieldErrors['purposeOfVisit'] = getBilingualNested(['errors', 'purposeOfVisitRequired']);
+            isValid = false;
         }
 
         // Email validation
@@ -532,11 +527,7 @@ export const GatePassForm: React.FC = () => {
             setOrganizationValue('');
             setSelectedPassType(null);
             setPassEndDate('');
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            setDateOfVisit(`${yyyy}-${mm}-${dd}`);
+            setDateOfVisit('');
 
 
             setConfirmed(false);
@@ -563,11 +554,7 @@ export const GatePassForm: React.FC = () => {
         setErrors([]);
         setSelectedPassType(null);
         setPassEndDate('');
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        setDateOfVisit(`${yyyy}-${mm}-${dd}`);
+        setDateOfVisit('');
     };
 
     if (success) {
@@ -643,6 +630,13 @@ export const GatePassForm: React.FC = () => {
                             // Clear passEndDate if switching back to temporary
                             if (!isPermanent(pt)) {
                                 setPassEndDate('');
+                                setDateOfVisit('');
+                            } else if (!dateOfVisit) {
+                                const today = new Date();
+                                const yyyy = today.getFullYear();
+                                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                                const dd = String(today.getDate()).padStart(2, '0');
+                                setDateOfVisit(`${yyyy}-${mm}-${dd}`);
                             }
                         }}
                     />
@@ -909,7 +903,7 @@ export const GatePassForm: React.FC = () => {
                         placeholder={getBilingualNested(['placeholders', 'selectDate'])}
                         value={dateOfVisit}
                         error={fieldErrors.dateOfVisit}
-                        required
+                        required={isPermanent(selectedPassType)}
                         readOnly={!isPermanent(selectedPassType)}
                         min={isPermanent(selectedPassType) ? new Date().toISOString().split('T')[0] : undefined}
                         onChange={(e) => {
