@@ -807,8 +807,8 @@ export const GatePassForm: React.FC = () => {
                         placeholder={getBilingualNested(['placeholders', 'selectDate'])}
                         value={dateOfVisit}
                         error={fieldErrors.dateOfVisit}
-                        required={isPermanent(selectedPassType)}
-                        readOnly={!isPermanent(selectedPassType)}
+                        required
+                        // readOnly={!isPermanent(selectedPassType)}
                         min={isPermanent(selectedPassType) ? new Date().toISOString().split('T')[0] : undefined}
                         onChange={(e) => {
                             if (!isPermanent(selectedPassType)) return;
