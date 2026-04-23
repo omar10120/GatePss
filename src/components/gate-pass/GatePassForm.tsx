@@ -166,6 +166,7 @@ export const GatePassForm: React.FC = () => {
         if (!pt) return false;
         const nameEn = pt.name_en.toLowerCase();
         const nameAr = pt.name_ar;
+        
         return nameEn.includes('permanent') || nameAr.includes('دائم');
     };
 
@@ -305,11 +306,14 @@ export const GatePassForm: React.FC = () => {
             isValid = false;
         }
 
-        // Purpose of Visit validation (minimum 10 characters)
+                // Purpose of Visit validation (minimum 10 characters)
         const purposeOfVisit = formData.get('purposeOfVisit') as string;
         if (!purposeOfVisit || purposeOfVisit.trim().length < 10) {
-            newFieldErrors['purposeOfVisit'] = getBilingualNested(['errors', 'purposeOfVisitRequired']);
-            isValid = false;
+        newFieldErrors['purposeOfVisit'] = getBilingualNested(['errors', 'purposeOfVisitRequired']);
+        isValid = false;
+        }``
+        if (!purposeOfVisit || purposeOfVisit.trim().length < 10) {
+            errors.push('Purpose of visit is required (minimum 10 characters)');
         }
 
         // Email validation

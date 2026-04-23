@@ -32,11 +32,13 @@ export async function POST(request: NextRequest) {
         const organization = formData.get('organization') as string;
         const visitduration = formData.get('visitduration') as string;
         const purposeOfVisit = formData.get('purposeOfVisit') as string;
-        const dateOfVisit = formData.get('dateOfVisit') as string;
+        const dateOfVisitRaw = (formData.get('dateOfVisit') as string | null)?.trim() || null;
         const requestType = formData.get('requestType') as string;
         const passportIdImage = formData.get('passportIdImage') as File | null;
         const photo = formData.get('photo') as File | null;
-        const passEndDate = formData.get('passEndDate') as string | null;
+        const passEndDate = (formData.get('passEndDate') as string | null)?.trim() || null;
+        
+
         const passFor = formData.get('passFor') as string | null;
         const passTypeId = formData.get('passTypeId') as string | null;
         const entityType = (formData.get('entityType') as string) || 'port';
@@ -47,9 +49,17 @@ export async function POST(request: NextRequest) {
 
 
 
+       
+
+
         // English name is required for Freezone (all types) OR Sohar Port (Permanent only)
         // Permanent is detected by having a passEndDate
         const isPermanent = !!passEndDate;
+        if (isPermanent && !dateOfVisitRaw) {
+            errors.push('Date of visit is required');
+        }
+          
+
         const englishNameRequired = entityType === 'freezone' || (entityType === 'port' && isPermanent);
 
         if (englishNameRequired && (!applicantNameEn || applicantNameEn.trim().length < 2)) {
@@ -98,15 +108,22 @@ export async function POST(request: NextRequest) {
             errors.push('Purpose of visit is required (minimum 10 characters)');
         }
 
-        if (!dateOfVisit) {
-            errors.push('Date of visit is required');
-        } else {
-            const visitDate = new Date(dateOfVisit);
+        let visitDate: Date | null = null;
+        if (dateOfVisitRaw) {
+            const parsedVisitDate = new Date(dateOfVisitRaw);
+            if (isNaN(parsedVisitDate.getTime())) {
+                errors.push('Date of visit must be a valid date');
+            } else {
+                visitDate = parsedVisitDate;
+            }
+        }
+
+        if (visitDate) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             visitDate.setHours(0, 0, 0, 0);
 
-            if (visitDate < today) {
+            if (isPermanent && visitDate < today) {
                 errors.push('Date of visit cannot be in the past');
             }
 
@@ -219,12 +236,12 @@ export async function POST(request: NextRequest) {
 
         // ... (existing validations)
 
-        // Date of Visit validation
-        const visitDate = new Date(dateOfVisit);
-        visitDate.setHours(0, 0, 0, 0);
-
-        const validFrom = new Date(visitDate);
-        let validTo = new Date(visitDate);
+        // Keep validity calculations based on visitDate when provided,
+        // and fall back to current date for temporary passes.
+        const baseDate = visitDate ? new Date(visitDate) : new Date();
+        baseDate.setHours(0, 0, 0, 0);
+        const validFrom = new Date(baseDate);
+        let validTo = new Date(baseDate);
 
         if (passEndDate) {
             validTo = new Date(passEndDate);
@@ -294,7 +311,7 @@ export async function POST(request: NextRequest) {
                 validFrom: validFrom,
                 validTo: validTo,
                 purposeOfVisit: purposeOfVisit.trim(),
-                dateOfVisit: new Date(dateOfVisit),
+                dateOfVisit: isPermanent && visitDate ? new Date(visitDate) : null,
                 requestType: requestType as RequestType,
                 passFor: passFor?.trim() || null,
                 entityType: entityType.trim(),
@@ -453,7 +470,7 @@ export async function POST(request: NextRequest) {
                 requestNumber,
                 applicantNameEn?.trim() || '',
                 requestType,
-                new Date(dateOfVisit).toLocaleDateString()
+                visitDate ? visitDate.toLocaleDateString() : 'N/A'
             ).catch(err => console.error('Failed to send admin notification:', err));
 
             return NextResponse.json({
