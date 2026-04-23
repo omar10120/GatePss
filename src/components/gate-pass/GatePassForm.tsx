@@ -306,10 +306,7 @@ export const GatePassForm: React.FC = () => {
         if (!purposeOfVisit || purposeOfVisit.trim() === '') {
             newFieldErrors['purposeOfVisit'] = getBilingualNested(['errors', 'purposeOfVisitRequired']);
             isValid = false;
-        } else if (isPermanent(selectedPassType) && purposeOfVisit.trim().length < 10) {
-            newFieldErrors['purposeOfVisit'] = getBilingualNested(['errors', 'purposeOfVisitRequired']);
-            isValid = false;
-        }
+        } 
 
         // Email validation
         const email = formData.get('applicantEmail') as string;
@@ -803,6 +800,65 @@ export const GatePassForm: React.FC = () => {
                             <p className="mt-1 text-sm text-red-600 font-['Rubik']">{fieldErrors.organization}</p>
                         )}
                     </div>
+                    <Input
+                        name="dateOfVisit"
+                        type="date"
+                        label={getBilingualNested(['fields', 'passStartingDate'])}
+                        placeholder={getBilingualNested(['placeholders', 'selectDate'])}
+                        value={dateOfVisit}
+                        error={fieldErrors.dateOfVisit}
+                        required={isPermanent(selectedPassType)}
+                        readOnly={!isPermanent(selectedPassType)}
+                        min={isPermanent(selectedPassType) ? new Date().toISOString().split('T')[0] : undefined}
+                        onChange={(e) => {
+                            if (!isPermanent(selectedPassType)) return;
+                            const selectedDate = e.target.value;
+                            setDateOfVisit(selectedDate);
+                            if (selectedDate) {
+                                const date = new Date(selectedDate);
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+                                date.setHours(0, 0, 0, 0);
+                                if (date < today) {
+                                    setFieldErrors(prev => ({
+                                        ...prev,
+                                        dateOfVisit: getBilingualNested(['errors', 'invalidDate'])
+                                    }));
+                                } else {
+                                    setFieldErrors(prev => {
+                                        const newErrors = { ...prev };
+                                        delete newErrors.dateOfVisit;
+                                        return newErrors;
+                                    });
+                                    // Re-validate passEndDate against new start date
+                                    if (passEndDate) {
+                                        const endDate = new Date(passEndDate);
+                                        endDate.setHours(0, 0, 0, 0);
+                                        const minEnd = new Date(date);
+                                        minEnd.setMonth(minEnd.getMonth() + 3);
+                                        minEnd.setDate(minEnd.getDate() + 1);
+                                        if (endDate < minEnd) {
+                                            setFieldErrors(prev => ({
+                                                ...prev,
+                                                passEndDate: getBilingualNested(['errors', 'passEndDateMin4Months'])
+                                            }));
+                                        } else {
+                                            setFieldErrors(prev => {
+                                                const newErrors = { ...prev };
+                                                delete newErrors.passEndDate;
+                                                return newErrors;
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }}
+                        rightIcon={
+                            <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        }
+                    />
                     {isPermanent(selectedPassType) ? (
                         <Input
                             name="passEndDate"
@@ -896,65 +952,7 @@ export const GatePassForm: React.FC = () => {
                             required
                         />
                     )}
-                    <Input
-                        name="dateOfVisit"
-                        type="date"
-                        label={getBilingualNested(['fields', 'passStartingDate'])}
-                        placeholder={getBilingualNested(['placeholders', 'selectDate'])}
-                        value={dateOfVisit}
-                        error={fieldErrors.dateOfVisit}
-                        required={isPermanent(selectedPassType)}
-                        readOnly={!isPermanent(selectedPassType)}
-                        min={isPermanent(selectedPassType) ? new Date().toISOString().split('T')[0] : undefined}
-                        onChange={(e) => {
-                            if (!isPermanent(selectedPassType)) return;
-                            const selectedDate = e.target.value;
-                            setDateOfVisit(selectedDate);
-                            if (selectedDate) {
-                                const date = new Date(selectedDate);
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
-                                date.setHours(0, 0, 0, 0);
-                                if (date < today) {
-                                    setFieldErrors(prev => ({
-                                        ...prev,
-                                        dateOfVisit: getBilingualNested(['errors', 'invalidDate'])
-                                    }));
-                                } else {
-                                    setFieldErrors(prev => {
-                                        const newErrors = { ...prev };
-                                        delete newErrors.dateOfVisit;
-                                        return newErrors;
-                                    });
-                                    // Re-validate passEndDate against new start date
-                                    if (passEndDate) {
-                                        const endDate = new Date(passEndDate);
-                                        endDate.setHours(0, 0, 0, 0);
-                                        const minEnd = new Date(date);
-                                        minEnd.setMonth(minEnd.getMonth() + 3);
-                                        minEnd.setDate(minEnd.getDate() + 1);
-                                        if (endDate < minEnd) {
-                                            setFieldErrors(prev => ({
-                                                ...prev,
-                                                passEndDate: getBilingualNested(['errors', 'passEndDateMin4Months'])
-                                            }));
-                                        } else {
-                                            setFieldErrors(prev => {
-                                                const newErrors = { ...prev };
-                                                delete newErrors.passEndDate;
-                                                return newErrors;
-                                            });
-                                        }
-                                    }
-                                }
-                            }
-                        }}
-                        rightIcon={
-                            <svg className="w-6 h-6 text-[#747474]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        }
-                    />
+              
 
                     <Select
                         name="passFor"
