@@ -66,10 +66,9 @@ export default function AdminLoginPage() {
             // If OTP is explicitly disabled for this account, proceed directly.
             if (data.data?.requiresOTP === false) {
                 const isSaved = saveAuthSession(data.data?.token, data.data?.user);
-
-                // Some legacy responses may skip token when OTP is bypassed.
-                if (!isSaved && data.data?.user) {
-                    localStorage.setItem('user', JSON.stringify(data.data.user));
+                if (!isSaved) {
+                    setError('Authentication data is invalid. Please try again.');
+                    return;
                 }
 
                 router.push('/admin/dashboard');
