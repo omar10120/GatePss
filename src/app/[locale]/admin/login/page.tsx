@@ -56,14 +56,27 @@ export default function AdminLoginPage() {
             }
 
             // Check if OTP is required
-            if (data.data?.requiresOTP) {
+            if (data.data?.requiresOTP === true) {
                 setUserEmail(data.data.email);
                 setShowOTPModal(true);
                 setError('');
                 return;
             }
 
-            // If no OTP required (shouldn't happen with new flow, but keep for backward compatibility)
+            // If OTP is explicitly disabled for this account, proceed directly.
+            if (data.data?.requiresOTP === false) {
+                const isSaved = saveAuthSession(data.data?.token, data.data?.user);
+
+                // Some legacy responses may skip token when OTP is bypassed.
+                if (!isSaved && data.data?.user) {
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+                }
+
+                router.push('/admin/dashboard');
+                return;
+            }
+
+            // Backward compatibility for older API responses that include token directly
             if (data.data?.token) {
                 const isSaved = saveAuthSession(data.data.token, data.data.user);
                 if (!isSaved) {
