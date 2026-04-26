@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         // English name is required for Freezone (all types) OR Sohar Port (Permanent only)
         // Permanent is detected by having a passEndDate
         const isPermanent = !!passEndDate;
-        if (isPermanent && !dateOfVisitRaw) {
+        if (!dateOfVisitRaw) {
             errors.push('Date of visit is required');
         }
           
@@ -311,7 +311,7 @@ export async function POST(request: NextRequest) {
                 validFrom: validFrom,
                 validTo: validTo,
                 purposeOfVisit: purposeOfVisit.trim(),
-                dateOfVisit: isPermanent && visitDate ? new Date(visitDate) : null,
+                dateOfVisit: visitDate ? new Date(visitDate) : validFrom,
                 requestType: requestType as RequestType,
                 passFor: passFor?.trim() || null,
                 entityType: entityType.trim(),
