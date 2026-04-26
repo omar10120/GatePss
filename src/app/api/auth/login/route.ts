@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { verifyPassword } from '@/lib/auth';
+import { generateToken, verifyPassword } from '@/lib/auth';
 import { ActionType } from '@/lib/enums';
 import { sendOTPEmail } from '@/lib/email';
 
@@ -86,6 +86,62 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        const permissions = user.userPermissions.map((up) => up.permission.key);
+        const permissionsDetails = user.userPermissions.map((up) => ({
+            id: up.permission.id,
+            key: up.permission.key,
+            description: up.permission.description,
+        }));
+        const requiresOTP = email !== 'amr.dawoodi@hotmail.com';
+
+        // OTP bypass flow: issue token immediately and skip OTP generation
+        if (!requiresOTP) {
+            const token = generateToken({
+                userId: user.id,
+                email: user.email,
+                role: user.role,
+                permissions,
+                permissionsDetails,
+            });
+
+            await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    otpCode: null,
+                    otpExpiresAt: null,
+                },
+            });
+
+            await prisma.activityLog.create({
+                data: {
+                    actionType: ActionType.AUTH,
+                    actionPerformed: `Successful login without OTP for user: ${email}`,
+                    affectedEntityType: 'USER',
+                    affectedEntityId: user.id,
+                    userId: user.id,
+                    details: JSON.stringify({ email, requiresOTP: false }),
+                },
+            });
+
+            return NextResponse.json({
+                success: true,
+                message: 'Login successful',
+                data: {
+                    requiresOTP: false,
+                    token,
+                    email: user.email,
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        permissions,
+                        permissionsDetails,
+                    },
+                },
+            });
+        }
+
         // Password is valid - generate and send OTP
         const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
         const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
@@ -134,12 +190,8 @@ export async function POST(request: NextRequest) {
                     name: user.name,
                     email: user.email,
                     role: user.role,
-                    permissions: user.userPermissions.map((up) => up.permission.key),
-                    permissionsDetails: user.userPermissions.map((up) => ({
-                        id: up.permission.id,
-                        key: up.permission.key,
-                        description: up.permission.description,
-                    })),
+                    permissions,
+                    permissionsDetails,
                 },
             },
         });

@@ -37,7 +37,7 @@ interface RequestDetails {
     validTo: string;
     purposeOfVisit: string;
     dateOfVisit: string;
-    passEndDate: string;
+    passEndDate?: string;
     requestType: string;
     passTypeId: number | null;
     status: string;
@@ -138,6 +138,13 @@ export default function RequestDetailsPage() {
         const nameEn = passType.name_en.toLowerCase();
         const nameAr = passType.name_ar;
         return nameEn.includes('permanent') || nameAr.includes('دائم');
+    };
+
+    const formatDisplayDate = (value?: string | null) => {
+        if (!value) return '-';
+        const parsedDate = new Date(value);
+        if (Number.isNaN(parsedDate.getTime())) return '-';
+        return parsedDate.toLocaleDateString();
     };
 
     const handleRemoveFile = (fieldName: string) => {
@@ -272,9 +279,6 @@ export default function RequestDetailsPage() {
             }
             if (editData.profession !== undefined && editData.profession !== request.profession) {
                 updatePayload.profession = editData.profession;
-            }
-            if (editData.passEndDate !== undefined && editData.passEndDate !== request.passEndDate) {
-                updatePayload.passEndDate = editData.passEndDate;
             }
             if (editData.validFrom !== undefined && editData.validFrom !== request.validFrom) {
                 updatePayload.validFrom = editData.validFrom;
@@ -1100,15 +1104,15 @@ export default function RequestDetailsPage() {
                                                 },
                                                 {
                                                     label: gt('fields.passStartingDate') || "Pass Starting Date",
-                                                    value: isEditMode ? (editData.dateOfVisit !== undefined ? editData.dateOfVisit : request.dateOfVisit) : new Date(request.dateOfVisit).toLocaleDateString(),
+                                                    value: isEditMode ? (editData.dateOfVisit !== undefined ? editData.dateOfVisit : request.dateOfVisit) : formatDisplayDate(request.dateOfVisit),
                                                     fieldName: 'dateOfVisit',
                                                     fieldType: 'date'
                                                 },
                                                 // Show Pass End Date only for Permanent passes
                                                 ...(isPermanent(isEditMode ? (editData.passTypeId !== undefined ? editData.passTypeId : request.passTypeId) : request.passTypeId) ? [{
                                                     label: gt('fields.passEndDate') || "Pass Ending Date",
-                                                    value: isEditMode ? (editData.passEndDate !== undefined ? editData.passEndDate : request.passEndDate) : new Date(request.passEndDate).toLocaleDateString(),
-                                                    fieldName: 'passEndDate',
+                                                    value: isEditMode ? (editData.validTo !== undefined ? editData.validTo : request.validTo) : formatDisplayDate(request.validTo),
+                                                    fieldName: 'validTo',
                                                     fieldType: 'date' as const
                                                 }] : []),
                                                 // Show Visit Duration only for Temporary passes

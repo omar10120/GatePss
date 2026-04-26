@@ -808,10 +808,8 @@ export const GatePassForm: React.FC = () => {
                         value={dateOfVisit}
                         error={fieldErrors.dateOfVisit}
                         required
-                        // readOnly={!isPermanent(selectedPassType)}
-                        min={isPermanent(selectedPassType) ? new Date().toISOString().split('T')[0] : undefined}
+                        min={new Date().toISOString().split('T')[0]}
                         onChange={(e) => {
-                            if (!isPermanent(selectedPassType)) return;
                             const selectedDate = e.target.value;
                             setDateOfVisit(selectedDate);
                             if (selectedDate) {
@@ -851,6 +849,12 @@ export const GatePassForm: React.FC = () => {
                                         }
                                     }
                                 }
+                            } else {
+                                setFieldErrors(prev => {
+                                    const newErrors = { ...prev };
+                                    delete newErrors.dateOfVisit;
+                                    return newErrors;
+                                });
                             }
                         }}
                         rightIcon={
