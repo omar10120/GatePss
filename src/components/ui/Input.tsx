@@ -40,6 +40,8 @@ export const Input: React.FC<InputProps> = ({
                 <input
                     id={inputId}
                     style={{ color: '#111827' }}
+                    dir={props.type === 'date' ? 'ltr' : props.dir}
+                    lang={props.type === 'date' ? 'en' : props.lang}
                     className={`
                         flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] px-4 py-4 
                         text-[14px] font-['Rubik'] text-gray-900 placeholder:text-[#747474] 
@@ -48,6 +50,7 @@ export const Input: React.FC<InputProps> = ({
                         ${hasError ? "border-danger-500 focus:ring-danger-500/20 focus:border-danger-500" : ""}
                         ${leftIcon ? "pl-12" : ""}
                         ${rightIcon ? "pr-12" : ""}
+                        ${props.type === 'date' ? "text-left" : ""}
                         ${props.type === 'date' ? "date-input-custom" : ""}
                         ${className}
                     `.trim()}
