@@ -1,13 +1,13 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'm',
-  port: parseInt(process.env.SMTP_PORT || ''),
+  host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+  port: parseInt(process.env.SMTP_PORT || '587', 10),
   secure: false, // false for port 587 (STARTTLS), true for port 465 (SSL)
-  requireTLS: true, // Require TLS encryption for Office365
+  requireTLS: true,
   auth: {
-    user: process.env.SMTP_USER || 'gatean.com',
-    pass: process.env.SMTP_PASSWORD,
+    user: process.env.SMTP_USER || 'info@gatepass.majis.om',
+    pass: process.env.SMTP_PASSWORD || 'Oman@pixel789',
   },
 });
 
@@ -21,7 +21,7 @@ export interface EmailOptions {
 export async function sendEmail(options: EmailOptions): Promise<void> {
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
+      from: process.env.EMAIL_FROM || 'info@gatepass.majis.om',
       to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
       subject: options.subject,
       html: options.html,
