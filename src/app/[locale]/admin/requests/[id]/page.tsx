@@ -147,6 +147,28 @@ export default function RequestDetailsPage() {
         return parsedDate.toLocaleDateString();
     };
 
+    const normalizeOptionKey = (raw: string) =>
+        raw
+            .toLowerCase()
+            .replace(/[\/,]/g, ' ')
+            .replace(/\s+/g, '_')
+            .replace(/_+/g, '_')
+            .trim();
+
+    const getOptionLabel = (rawValue: string) => {
+        const overrideMap: Record<string, string> = {
+            argentine: 'argentinian',
+            'bosnian_herzegovinian': 'bosnian',
+            'saudi_saudi_arabian': 'saudi_arabian',
+        };
+
+        const normalized = normalizeOptionKey(rawValue);
+        const key = overrideMap[normalized] || normalized;
+        const fullKey = `options.${key}` as const;
+
+        return gt.has(fullKey) ? gt(fullKey) : rawValue;
+    };
+
     const handleRemoveFile = (fieldName: string) => {
         setFiles(prev => ({ ...prev, [fieldName]: null }));
         setRemovedFiles(prev => ({ ...prev, [fieldName]: true }));
@@ -975,32 +997,34 @@ export default function RequestDetailsPage() {
                                                 },
                                                 {
                                                     label: gt('fields.nationality') || "Nationality",
-                                                    value: isEditMode ? (editData.nationality !== undefined ? editData.nationality : request.nationality) : (gt(`options.${request.nationality.toLowerCase()}`) || request.nationality),
+                                                    value: isEditMode
+                                                        ? (editData.nationality !== undefined ? editData.nationality : request.nationality)
+                                                        : getOptionLabel(request.nationality),
                                                     fieldName: 'nationality',
                                                     fieldType: 'select',
                                                     options: [
                                                               { value: 'Afghan', label: gt('options.afghan') || 'Afghan' },
                                                               { value: 'Algerian', label: gt('options.algerian') || 'Algerian' },
                                                               { value: 'Angolan', label: gt('options.angolan') || 'Angolan' },
-                                                              { value: 'Argentine', label: gt('options.argentine') || 'Argentine' },
+                                                              { value: 'Argentine', label: getOptionLabel('Argentine') },
                                                               { value: 'Austrian', label: gt('options.austrian') || 'Austrian' },
                                                               { value: 'Australian', label: gt('options.australian') || 'Australian' },
                                                               { value: 'Bangladeshi', label: gt('options.bangladeshi') || 'Bangladeshi' },
                                                               { value: 'Belarusian', label: gt('options.belarusian') || 'Belarusian' },
                                                               { value: 'Belgian', label: gt('options.belgian') || 'Belgian' },
                                                               { value: 'Bolivian', label: gt('options.bolivian') || 'Bolivian' },
-                                                              { value: 'Bosnian/Herzegovinian', label: gt('options.bosnian/herzegovinian') || 'Bosnian/Herzegovinian' },
+                                                              { value: 'Bosnian/Herzegovinian', label: getOptionLabel('Bosnian/Herzegovinian') },
                                                               { value: 'Brazilian', label: gt('options.brazilian') || 'Brazilian' },
                                                               { value: 'British', label: gt('options.british') || 'British' },
                                                               { value: 'Bulgarian', label: gt('options.bulgarian') || 'Bulgarian' },
                                                               { value: 'Cambodian', label: gt('options.cambodian') || 'Cambodian' },
                                                               { value: 'Cameroonian', label: gt('options.cameroonian') || 'Cameroonian' },
                                                               { value: 'Canadian', label: gt('options.canadian') || 'Canadian' },
-                                                              { value: 'Central African', label: gt('options.central african') || 'Central African' },
+                                                              { value: 'Central African', label: getOptionLabel('Central African') },
                                                               { value: 'Chadian', label: gt('options.chadian') || 'Chadian' },
                                                               { value: 'Chinese', label: gt('options.chinese') || 'Chinese' },
                                                               { value: 'Colombian', label: gt('options.colombian') || 'Colombian' },
-                                                              { value: 'Costa Rican', label: gt('options.costa rican') || 'Costa Rican' },
+                                                              { value: 'Costa Rican', label: getOptionLabel('Costa Rican') },
                                                               { value: 'Croatian', label: gt('options.croatian') || 'Croatian' },
                                                               { value: 'Czech', label: gt('options.czech') || 'Czech' },
                                                               { value: 'Congolese', label: gt('options.congolese') || 'Congolese' },
@@ -1008,7 +1032,7 @@ export default function RequestDetailsPage() {
                                                               { value: 'Ecuadorian', label: gt('options.ecuadorian') || 'Ecuadorian' },
                                                               { value: 'Egyptian', label: gt('options.egyptian') || 'Egyptian' },
                                                               { value: 'Salvadoran', label: gt('options.salvadoran') || 'Salvadoran' },
-                                                              { value: 'English', label: gt('options.english') || 'English' },
+                                                              { value: 'English', label: getOptionLabel('English') },
                                                               { value: 'Estonian', label: gt('options.estonian') || 'Estonian' },
                                                               { value: 'Ethiopian', label: gt('options.ethiopian') || 'Ethiopian' },
                                                               { value: 'Finnish', label: gt('options.finnish') || 'Finnish' },
@@ -1016,7 +1040,7 @@ export default function RequestDetailsPage() {
                                                               { value: 'German', label: gt('options.german') || 'German' },
                                                               { value: 'Ghanaian', label: gt('options.ghanaian') || 'Ghanaian' },
                                                               { value: 'Greek', label: gt('options.greek') || 'Greek' },
-                                                              { value: 'Guatemalan', label: gt('options.guatemalan') || 'Guatemalan' },
+                                                              { value: 'Guatemalan', label: getOptionLabel('Guatemalan') },
                                                               { value: 'Dutch', label: gt('options.dutch') || 'Dutch' },
                                                               { value: 'Honduran', label: gt('options.honduran') || 'Honduran' },
                                                               { value: 'Hungarian', label: gt('options.hungarian') || 'Hungarian' },
@@ -1038,14 +1062,14 @@ export default function RequestDetailsPage() {
                                                               { value: 'Latvian', label: gt('options.latvian') || 'Latvian' },
                                                               { value: 'Libyan', label: gt('options.libyan') || 'Libyan' },
                                                               { value: 'Lithuanian', label: gt('options.lithuanian') || 'Lithuanian' },
-                                                              { value: 'Malagasy', label: gt('options.malagasy') || 'Malagasy' },
+                                                              { value: 'Malagasy', label: getOptionLabel('Malagasy') },
                                                               { value: 'Malaysian', label: gt('options.malaysian') || 'Malaysian' },
                                                               { value: 'Malian', label: gt('options.malian') || 'Malian' },
                                                               { value: 'Mauritanian', label: gt('options.mauritanian') || 'Mauritanian' },
                                                               { value: 'Mexican', label: gt('options.mexican') || 'Mexican' },
                                                               { value: 'Moroccan', label: gt('options.moroccan') || 'Moroccan' },
-                                                              { value: 'Namibian', label: gt('options.namibian') || 'Namibian' },
-                                                              { value: 'New Zealand', label: gt('options.new zealand') || 'New Zealand' },
+                                                              { value: 'Namibian', label: getOptionLabel('Namibian') },
+                                                              { value: 'New Zealand', label: getOptionLabel('New Zealand') },
                                                               { value: 'Nicaraguan', label: gt('options.nicaraguan') || 'Nicaraguan' },
                                                               { value: 'Nigerien', label: gt('options.nigerien') || 'Nigerien' },
                                                               { value: 'Nigerian', label: gt('options.nigerian') || 'Nigerian' },
@@ -1053,21 +1077,21 @@ export default function RequestDetailsPage() {
                                                               { value: 'Omani', label: gt('options.omani') || 'Omani' },
                                                               { value: 'Pakistani', label: gt('options.pakistani') || 'Pakistani' },
                                                               { value: 'Panamanian', label: gt('options.panamanian') || 'Panamanian' },
-                                                              { value: 'Paraguayan', label: gt('options.paraguayan') || 'Paraguayan' },
+                                                              { value: 'Paraguayan', label: getOptionLabel('Paraguayan') },
                                                               { value: 'Peruvian', label: gt('options.peruvian') || 'Peruvian' },
                                                               { value: 'Philippine', label: gt('options.philippine') || 'Philippine' },
                                                               { value: 'Polish', label: gt('options.polish') || 'Polish' },
                                                               { value: 'Portuguese', label: gt('options.portuguese') || 'Portuguese' },
                                                               { value: 'Romanian', label: gt('options.romanian') || 'Romanian' },
                                                               { value: 'Russian', label: gt('options.russian') || 'Russian' },
-                                                              { value: 'Saudi, Saudi Arabian', label: gt('options.saudi, saudi arabian') || 'Saudi, Saudi Arabian' },
+                                                              { value: 'Saudi, Saudi Arabian', label: getOptionLabel('Saudi, Saudi Arabian') },
                                                               { value: 'Scottish', label: gt('options.scottish') || 'Scottish' },
                                                               { value: 'Senegalese', label: gt('options.senegalese') || 'Senegalese' },
                                                               { value: 'Serbian', label: gt('options.serbian') || 'Serbian' },
                                                               { value: 'Singaporean', label: gt('options.singaporean') || 'Singaporean' },
                                                               { value: 'Slovak', label: gt('options.slovak') || 'Slovak' },
                                                               { value: 'Somalian', label: gt('options.somalian') || 'Somalian' },
-                                                              { value: 'South African', label: gt('options.south african') || 'South African' },
+                                                              { value: 'South African', label: getOptionLabel('South African') },
                                                               { value: 'Spanish', label: gt('options.spanish') || 'Spanish' },
                                                               { value: 'Sudanese', label: gt('options.sudanese') || 'Sudanese' },
                                                               { value: 'Swedish', label: gt('options.swedish') || 'Swedish' },

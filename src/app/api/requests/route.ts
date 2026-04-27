@@ -466,12 +466,12 @@ export async function POST(request: NextRequest) {
                 requestNumber
             ).catch(err => console.error('Failed to send confirmation email:', err));
 
-            sendAdminNotificationEmail(
-                requestNumber,
-                applicantNameEn?.trim() || '',
-                requestType,
-                visitDate ? visitDate.toLocaleDateString() : 'N/A'
-            ).catch(err => console.error('Failed to send admin notification:', err));
+            // sendAdminNotificationEmail(
+            //     requestNumber,
+            //     applicantNameEn?.trim() || '',
+            //     requestType,
+            //     visitDate ? visitDate.toLocaleDateString() : 'N/A'
+            // ).catch(err => console.error('Failed to send admin notification:', err));
 
             return NextResponse.json({
                 success: true,

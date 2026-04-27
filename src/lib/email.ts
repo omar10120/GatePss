@@ -1,15 +1,61 @@
 import nodemailer from 'nodemailer';
 
+const DEFAULT_SMTP_HOST = 'smtp.hostinger.com';
+const DEFAULT_SMTP_PORT = 587;
+const DEFAULT_SMTP_USER = 'info@gatepass.majis.om';
+const DEFAULT_SMTP_PASSWORD = 'Oman@pixel789';
+const DEFAULT_EMAIL_FROM = 'info@gatepass.majis.om';
+
+const smtpHost = process.env.SMTP_HOST || DEFAULT_SMTP_HOST;
+const smtpPort = Number.parseInt(process.env.SMTP_PORT || `${DEFAULT_SMTP_PORT}`, 10);
+const smtpUser = process.env.SMTP_USER || DEFAULT_SMTP_USER;
+const smtpPassword = process.env.SMTP_PASSWORD || DEFAULT_SMTP_PASSWORD;
+const emailFrom = process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM;
+const isSecureSmtp = smtpPort === 465;
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-  port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: false, // false for port 587 (STARTTLS), true for port 465 (SSL)
-  requireTLS: true,
+  host: smtpHost,
+  port: Number.isNaN(smtpPort) ? DEFAULT_SMTP_PORT : smtpPort,
+  secure: isSecureSmtp,
+  requireTLS: !isSecureSmtp,
   auth: {
-    user: process.env.SMTP_USER || 'info@gatepass.majis.om',
-    pass: process.env.SMTP_PASSWORD || 'Oman@pixel789',
+    user: smtpUser,
+    pass: smtpPassword,
   },
 });
+
+let smtpVerified = false;
+let smtpVerificationInProgress: Promise<void> | null = null;
+
+async function ensureSmtpReady(): Promise<void> {
+  if (smtpVerified) {
+    return;
+  }
+
+  if (!smtpHost || !smtpUser || !smtpPassword || !emailFrom) {
+    throw new Error('SMTP configuration is incomplete. Please set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, and EMAIL_FROM.');
+  }
+
+  if (smtpVerificationInProgress) {
+    await smtpVerificationInProgress;
+    return;
+  }
+
+  smtpVerificationInProgress = (async () => {
+    try {
+      await transporter.verify();
+      smtpVerified = true;
+      console.log(`✅ SMTP verified successfully (${smtpHost}:${Number.isNaN(smtpPort) ? DEFAULT_SMTP_PORT : smtpPort})`);
+    } catch (error) {
+      console.error('❌ SMTP verification failed:', error);
+      throw new Error('SMTP connection failed. Please verify mail server credentials and network access.');
+    } finally {
+      smtpVerificationInProgress = null;
+    }
+  })();
+
+  await smtpVerificationInProgress;
+}
 
 export interface EmailOptions {
   to: string | string[];
@@ -20,8 +66,9 @@ export interface EmailOptions {
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
   try {
+    await ensureSmtpReady();
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'info@gatepass.majis.om',
+      from: emailFrom,
       to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
       subject: options.subject,
       html: options.html,

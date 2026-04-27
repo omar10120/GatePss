@@ -52,7 +52,10 @@ export async function POST(request: NextRequest) {
             await sendOTPEmail(user.email, user.name, otpCode);
         } catch (emailError) {
             console.error('Error sending OTP email:', emailError);
-            // Don't fail the request if email fails, but log it
+            return NextResponse.json(
+                { error: 'Email Service Error', message: 'Failed to send OTP email. Please try again shortly.' },
+                { status: 503 }
+            );
         }
 
         // Log OTP sent
