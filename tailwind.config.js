@@ -70,7 +70,7 @@ module.exports = {
                 'login-gradient': 'linear-gradient(180deg, #71CFF5 0%, #00B09C 56.73%, #0666A3 100%)',
             },
             fontFamily: {
-                sans: ['Inter', 'system-ui', 'sans-serif'],
+                sans: ['Tajawal', 'system-ui', 'sans-serif'],
                 arabic: ['Tajawal', 'system-ui', 'sans-serif'],
             },
             boxShadow: {
