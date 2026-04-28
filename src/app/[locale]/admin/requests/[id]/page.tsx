@@ -1124,7 +1124,9 @@ export default function RequestDetailsPage() {
                                                 },
                                                 {
                                                     label: gt('fields.organization') || "Organization Host",
-                                                    value: request.organization
+                                                    value: isEditMode ? (editData.organization !== undefined ? editData.organization : request.organization) : request.organization + ' / Majis Industrial Services',
+                                                    fieldName: 'organization',
+                                                    fieldType: 'text'
                                                 },
                                                 {
                                                     label: gt('fields.passStartingDate') || "Pass Starting Date",
