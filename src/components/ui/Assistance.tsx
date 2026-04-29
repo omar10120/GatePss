@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface FAQ {
     id: number;
@@ -22,6 +23,7 @@ export default function Assistance() {
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
     const [contactEmail, setContactEmail] = useState('');
     const [contactPhone, setContactPhone] = useState('');
+    const router = useRouter();
 
     useEffect(() => {
         fetchFAQs();
@@ -181,7 +183,7 @@ export default function Assistance() {
                             </div>
 
                             <Link
-                                href="#contact"
+                                href={locale === 'ar' ? '/ar/contact-us' : '/en/contact-us'}
                                 className="block w-full py-4 text-center font-bold text-teal-500 hover:text-teal-600 border-2 border-teal-50 rounded-2xl hover:border-teal-100 transition-all active:scale-95"
                             >
                                 {t('assistance.contactSupport')}
