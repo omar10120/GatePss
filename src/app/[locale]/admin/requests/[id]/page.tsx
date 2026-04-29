@@ -305,6 +305,9 @@ export default function RequestDetailsPage() {
             if (editData.validFrom !== undefined && editData.validFrom !== request.validFrom) {
                 updatePayload.validFrom = editData.validFrom;
             }
+            if (editData.organization !== undefined && editData.organization !== request.organization) {
+                updatePayload.organization = editData.organization;
+            }
             if (editData.validTo !== undefined && editData.validTo !== request.validTo) {
                 updatePayload.validTo = editData.validTo;
             }
@@ -1142,7 +1145,7 @@ export default function RequestDetailsPage() {
                                                 },
                                                 {
                                                     label: gt('fields.organization') || "Organization Host",
-                                                    value: isEditMode ? (editData.organization !== undefined ? editData.organization : request.organization) : request.organization + ' / Majis Industrial Services',
+                                                    value: isEditMode ? (editData.organization !== undefined ? editData.organization : request.organization) : request.organization ,
                                                     fieldName: 'organization',
                                                     fieldType: 'text'
                                                 },

@@ -163,7 +163,7 @@ export const GatePassForm: React.FC = () => {
         return nameEn.includes('permanent') || nameAr.includes('دائم');
     };
 
-    const ORGANIZATION_PREFIX = 'مجيس للخدمات الصناعية / Majis Industrial Services';
+    const ORGANIZATION_PREFIX = 'مجيس للخدمات الصناعية ';
 
     const getFieldLabel = (name: string): string => {
         const fieldMap: { [key: string]: string } = {

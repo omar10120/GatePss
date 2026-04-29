@@ -126,7 +126,7 @@ export async function POST(
                 applicantEmail: gateRequest.applicantEmail,
                 passportIdNumber: gateRequest.passportIdNumber,
                 purposeOfVisit: gateRequest.purposeOfVisit,
-                dateOfVisit: gateRequest.dateOfVisit.toISOString(),
+                dateOfVisit: gateRequest.dateOfVisit?.toISOString() || new Date().toISOString(),
                 requestType: gateRequest.requestType as any,
                 extraFields: {
                     passFor: gateRequest.passFor,

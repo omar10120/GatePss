@@ -182,6 +182,7 @@ export async function PUT(
             if (body.dateOfVisit !== undefined) updateData.dateOfVisit = new Date(body.dateOfVisit);
             if (body.validFrom !== undefined) updateData.validFrom = new Date(body.validFrom);
             if (body.validTo !== undefined) updateData.validTo = new Date(body.validTo);
+            if (body.organization !== undefined) updateData.organization = typeof body.organization === 'string' ? body.organization.trim() : body.organization;
             if (body.requestType !== undefined) updateData.requestType = body.requestType;
             if (body.passFor !== undefined) updateData.passFor = typeof body.passFor === 'string' ? body.passFor.trim() || null : body.passFor;
             if (body.nationality !== undefined) updateData.nationality = typeof body.nationality === 'string' ? body.nationality.trim() : body.nationality;
