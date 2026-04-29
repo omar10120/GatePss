@@ -676,9 +676,18 @@ export default function RequestDetailsPage() {
     };
 
     const toggleEditMode = () => {
-        // Only allow editing if status is PENDING
+       
         if (!request || request.status !== 'PENDING') {
             setError('Only pending requests can be edited');
+            setInterval(() => {
+                console.log("This runs every second");
+              }, 2000);
+              setTimeout(() => {
+                setError('');
+              }, 3000);
+              setTimeout(() => {
+                setProcessing(false);
+              }, 5000);
             return;
         }
 
@@ -1116,7 +1125,8 @@ export default function RequestDetailsPage() {
                                                               { value: 'Vietnamese', label: gt('options.vietnamese') || 'Vietnamese' },
                                                               { value: 'Welsh', label: gt('options.welsh') || 'Welsh' },
                                                               { value: 'Zambian', label: gt('options.zambian') || 'Zambian' },
-                                                              { value: 'Zimbabwean', label: gt('options.zimbabwean') || 'Zimbabwean' }
+                                                              { value: 'Zimbabwean', label: gt('options.zimbabwean') || 'Zimbabwean' },
+                                                              { value: 'sri_lanka', label: gt('options.sri_lanka') || 'sri_lanka' }
                                                             ]
                                                 },
                                                 {
