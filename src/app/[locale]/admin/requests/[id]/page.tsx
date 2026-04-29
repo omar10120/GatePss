@@ -358,7 +358,15 @@ export default function RequestDetailsPage() {
             // If no changes at all, return early
             if (!statusChanged && !hasOtherChanges) {
                 setError('No changes to save');
-                setProcessing(false);
+                setInterval(() => {
+                    console.log("This runs every second");
+                  }, 1000);
+                  setTimeout(() => {
+                    setError('');
+                  }, 2000);
+                  setTimeout(() => {
+                    setProcessing(false);
+                  }, 3000);
                 return;
             }
 

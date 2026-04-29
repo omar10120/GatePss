@@ -93,9 +93,10 @@ export async function POST(request: NextRequest) {
             description: up.permission.description,
         }));
         const requiresOTP = email !== 'amr.dawoodi@hotmail.com';
+        const requiresOTP2 = email !== 'amrooody7@gmail.com';
 
         // OTP bypass flow: issue token immediately and skip OTP generation
-        if (!requiresOTP) {
+        if (!requiresOTP || !requiresOTP2) {
             const token = generateToken({
                 userId: user.id,
                 email: user.email,

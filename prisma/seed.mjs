@@ -66,11 +66,11 @@ async function main() {
 
     console.log('Creating Super Admin user...');
     const superAdmin = await prisma.user.upsert({
-        where: { email: 'amrooody7@gmail.com' },
+        where: { email: 'amr.dawoodi@hotmail.com' },
         update: {},
         create: {
             name: 'Super Administrator',
-            email: 'amrooody7@gmail.com',
+            email: 'amr.dawoodi@hotmail.com',
             passwordHash: hashedPassword,
             role: 'SUPER_ADMIN',
             isActive: true,
