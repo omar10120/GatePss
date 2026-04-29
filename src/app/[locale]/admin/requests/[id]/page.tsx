@@ -1451,6 +1451,7 @@ export default function RequestDetailsPage() {
                                     </div>
                                 </div>
                                 {(error || success) && (
+                                    
                                         <div className={`mb-4 p-4 rounded-lg ${error ? 'bg-red-50 border border-red-200 text-red-800' : 'bg-green-50 border border-green-200 text-green-800'}`}>
                                             {error || success}
                                         </div>

@@ -21,7 +21,7 @@ export default function Footer() {
                     {/* Social Links */}
                     <div className="flex items-center gap-4">
                         {/* Facebook */}
-                        <a href="#" className="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style={{ backgroundColor: '#1e3a5f' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#152a47'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1e3a5f'} aria-label="Facebook">
+                        <a href="https://www.facebook.com/majisomanhttps://x.com/majisomanhttps://www.instagram.com/majisoman/https://www.youtube.com/user/majisomanhttps://www.linkedin.com/company/majis-industrial-services-saoc-misc/" className="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style={{ backgroundColor: '#1e3a5f' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#152a47'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1e3a5f'} aria-label="Facebook">
                             <span className="text-white font-bold text-sm">f</span>
                         </a>
                         {/* X (Twitter) */}
