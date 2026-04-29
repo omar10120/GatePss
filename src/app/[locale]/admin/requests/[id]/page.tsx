@@ -359,17 +359,21 @@ export default function RequestDetailsPage() {
             const hasOtherChanges = Object.keys(otherUpdates).length > 0 || hasFiles;
 
             // If no changes at all, return early
+            // if (!statusChanged && !hasOtherChanges) {
+            //     setError('No changes to save');
+            //     setInterval(() => {
+            //         console.log("This runs every second");
+            //       }, 1000);
+            //       setTimeout(() => {
+            //         setError('');
+            //       }, 2000);
+            //       setTimeout(() => {
+            //         setProcessing(false);
+            //       }, 3000);
+            //     return;
+            // }
             if (!statusChanged && !hasOtherChanges) {
                 setError('No changes to save');
-                setInterval(() => {
-                    console.log("This runs every second");
-                  }, 1000);
-                  setTimeout(() => {
-                    setError('');
-                  }, 2000);
-                  setTimeout(() => {
-                    setProcessing(false);
-                  }, 3000);
                 return;
             }
 
@@ -680,18 +684,22 @@ export default function RequestDetailsPage() {
 
     const toggleEditMode = () => {
        
+        // if (!request || request.status !== 'PENDING') {
+        //     setError('Only pending requests can be edited');
+        //     setInterval(() => {
+        //         console.log("This runs every second");
+        //       }, 2000);
+        //       setTimeout(() => {
+        //         setError('');
+        //       }, 3000);
+        //       setTimeout(() => {
+        //         setProcessing(false);
+        //       }, 5000);
+        //     return;
+        // }
         if (!request || request.status !== 'PENDING') {
             setError('Only pending requests can be edited');
-            setInterval(() => {
-                console.log("This runs every second");
-              }, 2000);
-              setTimeout(() => {
-                setError('');
-              }, 3000);
-              setTimeout(() => {
-                setProcessing(false);
-              }, 5000);
-            return;
+          return;
         }
 
         if (isEditMode) {
@@ -903,30 +911,33 @@ export default function RequestDetailsPage() {
                                                 {dt(`status.${request.status}`)}
                                             </span>
                                         )}
-                                        <button
-                                            onClick={toggleEditMode}
-                                            className={`px-4 py-1 rounded-lg font-medium transition-colors flex items-center gap-2 ${isEditMode
-                                                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                : 'bg-blue-600 text-white hover:bg-blue-700'
-                                                }`}
-                                            disabled={processing}
-                                        >
-                                            {isEditMode ? (
-                                                <>
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                    {t('cancel')}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                    {t('edit')}
-                                                </>
-                                            )}
-                                        </button>
+                                        {request.status === 'PENDING' && ( 
+                                                   <button
+                                                   onClick={toggleEditMode}
+                                                   className={`px-4 py-1 rounded-lg font-medium transition-colors flex items-center gap-2 ${isEditMode
+                                                       ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                       : 'bg-blue-600 text-white hover:bg-blue-700'
+                                                       }`}
+                                                   disabled={processing}
+                                               >
+                                                   {isEditMode ? (
+                                                       <>
+                                                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                           </svg>
+                                                           {t('cancel')}
+                                                       </>
+                                                   ) : (
+                                                       <>
+                                                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                           </svg>
+                                                           {t('edit')}
+                                                       </>
+                                                   )}
+                                               </button>
+                                        )}
+                                 
                                     </div>
                                 </div>
 
@@ -954,12 +965,7 @@ export default function RequestDetailsPage() {
                                     </div>
                                 )}
 
-                                {(error || success) && (
-                                    <div className={`mb-4 p-4 rounded-lg ${error ? 'bg-red-50 border border-red-200 text-red-800' : 'bg-green-50 border border-green-200 text-green-800'}`}>
-                                        {error || success}
-                                    </div>
-                                )}
-
+                              
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                     {/* Left Column: Info Sections */}
                                     <div className="border-r border-gray-100 pr-0 lg:pr-8">
@@ -1444,7 +1450,13 @@ export default function RequestDetailsPage() {
                                         )}
                                     </div>
                                 </div>
+                                {(error || success) && (
+                                        <div className={`mb-4 p-4 rounded-lg ${error ? 'bg-red-50 border border-red-200 text-red-800' : 'bg-green-50 border border-green-200 text-green-800'}`}>
+                                            {error || success}
+                                        </div>
+                                )}
                             </div>
+
 
                             {/* Permit Section (Bottom) */}
                             <div className="bg-white rounded-[16px] p-6 shadow-sm">
@@ -1461,6 +1473,8 @@ export default function RequestDetailsPage() {
                         </div>
                     ) : null}
                 </main>
+
+                
 
                 {/* Reject Modal */}
                 {
