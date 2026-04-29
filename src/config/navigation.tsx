@@ -139,7 +139,7 @@ export const getSidebarItems = (
         items.push({
             label: locale === 'en' ? 'Permits' : 'التصاريح',
             href: '/admin/permits',
-            active: currentPath === '/admin/permits',
+            active: currentPath?.startsWith('/admin/permits'),
             permission: PERMISSIONS.MANAGE_PERMITS,
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -81,7 +81,7 @@ export default function PermitsPage() {
             params.append('page', filters.page.toString());
             params.append('limit', '10');
 
-            const result = await apiFetch<{ requests: any[]; pagination: any }>(`/api/admin/requests?${params}`);
+            const result = await apiFetch<{ requests: any[]; pagination: any }>(`/api/admin/permits?${params}`);
             setPermits(result.requests || []);
             setPagination(result.pagination || null);
         } catch (error: any) {
@@ -129,7 +129,7 @@ export default function PermitsPage() {
         // Check Sohar status and update before navigating (if externalReference exists)
         if (permit.externalReference) {
             try {
-                await apiFetch(`/api/admin/requests/${permit.id}/check-sohar-status`, {
+                await apiFetch(`/api/admin/permits/${permit.id}/check-sohar-status`, {
                     method: 'POST',
                 });
                 // Refresh permits list to show updated status (async, don't wait)
@@ -146,8 +146,8 @@ export default function PermitsPage() {
             }
         }
 
-        // Navigate to request details page
-        router.push(`/admin/requests/${permit.id}`);
+        // Navigate to permit details page (permits permission scope)
+        router.push(`/admin/permits/${permit.id}`);
     };
 
     if (loading && permits.length === 0) {
