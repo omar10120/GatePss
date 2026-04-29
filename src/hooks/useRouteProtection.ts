@@ -13,6 +13,11 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
     '/admin/settings': PERMISSIONS.MANAGE_SETTINGS,
 };
 
+const PERMISSION_ROUTE_PREFIXES: Array<{ prefix: string; permission: string }> = [
+    { prefix: '/admin/requests', permission: PERMISSIONS.MANAGE_REQUESTS },
+    { prefix: '/admin/permits', permission: PERMISSIONS.MANAGE_PERMITS },
+];
+
 export function useRouteProtection() {
     const router = useRouter();
     const pathname = usePathname();
@@ -66,7 +71,11 @@ export function useRouteProtection() {
             }
 
             // Check if current route requires a specific permission
-            const requiredPermission = ROUTE_PERMISSIONS[pathname];
+            const exactPermission = ROUTE_PERMISSIONS[pathname];
+            const prefixPermission = PERMISSION_ROUTE_PREFIXES.find(({ prefix }) =>
+                pathname.startsWith(prefix)
+            )?.permission;
+            const requiredPermission = exactPermission || prefixPermission;
             if (requiredPermission) {
                 const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
                 const userPermissions = currentUser.permissions || [];
