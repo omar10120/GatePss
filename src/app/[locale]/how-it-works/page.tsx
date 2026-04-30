@@ -13,8 +13,8 @@ export default function HowItWorksPage() {
             <section className="py-20 px-4 bg-gray-50/50">
                 <div className="container mx-auto px-4 lg:px-6">
                     <div className="text-center mb-12 md:mb-16">
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium mb-4 capitalize" style={{ color: '#0666A3' }}>{t('howItWorks.title')}</h2>
-                        <p className="text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto" style={{ color: '#1F1F1F' }}>{t('howItWorks.subtitle')}</p>
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium mb-4 capitalize text-[#0666A3]" >{t('howItWorks.title')}</h2>
+                        <p className="text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto text-[#1F1F1F]" >{t('howItWorks.subtitle')}</p>
                     </div>
 
                     {/* Video */}
