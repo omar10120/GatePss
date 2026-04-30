@@ -18,10 +18,10 @@ export default function RequestPermit() {
                     {/* Hero Section */}    
                     <section className="py-16 bg-white text-center">
                         <div className="container mx-auto px-4">
-                            <h1 className="text-[38px] leading-[45px] font-medium text-[#0666A3] mb-3 font-['Rubik'] capitalize">
+                            <h1 className="text-[38px] leading-[45px] font-medium text-[#0666A3] mb-3  capitalize">
                                 {t('title')}
                             </h1>
-                            <p className="text-[#747474] max-w-[856px] mx-auto text-[18px] leading-[28px] font-['Rubik']">
+                            <p className="text-[#747474] max-w-[856px] mx-auto text-[18px] leading-[28px] ">
                                 {t('subtitle')}
                             </p>
                         </div>

@@ -25,12 +25,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     return (
         <div className="w-full">
-            <label htmlFor={id} className="block text-[16px] font-normal text-[#222222] mb-1 font-['Rubik']">
+            <label htmlFor={id} className="block text-[16px] font-normal text-[#222222] mb-1 ">
                 {label}
                 {required && <span className="text-red-500 ml-1">*</span>}
             </label>
             {helperText && (
-                <p className="text-[12px] text-[#747474] mb-2 font-['Rubik'] font-light">
+                <p className="text-[12px] text-[#747474] mb-2  font-light">
                     {helperText}
                 </p>
             )}
@@ -61,10 +61,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                         `.trim()}
                     >
                         <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="bg-[#F7F1EB] text-[#747474] px-3 py-1.5 rounded-[4px] text-[14px] font-['Rubik'] whitespace-nowrap">
+                            <div className="bg-[#F7F1EB] text-[#747474] px-3 py-1.5 rounded-[4px] text-[14px]  whitespace-nowrap">
                                 {placeholder || 'Choose File'}
                             </div>
-                            <span id={`${id}-label`} className="text-[14px] text-[#747474] truncate font-['Rubik']">
+                            <span id={`${id}-label`} className="text-[14px] text-[#747474] truncate ">
                                 {fileName || ''}
                             </span>
                         </div>
@@ -77,7 +77,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 </label>
             </div>
             {fileName && !error && (
-                <p className="mt-1.5 text-[12px] text-[#00B09C] font-medium font-['Rubik'] flex items-center gap-1">
+                <p className="mt-1.5 text-[12px] text-[#00B09C] font-medium  flex items-center gap-1">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -85,7 +85,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 </p>
             )}
             {error && (
-                <p className="mt-1.5 text-[12px] text-danger-600 font-medium font-['Rubik']">{error}</p>
+                <p className="mt-1.5 text-[12px] text-danger-600 font-medium ">{error}</p>
             )}
         </div>
     );

@@ -861,7 +861,7 @@ export default function RequestDetailsPage() {
                             </Link>
                         </div>
                     ) : request ? (
-                        <div className="animate-fade-in font-['Rubik']">
+                        <div className="animate-fade-in ">
                             {/* Header Section */}
                             <div className="bg-white rounded-[16px] p-6 shadow-sm mb-6">
                                 <div className="flex items-center justify-between mb-8">

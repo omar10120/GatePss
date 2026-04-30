@@ -19,12 +19,12 @@ export default function About() {
                 }}
             >
                 {/* Our Mission And Values - Title */}
-                <h1 className="w-full max-w-[800px] font-['Rubik'] font-medium text-3xl md:text-[48px] leading-tight md:leading-[57px] text-center capitalize text-white z-10">
+                <h1 className="w-full max-w-[800px]  font-medium text-3xl md:text-[48px] leading-tight md:leading-[57px] text-center capitalize text-white z-10">
                     {t('hero.title')}
                 </h1>
 
                 {/* Subtitle / Description */}
-                <p className="w-full max-w-[672px] font-['Rubik'] font-normal text-lg md:text-[24px] leading-relaxed md:leading-[38px] text-center capitalize text-white z-10">
+                <p className="w-full max-w-[672px]  font-normal text-lg md:text-[24px] leading-relaxed md:leading-[38px] text-center capitalize text-white z-10">
                     {t('hero.subtitle')}
                 </p>
             </section>
@@ -48,10 +48,10 @@ export default function About() {
                                     className="flex flex-row justify-center items-center gap-4 w-full sm:w-[362px] h-auto py-6 md:h-[140px] bg-[#00B09C] px-4"
                                     style={{ transform: 'scaleX(-1)' }}
                                 >
-                                    <span className="font-['Rubik'] font-medium text-5xl md:text-[88px] leading-tight text-white">
+                                    <span className=" font-medium text-5xl md:text-[88px] leading-tight text-white">
                                         +16
                                     </span>
-                                    <span className="font-['Rubik'] font-medium text-xl md:text-[30px] md:leading-[38px] text-white capitalize">
+                                    <span className=" font-medium text-xl md:text-[30px] md:leading-[38px] text-white capitalize">
                                         {t('mission.experience')}
                                     </span>
                                 </div>
@@ -62,20 +62,20 @@ export default function About() {
 
                                 {/* Title Group */}
                                 <div className="flex flex-col items-start gap-3 w-full">
-                                    <h2 className="font-['Rubik'] font-medium text-3xl md:text-[38px] leading-tight text-[#0666A3]">
+                                    <h2 className=" font-medium text-3xl md:text-[38px] leading-tight text-[#0666A3]">
                                         {t('mission.title')}
                                     </h2>
-                                    <h3 className="font-['Rubik'] font-medium text-lg md:text-[20px] leading-snug md:leading-[34px] text-[#38B3E0] capitalize">
+                                    <h3 className=" font-medium text-lg md:text-[20px] leading-snug md:leading-[34px] text-[#38B3E0] capitalize">
                                         {t('mission.description')}
                                     </h3>
                                 </div>
 
                                 {/* Description Group */}
                                 <div className="flex flex-col items-start gap-4 md:gap-[28px] w-full">
-                                    <p className="font-['Rubik'] font-normal text-base md:text-[20px] leading-relaxed md:leading-[38px] text-[#1F1F1F]">
+                                    <p className=" font-normal text-base md:text-[20px] leading-relaxed md:leading-[38px] text-[#1F1F1F]">
                                         {t('mission.section1')}
                                     </p>
-                                    <p className="font-['Rubik'] font-normal text-base md:text-[20px] leading-relaxed md:leading-[38px] text-[#1F1F1F]">
+                                    <p className=" font-normal text-base md:text-[20px] leading-relaxed md:leading-[38px] text-[#1F1F1F]">
                                         {t('mission.section2')}
                                     </p>
                                 </div>

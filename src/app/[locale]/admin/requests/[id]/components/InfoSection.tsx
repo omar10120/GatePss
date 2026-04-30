@@ -117,10 +117,10 @@ interface InfoSectionProps {
 export const InfoSection: React.FC<InfoSectionProps> = ({ title, data, isEditable, onChange }) => {
     return (
         <div className="mb-6">
-            <h3 className="text-[#00B09C] font-normal text-[14px] mb-4 font-['Rubik']">
+            <h3 className="text-[#00B09C] font-normal text-[14px] mb-4 ">
                 {title}
             </h3>
-            <div className="space-y-3 font-['Rubik']">
+            <div className="space-y-3 ">
                 {data.map((row, index) => (
                     <InfoRow 
                         key={index} 

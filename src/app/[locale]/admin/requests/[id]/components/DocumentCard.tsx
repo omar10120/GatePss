@@ -79,9 +79,9 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
 
     if (isEditable && fieldName) {
         return (
-            <div className="bg-white rounded-[8px] p-4 border border-gray-100 mb-6 font-['Rubik']">
+            <div className="bg-white rounded-[8px] p-4 border border-gray-100 mb-6 ">
                 <div className="w-full">
-                    <label htmlFor={fieldName} className="block text-[16px] font-normal text-[#222222] mb-2 font-['Rubik']">
+                    <label htmlFor={fieldName} className="block text-[16px] font-normal text-[#222222] mb-2 ">
                         {title}
                     </label>
                     <div className="relative group">
@@ -121,10 +121,10 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                                 `.trim()}
                             >
                                 <div className="flex items-center gap-3 overflow-hidden">
-                                    <div className="bg-[#F7F1EB] text-[#747474] px-3 py-1.5 rounded-[4px] text-[14px] font-['Rubik'] whitespace-nowrap">
+                                    <div className="bg-[#F7F1EB] text-[#747474] px-3 py-1.5 rounded-[4px] text-[14px]  whitespace-nowrap">
                                         {placeholder || gt('placeholders.chooseFile') || "Choose File"}
                                     </div>
-                                    <span className="text-[14px] text-[#747474] truncate font-['Rubik']">
+                                    <span className="text-[14px] text-[#747474] truncate ">
                                         {selectedFile?.name || ''}
                                     </span>
                                 </div>
@@ -137,7 +137,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                         </label>
                     </div>
                     {selectedFile && !error && (
-                        <p className="mt-1.5 text-[12px] text-[#00B09C] font-medium font-['Rubik'] flex items-center gap-1">
+                        <p className="mt-1.5 text-[12px] text-[#00B09C] font-medium  flex items-center gap-1">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -145,7 +145,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                         </p>
                     )}
                     {error && (
-                        <p className="mt-1.5 text-[12px] text-danger-600 font-medium font-['Rubik']">{error}</p>
+                        <p className="mt-1.5 text-[12px] text-danger-600 font-medium ">{error}</p>
                     )}
                 </div>
                 {src && (
@@ -204,7 +204,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
     }
 
     return (
-        <div className="bg-white rounded-[8px] p-4 border border-gray-100 mb-6 font-['Rubik']">
+        <div className="bg-white rounded-[8px] p-4 border border-gray-100 mb-6 ">
             <h3 className="text-[#3E4259] text-[16px] font-normal mb-4">{title}</h3>
 
             <div className="bg-[#FAF9FB] rounded-[8px] p-6 flex justify-center items-center relative min-h-[160px]">
@@ -245,7 +245,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                         <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <span className="text-sm font-['Rubik']">{gt('noDocumentAvailable') || "No document available"}</span>
+                        <span className="text-sm ">{gt('noDocumentAvailable') || "No document available"}</span>
                     </div>
                 )}
             </div>

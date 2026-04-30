@@ -27,7 +27,7 @@ export const Textarea: React.FC<TextareaProps> = ({
     return (
         <div className="w-full">
             {label && (
-                <label htmlFor={textareaId} className="block text-[16px] font-normal text-[#222222] mb-2 font-['Rubik']">
+                <label htmlFor={textareaId} className="block text-[16px] font-normal text-[#222222] mb-2 ">
                     {label}
                 </label>
             )}
@@ -42,7 +42,7 @@ export const Textarea: React.FC<TextareaProps> = ({
                     style={{ color: '#111827' }}
                     className={`
                         flex  w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] px-4 py-4 
-                        text-[14px] font-['Rubik']  text-gray-900 placeholder:text-[#747474] 
+                        text-[14px]   text-gray-900 placeholder:text-[#747474] 
                         focus:outline-none focus:ring-2 focus:ring-[#00B09C]/20 focus:border-[#00B09C] 
                         transition-all disabled:cursor-not-allowed disabled:opacity-50
                         ${hasError ? "border-danger-500 focus:ring-danger-500/20 focus:border-danger-500" : ""}
@@ -59,10 +59,10 @@ export const Textarea: React.FC<TextareaProps> = ({
                 )}
             </div>
             {error && (
-                <p className="mt-1.5 text-[12px] text-danger-600 font-medium font-['Rubik']">{error}</p>
+                <p className="mt-1.5 text-[12px] text-danger-600 font-medium ">{error}</p>
             )}
             {helperText && !error && (
-                <p className="mt-1.5 text-[12px] text-gray-400 font-['Rubik']">{helperText}</p>
+                <p className="mt-1.5 text-[12px] text-gray-400 ">{helperText}</p>
             )}
         </div>
     );
@@ -91,7 +91,7 @@ export const Select: React.FC<SelectProps> = ({
     return (
         <div className="w-full">
             {label && (
-                <label htmlFor={selectId} className="block text-[16px] font-normal text-[#222222] mb-2 font-['Rubik']">
+                <label htmlFor={selectId} className="block text-[16px] font-normal text-[#222222] mb-2 ">
                     {label}
                 </label>
             )}
@@ -102,7 +102,7 @@ export const Select: React.FC<SelectProps> = ({
                     className={`
                         flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] pl-4 pr-10 py-4 
                         rtl:pl-10 rtl:pr-4
-                        text-[14px] font-['Rubik'] text-gray-900 appearance-none
+                        text-[14px]  text-gray-900 appearance-none
                         focus:outline-none focus:ring-2 focus:ring-[#00B09C]/20 focus:border-[#00B09C] 
                         transition-all disabled:cursor-not-allowed disabled:opacity-50
                         ${hasError ? "border-danger-500 focus:ring-danger-500/20 focus:border-danger-500" : ""}
@@ -127,10 +127,10 @@ export const Select: React.FC<SelectProps> = ({
                 </div>
             </div>
             {error && (
-                <p className="mt-1.5 text-[12px] text-danger-600 font-medium font-['Rubik']">{error}</p>
+                <p className="mt-1.5 text-[12px] text-danger-600 font-medium ">{error}</p>
             )}
             {helperText && !error && (
-                <p className="mt-1.5 text-[12px] text-gray-400 font-['Rubik']">{helperText}</p>
+                <p className="mt-1.5 text-[12px] text-gray-400 ">{helperText}</p>
             )}
         </div>
     );

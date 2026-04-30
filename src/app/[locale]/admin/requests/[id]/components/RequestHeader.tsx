@@ -12,7 +12,7 @@ export const RequestHeader: React.FC<RequestHeaderProps> = ({ requestNumber, onS
     const ct = useTranslations('Admin.common');
     return (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h1 className="text-[24px] md:text-[28px] font-bold text-[#3E4259] font-['Rubik']">
+            <h1 className="text-[24px] md:text-[28px] font-bold text-[#3E4259] ">
                 {t('title')} <span className="text-[#00B09C]">{requestNumber}</span>
             </h1>
             

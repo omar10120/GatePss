@@ -1,5 +1,6 @@
 'use client';
 
+
 import React, { useState, useEffect, useActionState } from 'react';
 import { Input, Select } from '@/components/ui/Input';
 import { Textarea } from '../ui/Textarea';
@@ -564,9 +565,9 @@ export const GatePassForm: React.FC = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 px-4 sm:px-6 md:px-8 lg:px-10 py-6 md:py-8 max-w-7xl max-auto">
+        <form onSubmit={handleSubmit} className="space-y-8 px-4 sm:px-6 md:px-8 lg:px-10 py-6 md:py-8 max-w-7xl max-auto ">
             {(error || errors.length > 0) && (
-                <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-lg text-red-700 animate-fade-in text-sm font-medium font-['Rubik'] shadow-sm">
+                <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-lg text-red-700 animate-fade-in text-sm font-medium font-['Tajawal'] shadow-sm">
                     {error && <p className="mb-2 font-semibold flex items-center gap-2">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -587,7 +588,7 @@ export const GatePassForm: React.FC = () => {
             <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
                     <div className="w-1 h-8 bg-[#00B09C] rounded-full"></div>
-                    <h3 className=" font-semibold text-lg md:text-xl capitalize font-['Rubik']">
+                    <h3 className=" font-semibold text-lg md:text-xl capitalize font-['Tajawal']">
                         {getBilingualNested(['sections', 'passPermitInfo'])}
                     </h3>
                 </div>
@@ -781,7 +782,7 @@ export const GatePassForm: React.FC = () => {
                     />
 
                     <div className="w-full">
-                        <label className="block text-sm font-medium text-gray-700 mb-2 font-['Rubik']">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-['Tajawal']">
                             {getBilingualNested(['fields', 'organization'])}
                             <span className="text-red-500 ml-1">*</span>
                         </label>
@@ -798,7 +799,7 @@ export const GatePassForm: React.FC = () => {
                             </div>
                         </div>
                         {fieldErrors.organization && (
-                            <p className="mt-1 text-sm text-red-600 font-['Rubik']">{fieldErrors.organization}</p>
+                            <p className="mt-1 text-sm text-red-600 font-['Tajawal']">{fieldErrors.organization}</p>
                         )}
                     </div>
                     <Input
@@ -995,7 +996,7 @@ export const GatePassForm: React.FC = () => {
             <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
                     <div className="w-1 h-8 bg-[#00B09C] rounded-full"></div>
-                    <h3 className=" font-semibold text-lg md:text-xl capitalize font-['Rubik']">
+                    <h3 className=" font-semibold text-lg md:text-xl capitalize font-['Tajawal']">
                         {getBilingualNested(['sections', 'passHolderInfo'])}
                     </h3>
                 </div>
@@ -1185,7 +1186,7 @@ export const GatePassForm: React.FC = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <span className="text-[14px] text-[#747474] leading-[21px] font-['Rubik'] capitalize">
+                    <span className="text-[14px] text-[#747474] leading-[21px] font-['Tajawal'] capitalize">
                         {getBilingualNested(['confirmation'])}
                     </span>
                 </label>
@@ -1196,7 +1197,7 @@ export const GatePassForm: React.FC = () => {
                     disabled={loading || !confirmed}
                     className={`
             flex items-center justify-center px-16 py-4 bg-[#00B09C] text-white rounded-full 
-            text-[22px] md:text-[28px] font-medium font-['Rubik'] transition-all shadow-md 
+            text-[22px] md:text-[28px] font-medium font-['Tajawal'] transition-all shadow-md 
             hover:shadow-xl hover:bg-[#009686] active:scale-[0.98] 
             disabled:opacity-50 disabled:cursor-not-allowed
             min-w-[320px] md:min-w-[440px] h-[70px] md:h-[84px]
@@ -1215,6 +1216,7 @@ export const GatePassForm: React.FC = () => {
         </form>
     );
 };
+
 
 
 

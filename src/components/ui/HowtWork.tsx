@@ -16,11 +16,11 @@ export default function HowtWork() {
                     {/* Process Flow Text */}
                     {/* <div className="mb-12 md:mb-16 max-w-4xl mx-auto">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                            <p className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed text-center font-['Rubik']">
+                            <p className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed text-center ">
                                     {t('howItWorks.processFlow')}
                              
                             </p>
-                            <p className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed text-center font-['Rubik']">
+                            <p className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed text-center ">
                                 <Link href={`/${locale}/ApplicationNumber`} className="text-blue-500 hover:text-blue-700">
                                     {t('howItWorks.trackApplication')}
                                 </Link>

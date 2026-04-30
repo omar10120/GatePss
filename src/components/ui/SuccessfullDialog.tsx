@@ -21,13 +21,13 @@ export const SuccessfullDialog: React.FC<SuccessfullDialogProps> = ({ requestNum
             </div>
 
             {/* Success Title */}
-            <h2 className="text-[24px] md:text-[32px] font-bold text-[#005068] mb-4 font-['Rubik'] capitalize">
+            <h2 className="text-[24px] md:text-[32px] font-bold text-[#005068] mb-4  capitalize">
                 {t('successTitle') || 'Your Application Submitted Successfully'}
             </h2>
 
             {/* Request Number Subtitle */}
             {requestNumber && (
-                <p className="text-[#747474] text-lg font-['Rubik'] mb-8">
+                <p className="text-[#747474] text-lg  mb-8">
                     {t('columns.requestNumber')}: <span className="font-semibold text-[#00B09C]">{requestNumber}</span>
                 </p>
             )}
@@ -37,7 +37,7 @@ export const SuccessfullDialog: React.FC<SuccessfullDialogProps> = ({ requestNum
                 onClick={onDone}
                 className={`
                     flex items-center justify-center px-16 py-4 bg-[#00B09C] text-white rounded-full 
-                    text-[22px] md:text-[28px] font-medium font-['Rubik'] transition-all shadow-md 
+                    text-[22px] md:text-[28px] font-medium  transition-all shadow-md 
                     hover:shadow-xl hover:bg-[#009686] active:scale-[0.98] 
                     min-w-[200px] md:min-w-[280px] h-[60px] md:h-[72px]
                 `.trim()}

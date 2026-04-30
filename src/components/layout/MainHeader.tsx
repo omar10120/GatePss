@@ -39,16 +39,16 @@ export const MainHeader: React.FC<MainHeaderProps> = ({
 
                 {/* Navigation */}
                 <nav className="hidden md:flex flex-row items-center gap-[48px]">
-                    <Link href={`/${locale}`} className="text-[#1F1F1F] hover:text-info-500 font-medium text-[24px] leading-[28px] font-['Rubik'] transition-colors">
+                    <Link href={`/${locale}`} className="text-[#1F1F1F] hover:text-info-500 font-medium text-[24px] leading-[28px]  transition-colors">
                         {t('nav.home')}
                     </Link>
-                    <Link href={`/${locale}#services`} className="text-[#1F1F1F] hover:text-info-500 font-medium text-[24px] leading-[28px] font-['Rubik'] transition-colors">
+                    <Link href={`/${locale}#services`} className="text-[#1F1F1F] hover:text-info-500 font-medium text-[24px] leading-[28px]  transition-colors">
                         {t('nav.services')}
                     </Link>
-                    <Link href={`/${locale}#about`} className="text-[#1F1F1F] hover:text-info-500 font-medium text-[24px] leading-[28px] font-['Rubik'] transition-colors">
+                    <Link href={`/${locale}#about`} className="text-[#1F1F1F] hover:text-info-500 font-medium text-[24px] leading-[28px]  transition-colors">
                         {t('nav.about')}
                     </Link>
-                    <Link href="https://majis.om" target="_blank" className="text-[#1F1F1F] hover:text-info-500 font-medium text-[24px] leading-[28px] font-['Rubik'] uppercase transition-colors">
+                    <Link href="https://majis.om" target="_blank" className="text-[#1F1F1F] hover:text-info-500 font-medium text-[24px] leading-[28px]  uppercase transition-colors">
                         {t('nav.MAJIS')}
                     </Link>
                 </nav>
@@ -85,7 +85,7 @@ export const MainHeader: React.FC<MainHeaderProps> = ({
                     {/* Contact Button */}
                     <Link
                         href={`/${locale}#contact`}
-                        className="flex flex-row justify-center items-center gap-[10px] bg-[#00B09C] hover:bg-green-600 text-white px-[28px] py-[23px] rounded-[34px] w-[198px] h-[68px] font-semibold text-[20px] leading-[24px] font-['Rubik'] transition-colors shadow-md hover:shadow-lg"
+                        className="flex flex-row justify-center items-center gap-[10px] bg-[#00B09C] hover:bg-green-600 text-white px-[28px] py-[23px] rounded-[34px] w-[198px] h-[68px] font-semibold text-[20px] leading-[24px]  transition-colors shadow-md hover:shadow-lg"
                     >
                         <svg className="w-[24px] h-[24px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />

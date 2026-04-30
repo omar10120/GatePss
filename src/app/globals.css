@@ -46,9 +46,12 @@ body {
 }
 
 body[dir="rtl"] {
-  font-family: 'Tajawal', sans-serif;
+  
   direction: rtl;
 }
+
+
+
 
 /* Hide native date picker icon and style custom date input */
 input[type="date"].date-input-custom {

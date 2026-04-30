@@ -17,7 +17,7 @@ export const PermitSection: React.FC<PermitSectionProps> = ({ status, requestTyp
     // Example logic handling
     if (status === 'REJECTED') {
         return (
-            <div className="bg-[#FAF9FB] rounded-[12px] p-6 mt-8 font-['Rubik'] border border-gray-100">
+            <div className="bg-[#FAF9FB] rounded-[12px] p-6 mt-8  border border-gray-100">
                 <h3 className="text-[#3E4259] text-[18px] font-medium mb-2">{title}</h3>
                 <p className="text-[#747474] text-[14px]">{subtitle || t('rejectionNotification') || "The user was informed of the reason for the rejection via his Email."}</p>
             </div>
@@ -27,7 +27,7 @@ export const PermitSection: React.FC<PermitSectionProps> = ({ status, requestTyp
     return (
   <>
         {status === 'APPROVED' && (
-        <div className="bg-[#FAF9FB] rounded-[12px] p-6 mt-8 border border-gray-100 font-['Rubik']">
+        <div className="bg-[#FAF9FB] rounded-[12px] p-6 mt-8 border border-gray-100 ">
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <h3 className="text-[#3E4259] text-[18px] font-medium">{title}</h3>

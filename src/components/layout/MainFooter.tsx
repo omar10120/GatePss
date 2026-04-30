@@ -57,12 +57,12 @@ export const MainFooter: React.FC = () => {
                 {/* Lower Section */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     {/* Left Side - Copyright */}
-                    <div className="text-[14px] leading-[16px] text-[#92989F] font-['Rubik'] text-center tracking-[0.25px]">
+                    <div className="text-[14px] leading-[16px] text-[#92989F]  text-center tracking-[0.25px]">
                         {t('footer.technicalSupport')} Pixel Tech.©2026 {t('footer.allRightsReserved')}
                     </div>
 
                     {/* Right Side - Navigation Links */}
-                    <div className="flex gap-[28px] text-[14px] leading-[16px] text-[#92989F] font-['Rubik']">
+                    <div className="flex gap-[28px] text-[14px] leading-[16px] text-[#92989F] ">
                         <Link href="#faq" className="hover:text-gray-900 transition-colors">
                             {t('footer.faq')}
                         </Link>
