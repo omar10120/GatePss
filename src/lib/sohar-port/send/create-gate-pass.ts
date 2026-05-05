@@ -4,10 +4,11 @@ import { CreateGatePassRequest, CreateGatePassResponse } from '../types';
 import { getEndpointUrl } from '../config';
 import { logSuccess, logError } from '../utils/logger';
 import { logger } from '../../logger';
+import { Storage } from '../../storage';
 
 const env = ((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {};
 
-/** Debug: omit attachment filenames + `_gatepassProxy`. */
+/** Debug: omit attachment binaries (JSON without attachment fields). */
 function shouldSkipAttachmentsForDebug(): boolean {
     const v = env.SOHAR_PORT_SKIP_ATTACHMENTS?.trim()?.toLowerCase();
     return v === 'true' || v === '1' || v === 'yes';
@@ -21,13 +22,6 @@ function getGatepassFilesPublicBaseUrl(): string {
     );
 }
 
-/** Path segment before `/uploads/` on the public site (e.g. Next route `app/api/uploads`). Default `api` → `https://host/api/uploads/...`. */
-function getPublicUploadUrlPrefix(): string {
-    const raw = env.GATEPASS_PUBLIC_UPLOAD_PREFIX?.trim();
-    if (raw === '' || raw === undefined) return 'api';
-    return raw.replace(/^\/+|\/+$/g, '');
-}
-
 function getFileName(filePath: string): string {
     const normalized = String(filePath || '').replace(/\\/g, '/');
     const parts = normalized.split('/');
@@ -35,16 +29,11 @@ function getFileName(filePath: string): string {
 }
 
 /**
- * Build public URL for a stored file. DB paths from `Storage.saveFile` are like `passports/foo.jpg`.
- * Production serves files at `{origin}/api/uploads/...` (not bare `/uploads/...`).
+ * Strip wrappers so DB paths like `passports/foo.jpg` or `uploads/passports/foo.jpg` resolve under Storage.
  */
-function storagePathToPublicUploadUrl(localPath: string): string | null {
-    const base = getGatepassFilesPublicBaseUrl();
-    if (!base || !localPath) return null;
+function normalizeRelativeUploadPath(localPath: string): string | null {
     let p = String(localPath).replace(/\\/g, '/').trim();
-    if (/^https?:\/\//i.test(p)) return p;
-    /** Proxy cannot fetch embedded files; omit URL (filenames may still be sent). */
-    if (/^data:/i.test(p)) return null;
+    if (!p || /^https?:\/\//i.test(p) || /^data:/i.test(p)) return null;
 
     const apiUploads = '/api/uploads/';
     if (p.includes(apiUploads)) {
@@ -60,17 +49,59 @@ function storagePathToPublicUploadUrl(localPath: string): string | null {
     }
 
     p = p.replace(/^\/+/, '');
-    if (p === '') return null;
-
-    const prefix = getPublicUploadUrlPrefix();
-    return `${base.replace(/\/$/, '')}/${prefix}/uploads/${p}`;
+    return p === '' ? null : p;
 }
 
-export interface GatepassProxyPayload {
-    identificationUrl?: string;
-    photoUrl?: string;
-    other1Url?: string;
-    other2Url?: string;
+/**
+ * Resolve a stored file reference to base64 (same shape Sohar expects as via the old proxy).
+ */
+async function fileRefToBase64(ref: string, requestNumber: string): Promise<string | null> {
+    const trimmed = String(ref || '').trim();
+    if (!trimmed) return null;
+
+    if (/^data:/i.test(trimmed)) {
+        const m = trimmed.match(/^data:[^;]+;base64,(.+)$/i);
+        return m?.[1] ? m[1] : null;
+    }
+
+    if (/^https?:\/\//i.test(trimmed)) {
+        const base = getGatepassFilesPublicBaseUrl().replace(/\/$/, '');
+        if (base && trimmed.startsWith(base)) {
+            const relUrl = trimmed.slice(base.length).replace(/^\//, '');
+            const inner = relUrl.replace(/^(api\/)?uploads\//, '');
+            const rel = normalizeRelativeUploadPath(inner) || inner;
+            try {
+                return (await Storage.readFile(rel)).toString('base64');
+            } catch (e) {
+                logger.warn(`Sohar Port: could not read attachment for ${requestNumber} at ${rel}`, {
+                    error: (e as Error).message,
+                });
+                return null;
+            }
+        }
+        try {
+            const res = await fetch(trimmed, { signal: AbortSignal.timeout(20000) });
+            if (!res.ok) return null;
+            return Buffer.from(await res.arrayBuffer()).toString('base64');
+        } catch (e) {
+            logger.warn(`Sohar Port: fetch attachment failed for ${requestNumber}`, {
+                url: trimmed.slice(0, 120),
+                error: (e as Error).message,
+            });
+            return null;
+        }
+    }
+
+    const rel = normalizeRelativeUploadPath(trimmed);
+    if (!rel) return null;
+    try {
+        return (await Storage.readFile(rel)).toString('base64');
+    } catch (e) {
+        logger.warn(`Sohar Port: could not read attachment for ${requestNumber} at ${rel}`, {
+            error: (e as Error).message,
+        });
+        return null;
+    }
 }
 
 /** Same shape as `extraFields.gateRequest` rows we read from the DB. */
@@ -151,7 +182,7 @@ function formatDate(date: Date | string): string {
     return d.toISOString().split('T')[0];
 }
 
-/** Redact PII for structured logs (proxy still receives real values). */
+/** Redact PII and attachment payloads for structured logs. */
 function maskPayloadForLog(payload: Record<string, unknown>): Record<string, unknown> {
     const out: Record<string, unknown> = { ...payload };
     if (typeof out.identification_number === 'string') {
@@ -163,45 +194,37 @@ function maskPayloadForLog(payload: Record<string, unknown>): Record<string, unk
     if (typeof out.phone === 'string') {
         out.phone = '[redacted]';
     }
-    if (out._gatepassProxy && typeof out._gatepassProxy === 'object') {
-        out._gatepassProxy = {
-            ...(out._gatepassProxy as Record<string, unknown>),
-            identificationUrl: (out._gatepassProxy as GatepassProxyPayload).identificationUrl ? '[url]' : undefined,
-            photoUrl: (out._gatepassProxy as GatepassProxyPayload).photoUrl ? '[url]' : undefined,
-            other1Url: (out._gatepassProxy as GatepassProxyPayload).other1Url ? '[url]' : undefined,
-            other2Url: (out._gatepassProxy as GatepassProxyPayload).other2Url ? '[url]' : undefined,
-        };
+    for (const k of [
+        'identification_attachment',
+        'photo_attachment',
+        'other_attachment',
+        'other_attachment2',
+    ] as const) {
+        if (typeof out[k] === 'string' && out[k]) {
+            out[k] = '[base64 redacted]';
+        }
     }
     return out;
 }
 
 /**
- * Attach `_gatepassProxy` URLs + Sohar filename fields from storage paths (no file I/O).
+ * Read files from disk (or data URLs) and set Sohar base64 attachment fields + filename fields.
  */
-function attachProxyRefsAndFilenames(
+async function attachDirectBase64Fields(
     payload: Record<string, unknown>,
     gateRequest: GateRequestSource | undefined,
     skipAttachments: boolean,
     requestNumber: string,
-): void {
+): Promise<void> {
     if (skipAttachments || !gateRequest) {
         return;
     }
 
-    const baseOk = !!getGatepassFilesPublicBaseUrl();
-    if (!baseOk) {
-        logger.warn(
-            `Sohar Port: GATEPASS_FILES_BASE_URL / NEXT_PUBLIC_APP_URL missing — _gatepassProxy URLs cannot be built for ${requestNumber}`,
-        );
-    }
-
-    const proxy: GatepassProxyPayload = {};
-
     if (gateRequest.passportIdImagePath) {
         payload.identification_document = getFileName(gateRequest.passportIdImagePath);
-        const u = storagePathToPublicUploadUrl(gateRequest.passportIdImagePath);
-        if (u) {
-            proxy.identificationUrl = u;
+        const b64 = await fileRefToBase64(gateRequest.passportIdImagePath, requestNumber);
+        if (b64) {
+            payload.identification_attachment = b64;
         }
     }
 
@@ -210,42 +233,39 @@ function attachProxyRefsAndFilenames(
         const otherDocs = uploads.filter((u) => u.fileType.startsWith('OTHER'));
         if (otherDocs[0]?.filePath) {
             payload.other_documents = getFileName(otherDocs[0].filePath);
-            const u = storagePathToPublicUploadUrl(otherDocs[0].filePath);
-            if (u) proxy.other1Url = u;
+            const b64 = await fileRefToBase64(otherDocs[0].filePath, requestNumber);
+            if (b64) payload.other_attachment = b64;
         }
         if (otherDocs[1]?.filePath) {
             payload.other_documents2 = getFileName(otherDocs[1].filePath);
-            const u = storagePathToPublicUploadUrl(otherDocs[1].filePath);
-            if (u) proxy.other2Url = u;
+            const b64 = await fileRefToBase64(otherDocs[1].filePath, requestNumber);
+            if (b64) payload.other_attachment2 = b64;
         }
 
         const photoUpload = uploads.find((u) => u.fileType === 'PHOTO');
         if (photoUpload?.filePath) {
             payload.photo = getFileName(photoUpload.filePath);
-            const u = storagePathToPublicUploadUrl(photoUpload.filePath);
-            if (u) proxy.photoUrl = u;
+            const b64 = await fileRefToBase64(photoUpload.filePath, requestNumber);
+            if (b64) payload.photo_attachment = b64;
         }
     }
 
-    if (!payload.photo && gateRequest.photoPath) {
+    if (!payload.photo_attachment && gateRequest.photoPath) {
         payload.photo = getFileName(gateRequest.photoPath);
-        const u = storagePathToPublicUploadUrl(gateRequest.photoPath);
-        if (u) proxy.photoUrl = u;
+        const b64 = await fileRefToBase64(gateRequest.photoPath, requestNumber);
+        if (b64) payload.photo_attachment = b64;
     }
 
-    if (!payload.photo && proxy.identificationUrl) {
+    if (!payload.photo_attachment && payload.identification_attachment) {
         payload.photo =
             (payload.identification_document as string) || getFileName(gateRequest.passportIdImagePath || '');
-        proxy.photoUrl = proxy.identificationUrl;
-    }
-
-    if (Object.keys(proxy).length > 0) {
-        payload._gatepassProxy = proxy;
+        payload.photo_attachment = payload.identification_attachment;
     }
 }
 
 /**
- * Create a new gate pass in Sohar Port system (JSON body + `_gatepassProxy` URLs; PHP proxy fetches files).
+ * Create a new gate pass in Sohar Port: POST `/api/gatepass/post` with JSON + base64 attachments.
+ * Auth: `SOHAR_PORT_USERNAME` / `SOHAR_PORT_PASSWORD` via {@link SoharPortHttpClient}.
  */
 export async function createGatePass(
     client: SoharPortHttpClient,
@@ -256,7 +276,11 @@ export async function createGatePass(
 
         const extraFields = request.extraFields || {};
         const gateRequest = extraFields.gateRequest as GateRequestSource | undefined;
-        const entityType = extraFields.entityType || gateRequest?.entityType || 'port';
+        const entityType =
+            (extraFields.entityType as string | undefined) ||
+            gateRequest?.entityType ||
+            env.SOHAR_PORT_ENTITY?.trim() ||
+            'port';
         const isPermanentPass = isPermanentSoharPass(gateRequest, extraFields);
         const passType = isPermanentPass ? '1' : '2';
 
@@ -317,7 +341,7 @@ export async function createGatePass(
         const skipAttachments = shouldSkipAttachmentsForDebug();
         if (skipAttachments) {
             logger.warn(
-                `Sohar Port: SOHAR_PORT_SKIP_ATTACHMENTS — JSON without attachment refs for ${request.requestNumber}`,
+                `Sohar Port: SOHAR_PORT_SKIP_ATTACHMENTS — JSON without attachment fields for ${request.requestNumber}`,
             );
         }
 
@@ -326,12 +350,15 @@ export async function createGatePass(
         delete soharPortPayload.other_attachment;
         delete soharPortPayload.other_attachment2;
 
-        attachProxyRefsAndFilenames(soharPortPayload, gateRequest, skipAttachments, request.requestNumber);
+        await attachDirectBase64Fields(soharPortPayload, gateRequest, skipAttachments, request.requestNumber);
 
-        const endpoint = getEndpointUrl('v1', 'CREATE_GATE_PASS_MULTIPART');
+        const endpoint = getEndpointUrl('v1', 'CREATE_GATE_PASS');
 
-        logger.info(`Sohar Port attachment refs for ${request.requestNumber}:`, {
-            hasProxy: !!soharPortPayload._gatepassProxy,
+        logger.info(`Sohar Port attachment fields for ${request.requestNumber}:`, {
+            hasIdentification: !!soharPortPayload.identification_attachment,
+            hasPhoto: !!soharPortPayload.photo_attachment,
+            hasOther1: !!soharPortPayload.other_attachment,
+            hasOther2: !!soharPortPayload.other_attachment2,
             identification_document: soharPortPayload.identification_document ?? null,
             photo: soharPortPayload.photo ?? null,
             other_documents: soharPortPayload.other_documents ?? null,

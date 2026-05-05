@@ -9,7 +9,7 @@
  *   - passNumber: The external reference (Sohar Port pass number)
  *   - entity: Always "port"
  * 
- * Authentication: Basic Auth (username: SOHAR_PORT_USERNAME, password: SOHAR_PORT_PASSWORD)
+ * Authentication: Basic Auth from env (SOHAR_PORT_USERNAME, SOHAR_PORT_PASSWORD). Entity: SOHAR_PORT_ENTITY (default port).
  * 
  * Reference: docs/GatePass.postman_collection.json
  */
@@ -19,6 +19,12 @@ import { GetGatePassRequest, GetGatePassResponse, GatePassStatus, SoharPortNotFo
 import { getEndpointUrl } from '../config';
 import { logSuccess, logError } from '../utils/logger';
 import { logger } from '../../logger';
+
+const env = ((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {};
+
+function getSoharEntity(): string {
+    return env.SOHAR_PORT_ENTITY?.trim() || 'port';
+}
 
 /**
  * Get a single gate pass from Sohar Port system
@@ -47,14 +53,16 @@ export async function getGatePass(
 
         logSuccess('getGatePass', `Fetching gate pass: ${request.externalReference}`);
 
+        const entity = getSoharEntity();
+
         // Make GET request to Sohar Port API
-        // Endpoint: /api/getpassdetails/get?passNumber={externalReference}&entity=port
+        // Endpoint: /api/getpassdetails/get?passNumber={externalReference}&entity={SOHAR_PORT_ENTITY}
         logger.info(`Sohar Port Get Gate Pass Request: ${request.externalReference}`, {
             type: 'SOHAR_PORT_GET_GATE_PASS_REQUEST',
             externalReference: request.externalReference,
             params: {
                 passNumber: request.externalReference.trim(),
-                entity: 'port',
+                entity,
             }
         });
 
@@ -63,7 +71,7 @@ export async function getGatePass(
             endpoint: getEndpointUrl('v1', 'GET_GATE_PASS'),
             params: {
                 passNumber: request.externalReference.trim(),
-                entity: 'port', // Always "port" as per API specification
+                entity,
             },
             externalReference: request.externalReference,
         });
