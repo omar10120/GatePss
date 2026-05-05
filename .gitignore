@@ -76,3 +76,4 @@ lerna-debug.log*
 *.backup
 *.bak
 *.sql.gz
+.htaccess
