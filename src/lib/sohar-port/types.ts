@@ -220,7 +220,7 @@ export interface SoharPortConfig {
     username?: string;
     password?: string;
     proxyUrl?: string;
-    /** Legacy flag; create uses JSON + `_gatepassProxy` on post-multipart route */
+    /** Legacy; unused — create sends base64 attachments to `/api/gatepass/post` */
     gatepassMultipart?: boolean;
 }
 

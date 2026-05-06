@@ -23,7 +23,7 @@ export function getEnvDefaults(): Required<SoharPortConfig> {
         username: process.env.SOHAR_PORT_USERNAME || 'Majees.API',
         password: process.env.SOHAR_PORT_PASSWORD || '',
         proxyUrl: process.env.SOHAR_PORT_PROXY_URL || '',
-        /** Kept for config shape; `createGatePass` sends JSON to post-multipart + `_gatepassProxy` URLs. */
+        /** Legacy; create posts JSON + base64 attachments to `/api/gatepass/post` */
         gatepassMultipart: false,
     };
 }
@@ -38,7 +38,7 @@ export const API_ENDPOINTS = {
         CREATE_GATE_PASS: '/api/gatepass/post',
         UPDATE_GATE_PASS: '/api/gatepass/update',
         CANCEL_GATE_PASS: '/api/gatepass/cancel',
-        /** Proxied multipart upload; server rewrites to Sohar POST /api/gatepass/post */
+        /** Optional legacy route (e.g. external proxy); app uses CREATE_GATE_PASS */
         CREATE_GATE_PASS_MULTIPART: '/api/gatepass/post-multipart',
 
         // Receive operations
