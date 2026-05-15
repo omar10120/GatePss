@@ -131,7 +131,15 @@
             "subtitle": "مثالي للاحتياجات العاجلة للسفر أو الجداول المزدحمة",
             "inputLabel": "رقم الطلب",
             "inputPlaceholder": "أدخل رقم الطلب الخاص بك",
-            "checkStatus": "تحقق من الحالة"
+            "checkStatus": "تحقق من الحالة",
+            "checking": "جاري التحقق...",
+            "errors": {
+                "pleaseEnterRequestNumber": "يرجى إدخال رقم الطلب",
+                "failedToCheck": "فشل التحقق من حالة الطلب",
+                "failedToRetrieve": "فشل استرجاع حالة الطلب",
+                "statusCheckError": "حدث خطأ أثناء التحقق من الحالة",
+                "requestNotFound": "الطلب غير موجود"
+            }
         },
         "permitStatus": {
             "rejectedTitle": "لقد تم رفض طلب التصريح",
@@ -645,6 +653,19 @@
             "passPermitInfo": "معلومات تصريح المرور",
             "passHolderInfo": "معلومات حامل التصريح",
             "permitsQrCode": "التصاريح (رمز الاستجابة السريعة)",
+            "errors": {
+                "noChangesToSave": "لا توجد تغييرات لحفظها",
+                "rejectionReasonMin": "يجب أن يكون سبب الرفض 10 أحرف على الأقل",
+                "rejectionReasonMinRejected": "يجب أن يكون سبب الرفض 10 أحرف على الأقل عندما تكون الحالة مرفوضة",
+                "failedToLoad": "فشل تحميل تفاصيل الطلب",
+                "genericError": "حدث خطأ",
+                "failedToSync": "فشل مزامنة الحالة",
+                "syncError": "حدث خطأ أثناء المزامنة",
+                "onlyPendingEditable": "يمكن تعديل الطلبات المعلقة فقط",
+                "failedToUpdate": "فشل تحديث الطلب",
+                "integrationError": "خطأ في التكامل",
+                "statusSynced": "تمت مزامنة الحالة بنجاح"
+            },
             "fields": {
                 "passType": "نوع التصريح",
                 "nationality": "الجنسية",

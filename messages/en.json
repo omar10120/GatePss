@@ -131,7 +131,15 @@
             "subtitle": "Perfect for urgent travel needs or busy schedules",
             "inputLabel": "Application Number",
             "inputPlaceholder": "Enter your Application Number",
-            "checkStatus": "Check Status"
+            "checkStatus": "Check Status",
+            "checking": "Checking...",
+            "errors": {
+                "pleaseEnterRequestNumber": "Please enter a request number",
+                "failedToCheck": "Failed to check request status",
+                "failedToRetrieve": "Failed to retrieve request status",
+                "statusCheckError": "An error occurred while checking the status",
+                "requestNotFound": "Request not found"
+            }
         },
         "permitStatus": {
             "rejectedTitle": "The Request Application Was Rejected",
@@ -640,6 +648,19 @@
             "requestapproved": "Request Approved Successfully!",
             "requestrejected": "Request Rejected Successfully!",
             "requestStatusUpdatedToPendingSuccessfully": "Request status updated to PENDING successfully!",
+            "errors": {
+                "noChangesToSave": "No changes to save",
+                "rejectionReasonMin": "Rejection reason must be at least 10 characters",
+                "rejectionReasonMinRejected": "Rejection reason must be at least 10 characters when status is REJECTED",
+                "failedToLoad": "Failed to load request details",
+                "genericError": "An error occurred",
+                "failedToSync": "Failed to sync status",
+                "syncError": "An error occurred during sync",
+                "onlyPendingEditable": "Only pending requests can be edited",
+                "failedToUpdate": "Failed to update request",
+                "integrationError": "Integration Error",
+                "statusSynced": "Status synced successfully"
+            },
             "fields": {
                 "passType": "Pass Type",
                 "nationality": "Nationality",
