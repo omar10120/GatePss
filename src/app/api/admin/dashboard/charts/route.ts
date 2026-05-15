@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
 
+/** Sohar / external gate pass reference present (issued permit). */
+function hasIssuedPermitReference(ref: string | null | undefined): boolean {
+    return ref != null && String(ref).trim() !== '';
+}
+
+/** Every UTC calendar day from start through end (inclusive), as YYYY-MM-DD. */
+function enumerateUtcCalendarDays(start: Date, end: Date): string[] {
+    const keys: string[] = [];
+    const t0 = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
+    const t1 = Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate());
+    for (let t = t0; t <= t1; t += 86_400_000) {
+        keys.push(new Date(t).toISOString().split('T')[0]);
+    }
+    return keys;
+}
+
 export async function GET(request: NextRequest) {
     return requirePermission(request, 'VIEW_DASHBOARD', async (req, user) => {
         try {
@@ -57,7 +73,7 @@ export async function GET(request: NextRequest) {
                 },
             });
 
-            // 📊 Group by date
+            // 📊 Group by UTC calendar day of createdAt (matches toISOString().split('T')[0])
             const dateMap = new Map<
                 string,
                 { approved: number; adminApproved: number; rejected: number; pending: number }
@@ -79,7 +95,8 @@ export async function GET(request: NextRequest) {
 
                 if (item.status === 'APPROVED') {
                     stats.approved++;
-                    if (!item.externalReference) {
+                    // adminApproved = issued permits (Sohar / external ref) — shown as "Permits" on dashboard
+                    if (hasIssuedPermitReference(item.externalReference)) {
                         stats.adminApproved++;
                     }
                 } else if (item.status === 'REJECTED') {
@@ -89,15 +106,17 @@ export async function GET(request: NextRequest) {
                 }
             });
 
-            const lineChartData = Array.from(dateMap.entries())
-                .map(([date, stats]) => ({
+            const dayKeys = enumerateUtcCalendarDays(startDate, endDate);
+            const lineChartData = dayKeys.map((date) => {
+                const stats = dateMap.get(date);
+                return {
                     date,
-                    approved: stats.approved,
-                    adminApproved: stats.adminApproved,
-                    rejected: stats.rejected,
-                    pending: stats.pending,
-                }))
-                .sort((a, b) => a.date.localeCompare(b.date));
+                    approved: stats?.approved ?? 0,
+                    adminApproved: stats?.adminApproved ?? 0,
+                    rejected: stats?.rejected ?? 0,
+                    pending: stats?.pending ?? 0,
+                };
+            });
 
             // 🥧 Pie chart (respect same date filter)
             const statusCounts = await prisma.request.groupBy({

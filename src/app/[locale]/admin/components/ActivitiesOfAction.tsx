@@ -129,9 +129,9 @@ export const ActivitiesOfAction: React.FC = () => {
         return path;
     };
 
-    // Line 1: All Requests (total requests)
+    // Line 1: All requests created that day (by current status buckets)
     const requestsPath = generatePath(chartData, (point) => point.approved + point.pending + point.rejected);
-    // Line 2: Admin-Approved Only (approved without externalReference, not Sohar-approved)
+    // Line 2: Permits = approved with external reference (issued / Sohar-linked), from API field adminApproved
     const adminApprovedPath = generatePath(chartData, (point) => point.adminApproved);
 
     // Get month labels based on data
