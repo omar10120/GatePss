@@ -56,6 +56,7 @@ body[dir="rtl"] {
 /* Hide native date picker icon and style custom date input */
 input[type="date"].date-input-custom {
   position: relative;
+  color-scheme: light;
 }
 
 input[type="date"].date-input-custom::-webkit-calendar-picker-indicator {
@@ -69,13 +70,28 @@ input[type="date"].date-input-custom::-webkit-clear-button {
   -webkit-appearance: none;
 }
 
-input[type="date"].date-input-custom {
-  color-scheme: light;
+/* Hide native mm/dd/yyyy hint when empty; custom placeholder overlay is used */
+input[type="date"].date-input-custom.date-empty::-webkit-datetime-edit {
+  opacity: 0;
+}
+
+input[type="date"].date-input-custom.date-empty:focus::-webkit-datetime-edit,
+input[type="date"].date-input-custom:not(.date-empty)::-webkit-datetime-edit {
+  opacity: 1;
 }
 
 /* Firefox */
 input[type="date"].date-input-custom::-moz-calendar-picker-indicator {
   display: none;
+}
+
+input[type="date"].date-input-custom.date-empty {
+  color: transparent;
+}
+
+input[type="date"].date-input-custom.date-empty:focus,
+input[type="date"].date-input-custom:not(.date-empty) {
+  color: #111827;
 }
 
 /* Custom Scrollbar */
