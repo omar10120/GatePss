@@ -121,7 +121,16 @@ export class SoharPortHttpClient {
 
                 // Structured log for error response
                 const fullUrl = error.config?.baseURL ? `${error.config.baseURL}${error.config.url}` : error.config?.url;
-                logger.error(`❌ Sohar Port API Error: ${error.message} ${fullUrl}`, {
+                const errData = error.response?.data;
+                const errDetails =
+                    (typeof errData?.ErrorDetails === 'string' && errData.ErrorDetails) ||
+                    (typeof errData?.errorDetails === 'string' && errData.errorDetails) ||
+                    '';
+                const isInvalidPassNumber =
+                    error.response?.status === 400 &&
+                    errDetails.toLowerCase().includes('invalid passnumber');
+
+                const payload = {
                     type: 'SOHAR_PORT_ERROR',
                     requestId,
                     url: fullUrl,
@@ -129,9 +138,15 @@ export class SoharPortHttpClient {
                     status: error.response?.status,
                     message: error.message,
                     duration: duration ? `${duration}ms` : undefined,
-                    data: error.response?.data,
+                    data: errData,
                     stack: error.stack,
-                });
+                };
+
+                if (isInvalidPassNumber) {
+                    logger.warn(`Sohar Port API validation: ${error.message} ${fullUrl}`, payload);
+                } else {
+                    logger.error(`❌ Sohar Port API Error: ${error.message} ${fullUrl}`, payload);
+                }
                 return Promise.reject(this.handleError(error));
             }
         );

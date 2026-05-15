@@ -29,6 +29,10 @@ yarn-error.log*
 .env*.local
 .env.production
 
+# Local deploy / SSH secrets
+deploy/ssh.local.env
+deploy/*.local.*
+
 # Vercel
 .vercel
 

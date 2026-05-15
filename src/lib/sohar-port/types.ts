@@ -117,6 +117,8 @@ export interface CancelGatePassResponse extends BaseResponse {
  */
 export interface GetGatePassRequest {
     externalReference: string;
+    /** Sohar query param `entity` (e.g. port | freezone). Must match create; defaults to SOHAR_PORT_ENTITY. */
+    entity?: string;
 }
 
 /**
