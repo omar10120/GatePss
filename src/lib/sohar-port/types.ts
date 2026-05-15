@@ -148,6 +148,8 @@ export interface GatePassData {
 export interface GetGatePassResponse extends BaseResponse {
     data?: GatePassData;
     error?: string;
+    /** Machine-readable subtype when Sohar denies read for this pass (credentials/ACL). */
+    errorCode?: string;
 }
 
 /**

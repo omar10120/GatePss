@@ -3,6 +3,10 @@ import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
 import { SoharPortClient } from '@/lib/sohar-port';
 import { normalizeGatePassStatus } from '@/lib/sohar-port/receive/get-gate-pass';
+import {
+    isSoharPassDetailsNotAuthorizedText,
+    SOHAR_PASS_NOT_AUTHORIZED_CODE,
+} from '@/lib/sohar-port/sohar-error-helpers';
 import { ActionType } from '@/lib/enums';
 import { logger } from '@/lib/logger';
 
@@ -48,9 +52,10 @@ export async function POST(request: NextRequest) {
                 failed: 0,
                 noChange: 0,
                 rounds: 0,
+                soharAccessDenied: 0,
             };
 
-            const failureDetails: { id: number; requestNumber: string; message: string }[] = [];
+            const failureDetails: { id: number; requestNumber: string; message: string; code?: string }[] = [];
             const delayMs = Math.min(
                 2000,
                 Math.max(0, Number.parseInt(process.env.SOHAR_SYNC_BATCH_DELAY_MS || '0', 10) || 0)
@@ -133,27 +138,51 @@ export async function POST(request: NextRequest) {
                         } else {
                             results.failed++;
                             const failMsg = apiResponse.message || apiResponse.error || 'Unknown error';
-                            failureDetails.push({
-                                id: row.id,
-                                requestNumber: row.requestNumber,
-                                message: failMsg,
-                            });
-                            logger.warn(`Failed to sync request ${row.id}: ${failMsg}`);
+                            const accessDenied =
+                                apiResponse.errorCode === SOHAR_PASS_NOT_AUTHORIZED_CODE ||
+                                isSoharPassDetailsNotAuthorizedText(failMsg);
 
-                            await prisma.activityLog.create({
-                                data: {
-                                    userId: user.userId,
-                                    actionType: ActionType.SYSTEM_INTEGRATION,
-                                    actionPerformed: `Batch sync failed for request ${row.requestNumber}`,
-                                    affectedEntityType: 'REQUEST',
-                                    affectedEntityId: row.id,
-                                    details: JSON.stringify({
-                                        error: apiResponse.message,
-                                        statusCode: apiResponse.statusCode,
-                                        apiResponse: apiResponse,
-                                    }),
-                                },
-                            });
+                            if (accessDenied) {
+                                results.soharAccessDenied++;
+                                await prisma.request.update({
+                                    where: { id: row.id },
+                                    data: {
+                                        lastIntegrationStatusCode: apiResponse.statusCode ?? 400,
+                                        lastIntegrationStatusMessage: failMsg,
+                                    },
+                                });
+                                failureDetails.push({
+                                    id: row.id,
+                                    requestNumber: row.requestNumber,
+                                    message: failMsg,
+                                    code: SOHAR_PASS_NOT_AUTHORIZED_CODE,
+                                });
+                                logger.warn(
+                                    `Sohar access denied for pass (batch): request ${row.id} — ${failMsg}`
+                                );
+                            } else {
+                                failureDetails.push({
+                                    id: row.id,
+                                    requestNumber: row.requestNumber,
+                                    message: failMsg,
+                                });
+                                logger.warn(`Failed to sync request ${row.id}: ${failMsg}`);
+
+                                await prisma.activityLog.create({
+                                    data: {
+                                        userId: user.userId,
+                                        actionType: ActionType.SYSTEM_INTEGRATION,
+                                        actionPerformed: `Batch sync failed for request ${row.requestNumber}`,
+                                        affectedEntityType: 'REQUEST',
+                                        affectedEntityId: row.id,
+                                        details: JSON.stringify({
+                                            error: apiResponse.message,
+                                            statusCode: apiResponse.statusCode,
+                                            apiResponse: apiResponse,
+                                        }),
+                                    },
+                                });
+                            }
                         }
                     } catch (err: unknown) {
                         results.failed++;
@@ -190,7 +219,7 @@ export async function POST(request: NextRequest) {
 
             return NextResponse.json({
                 success: true,
-                message: `Batch sync completed. Rows touched: ${results.total}, Updated: ${results.updated}, Failed: ${results.failed}, No Change: ${results.noChange}`,
+                message: `Batch sync completed. Rows touched: ${results.total}, Updated: ${results.updated}, Failed: ${results.failed}, No Change: ${results.noChange}${results.soharAccessDenied ? `, Sohar access denied: ${results.soharAccessDenied}` : ''}`,
                 data: {
                     ...results,
                     batchSize,

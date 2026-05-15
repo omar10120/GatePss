@@ -18,8 +18,12 @@
 import { SoharPortHttpClient } from '../client';
 import { GetGatePassRequest, GetGatePassResponse, GatePassStatus, SoharPortNotFoundError, GatePassData } from '../types';
 import { getEndpointUrl } from '../config';
-import { logSuccess, logError } from '../utils/logger';
+import { logSuccess, logError, logWarning } from '../utils/logger';
 import { logger } from '../../logger';
+import {
+    isSoharPassDetailsNotAuthorizedText,
+    SOHAR_PASS_NOT_AUTHORIZED_CODE,
+} from '../sohar-error-helpers';
 
 const env = ((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env) || {};
 
@@ -119,22 +123,41 @@ export async function getGatePass(
         return result;
 
     } catch (error: any) {
-        logError('getGatePass', error);
+        const rawMsg =
+            error?.message ||
+            error?.response?.data?.ErrorDetails ||
+            error?.response?.data?.message ||
+            '';
+        if (isSoharPassDetailsNotAuthorizedText(String(rawMsg))) {
+            logWarning('getGatePass', `[${SOHAR_PASS_NOT_AUTHORIZED_CODE}] ${rawMsg}`);
+        } else {
+            logError('getGatePass', error);
+        }
 
         // Handle different error types
         const statusCode = error.statusCode || error.response?.status || 500;
         
         // Provide more descriptive error messages
         let errorMessage: string;
+        let errorCode: string | undefined;
         if (error instanceof SoharPortNotFoundError) {
             errorMessage = `Gate pass not found in Sohar Port system. The pass number "${passNumber}" does not exist or has been removed.`;
         } else {
-            const rawMessage = error.message || error.response?.data?.message || 'Failed to retrieve gate pass from Sohar Port';
+            const rawMessage =
+                error.message ||
+                error.response?.data?.ErrorDetails ||
+                error.response?.data?.message ||
+                'Failed to retrieve gate pass from Sohar Port';
             // If the message is just "NOT_FOUND", provide more context
             if (rawMessage === 'NOT_FOUND' || rawMessage.toUpperCase() === 'NOT_FOUND') {
                 errorMessage = `Gate pass not found in Sohar Port system. The pass number "${passNumber}" does not exist or has been removed.`;
             } else {
                 errorMessage = rawMessage;
+            }
+            if (isSoharPassDetailsNotAuthorizedText(rawMessage)) {
+                errorCode = SOHAR_PASS_NOT_AUTHORIZED_CODE;
+                errorMessage =
+                    `${rawMessage} — Sohar blocked read for this pass with the current API user; check Sohar ACL / entity (port vs freezone) or ask Sohar to link passes to your integration account.`;
             }
         }
 
@@ -143,6 +166,7 @@ export async function getGatePass(
             statusCode,
             message: errorMessage,
             error: errorMessage,
+            ...(errorCode ? { errorCode } : {}),
         };
     }
 }
