@@ -34,6 +34,7 @@ interface Request {
     dateOfVisit: string;
     requestType: string;
     status: string;
+    rejectionReason?: string | null;
     passFor?: string | null;
     createdAt: string;
     updatedAt: string;
@@ -509,6 +510,12 @@ export default function AdminRequestsPage() {
                                                                                     <span className="font-semibold text-gray-700">{t('columns.passFor')}: </span>
                                                                                     <span className="text-gray-600">{getPassForLabel(request.requestType)}</span>
                                                                                 </div>
+                                                                                {request.rejectionReason && (
+                                                                                    <div>
+                                                                                        <span className="font-semibold text-gray-700">{t('columns.rejectionReason')}: </span>
+                                                                                        <span className="text-gray-600">{request.rejectionReason}</span>
+                                                                                    </div>
+                                                                                )}
                                                                                 <div className="sm:col-span-2 lg:col-span-3">
                                                                                     <span className="font-semibold text-gray-700">{t('columns.soharMessage')}: </span>
                                                                                     <span className="text-gray-600">{request.lastIntegrationStatusMessage || '-'}</span>

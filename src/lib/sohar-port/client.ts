@@ -17,6 +17,7 @@ import {
 import { getConfig, HTTP_STATUS, ERROR_MESSAGES } from './config';
 import { logApiCall } from './utils/logger';
 import { logger } from '../logger';
+import { isSoharPassDetailsNotAuthorizedText } from './sohar-error-helpers';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { randomUUID } from 'crypto';
 
@@ -130,6 +131,9 @@ export class SoharPortHttpClient {
                     error.response?.status === 400 &&
                     errDetails.toLowerCase().includes('invalid passnumber');
 
+                const isPassDetailsNotAuthorized =
+                    error.response?.status === 400 && isSoharPassDetailsNotAuthorizedText(errDetails);
+
                 const payload = {
                     type: 'SOHAR_PORT_ERROR',
                     requestId,
@@ -142,8 +146,8 @@ export class SoharPortHttpClient {
                     stack: error.stack,
                 };
 
-                if (isInvalidPassNumber) {
-                    logger.warn(`Sohar Port API validation: ${error.message} ${fullUrl}`, payload);
+                if (isInvalidPassNumber || isPassDetailsNotAuthorized) {
+                    logger.warn(`Sohar Port API (non-fatal): ${error.message} ${fullUrl}`, payload);
                 } else {
                     logger.error(`❌ Sohar Port API Error: ${error.message} ${fullUrl}`, payload);
                 }
