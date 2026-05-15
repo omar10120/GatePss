@@ -342,7 +342,7 @@ export default function RequestDetailsPage() {
             // Validate rejection reason if status is being changed to REJECTED
             if (newStatus === 'REJECTED') {
                 const rejectionReason = editData.rejectionReason !== undefined ? editData.rejectionReason : request.rejectionReason;
-                if (!rejectionReason || rejectionReason.trim().length < 10) {
+                if (!rejectionReason || rejectionReason.trim().length === 0) {
                     setError(et('rejectionReasonMinRejected'));
                     setProcessing(false);
                     return;
@@ -731,7 +731,7 @@ export default function RequestDetailsPage() {
             if (status === 'APPROVED') {
                 endpoint = `/api/admin/requests/${requestId}/approve`;
             } else if (status === 'REJECTED') {
-                if (!rejectionReason || rejectionReason.trim().length < 10) {
+                if (!rejectionReason || rejectionReason.trim().length === 0) {
                     setError(et('rejectionReasonMin'));
                     setProcessing(false);
                     return;
@@ -792,7 +792,7 @@ export default function RequestDetailsPage() {
     };
 
     const handleReject = async () => {
-        if (rejectionReason.length < 10) {
+        if (!rejectionReason.trim()) {
             setError(et('rejectionReasonMin'));
             return;
         }
@@ -903,10 +903,9 @@ export default function RequestDetailsPage() {
                                                         <textarea
                                                             value={editData.rejectionReason !== undefined ? (editData.rejectionReason || '') : (request.rejectionReason || '')}
                                                             onChange={(e) => setEditData(prev => ({ ...prev, rejectionReason: e.target.value }))}
-                                                            placeholder={t('rejectReasonPlaceholder') || "Enter rejection reason (minimum 10 characters)"}
+                                                            placeholder={t('rejectReasonPlaceholder')}
                                                             rows={3}
                                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                            minLength={10}
                                                         />
                                                     </div>
                                                 )}
@@ -1496,7 +1495,6 @@ export default function RequestDetailsPage() {
                                     placeholder={t('rejectReasonPlaceholder')}
                                     rows={4}
                                     className="input mb-4"
-                                    minLength={10}
                                 />
 
                                 <div className="flex gap-3">
@@ -1524,7 +1522,7 @@ export default function RequestDetailsPage() {
                                             setRejectionReason('');
                                         }}
                                         className="btn btn-danger flex-1"
-                                        disabled={rejectionReason.length < 10}
+                                        disabled={!rejectionReason.trim()}
                                     >
                                         {t('confirmReject')}
                                     </button>

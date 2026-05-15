@@ -158,8 +158,8 @@ export function validateLogin(data: LoginData): ValidationResult {
 export function validateRejection(rejectionReason?: string): ValidationResult {
   const errors: string[] = [];
 
-  if (!rejectionReason || !validateMinLength(rejectionReason, 10)) {
-    errors.push('Rejection reason is required (minimum 10 characters)');
+  if (!rejectionReason || !validateMinLength(rejectionReason, 1)) {
+    errors.push('Rejection reason is required');
   }
 
   return {

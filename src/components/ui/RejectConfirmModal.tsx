@@ -17,11 +17,7 @@ export default function RejectConfirmModal({ isOpen, onClose, onConfirm }: Rejec
 
     const handleConfirm = () => {
         if (!rejectionReason.trim()) {
-            alert(t('rejectReasonPlaceholder'));
-            return;
-        }
-        if (rejectionReason.trim().length < 10) {
-            alert('Rejection reason must be at least 10 characters');
+            alert(t('errors.rejectionReasonMin'));
             return;
         }
         onConfirm(rejectionReason.trim());
@@ -45,7 +41,6 @@ export default function RejectConfirmModal({ isOpen, onClose, onConfirm }: Rejec
                         placeholder="type your rejection reason"
                         rows={4}
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 resize-none"
-                        minLength={10}
                     />
                 </div>
 
