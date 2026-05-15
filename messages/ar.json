@@ -588,7 +588,8 @@
                 "passFor": "المستفيد من التصريح",
                 "uploaded": "تم الرفع",
                 "soharStatus": "حالة صحار",
-                "soharMessage": "رسالة صحار"
+                "soharMessage": "رسالة صحار",
+                "rejectionReason": "سبب الرفض"
             },
             "viewDetails": "عرض التفاصيل",
             "noResults": "لم يتم العثور على طلبات",

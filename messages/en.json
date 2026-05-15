@@ -583,7 +583,8 @@
                 "passFor": "Beneficiary of the permit",
                 "uploaded": "Uploaded",
                 "soharStatus": "Sohar Status",
-                "soharMessage": "Sohar Message"
+                "soharMessage": "Sohar Message",
+                "rejectionReason": "Rejection Reason"
             },
             "viewDetails": "View Details",
             "noResults": "No requests found",
