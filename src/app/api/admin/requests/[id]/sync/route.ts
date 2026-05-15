@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
 import { SoharPortClient } from '@/lib/sohar-port';
+import { normalizeGatePassStatus } from '@/lib/sohar-port/receive/get-gate-pass';
 import { ActionType } from '@/lib/enums';
 import { logger } from '@/lib/logger';
 
@@ -42,6 +43,7 @@ export async function POST(
             const soharPortClient = new SoharPortClient();
             const apiResponse = await soharPortClient.receive.getGatePass({
                 externalReference: gateRequest.externalReference,
+                entity: gateRequest.entityType,
             });
 
             if (!apiResponse.success || !apiResponse.data) {
@@ -55,9 +57,11 @@ export async function POST(
             }
 
             const newExternalStatus = apiResponse.data.status;
-            
-            // Only update if status changed
-            if (newExternalStatus !== gateRequest.externalStatus) {
+            const prevNorm = normalizeGatePassStatus(gateRequest.externalStatus);
+            const nextNorm = normalizeGatePassStatus(newExternalStatus);
+
+            // Only update if status changed (normalize casing/spelling variants)
+            if (prevNorm !== nextNorm) {
                 await prisma.request.update({
                     where: { id: requestId },
                     data: {

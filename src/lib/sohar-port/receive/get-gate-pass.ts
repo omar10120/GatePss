@@ -7,9 +7,10 @@
  * API Endpoint: GET /api/getpassdetails/get
  * Query Parameters:
  *   - passNumber: The external reference (Sohar Port pass number)
- *   - entity: Always "port"
+ *   - entity: port | freezone (must match create)
  * 
- * Authentication: Basic Auth from env (SOHAR_PORT_USERNAME, SOHAR_PORT_PASSWORD). Entity: SOHAR_PORT_ENTITY (default port).
+ * Authentication: Basic Auth from env (SOHAR_PORT_USERNAME, SOHAR_PORT_PASSWORD).
+ * Entity: request.entity if set, else SOHAR_PORT_ENTITY (default port). Must match the entity used at create time.
  * 
  * Reference: docs/GatePass.postman_collection.json
  */
@@ -24,6 +25,13 @@ const env = ((globalThis as { process?: { env?: Record<string, string | undefine
 
 function getSoharEntity(): string {
     return env.SOHAR_PORT_ENTITY?.trim() || 'port';
+}
+
+/** Trim and strip invisible chars Sohar may reject in passNumber. */
+export function normalizeSoharPassNumber(ref: string): string {
+    return String(ref)
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')
+        .trim();
 }
 
 /**
@@ -45,41 +53,45 @@ export async function getGatePass(
     client: SoharPortHttpClient,
     request: GetGatePassRequest
 ): Promise<GetGatePassResponse> {
+    const passNumber = normalizeSoharPassNumber(request.externalReference);
+
     try {
-        // Validate request
-        if (!request.externalReference || request.externalReference.trim() === '') {
-            throw new Error('externalReference (passNumber) is required');
+        if (!passNumber) {
+            return {
+                success: false,
+                statusCode: 400,
+                message: 'externalReference (passNumber) is required',
+                error: 'externalReference (passNumber) is required',
+            };
         }
 
-        logSuccess('getGatePass', `Fetching gate pass: ${request.externalReference}`);
+        logSuccess('getGatePass', `Fetching gate pass: ${passNumber}`);
 
-        const entity = getSoharEntity();
+        const entity = (request.entity && String(request.entity).trim()) || getSoharEntity();
 
-        // Make GET request to Sohar Port API
-        // Endpoint: /api/getpassdetails/get?passNumber={externalReference}&entity={SOHAR_PORT_ENTITY}
-        logger.info(`Sohar Port Get Gate Pass Request: ${request.externalReference}`, {
+        // Endpoint: /api/getpassdetails/get?passNumber=...&entity=...
+        logger.info(`Sohar Port Get Gate Pass Request: ${passNumber}`, {
             type: 'SOHAR_PORT_GET_GATE_PASS_REQUEST',
-            externalReference: request.externalReference,
+            externalReference: passNumber,
             params: {
-                passNumber: request.externalReference.trim(),
+                passNumber,
                 entity,
-            }
+            },
         });
 
         const response = await client.request<any>({
             method: 'GET',
             endpoint: getEndpointUrl('v1', 'GET_GATE_PASS'),
             params: {
-                passNumber: request.externalReference.trim(),
+                passNumber,
                 entity,
             },
-            externalReference: request.externalReference,
+            externalReference: passNumber,
         });
 
-        // Log the raw response from Sohar Port
-        logger.info(`Sohar Port Get Gate Pass Response: ${request.externalReference}`, {
+        logger.info(`Sohar Port Get Gate Pass Response: ${passNumber}`, {
             type: 'SOHAR_PORT_GET_GATE_PASS_RESPONSE',
-            externalReference: request.externalReference,
+            externalReference: passNumber,
             response,
         });
 
@@ -88,7 +100,7 @@ export async function getGatePass(
         const statusValue = response.status || response.PassStatus || response.externalStatus;
         const mappedStatus = mapSoharStatusToInternal(statusValue);
         const gatePassData: GatePassData = {
-            externalReference: response.Barcode || response.PassNumber || request.externalReference,
+            externalReference: response.Barcode || response.PassNumber || passNumber,
             status: mappedStatus || 'PENDING' as GatePassStatus,
             metadata: {
                 ...response,
@@ -115,12 +127,12 @@ export async function getGatePass(
         // Provide more descriptive error messages
         let errorMessage: string;
         if (error instanceof SoharPortNotFoundError) {
-            errorMessage = `Gate pass not found in Sohar Port system. The pass number "${request.externalReference}" does not exist or has been removed.`;
+            errorMessage = `Gate pass not found in Sohar Port system. The pass number "${passNumber}" does not exist or has been removed.`;
         } else {
             const rawMessage = error.message || error.response?.data?.message || 'Failed to retrieve gate pass from Sohar Port';
             // If the message is just "NOT_FOUND", provide more context
             if (rawMessage === 'NOT_FOUND' || rawMessage.toUpperCase() === 'NOT_FOUND') {
-                errorMessage = `Gate pass not found in Sohar Port system. The pass number "${request.externalReference}" does not exist or has been removed.`;
+                errorMessage = `Gate pass not found in Sohar Port system. The pass number "${passNumber}" does not exist or has been removed.`;
             } else {
                 errorMessage = rawMessage;
             }
@@ -133,6 +145,17 @@ export async function getGatePass(
             error: errorMessage,
         };
     }
+}
+
+/**
+ * Canonical status for compares / DB alignment (matches mapSoharStatusToInternal).
+ */
+export function normalizeGatePassStatus(status: string | null | undefined): string {
+  if (status === null || status === undefined || String(status).trim() === '') {
+    return '';
+  }
+  const mapped = mapSoharStatusToInternal(status);
+  return mapped ?? String(status).toUpperCase().trim();
 }
 
 /**

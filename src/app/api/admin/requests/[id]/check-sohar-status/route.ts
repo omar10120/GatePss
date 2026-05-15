@@ -44,6 +44,7 @@ export async function POST(
             const soharPortClient = new SoharPortClient();
             const soharResponse = await soharPortClient.receive.getGatePass({
                 externalReference: gateRequest.externalReference,
+                entity: gateRequest.entityType,
             });
 
             if (!soharResponse.success) {
