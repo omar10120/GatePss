@@ -16,6 +16,7 @@ import { PermitSection } from './components/PermitSection';
 import SuccessModal from '@/components/ui/SuccessModal';
 import IntegrationErrorModal from '@/components/ui/IntegrationErrorModal';
 import { apiFetch, authenticatedFetch } from '@/lib/api-client';
+import { translateApiErrorMessage } from '@/lib/translate-error';
 import { compressImage, getInternalUrl } from '@/utils/helpers';
 
 interface RequestDetails {
@@ -96,8 +97,12 @@ export default function RequestDetailsPage() {
     const locale = useLocale();
     const isRtl = locale === 'ar';
     const t = useTranslations('Admin.requestDetails');
+    const et = useTranslations('Admin.requestDetails.errors');
     const dt = useTranslations('Admin.dashboard');
     const gt = useTranslations('GatePassPage');
+
+    const localizeError = (message: string, fallback?: string) =>
+        translateApiErrorMessage(message || fallback || et('genericError'), locale);
 
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
@@ -247,7 +252,7 @@ export default function RequestDetailsPage() {
             if (error.message?.includes('Forbidden') || error.message?.includes('permission')) {
                 setPermissionDenied(true);
             } else {
-                setError('Failed to load request details');
+                setError(et('failedToLoad'));
             }
             // apiFetch handles 401 (token expiration) automatically with redirect
         } finally {
@@ -337,8 +342,8 @@ export default function RequestDetailsPage() {
             // Validate rejection reason if status is being changed to REJECTED
             if (newStatus === 'REJECTED') {
                 const rejectionReason = editData.rejectionReason !== undefined ? editData.rejectionReason : request.rejectionReason;
-                if (!rejectionReason || rejectionReason.trim().length < 10) {
-                    setError('Rejection reason must be at least 10 characters when status is REJECTED');
+                if (!rejectionReason || rejectionReason.trim().length === 0) {
+                    setError(et('rejectionReasonMinRejected'));
                     setProcessing(false);
                     return;
                 }
@@ -373,7 +378,7 @@ export default function RequestDetailsPage() {
             //     return;
             // }
             if (!statusChanged && !hasOtherChanges) {
-                setError('No changes to save');
+                setError(et('noChangesToSave'));
                 return;
             }
 
@@ -638,7 +643,7 @@ export default function RequestDetailsPage() {
             router.replace(`/admin/requests/${requestId}`);
             fetchRequestDetails(requestId, false);
         } catch (err: any) {
-            setError(err.message || 'An error occurred');
+            setError(localizeError(err.message));
             // apiFetch/authenticatedFetch handles 401 (token expiration) automatically with redirect
         } finally {
             setProcessing(false);
@@ -660,13 +665,13 @@ export default function RequestDetailsPage() {
             const result = await response.json().catch(() => ({}));
 
             if (response.ok && result.success) {
-                setSuccess(result.message || 'Status synced successfully');
+                setSuccess(result.message ? localizeError(result.message) : et('statusSynced'));
                 fetchRequestDetails(requestId, false);
             } else {
-                setError(result.message || 'Failed to sync status');
+                setError(localizeError(result.message, et('failedToSync')));
             }
         } catch (err: any) {
-            setError(err.message || 'An error occurred during sync');
+            setError(localizeError(err.message, et('syncError')));
         } finally {
             setIsSyncing(false);
         }
@@ -698,7 +703,7 @@ export default function RequestDetailsPage() {
         //     return;
         // }
         if (!request || request.status !== 'PENDING') {
-            setError('Only pending requests can be edited');
+            setError(et('onlyPendingEditable'));
           return;
         }
 
@@ -726,8 +731,8 @@ export default function RequestDetailsPage() {
             if (status === 'APPROVED') {
                 endpoint = `/api/admin/requests/${requestId}/approve`;
             } else if (status === 'REJECTED') {
-                if (!rejectionReason || rejectionReason.trim().length < 10) {
-                    setError('Rejection reason must be at least 10 characters');
+                if (!rejectionReason || rejectionReason.trim().length === 0) {
+                    setError(et('rejectionReasonMin'));
                     setProcessing(false);
                     return;
                 }
@@ -770,12 +775,12 @@ export default function RequestDetailsPage() {
             console.error('Error updating status:', err);
             if (err.details || err.message?.includes('Integration')) {
                 setIntegrationError({
-                    error: err.details?.error || 'Integration Error',
-                    message: err.message,
+                    error: localizeError(err.details?.error || et('integrationError')),
+                    message: localizeError(err.message),
                     details: err.details
                 });
             } else {
-                setError(err.message || 'An error occurred');
+                setError(localizeError(err.message));
             }
         } finally {
             setProcessing(false);
@@ -787,8 +792,8 @@ export default function RequestDetailsPage() {
     };
 
     const handleReject = async () => {
-        if (rejectionReason.length < 10) {
-            setError('Rejection reason must be at least 10 characters');
+        if (!rejectionReason.trim()) {
+            setError(et('rejectionReasonMin'));
             return;
         }
         await handleStatusUpdate('REJECTED', rejectionReason);
@@ -898,10 +903,9 @@ export default function RequestDetailsPage() {
                                                         <textarea
                                                             value={editData.rejectionReason !== undefined ? (editData.rejectionReason || '') : (request.rejectionReason || '')}
                                                             onChange={(e) => setEditData(prev => ({ ...prev, rejectionReason: e.target.value }))}
-                                                            placeholder={t('rejectReasonPlaceholder') || "Enter rejection reason (minimum 10 characters)"}
+                                                            placeholder={t('rejectReasonPlaceholder')}
                                                             rows={3}
                                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                            minLength={10}
                                                         />
                                                     </div>
                                                 )}
@@ -1453,7 +1457,7 @@ export default function RequestDetailsPage() {
                                 {(error || success) && (
                                     
                                         <div className={`mb-4 p-4 rounded-lg ${error ? 'bg-red-50 border border-red-200 text-red-800' : 'bg-green-50 border border-green-200 text-green-800'}`}>
-                                            {error || success}
+                                            {error ? localizeError(error) : success}
                                         </div>
                                 )}
                             </div>
@@ -1491,7 +1495,6 @@ export default function RequestDetailsPage() {
                                     placeholder={t('rejectReasonPlaceholder')}
                                     rows={4}
                                     className="input mb-4"
-                                    minLength={10}
                                 />
 
                                 <div className="flex gap-3">
@@ -1519,7 +1522,7 @@ export default function RequestDetailsPage() {
                                             setRejectionReason('');
                                         }}
                                         className="btn btn-danger flex-1"
-                                        disabled={rejectionReason.length < 10}
+                                        disabled={!rejectionReason.trim()}
                                     >
                                         {t('confirmReject')}
                                     </button>

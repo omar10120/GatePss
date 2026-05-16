@@ -131,7 +131,15 @@
             "subtitle": "مثالي للاحتياجات العاجلة للسفر أو الجداول المزدحمة",
             "inputLabel": "رقم الطلب",
             "inputPlaceholder": "أدخل رقم الطلب الخاص بك",
-            "checkStatus": "تحقق من الحالة"
+            "checkStatus": "تحقق من الحالة",
+            "checking": "جاري التحقق...",
+            "errors": {
+                "pleaseEnterRequestNumber": "يرجى إدخال رقم الطلب",
+                "failedToCheck": "فشل التحقق من حالة الطلب",
+                "failedToRetrieve": "فشل استرجاع حالة الطلب",
+                "statusCheckError": "حدث خطأ أثناء التحقق من الحالة",
+                "requestNotFound": "الطلب غير موجود"
+            }
         },
         "permitStatus": {
             "rejectedTitle": "لقد تم رفض طلب التصريح",
@@ -256,6 +264,7 @@
             "selectPassType": "اختر نوع التصريح --",
             "typeOrganization": "اكتب اسم المنظمة --",
             "selectDate": "اختر مدة لزيارتك --",
+            "selectPassStartingDate": "يوم/شهر/سنة",
             "selectBeneficiary": "اختر المستفيد من التصريح --",
             "typePurpose": "اكتب الغرض من الزيارة",
             "otherProfessions": "أدخل تفاصيل مهنة أخرى (اختياري)",
@@ -263,8 +272,8 @@
             "telephoneHolder": "هاتف حامل التصريح",
             "emailHolder": "البريد الإلكتروني لحامل التصريح",
             "typeIdPassport": "اكتب رقم الهوية أو جواز السفر لحامل التصريح",
-            "chooseFile": "اختر ملفاً (DOC, PDF, ZIP) بحد أقصى ١ ميجابايت",
-            "choosePhoto": "اختر صورة (PNG, JPG) بحد أقصى ١ ميجابايت",
+            "chooseFile": "اختر ملفاً (PDF) بحد أقصى ٢ ميجابايت",
+            "choosePhoto": "اختر صورة (PNG, JPG) بحد أقصى ٢٥٠ كيلوبايت",
             "choosePhotoOrPdf": "اختر ملفاً (PNG, JPG, PDF) بحد أقصى ٢ ميجابايت"
         },
         "confirmation": "أؤكد أنني راجعت جميع المعلومات والمرفقات في هذا الطلب، وأتحمل المسؤولية الكاملة عن جميع المعلومات التي يحتوي عليها.",
@@ -579,7 +588,8 @@
                 "passFor": "المستفيد من التصريح",
                 "uploaded": "تم الرفع",
                 "soharStatus": "حالة صحار",
-                "soharMessage": "رسالة صحار"
+                "soharMessage": "رسالة صحار",
+                "rejectionReason": "سبب الرفض"
             },
             "viewDetails": "عرض التفاصيل",
             "noResults": "لم يتم العثور على طلبات",
@@ -631,7 +641,7 @@
             "rejecting": "جاري الرفض...",
             "rejectModalTitle": "رفض الطلب",
             "rejectModalDesc": "يرجى تقديم سبب لرفض هذا الطلب:",
-            "rejectReasonPlaceholder": "أدخل سبب الرفض (10 أحرف على الأقل)",
+            "rejectReasonPlaceholder": "أدخل سبب الرفض",
             "cancel": "إلغاء",
             "confirmReject": "تأكيد الرفض",
             "submittedOn": "تم التقديم في",
@@ -645,6 +655,19 @@
             "passPermitInfo": "معلومات تصريح المرور",
             "passHolderInfo": "معلومات حامل التصريح",
             "permitsQrCode": "التصاريح (رمز الاستجابة السريعة)",
+            "errors": {
+                "noChangesToSave": "لا توجد تغييرات لحفظها",
+                "rejectionReasonMin": "سبب الرفض مطلوب",
+                "rejectionReasonMinRejected": "سبب الرفض مطلوب عندما تكون الحالة مرفوضة",
+                "failedToLoad": "فشل تحميل تفاصيل الطلب",
+                "genericError": "حدث خطأ",
+                "failedToSync": "فشل مزامنة الحالة",
+                "syncError": "حدث خطأ أثناء المزامنة",
+                "onlyPendingEditable": "يمكن تعديل الطلبات المعلقة فقط",
+                "failedToUpdate": "فشل تحديث الطلب",
+                "integrationError": "خطأ في التكامل",
+                "statusSynced": "تمت مزامنة الحالة بنجاح"
+            },
             "fields": {
                 "passType": "نوع التصريح",
                 "nationality": "الجنسية",

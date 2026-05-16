@@ -131,7 +131,15 @@
             "subtitle": "Perfect for urgent travel needs or busy schedules",
             "inputLabel": "Application Number",
             "inputPlaceholder": "Enter your Application Number",
-            "checkStatus": "Check Status"
+            "checkStatus": "Check Status",
+            "checking": "Checking...",
+            "errors": {
+                "pleaseEnterRequestNumber": "Please enter a request number",
+                "failedToCheck": "Failed to check request status",
+                "failedToRetrieve": "Failed to retrieve request status",
+                "statusCheckError": "An error occurred while checking the status",
+                "requestNotFound": "Request not found"
+            }
         },
         "permitStatus": {
             "rejectedTitle": "The Request Application Was Rejected",
@@ -256,6 +264,7 @@
             "selectPassType": "Select Pass Type --",
             "typeOrganization": "Type Organization Name --",
             "selectDate": "Select a duration for your visit --",
+            "selectPassStartingDate": "DD/MM/YYYY",
             "selectBeneficiary": "Select the beneficiary of the permit --",
             "typePurpose": "Type the purpose of the visit",
             "otherProfessions": "Enter other profession details (optional)",
@@ -263,8 +272,8 @@
             "telephoneHolder": "Telephone of Pass Holder",
             "emailHolder": "Email of Pass Holder",
             "typeIdPassport": "Type ID Or Passport Number of Pass Holder",
-            "chooseFile": "Choose File (DOC, PDF, ZIP) max 1MB",
-            "choosePhoto": "Choose Photo (PNG, JPG) max 1MB",
+            "chooseFile": "Choose File (PDF) max 2MB",
+            "choosePhoto": "Choose Photo (PNG, JPG) max 250KB",
             "choosePhotoOrPdf": "Choose File (PNG, JPG, PDF) max 2MB"
         },
         "confirmation": "I Confirm That I Have Reviewed All Information And Attachments In This Request, And I Am Fully Responsible For All Information That Contains.",
@@ -574,7 +583,8 @@
                 "passFor": "Beneficiary of the permit",
                 "uploaded": "Uploaded",
                 "soharStatus": "Sohar Status",
-                "soharMessage": "Sohar Message"
+                "soharMessage": "Sohar Message",
+                "rejectionReason": "Rejection Reason"
             },
             "viewDetails": "View Details",
             "noResults": "No requests found",
@@ -620,7 +630,7 @@
             "rejecting": "Rejecting...",
             "rejectModalTitle": "Reject Request.",
             "rejectModalDesc": "Please provide a reason for rejecting this request:",
-            "rejectReasonPlaceholder": "Enter rejection reason (minimum 10 characters)",
+            "rejectReasonPlaceholder": "Enter rejection reason",
             "cancel": "Cancel",
             "confirmReject": "Confirm Rejection.",
             "submittedOn": "Submitted On.",
@@ -640,6 +650,19 @@
             "requestapproved": "Request Approved Successfully!",
             "requestrejected": "Request Rejected Successfully!",
             "requestStatusUpdatedToPendingSuccessfully": "Request status updated to PENDING successfully!",
+            "errors": {
+                "noChangesToSave": "No changes to save",
+                "rejectionReasonMin": "Rejection reason is required",
+                "rejectionReasonMinRejected": "Rejection reason is required when status is REJECTED",
+                "failedToLoad": "Failed to load request details",
+                "genericError": "An error occurred",
+                "failedToSync": "Failed to sync status",
+                "syncError": "An error occurred during sync",
+                "onlyPendingEditable": "Only pending requests can be edited",
+                "failedToUpdate": "Failed to update request",
+                "integrationError": "Integration Error",
+                "statusSynced": "Status synced successfully"
+            },
             "fields": {
                 "passType": "Pass Type",
                 "nationality": "Nationality",

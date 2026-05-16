@@ -18,11 +18,28 @@ export const Input: React.FC<InputProps> = ({
     rightIcon,
     className = '',
     id,
+    placeholder,
+    value,
     ...props
 }) => {
     const generatedId = useId();
     const inputId = id || `input-${generatedId}`;
     const hasError = !!error;
+    const isDateInput = props.type === 'date';
+    const dateValue = value ?? props.defaultValue ?? '';
+    const isDateEmpty = isDateInput && !dateValue;
+    const canOpenDatePicker = isDateInput && !props.readOnly && !props.disabled;
+
+    const openDatePicker = () => {
+        const input = document.getElementById(inputId) as HTMLInputElement | null;
+        if (!input) return;
+        if (input.showPicker && typeof input.showPicker === 'function') {
+            input.showPicker();
+        } else {
+            input.focus();
+            input.click();
+        }
+    };
 
     return (
         <div className="w-full">
@@ -33,57 +50,50 @@ export const Input: React.FC<InputProps> = ({
             )}
             <div className="relative">
                 {leftIcon && (
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 pl-4 rtl:left-auto rtl:right-0 rtl:pr-4 rtl:pl-0 flex items-center pointer-events-none">
                         {leftIcon}
                     </div>
                 )}
                 <input
                     id={inputId}
+                    dir={isDateInput ? 'ltr' : undefined}
                     style={{ color: '#111827' }}
                     className={`
                         flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] px-4 py-4 
-                        text-[14px]  text-gray-900 placeholder:text-[#747474] 
+                        text-[14px] text-gray-900 placeholder:text-[#747474] 
                         focus:outline-none focus:ring-2 focus:ring-[#00B09C]/20 focus:border-[#00B09C] 
                         transition-all disabled:cursor-not-allowed disabled:opacity-50
                         ${hasError ? "border-danger-500 focus:ring-danger-500/20 focus:border-danger-500" : ""}
-                        ${leftIcon ? "pl-12" : ""}
-                        ${rightIcon ? "pr-12" : ""}
-                        ${props.type === 'date' ? "date-input-custom" : ""}
+                        ${leftIcon ? "pl-12 rtl:pl-4 rtl:pr-12" : ""}
+                        ${rightIcon ? "pr-12 rtl:pr-4 rtl:pl-12" : ""}
+                        ${isDateInput ? "date-input-custom text-right" : ""}
+                        ${isDateEmpty ? "date-empty" : ""}
                         ${className}
                     `.trim()}
+                    value={value}
                     {...props}
                 />
+                {isDateEmpty && placeholder && (
+                    <span
+                        className={`absolute inset-y-0 flex items-center pointer-events-none text-[14px] text-[#747474] font-['Tajawal'] left-4 rtl:left-auto rtl:right-4 ${rightIcon ? 'pr-12 rtl:pr-4 rtl:pl-12' : ''}`}
+                        aria-hidden
+                    >
+                        {placeholder}
+                    </span>
+                )}
                 {rightIcon && (
-                    <div 
-                        className={`absolute inset-y-0 right-0 pr-4 flex items-center ${props.type === 'date' && !props.readOnly && !props.disabled ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'pointer-events-none'}`}
-                        onClick={props.type === 'date' && !props.readOnly && !props.disabled ? (e) => {
+                    <div
+                        className={`absolute inset-y-0 right-0 pr-4 rtl:right-auto rtl:left-0 rtl:pl-4 rtl:pr-0 flex items-center ${canOpenDatePicker ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'pointer-events-none'}`}
+                        onClick={canOpenDatePicker ? (e) => {
                             e.preventDefault();
-                            const input = document.getElementById(inputId) as HTMLInputElement;
-                            if (input) {
-                                // Try modern showPicker API first
-                                if (input.showPicker && typeof input.showPicker === 'function') {
-                                    input.showPicker();
-                                } else {
-                                    // Fallback: focus and click
-                                    input.focus();
-                                    input.click();
-                                }
-                            }
+                            openDatePicker();
                         } : undefined}
-                        role={props.type === 'date' && !props.readOnly && !props.disabled ? 'button' : undefined}
-                        tabIndex={props.type === 'date' && !props.readOnly && !props.disabled ? 0 : undefined}
-                        onKeyDown={props.type === 'date' && !props.readOnly && !props.disabled ? (e) => {
+                        role={canOpenDatePicker ? 'button' : undefined}
+                        tabIndex={canOpenDatePicker ? 0 : undefined}
+                        onKeyDown={canOpenDatePicker ? (e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
-                                const input = document.getElementById(inputId) as HTMLInputElement;
-                                if (input) {
-                                    if (input.showPicker && typeof input.showPicker === 'function') {
-                                        input.showPicker();
-                                    } else {
-                                        input.focus();
-                                        input.click();
-                                    }
-                                }
+                                openDatePicker();
                             }
                         } : undefined}
                     >
@@ -168,5 +178,3 @@ export const Select: React.FC<SelectProps> = ({
         </div>
     );
 };
-
-

@@ -1,25 +1,33 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import HowtWork from '@/components/ui/HowtWork';
 import StatusCard from '@/components/ui/StatusCard';
+import { translateApiErrorMessage } from '@/lib/translate-error';
 
 
 type DisplayStatus = 'PENDING' | 'APPROVED' | 'SO_APPROVED' | 'SO_REJECTED' | 'REJECTED' | null;
 
 export default function TrackApplication() {
+    const locale = useLocale();
     const t = useTranslations('HomePage');
+    const te = useTranslations('HomePage.trackApplication');
     const [requestNumber, setRequestNumber] = useState('');
     const [displayStatus, setDisplayStatus] = useState<DisplayStatus>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
 
+    const localizeError = (message: string, fallbackKey: 'failedToCheck' | 'failedToRetrieve' | 'statusCheckError' | 'requestNotFound' | 'pleaseEnterRequestNumber') => {
+        const known = te(`errors.${fallbackKey}`);
+        return translateApiErrorMessage(message || known, locale);
+    };
+
     const handleCheckStatus = async () => {
         if (!requestNumber.trim()) {
-            setError('Please enter a request number');
+            setError(te('errors.pleaseEnterRequestNumber'));
             return;
         }
 
@@ -32,18 +40,19 @@ export default function TrackApplication() {
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.message || 'Failed to check request status');
+                const fallback = response.status === 404 ? 'requestNotFound' : 'failedToCheck';
+                setError(localizeError(data.message, fallback));
                 return;
             }
 
             if (data.success && data.data) {
                 setDisplayStatus(data.data.displayStatus as DisplayStatus);
             } else {
-                setError('Failed to retrieve request status');
+                setError(te('errors.failedToRetrieve'));
             }
         } catch (err) {
             console.error('Error checking status:', err);
-            setError('An error occurred while checking the status');
+            setError(te('errors.statusCheckError'));
         } finally {
             setLoading(false);
         }
@@ -92,7 +101,7 @@ export default function TrackApplication() {
                             disabled={loading}
                             className="w-full md:w-auto px-12 py-4 bg-[#14b8a6] hover:bg-[#0d9488] text-white rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >
-                            {loading ? 'Checking...' : t('trackApplication.checkStatus')}
+                            {loading ? te('checking') : t('trackApplication.checkStatus')}
                         </button>
 
                         {error && (

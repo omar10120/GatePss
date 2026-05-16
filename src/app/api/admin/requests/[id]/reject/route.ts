@@ -24,10 +24,9 @@ export async function POST(
             const body = await req.json();
             const { rejectionReason } = body;
 
-            // Validate rejection reason - BRD requirement: minimum 10 characters
-            if (!rejectionReason || rejectionReason.trim().length < 10) {
+            if (!rejectionReason || rejectionReason.trim().length === 0) {
                 return NextResponse.json(
-                    { error: 'Validation Error', message: 'Rejection reason is required (minimum 10 characters)' },
+                    { error: 'Validation Error', message: 'Rejection reason is required' },
                     { status: 400 }
                 );
             }
