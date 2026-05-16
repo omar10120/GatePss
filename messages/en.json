@@ -646,7 +646,7 @@
             "loading": "Loading request details...",
             "passPermitInfo": "Pass Permit Info",
             "passHolderInfo": "Pass Holder Info",
-            "permitsQrCode": "Permits(QR Code)",
+            "permitsQrCode": "Permits(Rejection Reason)",
             "requestapproved": "Request Approved Successfully!",
             "requestrejected": "Request Rejected Successfully!",
             "requestStatusUpdatedToPendingSuccessfully": "Request status updated to PENDING successfully!",

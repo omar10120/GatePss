@@ -654,7 +654,7 @@
             "loading": "جاري تحميل تفاصيل الطلب...",
             "passPermitInfo": "معلومات تصريح المرور",
             "passHolderInfo": "معلومات حامل التصريح",
-            "permitsQrCode": "التصاريح (رمز الاستجابة السريعة)",
+            "permitsQrCode": "التصاريح (سبب الرفض)",
             "errors": {
                 "noChangesToSave": "لا توجد تغييرات لحفظها",
                 "rejectionReasonMin": "سبب الرفض مطلوب",
