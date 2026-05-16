@@ -323,10 +323,10 @@ export const GatePassForm: React.FC = () => {
             newFieldErrors['passportIdImage'] = `${fieldLabel} ${getBilingualNested(['errors', 'required'])}`;
             isValid = false;
         } else {
-            // Validate passport ID image size (max 2MB)
-            const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+            // Validate passport ID image size (max 250kb)
+            const maxSize = 250 * 1024; // 250kb in bytes
             if (passportIdImage.size > maxSize) {
-                newFieldErrors['passportIdImage'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (2MB)';
+                newFieldErrors['passportIdImage'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (250kb)';
                 isValid = false;
             }
             // Validate file type (robust: check both MIME type and extension)
@@ -1127,7 +1127,7 @@ export const GatePassForm: React.FC = () => {
                             placeholder={getBilingualNested(['placeholders', 'choosePhotoOrPdf'])}
                             required
                             accept=".png,.jpg,.jpeg,.pdf"
-                            helperText="(jpg, png, pdf) max 2MB"
+                            helperText="(jpg, png, pdf) max 250kb"
                             error={fieldErrors.passportIdImage}
                         />
                     </div>

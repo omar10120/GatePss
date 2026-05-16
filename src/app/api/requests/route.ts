@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
             if (!file || file.size === 0 || file.name === undefined || file.name === '') return null;
 
             const bytes = await file.arrayBuffer();
-
+            
             const maxSize = customMaxSize || parseInt(env.MAX_FILE_SIZE || '1048576');
             if (bytes.byteLength > maxSize) {
                 const sizeLabel = maxSize >= 1024 * 1024 ? `${(maxSize / (1024 * 1024)).toFixed(0)}MB` : `${(maxSize / 1024).toFixed(0)}KB`;
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
         console.log(' Photo extraction - photo instanceof File:', photo instanceof File);
 
         try {
-            imagePath = await uploadFile(passportIdImage, 'passport', 2 * 1024 * 1024, ['jpg', 'jpeg', 'png', 'pdf']);
+            imagePath = await uploadFile(passportIdImage, 'passport', 250 * 1024, ['jpg', 'jpeg', 'png', 'pdf']);
             photoPath = await uploadFile(photo, 'photo', 250 * 1024, ['jpg', 'jpeg', 'png']);
             console.log('📸 After uploadFile - photoPath:', photoPath);
             otherDoc1Path = await uploadFile(formData.get('otherDocuments1') as File | null, 'other1', 2 * 1024 * 1024, ['pdf']);
