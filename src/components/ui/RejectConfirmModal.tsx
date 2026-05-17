@@ -23,6 +23,8 @@ export default function RejectConfirmModal({ isOpen, onClose, onConfirm }: Rejec
         onConfirm(rejectionReason.trim());
         setRejectionReason('');
     };
+  
+
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000] p-4">
@@ -44,12 +46,24 @@ export default function RejectConfirmModal({ isOpen, onClose, onConfirm }: Rejec
                     />
                 </div>
 
-                <button
-                    onClick={handleConfirm}
-                    className="w-full bg-[#E91A1A] text-white py-3 rounded-xl font-bold hover:bg-[#C81A1A] transition-colors"
-                >
-                    Yes, Reject It
-                </button>
+                <div className='flex gap-4 w-full'>
+                    <div className='w-1/2'>
+                        <button
+                            onClick={handleConfirm}
+                            className="w-full bg-[#E91A1A] text-white py-3 rounded-xl font-bold hover:bg-[#C81A1A] transition-colors"
+                        >
+                            Yes, Reject It
+                        </button>
+                    </div>
+                    <div className='w-1/2'>
+                    <button
+                            onClick={onClose}
+                            className="w-full bg-[#3B82F6] text-white py-3 rounded-xl font-bold hover:bg-[#3B82F8] transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
