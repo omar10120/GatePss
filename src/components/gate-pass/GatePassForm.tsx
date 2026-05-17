@@ -177,6 +177,7 @@ export const GatePassForm: React.FC = () => {
             'passportIdNumber': 'idPassportNumber',
             'otherDocuments1': 'otherDocuments1',
             'otherDocuments2': 'otherDocuments2',
+            'enterFullName' : 'enterFullName'
         };
         const fieldKey = fieldMap[name] || name;
         return getBilingualNested(['fields', fieldKey]) || name;
@@ -1008,6 +1009,7 @@ export const GatePassForm: React.FC = () => {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-6 text-gray-900">
                     {(entityType === 'freezone' || (entityType === 'port' && isPermanent(selectedPassType))) && (
                         <Input
+                            type='text'
                             name="applicantName"
                             label={getBilingualNested(['fields', 'fullNameEn'])}
                             placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
@@ -1024,6 +1026,7 @@ export const GatePassForm: React.FC = () => {
                     )}
                     <Input
                         name="fullNameAr"
+                        type='text'
                         label={getBilingualNested(['fields', 'fullNameAr'])}
                         placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
                         error={fieldErrors.fullNameAr}
