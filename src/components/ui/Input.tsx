@@ -25,10 +25,11 @@ export const Input: React.FC<InputProps> = ({
     const generatedId = useId();
     const inputId = id || `input-${generatedId}`;
     const hasError = !!error;
-    const isDateInput = props.type === 'date';
+    // const isDateInput = props.type === 'text';
     const dateValue = value ?? props.defaultValue ?? '';
-    const isDateEmpty = isDateInput && !dateValue;
-    const canOpenDatePicker = isDateInput && !props.readOnly && !props.disabled;
+    // const isDateEmpty = isDateInput && !dateValue;
+    // const canOpenDatePicker = isDateInput && !props.readOnly && !props.disabled;
+    const canOpenDatePicker =  !props.readOnly && !props.disabled;
 
     const openDatePicker = () => {
         const input = document.getElementById(inputId) as HTMLInputElement | null;
@@ -56,7 +57,7 @@ export const Input: React.FC<InputProps> = ({
                 )}
                 <input
                     id={inputId}
-                    dir={isDateInput ? 'ltr' : undefined}
+                    // dir={isDateInput ? 'ltr' : undefined}
                     
                     className={`
                         flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] px-4 py-4 
@@ -66,14 +67,13 @@ export const Input: React.FC<InputProps> = ({
                         ${hasError ? "border-danger-500 focus:ring-danger-500/20 focus:border-danger-500" : ""}
                         ${leftIcon ? "pl-12 rtl:pl-4 rtl:pr-12" : ""}
                         ${rightIcon ? "pr-12 rtl:pr-4 rtl:pl-12" : ""}
-                        ${isDateInput ? "date-input-custom text-right" : ""}
-                        ${isDateEmpty ? "date-empty" : ""}
+                        
                         ${className}
                     `.trim()}
                     value={value}
                     {...props}
                 />
-                {isDateEmpty && placeholder && (
+                { placeholder && (
                     <span
                         className={`absolute inset-y-0 flex items-center pointer-events-none text-[14px] text-[#747474] font-['Tajawal'] left-4 rtl:left-auto rtl:right-4 ${rightIcon ? 'pr-12 rtl:pr-4 rtl:pl-12' : ''}`}
                         aria-hidden

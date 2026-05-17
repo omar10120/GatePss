@@ -810,7 +810,7 @@ export const GatePassForm: React.FC = () => {
                         name="dateOfVisit"
                         type="date"
                         label={getBilingualNested(['fields', 'passStartingDate'])}
-                        placeholder={getBilingualNested(['placeholders', 'selectPassStartingDate'])}
+                        // placeholder={getBilingualNested(['placeholders', 'selectPassStartingDate'])}
                         value={dateOfVisit}
                         error={fieldErrors.dateOfVisit}
                         required
@@ -1037,7 +1037,7 @@ export const GatePassForm: React.FC = () => {
                     <Input
                         name="telephone"
                         label={getBilingualNested(['fields', 'telephone'])}
-                        placeholder={getBilingualNested(['placeholders', 'telephoneHolder'])}
+                        // placeholder={getBilingualNested(['placeholders', 'telephoneHolder'])}
                         error={fieldErrors.telephone}
                         disabled
                         value={applicantPhone}

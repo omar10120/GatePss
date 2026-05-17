@@ -52,67 +52,6 @@ body[dir="rtl"] {
 
 
 
-
-/* Hide native date picker icon and style custom date input */
-input[type="date"].date-input-custom {
-  position: relative;
-  color-scheme: light;
-}
-
-input[type="date"].date-input-custom::-webkit-calendar-picker-indicator {
-  display: none;
-  -webkit-appearance: none;
-}
-
-input[type="date"].date-input-custom::-webkit-inner-spin-button,
-input[type="date"].date-input-custom::-webkit-clear-button {
-  display: none;
-  -webkit-appearance: none;
-}
-
-/* Hide native mm/dd/yyyy hint when empty; custom placeholder overlay is used */
-input[type="date"].date-input-custom.date-empty::-webkit-datetime-edit {
-  opacity: 0;
-}
-
-input[type="date"].date-input-custom.date-empty:focus::-webkit-datetime-edit,
-input[type="date"].date-input-custom:not(.date-empty)::-webkit-datetime-edit {
-  opacity: 1;
-}
-
-/* Firefox */
-input[type="date"].date-input-custom::-moz-calendar-picker-indicator {
-  display: none;
-}
-
-input[type="date"].date-input-custom.date-empty {
-  color: transparent;
-}
-
-input[type="date"].date-input-custom.date-empty:focus,
-input[type="date"].date-input-custom:not(.date-empty) {
-  color: #111827;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--gray-100);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--gray-400);
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--gray-500);
-}
-
 /* Utility Classes */
 .container {
   width: 100%;
