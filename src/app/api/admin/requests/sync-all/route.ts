@@ -3,6 +3,7 @@ import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
 import { SoharPortClient } from '@/lib/sohar-port';
 import { normalizeGatePassStatus } from '@/lib/sohar-port/receive/get-gate-pass';
+import { createRequestNotifications } from '@/utils/notification-helper';
 import {
     isSoharPassDetailsNotAuthorizedText,
     SOHAR_PASS_NOT_AUTHORIZED_CODE,
@@ -217,6 +218,15 @@ export async function POST(request: NextRequest) {
                 });
             }
 
+            // Create notifications for all admins (async, don't wait)
+            createRequestNotifications(
+                ActionType.SYSTEM_INTEGRATION,
+                `Batch sync completed. Rows touched: ${results.total}, Updated: ${results.updated}, Failed: ${results.failed}, No Change: ${results.noChange}${results.soharAccessDenied ? `, Sohar access denied: ${results.soharAccessDenied}` : ''}`,
+                'REQUEST',
+                null,
+                user.userId,
+                `تم الموافقة على الطلب ${results.total}, Updated: ${results.updated}, Failed: ${results.failed}, No Change: ${results.noChange}${results.soharAccessDenied ? `, Sohar access denied: ${results.soharAccessDenied}` : ''}`
+            ).catch(err => console.error('Failed to create batch sync notifications:', err));
             return NextResponse.json({
                 success: true,
                 message: `Batch sync completed. Rows touched: ${results.total}, Updated: ${results.updated}, Failed: ${results.failed}, No Change: ${results.noChange}${results.soharAccessDenied ? `, Sohar access denied: ${results.soharAccessDenied}` : ''}`,
