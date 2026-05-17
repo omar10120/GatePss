@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requirePermission } from '@/middleware/api';
 import prisma from '@/lib/prisma';
+
 import { sendRequestRejectionEmail } from '@/lib/email';
 import { ActionType } from '@/lib/enums';
 import { createRequestNotifications } from '@/utils/notification-helper';
@@ -85,14 +86,15 @@ export async function POST(
                 user.userId,
                 `تم رفض الطلب ${gateRequest.requestNumber}`
             ).catch(err => console.error('Failed to create notifications:', err));
+            
 
             // Send rejection email to applicant (async)
-            // sendRequestRejectionEmail(
-            //     gateRequest.applicantEmail,
-            //     gateRequest.applicantNameEn || "",
-            //     gateRequest.requestNumber,
-            //     rejectionReason.trim()
-            // ).catch(err => console.error('Failed to send rejection email:', err));
+            sendRequestRejectionEmail(
+                gateRequest.applicantEmail,
+                gateRequest.applicantNameEn || "",
+                gateRequest.requestNumber,
+                rejectionReason.trim()
+            ).catch(err => console.error('Failed to send rejection email:', err));
 
             return NextResponse.json({
                 success: true,
