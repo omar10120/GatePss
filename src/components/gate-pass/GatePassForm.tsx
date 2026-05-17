@@ -172,7 +172,7 @@ export const GatePassForm: React.FC = () => {
             'requestType': 'requestType',
             'dateOfVisit': 'passStartingDate',
             'applicantName': 'fullNameEn',
-            
+            'applicantEmail': 'email',
             'passportIdImage': 'copyOfCivilId',
             'passportIdNumber': 'idPassportNumber',
             'otherDocuments1': 'otherDocuments1',
@@ -788,8 +788,10 @@ export const GatePassForm: React.FC = () => {
                         </label>
                         <div className="relative flex ">
                             <div className="flex-1">
-                                <Textarea
+                                <Input
                                     
+                                    
+                                    type="text"
                                     name="organization"
                                     value={organizationValue}
                                     onChange={(e) => setOrganizationValue(e.target.value)}
@@ -1020,7 +1022,7 @@ export const GatePassForm: React.FC = () => {
                             }
                         />
                     )}
-                    <Textarea
+                    <Input
                         name="fullNameAr"
                         label={getBilingualNested(['fields', 'fullNameAr'])}
                         placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
@@ -1093,9 +1095,8 @@ export const GatePassForm: React.FC = () => {
                         onChange={(e) => setProfessionValue(e.target.value)}
                     />
                     {professionValue === 'Other' && (
-                        <Textarea
+                        <Input
                             name="otherProfessions"
-                   
                             label={getBilingualNested(['fields', 'otherProfessions'])}
                             placeholder={getBilingualNested(['placeholders', 'otherProfessions'])}
                             error={fieldErrors.otherProfessions}
@@ -1115,7 +1116,7 @@ export const GatePassForm: React.FC = () => {
                         ]}
                         required
                     />
-                    <Textarea
+                    <Input
                         name="passportIdNumber"
                         label={getBilingualNested(['fields', 'idPassportNumber'])}
                         placeholder={getBilingualNested(['placeholders', 'typeIdPassport'])}
