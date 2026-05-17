@@ -264,7 +264,7 @@
             "selectPassType": "اختر نوع التصريح --",
             "typeOrganization": "اكتب اسم المنظمة --",
             "selectDate": "اختر مدة لزيارتك --",
-            "selectPassStartingDate": "يوم/شهر/سنة",
+            
             "selectBeneficiary": "اختر المستفيد من التصريح --",
             "typePurpose": "اكتب الغرض من الزيارة",
             "otherProfessions": "أدخل تفاصيل مهنة أخرى (اختياري)",

@@ -57,7 +57,7 @@ export const Input: React.FC<InputProps> = ({
                 <input
                     id={inputId}
                     dir={isDateInput ? 'ltr' : undefined}
-                    style={{ color: '#111827' }}
+                    
                     className={`
                         flex w-full h-[58px] bg-white border-[0.5px] border-[#D0D0D0] rounded-[12px] px-4 py-4 
                         text-[14px] text-gray-900 placeholder:text-[#747474] 

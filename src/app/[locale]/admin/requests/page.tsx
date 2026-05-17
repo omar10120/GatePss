@@ -411,6 +411,7 @@ export default function AdminRequestsPage() {
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">Created at</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.holderName')}</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.status')}</th>
+                                                        <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.rejectionReason')}</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.soharStatus')}</th>
                                                         <th className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center text-xs font-bold text-[#A1A1A1] uppercase tracking-wider whitespace-nowrap">{t('columns.actions')}</th>
                                                     </tr>
@@ -442,6 +443,7 @@ export default function AdminRequestsPage() {
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#747474] text-[12px] sm:text-[14px] text-center">
                                                                         {request.requestNumber ? request.requestNumber : request.id}
                                                                     </td>
+                                                                    
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#222222] font-bold text-[12px] sm:text-[14px] text-center">{formatDate(request.createdAt)}</td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#222222] font-bold text-[12px] sm:text-[14px] text-center">{request.applicantNameEn || request.applicantNameAr}</td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 relative overflow-visible text-center">
@@ -462,6 +464,7 @@ export default function AdminRequestsPage() {
                                                                             />
                                                                         </div>
                                                                     </td>
+                                                                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#222222] font-bold text-[12px] sm:text-[14px] text-center">{request.rejectionReason || '-'}</td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
                                                                         <div className="flex flex-col items-center gap-1">
                                                                             <span className={`px-2 py-1 rounded text-xs font-medium ${request.externalStatus ? getStatusColor(request.externalStatus) : 'bg-gray-50 text-gray-500'}`}>
@@ -513,12 +516,12 @@ export default function AdminRequestsPage() {
                                                                                     <span className="font-semibold text-gray-700">{t('columns.passFor')}: </span>
                                                                                     <span className="text-gray-600">{getPassForLabel(request.requestType)}</span>
                                                                                 </div>
-                                                                                {request.rejectionReason && (
+                                                                                {/* {request.rejectionReason && (
                                                                                     <div>
                                                                                         <span className="font-semibold text-gray-700">{t('columns.rejectionReason')}: </span>
                                                                                         <span className="text-gray-600">{request.rejectionReason}</span>
                                                                                     </div>
-                                                                                )}
+                                                                                )} */}
                                                                                 <div className="sm:col-span-2 lg:col-span-3">
                                                                                     <span className="font-semibold text-gray-700">{t('columns.soharMessage')}: </span>
                                                                                     <span className="text-gray-600">{request.lastIntegrationStatusMessage || '-'}</span>

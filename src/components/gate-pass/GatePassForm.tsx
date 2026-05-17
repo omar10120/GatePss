@@ -789,6 +789,9 @@ export const GatePassForm: React.FC = () => {
                         <div className="relative flex ">
                             <div className="flex-1">
                                 <Input
+                                    
+                                    
+                                    type="text"
                                     name="organization"
                                     value={organizationValue}
                                     onChange={(e) => setOrganizationValue(e.target.value)}
@@ -802,6 +805,7 @@ export const GatePassForm: React.FC = () => {
                             <p className="mt-1 text-sm text-red-600 font-['Tajawal']">{fieldErrors.organization}</p>
                         )}
                     </div>
+                    
                     <Input
                         name="dateOfVisit"
                         type="date"
