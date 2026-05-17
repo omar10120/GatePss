@@ -274,7 +274,9 @@
             "typeIdPassport": "Type ID Or Passport Number of Pass Holder",
             "chooseFile": "Choose File (PDF) max 2MB",
             "choosePhoto": "Choose Photo (PNG, JPG) max 250KB",
-            "choosePhotoOrPdf": "Choose File (PNG, JPG, PDF) max 2MB"
+            "choosePhotoOrPdf": "Choose File (PNG, JPG, PDF) max 2MB",
+            "applicantEmail": "Email of Pass Holder",
+            "email": "ايميل"
         },
         "confirmation": "I Confirm That I Have Reviewed All Information And Attachments In This Request, And I Am Fully Responsible For All Information That Contains.",
         "submit": "Submit The Permit",

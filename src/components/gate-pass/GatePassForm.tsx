@@ -172,7 +172,7 @@ export const GatePassForm: React.FC = () => {
             'requestType': 'requestType',
             'dateOfVisit': 'passStartingDate',
             'applicantName': 'fullNameEn',
-            'applicantEmail': 'email',
+            
             'passportIdImage': 'copyOfCivilId',
             'passportIdNumber': 'idPassportNumber',
             'otherDocuments1': 'otherDocuments1',
@@ -788,10 +788,8 @@ export const GatePassForm: React.FC = () => {
                         </label>
                         <div className="relative flex ">
                             <div className="flex-1">
-                                <Input
+                                <Textarea
                                     
-                                    
-                                    type="text"
                                     name="organization"
                                     value={organizationValue}
                                     onChange={(e) => setOrganizationValue(e.target.value)}
@@ -874,7 +872,7 @@ export const GatePassForm: React.FC = () => {
                             name="passEndDate"
                             type="date"
                             label={getBilingualNested(['fields', 'passEndDate'])}
-                            placeholder={getBilingualNested(['placeholders', 'selectPassStartingDate'])}
+                            // placeholder={getBilingualNested(['placeholders', 'selectPassStartingDate'])}
                             value={passEndDate}
                             error={fieldErrors.passEndDate}
                             required
@@ -1022,7 +1020,7 @@ export const GatePassForm: React.FC = () => {
                             }
                         />
                     )}
-                    <Input
+                    <Textarea
                         name="fullNameAr"
                         label={getBilingualNested(['fields', 'fullNameAr'])}
                         placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
@@ -1037,7 +1035,7 @@ export const GatePassForm: React.FC = () => {
                     <Input
                         name="telephone"
                         label={getBilingualNested(['fields', 'telephone'])}
-                        // placeholder={getBilingualNested(['placeholders', 'telephoneHolder'])}
+                        placeholder={getBilingualNested(['placeholders', 'telephoneHolder'])}
                         error={fieldErrors.telephone}
                         disabled
                         value={applicantPhone}
@@ -1095,8 +1093,9 @@ export const GatePassForm: React.FC = () => {
                         onChange={(e) => setProfessionValue(e.target.value)}
                     />
                     {professionValue === 'Other' && (
-                        <Input
+                        <Textarea
                             name="otherProfessions"
+                   
                             label={getBilingualNested(['fields', 'otherProfessions'])}
                             placeholder={getBilingualNested(['placeholders', 'otherProfessions'])}
                             error={fieldErrors.otherProfessions}
@@ -1116,7 +1115,7 @@ export const GatePassForm: React.FC = () => {
                         ]}
                         required
                     />
-                    <Input
+                    <Textarea
                         name="passportIdNumber"
                         label={getBilingualNested(['fields', 'idPassportNumber'])}
                         placeholder={getBilingualNested(['placeholders', 'typeIdPassport'])}
