@@ -1139,7 +1139,10 @@ export default function RequestDetailsPage() {
                                                               { value: 'Welsh', label: gt('options.welsh') || 'Welsh' },
                                                               { value: 'Zambian', label: gt('options.zambian') || 'Zambian' },
                                                               { value: 'Zimbabwean', label: gt('options.zimbabwean') || 'Zimbabwean' },
-                                                              { value: 'sri_lanka', label: gt('options.sri_lanka') || 'sri_lanka' }
+                                                              { value: 'sri_lanka', label: gt('options.sri_lanka') || 'sri_lanka' },
+                                                              { value: 'lebanese', label: gt('options.sri_lanka') || 'nepalese' },
+                                                              { value: 'lebanese', label: gt('options.sri_lanka') || 'lebanese' },
+                                                              
                                                             ]
                                                 },
                                                 {
