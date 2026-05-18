@@ -1092,6 +1092,7 @@ export default function RequestDetailsPage() {
                                                               { value: 'Latvian', label: gt('options.latvian') || 'Latvian' },
                                                               { value: 'Libyan', label: gt('options.libyan') || 'Libyan' },
                                                               { value: 'Lithuanian', label: gt('options.lithuanian') || 'Lithuanian' },
+                                                              { value: 'lebanese', label: gt('options.sri_lanka') || 'lebanese' },
                                                               { value: 'Malagasy', label: getOptionLabel('Malagasy') },
                                                               { value: 'Malaysian', label: gt('options.malaysian') || 'Malaysian' },
                                                               { value: 'Malian', label: gt('options.malian') || 'Malian' },
@@ -1104,6 +1105,7 @@ export default function RequestDetailsPage() {
                                                               { value: 'Nigerien', label: gt('options.nigerien') || 'Nigerien' },
                                                               { value: 'Nigerian', label: gt('options.nigerian') || 'Nigerian' },
                                                               { value: 'Norwegian', label: gt('options.norwegian') || 'Norwegian' },
+                                                              { value: 'nepalese', label: gt('options.sri_lanka') || 'nepalese' },
                                                               { value: 'Omani', label: gt('options.omani') || 'Omani' },
                                                               { value: 'Pakistani', label: gt('options.pakistani') || 'Pakistani' },
                                                               { value: 'Panamanian', label: gt('options.panamanian') || 'Panamanian' },
@@ -1140,8 +1142,8 @@ export default function RequestDetailsPage() {
                                                               { value: 'Zambian', label: gt('options.zambian') || 'Zambian' },
                                                               { value: 'Zimbabwean', label: gt('options.zimbabwean') || 'Zimbabwean' },
                                                               { value: 'sri_lanka', label: gt('options.sri_lanka') || 'sri_lanka' },
-                                                              { value: 'lebanese', label: gt('options.sri_lanka') || 'nepalese' },
-                                                              { value: 'lebanese', label: gt('options.sri_lanka') || 'lebanese' },
+                                                              
+                                                              
                                                               
                                                             ]
                                                 },

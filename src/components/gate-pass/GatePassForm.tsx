@@ -724,6 +724,8 @@ export const GatePassForm: React.FC = () => {
                             // { value: 'Latvian', label: getBilingualNested(['options', 'latvian']) },
                             { value: 'Libyan', label: getBilingualNested(['options', 'libyan']) },
                             { value: 'Lithuanian', label: getBilingualNested(['options', 'lithuanian']) },
+                            
+                            { value: 'lebanese', label: getBilingualNested(['options', 'lebanese']) },
                             // { value: 'Malagasy', label: getBilingualNested(['options', 'malagasy']) },
                             { value: 'Malaysian', label: getBilingualNested(['options', 'malaysian']) },
                             // { value: 'Malian', label: getBilingualNested(['options', 'malian']) },
@@ -738,6 +740,7 @@ export const GatePassForm: React.FC = () => {
                             // { value: 'Nigerien', label: getBilingualNested(['options', 'nigerien']) },
                             { value: 'Nigerian', label: getBilingualNested(['options', 'nigerian']) },
                             { value: 'Norwegian', label: getBilingualNested(['options', 'norwegian']) },
+                            { value: 'nepalese', label: getBilingualNested(['options', 'nepalese']) },
                             { value: 'Omani', label: getBilingualNested(['options', 'omani']) },
                             { value: 'Pakistani', label: getBilingualNested(['options', 'pakistani']) },
                             // { value: 'Panamanian', label: getBilingualNested(['options', 'panamanian']) },
@@ -778,8 +781,7 @@ export const GatePassForm: React.FC = () => {
                             { value: 'Zambian', label: getBilingualNested(['options', 'zambian']) },
                             { value: 'Zimbabwean', label: getBilingualNested(['options', 'zimbabwean']) },
                             { value: 'sri_lanka', label: getBilingualNested(['options', 'sri_lanka']) },
-                            { value: 'nepalese', label: getBilingualNested(['options', 'nepalese']) },
-                            { value: 'lebanese', label: getBilingualNested(['options', 'lebanese']) },
+                            
                         ]}
                         required
                     />
