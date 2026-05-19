@@ -126,10 +126,10 @@ export const NATIONALITY_OPTIONS: NationalityOption[] = [
   { value: 'Bolivian', labelKey: 'bolivian' },
   { value: 'Bosnian/Herzegovinian', labelKey: 'Bosnian/Herzegovinc' },
   { value: 'Burundian', labelKey: 'Burundian' },
-  { value: 'Comorian', labelKey: 'Comorian' }, // you currently have Comoran
+  { value: 'Comorian', labelKey: 'Comorian' }, 
   { value: 'Dutch', labelKey: 'Dutch' },
-  { value: 'Filipino', labelKey: 'Filipino' }, // you currently have Philippine
-  { value: 'Myanmar', labelKey: 'Myanmar' }, // you currently use Burmese
+  { value: 'Filipino', labelKey: 'Filipino' },
+  { value: 'Myanmar', labelKey: 'Myanmar' }, 
   { value: 'Nicaraguan', labelKey: 'Nicaraguan' },
   { value: 'Nigerien', labelKey: 'Nigerien' },
   { value: 'Norwegian', labelKey: 'Norwegian' },
