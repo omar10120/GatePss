@@ -6,6 +6,7 @@ export interface NationalityOption {
 
 /** User-requested list — preserves existing DB values, adds missing countries only. Entries marked `` were not in the original form. */
 export const NATIONALITY_OPTIONS: NationalityOption[] = [
+  { value: 'American', labelKey: 'America' },
   { value: 'Afghan', labelKey: 'afghanistan' },
   { value: 'Albanian', labelKey: 'albania' }, 
   { value: 'Algerian', labelKey: 'algeria' },
@@ -78,15 +79,15 @@ export const NATIONALITY_OPTIONS: NationalityOption[] = [
   { value: 'Mauritanian', labelKey: 'mauritania' }, 
   { value: 'Mexican', labelKey: 'mexico' },
   { value: 'Moroccan', labelKey: 'morocco' },
-  { value: 'Burmese', labelKey: 'myanmar' }, 
+  { value: 'Burmese', labelKey: 'Myanmar' }, 
   { value: 'Namibian', labelKey: 'namibia' }, 
   { value: 'nepalese', labelKey: 'nepal' },
   { value: 'New Zealand', labelKey: 'new_zealand' }, 
   { value: 'Rwandan', labelKey: 'rwanda' }, 
   { value: 'Salvadoran', labelKey: 'el_salvador' },
-  { value: 'Saudi, Saudi Arabian', labelKey: 'saudi_arabia' }, 
+  { value: 'saudi_arabia', labelKey: 'saudi_arabia' }, 
   { value: 'Scottish', labelKey: 'scotland' }, 
-  { value: 'Senegalese', labelKey: 'senegal' },
+  { value: 'Senegalese', labelKey: 'Senegalese' },
   { value: 'Serbian', labelKey: 'serbia' },
   { value: 'Singaporean', labelKey: 'singapore' },
   { value: 'Slovak', labelKey: 'slovakia' }, 
@@ -119,29 +120,25 @@ export const NATIONALITY_OPTIONS: NationalityOption[] = [
   { value: 'Qatari', labelKey: 'Qatari' },
   { value: 'Papua', labelKey: 'Papua' },
   { value: 'Romanian', labelKey: 'Romanian' },
-
-  { value: 'American', labelKey: 'america' },
-  { value: 'Angolan', labelKey: 'angola' },
-  { value: 'Bahraini', labelKey: 'bahrain' },
-  { value: 'Belarusian', labelKey: 'belarus' },
-  { value: 'Bolivian', labelKey: 'bolivia' },
-  { value: 'Bosnian/Herzegovinian', labelKey: 'bosnia_and_herzegovina' },
-  { value: 'Burundian', labelKey: 'burundi' },
-  { value: 'Comorian', labelKey: 'comoros' }, // you currently have Comoran
-  { value: 'Dutch', labelKey: 'netherlands' },
-  { value: 'Filipino', labelKey: 'philippines' }, // you currently have Philippine
-  { value: 'Madagascan', labelKey: 'madagascar' }, // optional if you want both
-  { value: 'Myanmar', labelKey: 'myanmar' }, // you currently use Burmese
-  { value: 'Nicaraguan', labelKey: 'nicaragua' },
-  { value: 'Nigerien', labelKey: 'niger' },
-  { value: 'Norwegian', labelKey: 'norway' },
-  { value: 'Omani', labelKey: 'oman' },
-  { value: 'Pakistani', labelKey: 'pakistan' },
-  { value: 'Panamanian', labelKey: 'panama' },
-  { value: 'Papua New Guinean', labelKey: 'papua_new_guinea' },
-  { value: 'Peruvian', labelKey: 'peru' },
-  { value: 'Polish', labelKey: 'poland' },
-  { value: 'Russian', labelKey: 'russia' },
+  { value: 'Angolan', labelKey: 'Angolan' },
+  { value: 'Bahraini', labelKey: 'Bahraini' },
+  { value: 'Belarusian', labelKey: 'belarusian' },
+  { value: 'Bolivian', labelKey: 'bolivian' },
+  { value: 'Bosnian/Herzegovinian', labelKey: 'Bosnian/Herzegovinc' },
+  { value: 'Burundian', labelKey: 'Burundian' },
+  { value: 'Comorian', labelKey: 'Comorian' }, // you currently have Comoran
+  { value: 'Dutch', labelKey: 'Dutch' },
+  { value: 'Filipino', labelKey: 'Filipino' }, // you currently have Philippine
+  { value: 'Myanmar', labelKey: 'Myanmar' }, // you currently use Burmese
+  { value: 'Nicaraguan', labelKey: 'Nicaraguan' },
+  { value: 'Nigerien', labelKey: 'Nigerien' },
+  { value: 'Norwegian', labelKey: 'Norwegian' },
+  { value: 'Omani', labelKey: 'Omani' },
+  { value: 'Pakistani', labelKey: 'Pakistani' },
+  { value: 'Panamanian', labelKey: 'Panamanian' },
+  { value: 'Peruvian', labelKey: 'Peruvian' },
+  { value: 'Polish', labelKey: 'Polish' },
+  { value: 'Russian', labelKey: 'Russian' },
 
 
 ];
