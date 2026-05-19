@@ -4,10 +4,10 @@ export interface NationalityOption {
   labelKey: string;
 }
 
-/** User-requested list — preserves existing DB values, adds missing countries only. Entries marked `// new` were not in the original form. */
+/** User-requested list — preserves existing DB values, adds missing countries only. Entries marked `` were not in the original form. */
 export const NATIONALITY_OPTIONS: NationalityOption[] = [
   { value: 'Afghan', labelKey: 'afghanistan' },
-  { value: 'Albanian', labelKey: 'albania' }, // new
+  { value: 'Albanian', labelKey: 'albania' }, 
   { value: 'Algerian', labelKey: 'algeria' },
   { value: 'Argentine', labelKey: 'argentina' },
   { value: 'Australian', labelKey: 'australia' },
@@ -20,27 +20,27 @@ export const NATIONALITY_OPTIONS: NationalityOption[] = [
   { value: 'Canadian', labelKey: 'canada' },
   { value: 'Central African', labelKey: 'central_african_republic' },
   { value: 'Chadian', labelKey: 'chad' },
-  { value: 'Chilean', labelKey: 'chile' }, // new
+  { value: 'Chilean', labelKey: 'chile' }, 
   { value: 'Chinese', labelKey: 'china' },
   { value: 'Colombian', labelKey: 'colombia' },
-  { value: 'Comoran', labelKey: 'comoros' }, // new
+  { value: 'Comoran', labelKey: 'comoros' }, 
   { value: 'Congolese', labelKey: 'congo' },
   { value: 'Costa Rican', labelKey: 'costa_rica' },
   { value: 'Croatian', labelKey: 'croatia' },
-  { value: 'Cuban', labelKey: 'cuba' }, // new
-  { value: 'Cypriot', labelKey: 'cyprus' }, // new
+  { value: 'Cuban', labelKey: 'cuba' }, 
+  { value: 'Cypriot', labelKey: 'cyprus' }, 
   { value: 'Czech', labelKey: 'czech_republic' },
   { value: 'Danish', labelKey: 'denmark' },
-  { value: 'Djiboutian', labelKey: 'djibouti' }, // new
-  { value: 'Dominican', labelKey: 'dominican_republic' }, // new
+  { value: 'Djiboutian', labelKey: 'djibouti' }, 
+  { value: 'Dominican', labelKey: 'dominican_republic' }, 
   { value: 'Ecuadorian', labelKey: 'ecuador' },
   { value: 'Egyptian', labelKey: 'egypt' },
   { value: 'Emirati', labelKey: 'united_arab_emirates' },
-  { value: 'English', labelKey: 'england' }, // new
-  { value: 'Eritrean', labelKey: 'eritrea' }, // new
+  { value: 'English', labelKey: 'england' }, 
+  { value: 'Eritrean', labelKey: 'eritrea' }, 
   { value: 'Estonian', labelKey: 'estonia' },
   { value: 'Ethiopian', labelKey: 'ethiopia' },
-  { value: 'Fijian', labelKey: 'fiji' }, // new
+  { value: 'Fijian', labelKey: 'fiji' }, 
   { value: 'Philippine', labelKey: 'philippines' },
   { value: 'Finnish', labelKey: 'finland' },
   { value: 'French', labelKey: 'france' },
@@ -64,33 +64,33 @@ export const NATIONALITY_OPTIONS: NationalityOption[] = [
   { value: 'Jordanian', labelKey: 'jordan' },
   { value: 'Kazakh', labelKey: 'kazakhstan' },
   { value: 'Kenyan', labelKey: 'kenya' },
-  { value: 'Korean', labelKey: 'korea' }, // new
-  { value: 'Kuwaiti', labelKey: 'kuwait' }, // new
-  { value: 'Kyrgyz', labelKey: 'kyrgyzstan' }, // new
-  { value: 'Lao', labelKey: 'laos' }, // new
-  { value: 'Latvian', labelKey: 'latvia' }, // new
+  { value: 'Korean', labelKey: 'korea' }, 
+  { value: 'Kuwaiti', labelKey: 'kuwait' }, 
+  { value: 'Kyrgyz', labelKey: 'kyrgyzstan' }, 
+  { value: 'Lao', labelKey: 'laos' }, 
+  { value: 'Latvian', labelKey: 'latvia' }, 
   { value: 'lebanese', labelKey: 'lebanon' },
   { value: 'Libyan', labelKey: 'libya' },
   { value: 'Lithuanian', labelKey: 'lithuania' },
-  { value: 'Malagasy', labelKey: 'madagascar' }, // new
+  { value: 'Malagasy', labelKey: 'madagascar' }, 
   { value: 'Malaysian', labelKey: 'malaysia' },
-  { value: 'Malian', labelKey: 'mali' }, // new
-  { value: 'Mauritanian', labelKey: 'mauritania' }, // new
+  { value: 'Malian', labelKey: 'mali' }, 
+  { value: 'Mauritanian', labelKey: 'mauritania' }, 
   { value: 'Mexican', labelKey: 'mexico' },
   { value: 'Moroccan', labelKey: 'morocco' },
-  { value: 'Burmese', labelKey: 'myanmar' }, // new
-  { value: 'Namibian', labelKey: 'namibia' }, // new
+  { value: 'Burmese', labelKey: 'myanmar' }, 
+  { value: 'Namibian', labelKey: 'namibia' }, 
   { value: 'nepalese', labelKey: 'nepal' },
-  { value: 'New Zealand', labelKey: 'new_zealand' }, // new
-  { value: 'Rwandan', labelKey: 'rwanda' }, // new
+  { value: 'New Zealand', labelKey: 'new_zealand' }, 
+  { value: 'Rwandan', labelKey: 'rwanda' }, 
   { value: 'Salvadoran', labelKey: 'el_salvador' },
-  { value: 'Saudi, Saudi Arabian', labelKey: 'saudi_arabia' }, // new
-  { value: 'Scottish', labelKey: 'scotland' }, // new
+  { value: 'Saudi, Saudi Arabian', labelKey: 'saudi_arabia' }, 
+  { value: 'Scottish', labelKey: 'scotland' }, 
   { value: 'Senegalese', labelKey: 'senegal' },
   { value: 'Serbian', labelKey: 'serbia' },
   { value: 'Singaporean', labelKey: 'singapore' },
-  { value: 'Slovak', labelKey: 'slovakia' }, // new
-  { value: 'Somalian', labelKey: 'somalia' }, // new
+  { value: 'Slovak', labelKey: 'slovakia' }, 
+  { value: 'Somalian', labelKey: 'somalia' }, 
   { value: 'South African', labelKey: 'south_africa' },
   { value: 'Spanish', labelKey: 'spain' },
   { value: 'sri_lanka', labelKey: 'sri_lanka' },
@@ -98,21 +98,29 @@ export const NATIONALITY_OPTIONS: NationalityOption[] = [
   { value: 'Swedish', labelKey: 'sweden' },
   { value: 'Swiss', labelKey: 'switzerland' },
   { value: 'Syrian', labelKey: 'syria' },
-  { value: 'Tajik', labelKey: 'tajikistan' }, // new
-  { value: 'Tanzanian', labelKey: 'tanzania' }, // new
-  { value: 'Thai', labelKey: 'thailand' }, // new
+  { value: 'Tajik', labelKey: 'tajikistan' }, 
+  { value: 'Tanzanian', labelKey: 'tanzania' }, 
+  { value: 'Thai', labelKey: 'thailand' }, 
   { value: 'Tunisian', labelKey: 'tunisia' },
   { value: 'Turkish', labelKey: 'turkey' },
-  { value: 'Turkmen', labelKey: 'turkmenistan' }, // new
+  { value: 'Turkmen', labelKey: 'turkmenistan' }, 
   { value: 'Ukranian', labelKey: 'ukraine' },
   { value: 'Uruguayan', labelKey: 'uruguay' },
-  { value: 'Uzbek', labelKey: 'uzbekistan' }, // new
-  { value: 'Venezuelan', labelKey: 'venezuela' }, // new
+  { value: 'Uzbek', labelKey: 'uzbekistan' }, 
+  { value: 'Venezuelan', labelKey: 'venezuela' }, 
   { value: 'Vietnamese', labelKey: 'vietnam' },
   { value: 'Welsh', labelKey: 'wales' },
-  { value: 'Yemeni', labelKey: 'yemen' }, // new
+  { value: 'Yemeni', labelKey: 'yemen' }, 
   { value: 'Zambian', labelKey: 'zambia' },
   { value: 'Zimbabwean', labelKey: 'zimbabwe' },
+  { value: 'Palestine', labelKey: 'Palestine' },
+  { value: 'portuguese', labelKey: 'portuguese' },
+  { value: 'Paraguayan', labelKey: 'Paraguayan' },
+  { value: 'Qatari', labelKey: 'Qatari' },
+  { value: 'Papua', labelKey: 'Papua' },
+  { value: 'Romanian', labelKey: 'Romanian' },
+
+
 ];
 
 const normalizeStoredValue = (raw: string) =>
