@@ -311,7 +311,7 @@
             "angolan": "Angolan",
             "antiguan": "Antiguan and Barbuda",
             "Argentine": "Argentine",
-            "argentinian": "Argentinian",
+            
             "salvadoran": "Salvadoran",
             "armenian": "Armenian",
             "australian": "Australian",
@@ -351,7 +351,7 @@
             "costa_rican": "Costa Rican",
             "croatian": "Croatian",
             "cuban": "Cuban",
-            "cypriot": "Cyprotic",
+     
             "cyprotic": "Cyprotic",
             "danish": "Danish",
             "czech": "Czech",
@@ -360,12 +360,19 @@
             "latvian": "Latvian",
             "malian": "Malian",
             "mauritanian": "Mauritanian",
-            
             "nicaraguan": "Nicaraguan",
             "nigerien": "Nigerien",
             "panamanian": "Panamanian",
-            "saudi_arabian": "Saudi_arabian",
-            "scottish": "Saudi_arabian",
+        
+
+            "cypriot": "Cypriot",
+            "saudi_arabian": "Saudi Arabian",
+            "scottish": "Scottish",
+            "philippine": "Philippine",
+            "lebanese": "Lebanese",
+            "nepalese": "Nepalese",
+
+
             "slovak": "Slovak",
             "somalian": "Somalian",
             "thai": "Thai",
@@ -395,19 +402,19 @@
             "iraqi": "Iraqi",
             "jamaican": "Jamaican",
             "kazakh": "Kazakh",
-            "philippine": "philippine",
+         
+
             "irish": "Irish",
             "italian": "Italian",
             "japanese": "Japanese",
             "jordanian": "Jordanian",
             "kenyan": "Kenyan",
             "kuwaiti": "Kuwaiti",
-            "lebanese": "Lebanon",
+
             "libyan": "Libyan",
             "malaysian": "Malaysian",
             "mexican": "Mexican",
             "moroccan": "Moroccan",
-            "nepalese": "Nepal",
             "nigerian": "Nigerian",
             "norwegian": "Norwegian",
             "pakistani": "Pakistani",
@@ -424,7 +431,6 @@
             "zambian": "Zambian",
             "welsh": "Welsh",
             "singaporean": "Singaporean",
-            "romanian": "Romanian",
             "russian": "Russian",
             "Romanian" : "Romanian",
             "saudi": "Saudi",

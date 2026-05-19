@@ -120,6 +120,29 @@ export const NATIONALITY_OPTIONS: NationalityOption[] = [
   { value: 'Papua', labelKey: 'Papua' },
   { value: 'Romanian', labelKey: 'Romanian' },
 
+  { value: 'American', labelKey: 'america' },
+  { value: 'Angolan', labelKey: 'angola' },
+  { value: 'Bahraini', labelKey: 'bahrain' },
+  { value: 'Belarusian', labelKey: 'belarus' },
+  { value: 'Bolivian', labelKey: 'bolivia' },
+  { value: 'Bosnian/Herzegovinian', labelKey: 'bosnia_and_herzegovina' },
+  { value: 'Burundian', labelKey: 'burundi' },
+  { value: 'Comorian', labelKey: 'comoros' }, // you currently have Comoran
+  { value: 'Dutch', labelKey: 'netherlands' },
+  { value: 'Filipino', labelKey: 'philippines' }, // you currently have Philippine
+  { value: 'Madagascan', labelKey: 'madagascar' }, // optional if you want both
+  { value: 'Myanmar', labelKey: 'myanmar' }, // you currently use Burmese
+  { value: 'Nicaraguan', labelKey: 'nicaragua' },
+  { value: 'Nigerien', labelKey: 'niger' },
+  { value: 'Norwegian', labelKey: 'norway' },
+  { value: 'Omani', labelKey: 'oman' },
+  { value: 'Pakistani', labelKey: 'pakistan' },
+  { value: 'Panamanian', labelKey: 'panama' },
+  { value: 'Papua New Guinean', labelKey: 'papua_new_guinea' },
+  { value: 'Peruvian', labelKey: 'peru' },
+  { value: 'Polish', labelKey: 'poland' },
+  { value: 'Russian', labelKey: 'russia' },
+
 
 ];
 
