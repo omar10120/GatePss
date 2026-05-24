@@ -21,7 +21,7 @@ function createTransporter(cfg: ReturnType<typeof getSmtpConfig>): Transporter {
     },
     tls: {
       rejectUnauthorized: cfg.tlsRejectUnauthorized,
-      servername: cfg.host || undefined,
+      servername: cfg.tlsServername || cfg.host || undefined,
     },
   });
 }
@@ -56,7 +56,7 @@ async function ensureSmtpReady(): Promise<Transporter> {
     try {
       if (cfg.skipVerify) {
         smtpVerified = true;
-        authOtpLog.smtpConnectionOk();
+        authOtpLog.smtpVerifySkipped();
         return;
       }
       await transporter.verify();
