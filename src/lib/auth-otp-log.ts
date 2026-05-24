@@ -51,6 +51,7 @@ export function getSmtpConfigSnapshot() {
         emailFrom: emailFrom ? maskEmail(emailFrom) : '(not set)',
         fromMatchesUser: Boolean(smtpUser && emailFrom && smtpUser === emailFrom),
         smtpPasswordSet: Boolean(process.env.SMTP_PASSWORD),
+        smtpSkipVerify: process.env.SMTP_SKIP_VERIFY === 'true',
     };
 }
 
