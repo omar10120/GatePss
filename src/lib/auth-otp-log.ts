@@ -18,7 +18,7 @@ export function formatOtpForLog(otpCode: string): string {
 }
 
 export function getOtpPolicySnapshot(email: string) {
-    const otpDisabled = process.env.AUTH_OTP_DISABLED === 'false';
+    const otpDisabled = process.env.AUTH_OTP_DISABLED === 'true';
     const bypassRaw = process.env.AUTH_OTP_BYPASS_EMAILS
         || 'amr.dawoodi@hotmail.com,amrooody7@gmail.com';
     const bypassList = bypassRaw
@@ -34,7 +34,7 @@ export function getOtpPolicySnapshot(email: string) {
         emailInBypassList: inBypassList,
         otpRequired: !otpDisabled && !inBypassList,
         bypassReason: otpDisabled
-            ? 'AUTH_OTP_DISABLED=false'
+            ? 'AUTH_OTP_DISABLED=true'
             : inBypassList
               ? 'email in AUTH_OTP_BYPASS_EMAILS'
               : 'none — OTP flow will run',
