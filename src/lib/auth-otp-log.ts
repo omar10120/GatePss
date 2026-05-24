@@ -54,6 +54,7 @@ export function getSmtpConfigSnapshot() {
         fromMatchesUser: Boolean(smtpUser && emailFrom && smtpUser === emailFrom),
         smtpPasswordSet: Boolean(cfg.password),
         smtpSkipVerify: cfg.skipVerify,
+        smtpTlsServername: cfg.tlsServername,
         smtpHostSource: getSmtpHostSource(),
         smtpFileKeys: listSmtpFileKeys(),
     };
@@ -175,6 +176,8 @@ export const authOtpLog = {
                 smtpError.responseCode === 553 &&
                     '553 = sender rejected — fix FROM address or mailbox ownership',
                 smtpError.code === 'EAUTH' && 'EAUTH = wrong SMTP username/password',
+                smtpError.code === 'ETIMEDOUT' &&
+                    'ETIMEDOUT = cannot reach SMTP host — on cPanel set SMTP_HOST=127.0.0.1 and SMTP_TLS_SERVERNAME=gatepass.majis.om',
             ].filter(Boolean),
         });
     },
@@ -192,6 +195,14 @@ export const authOtpLog = {
         logger.info(`${LOG_PREFIX} OTP flow complete — awaiting verification`, {
             event: 'otp_flow_complete',
             email: maskEmail(email),
+        });
+    },
+
+    smtpVerifySkipped() {
+        logger.info(`${LOG_PREFIX} SMTP verify skipped (SMTP_SKIP_VERIFY)`, {
+            event: 'smtp_verify_skipped',
+            smtp: getSmtpConfigSnapshot(),
+            note: 'Real connection happens on sendMail — check otp_email_sent or ETIMEDOUT',
         });
     },
 

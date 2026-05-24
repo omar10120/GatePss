@@ -1,12 +1,17 @@
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 
-/** Majis production mail — used when env / `.env` omit a value (password always from env). */
+/**
+ * Majis production mail — used when env / `.env` omit a value (password always from env).
+ * On cPanel, connect to localhost; public hostname often times out (ETIMEDOUT) from the same box.
+ */
 export const SMTP_DEFAULTS = {
-  host: 'gatepass.majis.om',
+  host: '127.0.0.1',
   port: 465,
   user: 'info@gatepass.majis.om',
   from: 'info@gatepass.majis.om',
+  /** TLS SNI / cert name when SMTP_HOST is 127.0.0.1 */
+  tlsServername: 'gatepass.majis.om',
 } as const;
 
 /**
@@ -77,8 +82,13 @@ export function getSmtpEnvConfig() {
   const port = Number.parseInt(portRaw || String(SMTP_DEFAULTS.port), 10);
   const resolvedPort = Number.isNaN(port) ? SMTP_DEFAULTS.port : port;
 
+  const host = readSmtpEnv('SMTP_HOST') ?? SMTP_DEFAULTS.host;
+  const skipVerifyEnv = readSmtpEnv('SMTP_SKIP_VERIFY');
+  const isLocalHost =
+    host === '127.0.0.1' || host === 'localhost' || host === '::1';
+
   return {
-    host: readSmtpEnv('SMTP_HOST') ?? SMTP_DEFAULTS.host,
+    host,
     user: readSmtpEnv('SMTP_USER') ?? SMTP_DEFAULTS.user,
     password: readSmtpEnv('SMTP_PASSWORD'),
     from:
@@ -87,8 +97,13 @@ export function getSmtpEnvConfig() {
       SMTP_DEFAULTS.from,
     port: resolvedPort,
     secure: resolvedPort === 465,
-    skipVerify: readSmtpEnv('SMTP_SKIP_VERIFY') === 'true',
+    /** cPanel local SMTP: default skip verify unless explicitly false */
+    skipVerify:
+      skipVerifyEnv === 'true' ||
+      (skipVerifyEnv !== 'false' && isLocalHost),
     tlsRejectUnauthorized: readSmtpEnv('SMTP_TLS_REJECT_UNAUTHORIZED') !== 'false',
+    tlsServername:
+      readSmtpEnv('SMTP_TLS_SERVERNAME') ?? SMTP_DEFAULTS.tlsServername,
   };
 }
 
