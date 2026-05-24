@@ -1,21 +1,16 @@
 import nodemailer from 'nodemailer';
+import { authOtpLog } from '@/lib/auth-otp-log';
 
-const DEFAULT_SMTP_HOST = 'smtp.hostinger.com';
-const DEFAULT_SMTP_PORT = 587;
-const DEFAULT_SMTP_USER = 'info@gatepass.majis.om';
-const DEFAULT_SMTP_PASSWORD = 'Oman@pixel789';
-const DEFAULT_EMAIL_FROM = 'info@gatepass.majis.om';
-
-const smtpHost = process.env.SMTP_HOST || DEFAULT_SMTP_HOST;
-const smtpPort = Number.parseInt(process.env.SMTP_PORT || `${DEFAULT_SMTP_PORT}`, 10);
-const smtpUser = process.env.SMTP_USER || DEFAULT_SMTP_USER;
-const smtpPassword = process.env.SMTP_PASSWORD || DEFAULT_SMTP_PASSWORD;
-const emailFrom = process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM;
+const smtpHost = process.env.SMTP_HOST;
+const smtpPort = Number.parseInt(process.env.SMTP_PORT || '587', 10);
+const smtpUser = process.env.SMTP_USER;
+const smtpPassword = process.env.SMTP_PASSWORD;
+const emailFrom = process.env.EMAIL_FROM || process.env.SMTP_USER;
 const isSecureSmtp = smtpPort === 465;
 
 const transporter = nodemailer.createTransport({
   host: smtpHost,
-  port: Number.isNaN(smtpPort) ? DEFAULT_SMTP_PORT : smtpPort,
+  port: Number.isNaN(smtpPort) ? 587 : smtpPort,
   secure: isSecureSmtp,
   requireTLS: !isSecureSmtp,
   auth: {
@@ -45,9 +40,9 @@ async function ensureSmtpReady(): Promise<void> {
     try {
       await transporter.verify();
       smtpVerified = true;
-      console.log(`✅ SMTP verified successfully (${smtpHost}:${Number.isNaN(smtpPort) ? DEFAULT_SMTP_PORT : smtpPort})`);
+      authOtpLog.smtpConnectionOk();
     } catch (error) {
-      console.error('❌ SMTP verification failed:', error);
+      authOtpLog.smtpConnectionFailed(error);
       throw new Error('SMTP connection failed. Please verify mail server credentials and network access.');
     } finally {
       smtpVerificationInProgress = null;
@@ -74,7 +69,6 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
       html: options.html,
       text: options.text,
     });
-    console.log(`✅ Email sent to ${options.to}`);
   } catch (error) {
     console.error('❌ Error sending email:', error);
     throw error;
@@ -290,6 +284,8 @@ export async function sendOTPEmail(
   userName: string,
   otpCode: string
 ): Promise<void> {
+  authOtpLog.otpEmailSending(userEmail);
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -331,11 +327,19 @@ export async function sendOTPEmail(
     </html>
   `;
 
-  await sendEmail({
-    to: userEmail,
-    subject: 'Your Login Verification Code',
-    html,
-  });
+  try {
+    await ensureSmtpReady();
+    const result = await transporter.sendMail({
+      from: emailFrom,
+      to: userEmail,
+      subject: 'Your Login Verification Code',
+      html,
+    });
+    authOtpLog.otpEmailSent(userEmail, result.messageId);
+  } catch (error) {
+    authOtpLog.otpEmailFailed(userEmail, error);
+    throw error;
+  }
 }
 
 export async function sendContactFormEmail(
