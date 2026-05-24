@@ -1,25 +1,10 @@
 import nodemailer from 'nodemailer';
 import type Transporter from 'nodemailer/lib/mailer';
 import { authOtpLog } from '@/lib/auth-otp-log';
+import { getSmtpEnvConfig, getSmtpHostSource, listSmtpEnvKeys, listSmtpFileKeys } from '@/lib/smtp-config';
 
-/** Read at request time — Next.js can inline top-level `process.env.X` at build time. */
 function getSmtpConfig() {
-  const host = process.env['SMTP_HOST'];
-  const port = Number.parseInt(process.env['SMTP_PORT'] || '587', 10);
-  const user = process.env['SMTP_USER'];
-  const password = process.env['SMTP_PASSWORD'];
-  const from = process.env['EMAIL_FROM'] || process.env['SMTP_USER'];
-  const resolvedPort = Number.isNaN(port) ? 587 : port;
-  return {
-    host,
-    user,
-    password,
-    from,
-    port: resolvedPort,
-    secure: resolvedPort === 465,
-    skipVerify: process.env['SMTP_SKIP_VERIFY'] === 'true',
-    tlsRejectUnauthorized: process.env['SMTP_TLS_REJECT_UNAUTHORIZED'] !== 'false',
-  };
+  return getSmtpEnvConfig();
 }
 
 function createTransporter(cfg: ReturnType<typeof getSmtpConfig>): Transporter {
@@ -50,7 +35,7 @@ async function ensureSmtpReady(): Promise<Transporter> {
 
   if (!cfg.host || !cfg.user || !cfg.password || !cfg.from) {
     // #region agent log
-    fetch('http://127.0.0.1:7462/ingest/57bc6c0c-3c40-4f52-952b-a9b5a5dda95f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4eceec'},body:JSON.stringify({sessionId:'4eceec',location:'email.ts:ensureSmtpReady',message:'SMTP env incomplete at runtime',data:{hasHost:Boolean(cfg.host),hasUser:Boolean(cfg.user),hasPassword:Boolean(cfg.password),hasFrom:Boolean(cfg.from),cwd:process.cwd()},timestamp:Date.now(),hypothesisId:'H2-build-inlined-env'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7462/ingest/57bc6c0c-3c40-4f52-952b-a9b5a5dda95f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4eceec'},body:JSON.stringify({sessionId:'4eceec',location:'email.ts:ensureSmtpReady',message:'SMTP env incomplete at runtime',data:{hasHost:Boolean(cfg.host),hasUser:Boolean(cfg.user),hasPassword:Boolean(cfg.password),hasFrom:Boolean(cfg.from),smtpHostSource:getSmtpHostSource(),smtpEnvKeys:listSmtpEnvKeys(),smtpFileKeys:listSmtpFileKeys(),cwd:process.cwd()},timestamp:Date.now(),hypothesisId:'H3-smtp-host-missing'})}).catch(()=>{});
     // #endregion
     throw new Error('SMTP configuration is incomplete. Please set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, and EMAIL_FROM.');
   }

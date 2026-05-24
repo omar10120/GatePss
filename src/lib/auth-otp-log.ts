@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { getSmtpEnvConfig, getSmtpHostSource, listSmtpFileKeys } from '@/lib/smtp-config';
 
 const LOG_PREFIX = '[Auth/OTP]';
 
@@ -42,16 +43,19 @@ export function getOtpPolicySnapshot(email: string) {
 }
 
 export function getSmtpConfigSnapshot() {
-    const smtpUser = process.env.SMTP_USER || '';
-    const emailFrom = process.env.EMAIL_FROM || process.env.SMTP_USER || '';
+    const cfg = getSmtpEnvConfig();
+    const smtpUser = cfg.user || '';
+    const emailFrom = cfg.from || '';
     return {
-        smtpHost: process.env.SMTP_HOST || '(not set)',
-        smtpPort: process.env.SMTP_PORT || '587',
+        smtpHost: cfg.host || '(not set)',
+        smtpPort: String(cfg.port),
         smtpUser: smtpUser ? maskEmail(smtpUser) : '(not set)',
         emailFrom: emailFrom ? maskEmail(emailFrom) : '(not set)',
         fromMatchesUser: Boolean(smtpUser && emailFrom && smtpUser === emailFrom),
-        smtpPasswordSet: Boolean(process.env.SMTP_PASSWORD),
-        smtpSkipVerify: process.env.SMTP_SKIP_VERIFY === 'true',
+        smtpPasswordSet: Boolean(cfg.password),
+        smtpSkipVerify: cfg.skipVerify,
+        smtpHostSource: getSmtpHostSource(),
+        smtpFileKeys: listSmtpFileKeys(),
     };
 }
 
