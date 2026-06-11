@@ -1,53 +1,71 @@
 import nodemailer from 'nodemailer';
+import type Transporter from 'nodemailer/lib/mailer';
+import { authOtpLog } from '@/lib/auth-otp-log';
+import { getSmtpEnvConfig, getSmtpHostSource, listSmtpEnvKeys, listSmtpFileKeys } from '@/lib/smtp-config';
 
-const DEFAULT_SMTP_HOST = 'smtp.hostinger.com';
-const DEFAULT_SMTP_PORT = 587;
-const DEFAULT_SMTP_USER = 'info@gatepass.majis.om';
-const DEFAULT_SMTP_PASSWORD = 'Oman@pixel789';
-const DEFAULT_EMAIL_FROM = 'info@gatepass.majis.om';
+function getSmtpConfig() {
+  return getSmtpEnvConfig();
+}
 
-const smtpHost = process.env.SMTP_HOST || DEFAULT_SMTP_HOST;
-const smtpPort = Number.parseInt(process.env.SMTP_PORT || `${DEFAULT_SMTP_PORT}`, 10);
-const smtpUser = process.env.SMTP_USER || DEFAULT_SMTP_USER;
-const smtpPassword = process.env.SMTP_PASSWORD || DEFAULT_SMTP_PASSWORD;
-const emailFrom = process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM;
-const isSecureSmtp = smtpPort === 465;
-
-const transporter = nodemailer.createTransport({
-  host: smtpHost,
-  port: Number.isNaN(smtpPort) ? DEFAULT_SMTP_PORT : smtpPort,
-  secure: isSecureSmtp,
-  requireTLS: !isSecureSmtp,
-  auth: {
-    user: smtpUser,
-    pass: smtpPassword,
-  },
-});
+function createTransporter(cfg: ReturnType<typeof getSmtpConfig>): Transporter {
+  return nodemailer.createTransport({
+    host: cfg.host,
+    port: cfg.port,
+    secure: cfg.secure,
+    requireTLS: !cfg.secure,
+    connectionTimeout: 20_000,
+    greetingTimeout: 20_000,
+    auth: {
+      user: cfg.user,
+      pass: cfg.password,
+    },
+    tls: {
+      rejectUnauthorized: cfg.tlsRejectUnauthorized,
+      servername: cfg.tlsServername || cfg.host || undefined,
+    },
+  });
+}
 
 let smtpVerified = false;
 let smtpVerificationInProgress: Promise<void> | null = null;
+let cachedTransporter: Transporter | null = null;
 
-async function ensureSmtpReady(): Promise<void> {
-  if (smtpVerified) {
-    return;
+async function ensureSmtpReady(): Promise<Transporter> {
+  const cfg = getSmtpConfig();
+
+  if (!cfg.host || !cfg.user || !cfg.password || !cfg.from) {
+    // #region agent log
+    fetch('http://127.0.0.1:7462/ingest/57bc6c0c-3c40-4f52-952b-a9b5a5dda95f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4eceec'},body:JSON.stringify({sessionId:'4eceec',location:'email.ts:ensureSmtpReady',message:'SMTP env incomplete at runtime',data:{hasHost:Boolean(cfg.host),hasUser:Boolean(cfg.user),hasPassword:Boolean(cfg.password),hasFrom:Boolean(cfg.from),smtpHostSource:getSmtpHostSource(),smtpEnvKeys:listSmtpEnvKeys(),smtpFileKeys:listSmtpFileKeys(),cwd:process.cwd()},timestamp:Date.now(),hypothesisId:'H3-smtp-host-missing'})}).catch(()=>{});
+    // #endregion
+    throw new Error('SMTP configuration is incomplete. Please set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, and EMAIL_FROM.');
   }
 
-  if (!smtpHost || !smtpUser || !smtpPassword || !emailFrom) {
-    throw new Error('SMTP configuration is incomplete. Please set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, and EMAIL_FROM.');
+  if (smtpVerified && cachedTransporter) {
+    return cachedTransporter;
   }
 
   if (smtpVerificationInProgress) {
     await smtpVerificationInProgress;
-    return;
+    return cachedTransporter!;
   }
+
+  const transporter = createTransporter(cfg);
+  cachedTransporter = transporter;
 
   smtpVerificationInProgress = (async () => {
     try {
+      if (cfg.skipVerify) {
+        smtpVerified = true;
+        authOtpLog.smtpVerifySkipped();
+        return;
+      }
       await transporter.verify();
       smtpVerified = true;
-      console.log(`✅ SMTP verified successfully (${smtpHost}:${Number.isNaN(smtpPort) ? DEFAULT_SMTP_PORT : smtpPort})`);
+      authOtpLog.smtpConnectionOk();
     } catch (error) {
-      console.error('❌ SMTP verification failed:', error);
+      smtpVerified = false;
+      cachedTransporter = null;
+      authOtpLog.smtpConnectionFailed(error);
       throw new Error('SMTP connection failed. Please verify mail server credentials and network access.');
     } finally {
       smtpVerificationInProgress = null;
@@ -55,6 +73,7 @@ async function ensureSmtpReady(): Promise<void> {
   })();
 
   await smtpVerificationInProgress;
+  return transporter;
 }
 
 export interface EmailOptions {
@@ -66,15 +85,15 @@ export interface EmailOptions {
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
   try {
-    await ensureSmtpReady();
+    const transporter = await ensureSmtpReady();
+    const cfg = getSmtpConfig();
     await transporter.sendMail({
-      from: emailFrom,
+      from: cfg.from,
       to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
       subject: options.subject,
       html: options.html,
       text: options.text,
     });
-    console.log(`✅ Email sent to ${options.to}`);
   } catch (error) {
     console.error('❌ Error sending email:', error);
     throw error;
@@ -290,6 +309,8 @@ export async function sendOTPEmail(
   userName: string,
   otpCode: string
 ): Promise<void> {
+  authOtpLog.otpEmailSending(userEmail);
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -331,11 +352,20 @@ export async function sendOTPEmail(
     </html>
   `;
 
-  await sendEmail({
-    to: userEmail,
-    subject: 'Your Login Verification Code',
-    html,
-  });
+  try {
+    const transporter = await ensureSmtpReady();
+    const cfg = getSmtpConfig();
+    const result = await transporter.sendMail({
+      from: cfg.from,
+      to: userEmail,
+      subject: 'Your Login Verification Code',
+      html,
+    });
+    authOtpLog.otpEmailSent(userEmail, result.messageId);
+  } catch (error) {
+    authOtpLog.otpEmailFailed(userEmail, error);
+    throw error;
+  }
 }
 
 export async function sendContactFormEmail(

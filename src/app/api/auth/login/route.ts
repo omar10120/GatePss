@@ -3,13 +3,15 @@ import prisma from '@/lib/prisma';
 import { generateToken, verifyPassword } from '@/lib/auth';
 import { ActionType } from '@/lib/enums';
 import { sendOTPEmail } from '@/lib/email';
+import { authOtpLog } from '@/lib/auth-otp-log';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { email, password } = body;
 
-        // Validate input - BRD requirement: Cannot login without filling all fields
+        authOtpLog.loginStarted(email);
+
         if (!email || !password) {
             return NextResponse.json(
                 { error: 'Validation Error', message: 'Cannot login without filling all fields' },
@@ -92,11 +94,13 @@ export async function POST(request: NextRequest) {
             key: up.permission.key,
             description: up.permission.description,
         }));
-        const requiresOTP = email !== 'amr.dawoodi@hotmail.com';
-        const requiresOTP2 = email !== 'amrooody7@gmail.com';
 
-        // OTP bypass flow: issue token immediately and skip OTP generation
-        if (!requiresOTP || !requiresOTP2) {
+        authOtpLog.passwordOk(user.id, email, user.role);
+        const otpPolicy = authOtpLog.otpPolicy(email);
+
+        if (!otpPolicy.otpRequired) {
+            authOtpLog.otpBypassed(email, otpPolicy.bypassReason);
+
             const token = generateToken({
                 userId: user.id,
                 email: user.email,
@@ -107,10 +111,7 @@ export async function POST(request: NextRequest) {
 
             await prisma.user.update({
                 where: { id: user.id },
-                data: {
-                    otpCode: null,
-                    otpExpiresAt: null,
-                },
+                data: { otpCode: null, otpExpiresAt: null },
             });
 
             await prisma.activityLog.create({
@@ -143,32 +144,33 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        // Password is valid - generate and send OTP
         const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
-        const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+        const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-        // Update user with OTP
+        authOtpLog.otpGenerated(user.id, email, otpCode, otpExpiresAt);
+
         await prisma.user.update({
             where: { id: user.id },
-            data: {
-                otpCode,
-                otpExpiresAt,
-            },
+            data: { otpCode, otpExpiresAt },
         });
 
-        // Send OTP email
         try {
             await sendOTPEmail(user.email, user.name, otpCode);
         } catch (emailError) {
-            console.error('Error sending OTP email:', emailError);
+            authOtpLog.otpEmailFailed(user.email, emailError);
             return NextResponse.json(
-                { error: 'Internal Server Error', emailError: 'An error occurred during login' },
-                { status: 500 }
+                {
+                    error: 'Email Delivery Failed',
+                    message:
+                        'OTP email could not be sent. Verify SMTP_HOST, SMTP_USER, SMTP_PASSWORD, and EMAIL_FROM.',
+                    emailError: emailError instanceof Error ? emailError.message : 'SMTP error',
+                },
+                { status: 503 }
             );
-            // Continue even if email fails
         }
 
-        // Log OTP sent
+        authOtpLog.otpFlowComplete(email);
+
         await prisma.activityLog.create({
             data: {
                 actionType: ActionType.AUTH,
@@ -196,9 +198,8 @@ export async function POST(request: NextRequest) {
                 },
             },
         });
-
-    } catch (error: any) {
-        console.error('Login error:', error);
+    } catch (error: unknown) {
+        authOtpLog.loginFailed('unknown', 'unhandled', error);
         return NextResponse.json(
             { error: 'Internal Server Error', message: 'An error occurred during login' },
             { status: 500 }
