@@ -14,6 +14,24 @@ export function formatDate(date: Date | string): string {
     });
 }
 
+/** Format for <input type="date"> using local calendar date (avoids UTC off-by-one). */
+export function formatDateForInput(date: Date | string): string {
+    if (!date) return '';
+
+    const raw = typeof date === 'string' ? date.trim() : date;
+    if (typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+        return raw;
+    }
+
+    const parsed = typeof raw === 'string' ? new Date(raw) : raw;
+    if (Number.isNaN(parsed.getTime())) return '';
+
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 export function formatDateTime(date: Date | string): string {
     const d = new Date(date);
     return d.toLocaleString('en-US', {

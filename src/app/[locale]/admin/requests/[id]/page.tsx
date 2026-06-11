@@ -149,7 +149,10 @@ export default function RequestDetailsPage() {
     const formatDisplayDate = (value?: string | null) => {
         if (!value) return '-';
         const parsedDate = new Date(value);
+        console.log("parsedDate"+ parsedDate);
         if (Number.isNaN(parsedDate.getTime())) return '-';
+        console.log("parsedDate"+ parsedDate);
+
         return parsedDate.toLocaleDateString();
     };
 

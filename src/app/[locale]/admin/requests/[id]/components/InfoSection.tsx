@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDateForInput } from '@/utils/helpers';
 
 interface InfoRowProps {
     label: string;
@@ -37,21 +38,12 @@ const InfoRow: React.FC<InfoRowProps> = ({ label, value, isEditable, fieldName, 
         
         // Date input
         if (fieldType === 'date') {
-            // Convert date string to YYYY-MM-DD format for date input
-            let dateValue = '';
-            if (inputValue) {
-                try {
-                    const date = new Date(inputValue);
-                    if (!isNaN(date.getTime())) {
-                        dateValue = date.toISOString().split('T')[0];
-                    }
-                } catch {
-                    // If parsing fails, try to extract date from formatted string
-                    const dateMatch = inputValue.match(/\d{1,2}\/\d{1,2}\/\d{4}/);
-                    if (dateMatch) {
-                        const [month, day, year] = dateMatch[0].split('/');
-                        dateValue = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-                    }
+            let dateValue = formatDateForInput(inputValue);
+            if (!dateValue && inputValue) {
+                const dateMatch = inputValue.match(/\d{1,2}\/\d{1,2}\/\d{4}/);
+                if (dateMatch) {
+                    const [month, day, year] = dateMatch[0].split('/');
+                    dateValue = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
                 }
             }
             return (
