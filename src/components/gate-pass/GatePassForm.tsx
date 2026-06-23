@@ -916,7 +916,7 @@ export const GatePassForm: React.FC = () => {
                         name="fullNameAr"
                         type='text'
                         label={getBilingualNested(['fields', 'fullNameAr'])}
-                        placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
+                        // placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
                         error={fieldErrors.fullNameAr}
                         required
                         rightIcon={
