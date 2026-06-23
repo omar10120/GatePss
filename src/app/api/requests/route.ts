@@ -212,8 +212,13 @@ export async function POST(request: NextRequest) {
         console.log(' Photo extraction - photo instanceof File:', photo instanceof File);
 
         try {
-            // imagePath = await uploadFile(passportIdImage, 'passport', 250 * 1024, ['jpg', 'jpeg', 'png', 'pdf']);
-            imagePath = await uploadFile(passportIdImage, 'passport', 2 * 1024 * 1024, ['jpg', 'jpeg', 'png', 'pdf']);
+            const passportImageMaxSize = (file: File) => {
+                const ext = file.name.split('.').pop()?.toLowerCase().trim();
+                const isImage = file.type.startsWith('image/') || (ext ? ['jpg', 'jpeg', 'png'].includes(ext) : false);
+                return isImage ? 250 * 1024 : 2 * 1024 * 1024;
+            };
+
+            imagePath = await uploadFile(passportIdImage!, 'passport', passportImageMaxSize(passportIdImage!), ['jpg', 'jpeg', 'png', 'pdf']);
 
             photoPath = await uploadFile(photo, 'photo', 250 * 1024, ['jpg', 'jpeg', 'png']);
             console.log('📸 After uploadFile - photoPath:', photoPath);

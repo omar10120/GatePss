@@ -26,10 +26,13 @@ export const Input: React.FC<InputProps> = ({
     const inputId = id || `input-${generatedId}`;
     const hasError = !!error;
     const isDateInput = props.type === 'date';
+    const isDateInputText = props.type === 'text';
     const isEmailInput = props.type === 'date';
     const isTextInput = props.type === 'text';
     const dateValue = value ?? props.defaultValue ?? '';
     const isDateEmpty = isDateInput && !dateValue;
+    
+
     const isEmailEmpty = isEmailInput && !dateValue;
     const isTextEmpty = isTextInput && !dateValue;
     const canOpenDatePicker = isDateInput && !props.readOnly && !props.disabled;
@@ -77,7 +80,8 @@ export const Input: React.FC<InputProps> = ({
                     value={value}
                     {...props}
                 />
-                {(isDateEmpty || isEmailEmpty || isTextEmpty) && placeholder && (
+                
+                {(isDateEmpty || isEmailEmpty || isTextEmpty ) && placeholder && (
                     <span
                         className={`absolute inset-y-0 flex items-center pointer-events-none text-[14px] text-[#747474] font-['Tajawal'] left-4 rtl:left-auto rtl:right-4 ${rightIcon ? 'pr-12 rtl:pr-4 rtl:pl-12' : ''}`}
                         aria-hidden

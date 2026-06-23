@@ -325,13 +325,6 @@ export const GatePassForm: React.FC = () => {
             newFieldErrors['passportIdImage'] = `${fieldLabel} ${getBilingualNested(['errors', 'required'])}`;
             isValid = false;
         } else {
-            // Validate passport ID image size (max 2m)
-            const maxSize = 2 * 1024 * 1024; // 2MB in bytes
-            if (passportIdImage.size > maxSize) {
-                newFieldErrors['passportIdImage'] = (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ' (250kb)';
-                isValid = false;
-            }
-            // Validate file type (robust: check both MIME type and extension)
             const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
             const allowedExts = ['jpg', 'jpeg', 'png', 'pdf'];
             const fileExt = passportIdImage.name.split('.').pop()?.toLowerCase().trim();
@@ -342,6 +335,18 @@ export const GatePassForm: React.FC = () => {
             if (!isMimeTypeValid && !isExtValid) {
                 newFieldErrors['passportIdImage'] = getBilingualNested(['errors', 'invalidFileType']) || 'Only JPG, PNG, and PDF files are allowed';
                 isValid = false;
+            } else {
+                const isImageFile =
+                    passportIdImage.type.startsWith('image/') ||
+                    (fileExt ? ['jpg', 'jpeg', 'png'].includes(fileExt) : false);
+                const maxSize = isImageFile ? 250 * 1024 : 2 * 1024 * 1024;
+                const sizeLabel = isImageFile ? '250KB' : '2MB';
+
+                if (passportIdImage.size > maxSize) {
+                    newFieldErrors['passportIdImage'] =
+                        (getBilingualNested(['errors', 'fileSizeExceeded']) || 'File size exceeds limit') + ` (${sizeLabel})`;
+                    isValid = false;
+                }
             }
         }
 
@@ -432,10 +437,9 @@ export const GatePassForm: React.FC = () => {
         // Process each field, compressing images to meet Sohar Port limits
         for (const [key, value] of rawFormData.entries()) {
             if (value instanceof File && (key === 'photo' || key === 'passportIdImage') && value.size > 0) {
-                // Photo needs to be tiny (<50-100KB), Passport ID can be slightly larger
                 const options = key === 'photo'
                     ? { maxWidth: 300, maxHeight: 300, quality: 0.4 }
-                    : { maxWidth: 600, maxHeight: 600, quality: 0.5 };
+                    : { maxWidth: 500, maxHeight: 500, quality: 0.45 };
                 const compressedFile = await compressImage(value, options);
                 console.log(`Compressed ${key}: ${value.size} -> ${compressedFile.size} bytes`);
                 formData.append(key, compressedFile);
@@ -1018,7 +1022,7 @@ export const GatePassForm: React.FC = () => {
                             placeholder={getBilingualNested(['placeholders', 'choosePhotoOrPdf'])}
                             required
                             accept=".png,.jpg,.jpeg,.pdf"
-                            helperText="(jpg, png, pdf) max 2mb"
+                            helperText="(jpg, png) max 250KB, (pdf) max 2MB"
                             error={fieldErrors.passportIdImage}
                         />
                     </div>
