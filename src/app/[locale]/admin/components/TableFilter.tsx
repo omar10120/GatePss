@@ -161,65 +161,78 @@ export const TableFilter: React.FC<TableFilterProps> = ({
     }, []);
 
     return (
-        <div className="bg-white rounded-[12px] border border-gray-100 flex items-center h-[60px] shadow-sm mb-6 relative" style={{ overflow: 'visible' }}>
-            {/* Filter Label */}
-            <div className={`flex items-center gap-3 px-6 h-full bg-gray-50/50 min-w-max border-r border-gray-100 ${isRtl ? 'border-l border-r-0' : 'border-r'}`}>
-                <svg className="w-5 h-5 text-gray-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                </svg>
-                <span className="text-[#A1A1A1] text-[14px] font-medium whitespace-nowrap">{t('filterBy')}</span>
-            </div>
-
-            {/* Search Input */}
-            <div className="flex-1 flex items-center px-6 h-full gap-3">
-                <svg className="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input
-                    type="text"
-                    placeholder={t('searchPlaceholder')}
-                    value={currentFilters.search}
-                    onChange={(e) => onSearch(e.target.value)}
-                    disabled={disabled}
-                    className="w-full bg-transparent border-none outline-none text-[#222222] text-[14px] font-medium placeholder:text-[#A1A1A1] disabled:opacity-50"
-                />
-            </div>
-
-            {/* Date Picker */}
-            {!hideDate && (
-                <div 
-                    ref={dateRef}
-                    className={`relative flex items-center px-6 h-full border-l border-gray-100 min-w-[180px] ${isRtl ? 'border-r border-l-0' : 'border-l'}`}
-                    style={{ overflow: 'visible' }}
+        <div className="bg-white rounded-[12px] border border-gray-100 shadow-sm mb-6 relative overflow-visible">
+            <div className="flex flex-col lg:flex-row lg:items-stretch lg:min-h-[60px]">
+                {/* Filter Label */}
+                <div
+                    className={`flex items-center gap-3 px-4 py-3 lg:px-6 lg:py-0 lg:min-h-[60px] bg-gray-50/50 shrink-0 border-b lg:border-b-0 border-gray-100 ${
+                        isRtl ? 'lg:border-l' : 'lg:border-r'
+                    }`}
                 >
-                    <button
-                        type="button"
+                    <svg className="w-5 h-5 text-gray-900 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    <span className="text-[#A1A1A1] text-[14px] font-medium">{t('filterBy')}</span>
+                </div>
+
+                {/* Search Input */}
+                <div className="flex items-center gap-3 px-4 py-3 lg:flex-1 lg:px-6 lg:py-0 lg:min-h-[60px] min-w-0 border-b lg:border-b-0 border-gray-100">
+                    <svg className="w-5 h-5 text-gray-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input
+                        type="text"
+                        placeholder={t('searchPlaceholder')}
+                        value={currentFilters.search}
+                        onChange={(e) => onSearch(e.target.value)}
                         disabled={disabled}
-                        onClick={() => {
-                            setIsDateOpen(!isDateOpen);
-                            setIsStatusOpen(false);
-                        }}
-                        className="flex items-center justify-between w-full bg-transparent border-none outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <span className="text-gray-900 text-[14px] font-bold">
-                            {getDateDisplayText()}
-                        </span>
-                        <svg 
-                            className={`w-5 h-5 text-gray-900 ${isRtl ? 'mr-2' : 'ml-2'}`} 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
+                        className="w-full min-w-0 bg-transparent border-none outline-none text-[#222222] text-[14px] font-medium placeholder:text-[#A1A1A1] disabled:opacity-50"
+                    />
+                </div>
+
+                {/* Date, Status, Reset */}
+                <div className={`grid grid-cols-1 ${hideDate ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} lg:flex lg:items-stretch lg:shrink-0`}>
+                    {/* Date Picker */}
+                    {!hideDate && (
+                        <div
+                            ref={dateRef}
+                            className={`relative flex items-center px-4 py-3 lg:px-6 lg:py-0 lg:min-h-[60px] lg:min-w-[180px] border-b sm:border-b-0 lg:border-b-0 border-gray-100 ${
+                                isRtl ? 'sm:border-l lg:border-l' : 'sm:border-l lg:border-l'
+                            }`}
+                            style={{ overflow: 'visible' }}
                         >
-                            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </button>
-                    
-                    {isDateOpen && (
-                        <div className={`absolute top-full ${isRtl ? 'right-0' : 'left-0'} mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999] p-4 w-[320px]`}>
+                            <button
+                                type="button"
+                                disabled={disabled}
+                                onClick={() => {
+                                    setIsDateOpen(!isDateOpen);
+                                    setIsStatusOpen(false);
+                                }}
+                                className="flex items-center justify-between w-full min-w-0 bg-transparent border-none outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed gap-2"
+                            >
+                                <span className="text-gray-900 text-[14px] font-bold truncate">
+                                    {getDateDisplayText()}
+                                </span>
+                                <svg
+                                    className="w-5 h-5 text-gray-900 shrink-0"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </button>
+
+                            {isDateOpen && (
+                                <div
+                                    className={`absolute top-full z-[9999] mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-[min(320px,calc(100vw-2rem))]
+                                    ${isRtl ? 'right-0 lg:right-0' : 'left-0 lg:left-0'}
+                                    max-lg:fixed max-lg:left-1/2 max-lg:-translate-x-1/2 max-lg:top-1/2 max-lg:-translate-y-1/2`}
+                                >
                             {/* Calendar Header */}
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-gray-900 font-bold text-base">
@@ -315,42 +328,48 @@ export const TableFilter: React.FC<TableFilterProps> = ({
                             </button>
                         </div>
                     )}
-                </div>
-            )}
+                        </div>
+                    )}
 
-            {/* Status Dropdown */}
-            <div 
-                ref={statusRef}
-                className={`relative flex items-center px-6 h-full border-l border-gray-100 min-w-[140px] ${isRtl ? 'border-r border-l-0' : 'border-l'}`}
-                style={{ overflow: 'visible' }}
-            >
-                <button
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => {
-                        setIsStatusOpen(!isStatusOpen);
-                        setIsDateOpen(false);
-                    }}
-                    className="flex items-center justify-between w-full bg-transparent border-none outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <span className="text-gray-900 text-[14px] font-bold">
-                        {getStatusDisplayText()}
-                    </span>
-                    <svg 
-                        className={`w-4 h-4 text-gray-900 ${isRtl ? 'mr-2' : 'ml-2'} transition-transform ${isStatusOpen ? 'rotate-180' : ''}`} 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="2" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round"
+                    {/* Status Dropdown */}
+                    <div
+                        ref={statusRef}
+                        className={`relative flex items-center px-4 py-3 lg:px-6 lg:py-0 lg:min-h-[60px] lg:min-w-[140px] border-b sm:border-b-0 lg:border-b-0 border-gray-100 ${
+                            isRtl ? 'sm:border-l lg:border-l' : 'sm:border-l lg:border-l'
+                        }`}
+                        style={{ overflow: 'visible' }}
                     >
-                        <path d="M6 9l6 6 6-6"></path>
-                    </svg>
-                </button>
-                
-                {isStatusOpen && (
-                    <div className={`absolute top-full ${isRtl ? 'right-0' : 'left-0'} mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-[9999] overflow-hidden min-w-[140px]`}>
+                        <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => {
+                                setIsStatusOpen(!isStatusOpen);
+                                setIsDateOpen(false);
+                            }}
+                            className="flex items-center justify-between w-full min-w-0 bg-transparent border-none outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed gap-2"
+                        >
+                            <span className="text-gray-900 text-[14px] font-bold truncate">
+                                {getStatusDisplayText()}
+                            </span>
+                            <svg
+                                className={`w-4 h-4 text-gray-900 shrink-0 transition-transform ${isStatusOpen ? 'rotate-180' : ''}`}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M6 9l6 6 6-6"></path>
+                            </svg>
+                        </button>
+
+                        {isStatusOpen && (
+                            <div
+                                className={`absolute top-full z-[9999] mt-1 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden min-w-full w-max max-w-[min(240px,calc(100vw-2rem))]
+                                ${isRtl ? 'right-0' : 'left-0'}
+                                max-sm:fixed max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:top-auto max-sm:bottom-24 max-sm:w-[min(240px,calc(100vw-2rem))]`}
+                            >
                         <button
                             type="button"
                             onClick={() => {
@@ -384,20 +403,24 @@ export const TableFilter: React.FC<TableFilterProps> = ({
                         ))}
                     </div>
                 )}
-            </div>
+                    </div>
 
-            {/* Reset Button */}
-            <button
-                onClick={onReset}
-                disabled={disabled}
-                className={`flex items-center gap-2 px-6 h-full border-l border-gray-100 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isRtl ? 'border-r border-l-0' : 'border-l'}`}
-            >
-                <svg className="w-5 h-5 text-danger-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M23 4v6h-6"></path>
-                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                </svg>
-                <span className="text-danger-500 text-[14px] font-medium whitespace-nowrap">{t('resetFilter')}</span>
-            </button>
+                    {/* Reset Button */}
+                    <button
+                        onClick={onReset}
+                        disabled={disabled}
+                        className={`flex items-center justify-center sm:justify-start gap-2 px-4 py-3 lg:px-6 lg:py-0 lg:min-h-[60px] hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border-gray-100 ${
+                            isRtl ? 'sm:border-l lg:border-l' : 'sm:border-l lg:border-l'
+                        }`}
+                    >
+                        <svg className="w-5 h-5 text-danger-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M23 4v6h-6"></path>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        <span className="text-danger-500 text-[14px] font-medium">{t('resetFilter')}</span>
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
