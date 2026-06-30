@@ -386,3 +386,40 @@ export async function PUT(
         }
     });
 }
+
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
+    return requirePermission(request, 'MANAGE_REQUESTS', async (req, user) => {
+        try {
+            const requestId = parseInt(id);
+            await prisma.request.delete({
+                where: { id: requestId },
+            });
+            await prisma.activityLog.create({
+                data: {
+                    userId: user.userId,
+                    actionType: 'REQUEST_MANAGEMENT',
+                    actionPerformed: `Deleted request ${requestId}`,
+                    affectedEntityType: 'REQUEST',
+                    affectedEntityId: requestId,
+                    details: JSON.stringify({
+                        deletedBy: user.email,
+                    }),
+                },
+            });
+            return NextResponse.json({
+                success: true,
+                message: 'Request deleted successfully',
+            });
+        } catch (error: any) {
+            console.error('Error deleting request:', error);
+            return NextResponse.json(
+                { error: 'Internal Server Error', message: 'Failed to delete request' },
+                { status: 500 }
+            );
+        }
+    });
+}

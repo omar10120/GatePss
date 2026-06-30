@@ -609,6 +609,7 @@
             "title": "Dashboard",
             "welcome": "Welcome back",
             "logout": "Logout",
+            
             "visitorsapplicationscard": "Visitors Applications Card",
             "Totalapplications": "Total applications",
             "summary": "Summary",
@@ -701,6 +702,12 @@
                 "rejectionReason": "Rejection Reason"
             },
             "viewDetails": "View Details",
+            "delete" : "Delete",
+            "deleteConfirmTitle": "Delete Request",
+            "deleteConfirmMessage": "Are you sure you want to delete request {requestNumber}? This action cannot be undone.",
+            "deleteConfirmYes": "Yes, Delete",
+            "deleteConfirmCancel": "Cancel",
+            "deletedSuccessfully": "Request deleted successfully.",
             "noResults": "No requests found",
             "pagination": {
                 "showing": "Showing",

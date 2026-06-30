@@ -9,9 +9,10 @@ interface StatusUpdateProps {
     getStatusColor: (status: string) => string;
     onRejectSuccess?: () => void;
     onEdit?: () => void;
+    onDelete?: () => void;
 }
 
-export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor, onRejectSuccess, onEdit }: StatusUpdateProps) => {
+export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor, onRejectSuccess, onEdit, onDelete }: StatusUpdateProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showRejectModal, setShowRejectModal] = useState(false);
@@ -187,3 +188,4 @@ export const StatusUpdate = ({ currentStatus, onUpdate, getStatusColor, onReject
         </>
     );
 };
+

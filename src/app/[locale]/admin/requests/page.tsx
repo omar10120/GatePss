@@ -12,6 +12,7 @@ import { StatusUpdate } from './components/StatusUpdate';
 import RejectSuccessModal from '@/components/ui/RejectSuccessModal';
 import SuccessModal from '@/components/ui/SuccessModal';
 import IntegrationErrorModal from '@/components/ui/IntegrationErrorModal';
+import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { apiFetch } from '@/lib/api-client';
 
 interface Request {
@@ -85,6 +86,8 @@ export default function AdminRequestsPage() {
     const [integrationError, setIntegrationError] = useState<any>(null);
     const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
     const [isSyncingBatch, setIsSyncingBatch] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<{ id: number; requestNumber: string } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Helper function to check if user has a specific permission
     const hasPermission = (permissionKey: string) => {
@@ -337,6 +340,29 @@ export default function AdminRequestsPage() {
         user?.role,
         pathname
     );
+    const handleDeleteRequest = async () => {
+        if (!deleteTarget || isDeleting) return;
+
+        setIsDeleting(true);
+        try {
+            await apiFetch(`/api/admin/requests/${deleteTarget.id}`, {
+                method: 'DELETE',
+            });
+            setDeleteTarget(null);
+            setSuccessMessage(t('deletedSuccessfully'));
+            setShowSuccessModal(true);
+            await fetchRequests();
+        } catch (error: any) {
+            console.error('Error deleting request:', error);
+            setIntegrationError({
+                error: 'Delete Error',
+                message: error.message || 'Failed to delete request',
+                details: error.details
+            });
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -458,8 +484,12 @@ export default function AdminRequestsPage() {
                                                                                 }}
                                                                                 onRejectSuccess={() => setShowRejectSuccessModal(true)}
                                                                                 onEdit={() => router.push(`/admin/requests/${request.id}?edit=true`)}
+                                                                                
+                                                                                
                                                                             />
+                                                                            
                                                                         </div>
+                                                                        
                                                                     </td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-[#222222] font-bold text-[12px] sm:text-[14px] text-center">{request.rejectionReason || '-'}</td>
                                                                     <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-3 md:py-4 text-center">
@@ -483,6 +513,20 @@ export default function AdminRequestsPage() {
                                                                         >
                                                                             {t('viewDetails')}
                                                                         </Link>
+                                                                        {hasPermission('MANAGE_REQUESTS') && (
+                                                                            <div className=''>
+                                                                                <button
+                                                                                onClick={() => setDeleteTarget({
+                                                                                    id: request.id,
+                                                                                    requestNumber: request.requestNumber || String(request.id),
+                                                                                })}
+                                                                                className="text-[#991B1B] hover:text-[#7f1616] text-[12px] sm:text-[14px] font-bold whitespace-nowrap"
+                                                                            >
+                                                                                {t('delete')}
+                                                                            </button>
+                                                                            </div>
+                                                                        )}
+                                                           
                                                                     </td>
                                                                 </tr>
                                                                 {isExpanded && (
@@ -527,6 +571,7 @@ export default function AdminRequestsPage() {
                                                                                     <span className="font-semibold text-gray-700">{t('columns.visitDate')}: </span>
                                                                                     <span className="text-gray-600">{formatDate(request.dateOfVisit)}</span>
                                                                                 </div>
+                                                                            
                                                                                 {/* {imageUrl && (
                                                                                     <div className="sm:col-span-2 lg:col-span-3">
                                                                                         <span className="font-semibold text-gray-700 block mb-2">{t('columns.uploaded')}: </span>
@@ -613,6 +658,19 @@ export default function AdminRequestsPage() {
                     details={integrationError.details}
                 />
             )}
+
+            <ConfirmDeleteDialog
+                isOpen={!!deleteTarget}
+                onClose={() => !isDeleting && setDeleteTarget(null)}
+                onConfirm={handleDeleteRequest}
+                title={t('deleteConfirmTitle')}
+                message={t('deleteConfirmMessage', {
+                    requestNumber: deleteTarget?.requestNumber ?? '',
+                })}
+                confirmButtonText={t('deleteConfirmYes')}
+                cancelButtonText={t('deleteConfirmCancel')}
+                isLoading={isDeleting}
+            />
         </div>
     );
 }

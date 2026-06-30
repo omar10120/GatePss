@@ -702,6 +702,12 @@
                 "rejectionReason": "سبب الرفض"
             },
             "viewDetails": "عرض التفاصيل",
+            "delete" : "حذف",
+            "deleteConfirmTitle": "حذف الطلب",
+            "deleteConfirmMessage": "هل أنت متأكد من حذف الطلب {requestNumber}؟ لا يمكن التراجع عن هذا الإجراء.",
+            "deleteConfirmYes": "نعم، احذف",
+            "deleteConfirmCancel": "إلغاء",
+            "deletedSuccessfully": "تم حذف الطلب بنجاح.",
             "noResults": "لم يتم العثور على طلبات",
             "pagination": {
                 "showing": "عرض",
