@@ -900,7 +900,7 @@ export const GatePassForm: React.FC = () => {
                             type='text'
                             name="applicantName"
                             label={getBilingualNested(['fields', 'fullNameEn'])}
-                            placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
+                            // placeholder={getBilingualNested(['placeholders', 'enterFullName'])}
                             error={fieldErrors.applicantName}
 
 
