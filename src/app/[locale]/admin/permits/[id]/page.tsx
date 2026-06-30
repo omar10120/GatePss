@@ -8,6 +8,7 @@ import { Sidebar } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import Header from '../../components/Header';
 import { apiFetch } from '@/lib/api-client';
+import { formatDate } from '@/utils/helpers';
 
 interface PermitDetails {
     id: number;
@@ -16,6 +17,7 @@ interface PermitDetails {
     applicantNameEn: string;
     applicantNameAr: string;
     applicantEmail: string;
+    dateOfVisit: string;
     profession: string;
     requestType: string;
     passFor?: string | null;
@@ -23,8 +25,14 @@ interface PermitDetails {
     validFrom: string;
     validTo: string;
     status: string;
+    passportIdNumber  : string;
     qrCodePdfUrl?: string | null;
     createdAt: string;
+    approvedBy: {
+        id: number;
+        name: string;
+        email: string;
+    };
 }
 
 export default function PermitDetailsPage() {
@@ -39,7 +47,7 @@ export default function PermitDetailsPage() {
     const [permissionDenied, setPermissionDenied] = useState(false);
     const [permit, setPermit] = useState<PermitDetails | null>(null);
     const [user, setUser] = useState<any>(null);
-
+    
     useEffect(() => {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
@@ -73,6 +81,12 @@ export default function PermitDetailsPage() {
             fetchPermit().catch((error) => console.error('Error loading permit details:', error));
         }
     }, [id, router]);
+
+    const formatDateOfVisit = (dateOfVisit: string) => {
+        const date = new Date(dateOfVisit);
+        const days = date.getUTCDate();
+        return `${days} ${date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) }`;
+    }
 
     const sidebarItems = getSidebarItems(
         locale as 'en' | 'ar',
@@ -126,8 +140,13 @@ export default function PermitDetailsPage() {
                                 <strong>{t('permitNumber')}:</strong> {permit.externalReference || permit.requestNumber}
                             </p>
                             <p className="text-gray-600">
-                                <strong>{t('holderName')}:</strong> {permit.applicantNameEn || permit.applicantNameAr}
+                                <strong>{t('holderNameAr')}:</strong> {permit.applicantNameEn }
                             </p>
+                            
+                            <p className="text-gray-600">
+                                <strong>{t('holderNameEn')}:</strong> {permit.applicantNameAr }
+                            </p>
+
                             <p className="text-gray-600">
                                 <strong>{t('email')}:</strong> {permit.applicantEmail}
                             </p>
@@ -144,11 +163,25 @@ export default function PermitDetailsPage() {
                                 <strong>{t('identification')}:</strong> {permit.identification}
                             </p>
                             <p className="text-gray-600">
-                                <strong>{t('date')}:</strong> {new Date(permit.validFrom).toLocaleDateString()}
+                                <strong>{t('date')}:</strong> {formatDate(permit.validFrom)}
+                            </p>
+                            <p className="text-gray-600">
+                                <strong>{t('dateOfVisit')}:</strong> {formatDateOfVisit(permit.dateOfVisit)}
                             </p>
                             <p className="text-gray-600">
                                 <strong>Status:</strong> {permit.status}
                             </p>
+                            <p className="text-gray-600">
+                                <strong>{t('passportIdNumber')}:</strong> {permit.passportIdNumber}
+                            </p>
+                            <p className="text-gray-600">
+                                <strong>{t('approvedby')}:</strong> {permit.approvedBy?.name || '-'}
+                            </p>
+                            {permit.qrCodePdfUrl && ( 
+                                <p className="text-gray-600">
+                                    <strong><b>{t('qrCodePdfUrl')}</b>:</strong> {permit.qrCodePdfUrl}
+                                </p>
+                            )}
                         </div>
                     ) : (
                         <p className="text-gray-500">Permit not found.</p>

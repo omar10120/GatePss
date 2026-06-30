@@ -15,11 +15,18 @@ interface Permit {
     applicantNameEn: string;
     applicantNameAr: string;
     applicantEmail: string;
+    approvedBy: {
+        id: number;
+        name: string;
+        email: string;
+    };
     profession: string;
     requestType: string;
     passFor?: string | null;
     identification: string;
+    passportIdNumber: string;
     validFrom: string;
+    dateOfVisit: string;
     validTo: string;
     qrCodePdfUrl?: string | null;
     externalReference?: string | null;
@@ -82,7 +89,10 @@ export default function PermitsPage() {
             params.append('limit', '10');
 
             const result = await apiFetch<{ requests: any[]; pagination: any }>(`/api/admin/permits?${params}`);
+            console.log(result);
             setPermits(result.requests || []);
+            console.log("permits", permits);
+            console.log("pagination", permits[0].dateOfVisit);
             setPagination(result.pagination || null);
         } catch (error: any) {
             console.error('Error fetching permits:', error);
@@ -226,7 +236,8 @@ export default function PermitsPage() {
                                                 <thead className="bg-[#F3F4F6] border-b border-gray-200">
                                                     <tr>
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">ID</th>
-                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('permitNumber')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('approvedby')}</th>
+                                                        {/* <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('permitNumber')}</th> */}
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('date')}</th>
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('holderName')}</th>
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('email')}</th>
@@ -234,18 +245,22 @@ export default function PermitsPage() {
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('requestType')}</th>
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('passType')}</th>
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('identification')}</th>
-                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('permit')}</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('passportIdNumber')}</th>
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('action')}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-200">
                                                     {permits.map((permit) => {
-                                                        const date = new Date(permit.validFrom);
-                                                        const formattedDate = `${date.getMonth() + 1}\\${date.getDate()}\\${date.getFullYear()}`;
+                                                        const date = new Date(permit.dateOfVisit);
+                                                        const days = date.getUTCDate();
+                                                        const formattedDate = `${days} ${date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) }`;
+                                                        const approvedby = permit.approvedBy?.name || '-';
+                                                        
                                                         return (
                                                             <tr key={permit.id} className="hover:bg-gray-50">
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{permit.id}</td>
-                                                                <td className="px-4 py-3 text-sm text-gray-700">{permit.externalReference || permit.requestNumber}</td>
+                                                                <td className="px-4 py-3 text-sm text-gray-700 font-bold">{approvedby}</td>
+                                                                {/* <td className="px-4 py-3 text-sm text-gray-700">{permit.externalReference || permit.requestNumber}</td> */}
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{formattedDate}</td>
                                                                 <td className="px-4 py-3 text-sm font-medium text-gray-900">{permit.applicantNameEn ? permit.applicantNameEn : permit.applicantNameAr}</td>
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{permit.applicantEmail}</td>
@@ -253,7 +268,8 @@ export default function PermitsPage() {
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{permit.requestType}</td>
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{getPassTypeLabel(permit.passFor)}</td>
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{getIdentificationLabel(permit.identification)}</td>
-                                                                <td className="px-4 py-3">
+                                                                <td className="px-4 py-3 text-sm text-gray-700">{permit.passportIdNumber}</td>
+                                                                {/* <td className="px-4 py-3">
                                                                     {permit.qrCodePdfUrl ? (
                                                                         <button
                                                                             onClick={() => handleViewPermitQR(permit)}
@@ -267,7 +283,7 @@ export default function PermitsPage() {
                                                                     ) : (
                                                                         <span className="text-gray-400">-</span>
                                                                     )}
-                                                                </td>
+                                                                </td> */}
                                                                 <td className="px-4 py-3">
                                                                     <button
                                                                         onClick={() => handleViewMore(permit)}
