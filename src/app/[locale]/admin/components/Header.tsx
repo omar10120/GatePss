@@ -1,3 +1,5 @@
+'use client';
+
 import LanguageSelector from '@/components/ui/LanguageSelector'
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter, Link } from '@/i18n/navigation';
@@ -5,6 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { LogoutConfirm } from '@/components/ui/LogoutConfirm';
 import Image from 'next/image';
 import { apiFetch } from '@/lib/api-client';
+import { useSidebar } from '@/components/layout';
 
 interface User {
     id?: number;
@@ -22,6 +25,8 @@ export default function Header() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const t = useTranslations('Admin.dashboard');
+    const { toggleOpen, isMobile, isLocked } = useSidebar();
+    const showMenuButton = isMobile || !isLocked;
 
     useEffect(() => {
         const userData = localStorage.getItem('user');
@@ -66,9 +71,23 @@ export default function Header() {
         <>
             {/* Header */}
             <header className="bg-white sticky top-0 z-30 border-b border-gray-50">
-                <div className="px-8 py-4">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
+                <div className="px-4 sm:px-8 py-4">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                            {showMenuButton && (
+                                <button
+                                    type="button"
+                                    onClick={toggleOpen}
+                                    className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors flex-shrink-0"
+                                    aria-label={t('openMenu')}
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                            )}
+                            <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{t('title')}</h1>
+                        </div>
                         <div className="flex items-center gap-6">
                             <LanguageSelector />
                             <div className="relative" ref={dropdownRef}>

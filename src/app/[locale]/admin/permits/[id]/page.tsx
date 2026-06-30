@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { usePathname, useRouter, Link } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { Sidebar } from '@/components/layout';
+import { AdminShell } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import Header from '../../components/Header';
 import { apiFetch } from '@/lib/api-client';
@@ -117,10 +117,7 @@ export default function PermitDetailsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            <Sidebar items={sidebarItems} locale={locale as 'en' | 'ar'} />
-
-            <div className="flex-1" style={{ marginLeft: locale === 'ar' ? '0' : '16rem', marginRight: locale === 'ar' ? '16rem' : '0' }}>
+        <AdminShell items={sidebarItems} locale={locale as 'en' | 'ar'}>
                 <Header />
 
                 <main className="px-6 py-8">
@@ -187,7 +184,6 @@ export default function PermitDetailsPage() {
                         <p className="text-gray-500">Permit not found.</p>
                     )}
                 </main>
-            </div>
-        </div>
+        </AdminShell>
     );
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname, Link } from '@/i18n/navigation';
-import { Sidebar } from '@/components/layout';
+import { AdminShell } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import Header from '../components/Header';
 import { useTranslations, useLocale } from 'next-intl';
@@ -127,13 +127,7 @@ export default function AdminUsersPage() {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 flex" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            {/* Sidebar */}
-            <Sidebar items={sidebarItems} locale={locale as 'en' | 'ar'} />
-
-            {/* Main Content Area */}
-            <div className="flex-1" style={{ marginLeft: locale === 'ar' ? '0' : '16rem', marginRight: locale === 'ar' ? '16rem' : '0' }}>
-                {/* Header */}
+        <AdminShell items={sidebarItems} locale={locale as 'en' | 'ar'}>
                 <Header />
 
                 {/* Main Content */}
@@ -283,7 +277,6 @@ export default function AdminUsersPage() {
                             </>
                         )}
                     </main>
-            </div>
-        </div>
+        </AdminShell>
     );
 }

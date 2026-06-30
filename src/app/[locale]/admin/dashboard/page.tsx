@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from '@/i18n/navigation';
-import { Sidebar } from '@/components/layout';
+import { AdminShell } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 
@@ -112,12 +112,7 @@ export default function AdminDashboardPage() {
     );
 
     return (
-        <div className="min-h-screen bg-white flex" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            {/* Sidebar */}
-            <Sidebar items={sidebarItems} locale={locale} />
-
-            {/* Main Content Area */}
-            <div className="flex-1" style={{ marginLeft: locale === 'ar' ? '0' : '16rem', marginRight: locale === 'ar' ? '16rem' : '0' }}>
+        <AdminShell items={sidebarItems} locale={locale} className="min-h-screen bg-white flex">
                 <Header />
 
                 {/* Main Content */}
@@ -157,8 +152,7 @@ export default function AdminDashboardPage() {
                         </div>
                     )}
                 </main>
-            </div>
-        </div>
+        </AdminShell>
     );
 }
 

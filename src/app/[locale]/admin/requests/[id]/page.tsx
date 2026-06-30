@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import Header from '../../components/Header';
-import { Sidebar } from '@/components/layout';
+import { AdminShell } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import { Link } from '@/i18n/navigation';
 
@@ -838,10 +838,7 @@ export default function RequestDetailsPage() {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 flex" dir={isRtl ? 'rtl' : 'ltr'}>
-            <Sidebar items={sidebarItems} locale={locale as 'en' | 'ar'} />
-
-            <div className="flex-1" style={{ marginLeft: isRtl ? '0' : '16rem', marginRight: isRtl ? '16rem' : '0' }}>
+        <AdminShell items={sidebarItems} locale={locale as 'en' | 'ar'}>
                 <Header />
 
                 <main className="px-6 py-8">
@@ -1520,7 +1517,6 @@ export default function RequestDetailsPage() {
                         details={integrationError.details}
                     />
                 )}
-            </div>
-        </div >
+        </AdminShell>
     );
 }

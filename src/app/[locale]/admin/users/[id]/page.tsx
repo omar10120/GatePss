@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname, useParams, useSearchParams } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { Sidebar } from '@/components/layout';
+import { AdminShell } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import Header from '../../components/Header';
 import { useTranslations, useLocale } from 'next-intl';
@@ -214,10 +214,7 @@ export default function ViewUserPage() {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 flex" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            <Sidebar items={sidebarItems} locale={locale as 'en' | 'ar'} />
-
-            <div className="flex-1" style={{ marginLeft: locale === 'ar' ? '0' : '16rem', marginRight: locale === 'ar' ? '16rem' : '0' }}>
+        <AdminShell items={sidebarItems} locale={locale as 'en' | 'ar'}>
                 <Header />
 
                 <main className="px-6 py-8">
@@ -421,7 +418,6 @@ export default function ViewUserPage() {
                         </div>
                     </div>
                 </main>
-            </div>
 
             {showSuccessModal && (
                 <SuccessModal
@@ -429,7 +425,7 @@ export default function ViewUserPage() {
                     onClose={handleSuccessClose}
                 />
             )}
-        </div>
+        </AdminShell>
     );
 }
 

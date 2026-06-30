@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
-import { Sidebar } from '@/components/layout';
+import { AdminShell } from '@/components/layout';
 import { getSidebarItems } from '@/config/navigation';
 import Header from '../components/Header';
 import { useLocale, useTranslations } from 'next-intl';
@@ -365,10 +365,7 @@ export default function AdminRequestsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex" dir={isRtl ? 'rtl' : 'ltr'}>
-            <Sidebar items={sidebarItems} locale={locale as 'en' | 'ar'} />
-
-            <div className="flex-1" style={{ marginLeft: isRtl ? '0' : '16rem', marginRight: isRtl ? '16rem' : '0' }}>
+        <AdminShell items={sidebarItems} locale={locale as 'en' | 'ar'}>
                 <Header />
 
                 <main className="px-6 py-8">
@@ -634,7 +631,6 @@ export default function AdminRequestsPage() {
                         </>
                     )}
                 </main>
-            </div>
 
             <RejectSuccessModal
                 isOpen={showRejectSuccessModal}
@@ -671,6 +667,6 @@ export default function AdminRequestsPage() {
                 cancelButtonText={t('deleteConfirmCancel')}
                 isLoading={isDeleting}
             />
-        </div>
+        </AdminShell>
     );
 }

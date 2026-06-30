@@ -609,6 +609,12 @@
             "title": "Dashboard",
             "welcome": "Welcome back",
             "logout": "Logout",
+            "openMenu": "Open menu",
+            "closeMenu": "Close menu",
+            "lockSidebar": "Pin sidebar open",
+            "unlockSidebar": "Unpin sidebar",
+            "sidebarLocked": "Sidebar pinned",
+            "sidebarUnlocked": "Sidebar unpinned",
             
             "visitorsapplicationscard": "Visitors Applications Card",
             "Totalapplications": "Total applications",
