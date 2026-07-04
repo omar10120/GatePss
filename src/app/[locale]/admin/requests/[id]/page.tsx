@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -19,6 +19,13 @@ import { apiFetch, authenticatedFetch } from '@/lib/api-client';
 import { translateApiErrorMessage } from '@/lib/translate-error';
 import { compressImage, getInternalUrl } from '@/utils/helpers';
 import { NATIONALITY_OPTIONS, resolveNationalityLabelKey } from '@/constants/nationalities';
+import {
+    exportRequestCsv,
+    exportRequestPdf,
+    type ExportActivityLogRow,
+    type ExportLabelValueRow,
+} from '@/lib/export-request-report';
+import { RequestExportButtons } from './components/RequestExportButtons';
 
 interface RequestDetails {
     id: number;
@@ -98,6 +105,7 @@ export default function RequestDetailsPage() {
     const locale = useLocale();
     const isRtl = locale === 'ar';
     const t = useTranslations('Admin.requestDetails');
+    const rt = useTranslations('Admin.requests');
     const et = useTranslations('Admin.requestDetails.errors');
     const dt = useTranslations('Admin.dashboard');
     const gt = useTranslations('GatePassPage');
@@ -123,6 +131,7 @@ export default function RequestDetailsPage() {
     const [passTypes, setPassTypes] = useState<PassType[]>([]);
     const [files, setFiles] = useState<{ [key: string]: File | null }>({});
     const [removedFiles, setRemovedFiles] = useState<{ [key: string]: boolean }>({});
+    const [isExporting, setIsExporting] = useState(false);
     const [imageModal, setImageModal] = useState<{ isOpen: boolean; imageUrl: string | null; title: string }>({
         isOpen: false,
         imageUrl: null,
@@ -171,6 +180,98 @@ export default function RequestDetailsPage() {
     const handleRemoveFile = (fieldName: string) => {
         setFiles(prev => ({ ...prev, [fieldName]: null }));
         setRemovedFiles(prev => ({ ...prev, [fieldName]: true }));
+    };
+
+    const buildRequestExportRows = useCallback((): ExportLabelValueRow[] => {
+        if (!request) return [];
+
+        const passType = passTypes.find((pt) => pt.id === request.passTypeId);
+        const passTypeLabel = passType
+            ? locale === 'ar'
+                ? passType.name_ar
+                : passType.name_en
+            : '-';
+        const isPermanentPass = passType
+            ? passType.name_en.toLowerCase().includes('permanent') || passType.name_ar.includes('دائم')
+            : false;
+
+        const identificationLabel =
+            request.identification === 'ID'
+                ? gt('options.idCard')
+                : gt('options.passport');
+
+        return [
+            { Field: t('requestNumber'), Value: request.requestNumber || String(request.id) },
+            { Field: rt('columns.status'), Value: dt(`status.${request.status}`) },
+            { Field: t('fields.entityType') || 'Entity Type', Value: dt(`entityTypes.${request.entityType}`) || request.entityType },
+            { Field: gt('fields.passType'), Value: passTypeLabel },
+            { Field: gt('fields.requestType'), Value: dt(`types.${request.requestType}`) || request.requestType },
+            { Field: gt('fields.nationality'), Value: getOptionLabel(request.nationality) },
+            { Field: gt('fields.identification'), Value: identificationLabel },
+            { Field: gt('fields.organization'), Value: request.organization || '-' },
+            { Field: gt('fields.passStartingDate'), Value: formatDisplayDate(request.dateOfVisit) },
+            ...(isPermanentPass
+                ? [{ Field: gt('fields.passEndDate'), Value: formatDisplayDate(request.validTo) }]
+                : [{ Field: gt('fields.visitduration'), Value: request.visitduration || '-' }]),
+            { Field: gt('fields.passFor'), Value: request.passFor || '-' },
+            { Field: gt('fields.purposeOfVisit'), Value: request.purposeOfVisit || '-' },
+            { Field: gt('fields.fullNameEn'), Value: request.applicantNameEn || '-' },
+            { Field: gt('fields.fullNameAr'), Value: request.applicantNameAr || '-' },
+            { Field: gt('fields.email'), Value: request.applicantEmail || '-' },
+            { Field: gt('fields.telephone'), Value: request.applicantPhone || '-' },
+            { Field: gt('fields.gender'), Value: request.gender || '-' },
+            { Field: gt('fields.profession'), Value: request.profession || '-' },
+            { Field: gt('fields.otherProfessions'), Value: request.otherProfessions || '-' },
+            { Field: gt('fields.idPassportNumber'), Value: request.passportIdNumber || '-' },
+            { Field: t('externalRef'), Value: request.externalReference || '-' },
+            { Field: t('rejectionReason'), Value: request.rejectionReason || '-' },
+            { Field: rt('columns.soharStatus'), Value: request.externalStatus || '-' },
+            { Field: rt('columns.soharMessage'), Value: request.lastIntegrationStatusMessage || '-' },
+            { Field: t('submittedOn'), Value: formatDisplayDate(request.createdAt) },
+            { Field: t('lastUpdated'), Value: formatDisplayDate(request.updatedAt) },
+            { Field: 'Approved By', Value: request.approvedBy?.name || '-' },
+        ];
+    }, [request, passTypes, locale, t, rt, dt, gt, getOptionLabel, formatDisplayDate]);
+
+    const buildActivityLogExportRows = useCallback((): ExportActivityLogRow[] => {
+        if (!request?.logs?.length) return [];
+
+        return request.logs.map((log) => ({
+            Timestamp: new Date(log.timestamp).toLocaleString(locale),
+            Action: log.actionPerformed,
+            User: log.user?.name || '-',
+        }));
+    }, [request, locale]);
+
+    const handleExportCsv = () => {
+        if (!request) return;
+
+        setIsExporting(true);
+        try {
+            const filename = `request_${request.requestNumber || request.id}`;
+            exportRequestCsv(filename, buildRequestExportRows(), buildActivityLogExportRows());
+            setSuccess(t('exportSuccess'));
+        } catch (error) {
+            console.error('CSV export failed:', error);
+            setError(et('genericError'));
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleExportPdf = () => {
+        if (!request) return;
+
+        setIsExporting(true);
+        try {
+            const title = `${t('title')} - ${request.requestNumber || request.id}`;
+            exportRequestPdf(title, buildRequestExportRows(), buildActivityLogExportRows(), locale);
+        } catch (error) {
+            console.error('PDF export failed:', error);
+            setError(et('genericError'));
+        } finally {
+            setIsExporting(false);
+        }
     };
 
 
@@ -860,13 +961,23 @@ export default function RequestDetailsPage() {
                         <div className="animate-fade-in ">
                             {/* Header Section */}
                             <div className="bg-white rounded-[16px] p-6 shadow-sm mb-6">
-                                <div className="flex items-center justify-between mb-8">
-                                    <RequestHeader
-                                        requestNumber={request.requestNumber}
-                                        onSync={request.externalReference ? handleSync : undefined}
-                                        isSyncing={isSyncing}
-                                    />
-                                    <div className="flex items-center gap-3">
+                                <div className="flex flex-col gap-4 mb-8">
+                                    <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4">
+                                        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 min-w-0">
+                                            <RequestHeader
+                                                requestNumber={request.requestNumber}
+                                                onSync={request.externalReference ? handleSync : undefined}
+                                                isSyncing={isSyncing}
+                                            />
+                                            <RequestExportButtons
+                                                onExportCsv={handleExportCsv}
+                                                onExportPdf={handleExportPdf}
+                                                exporting={isExporting}
+                                                exportCsvLabel={t('exportCsv')}
+                                                exportPdfLabel={t('exportPdf')}
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-3 flex-wrap">
                                         {isEditMode && request.status === 'PENDING' ? (
                                             <div className="flex flex-col gap-2">
                                                 <select
@@ -934,6 +1045,7 @@ export default function RequestDetailsPage() {
                                         )}
                                  
                                     </div>
+                                </div>
                                 </div>
 
                                 {isEditMode && request.status === 'PENDING' && (
