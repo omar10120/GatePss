@@ -33,6 +33,16 @@ interface PermitDetails {
         name: string;
         email: string;
     };
+    gender: string;
+    applicantPhone:string,
+    otherProfessions:string,
+    photoPath:string,
+    nationality:string,
+    organization:string,
+    purposeOfVisit:string,
+    rejectionReason:string,
+    
+
 }
 
 export default function PermitDetailsPage() {
@@ -87,6 +97,10 @@ export default function PermitDetailsPage() {
         const days = date.getUTCDate();
         return `${days} ${date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) }`;
     }
+    const numberofdaystovisist = ()=>{
+        const numbersofdaays = new Date(permit?.validFrom || '').getTime() - new Date(permit?.validTo || '').getTime();
+        return numbersofdaays / (1000 * 60 * 60 * 24);
+    }
 
     const sidebarItems = getSidebarItems(
         locale as 'en' | 'ar',
@@ -123,7 +137,7 @@ export default function PermitDetailsPage() {
                 <main className="px-6 py-8">
                     <div className="mb-6">
                         <Link href="/admin/permits" className="text-info-500 hover:text-primary-700 text-sm font-medium">
-                            {t('viewMore')}
+                           &lt; {t('back')}
                         </Link>
                     </div>
 
@@ -150,6 +164,10 @@ export default function PermitDetailsPage() {
                             <p className="text-gray-600">
                                 <strong>{t('role')}:</strong> {permit.profession}
                             </p>
+                            <p className="text-gray-600">
+                                <strong>{t('number_of_days_to_visit')}:</strong> {numberofdaystovisist().toFixed(0)}
+                            </p>
+
                             <p className="text-gray-600">
                                 <strong>{t('requestType')}:</strong> {permit.requestType}
                             </p>
@@ -179,6 +197,43 @@ export default function PermitDetailsPage() {
                                     <strong><b>{t('qrCodePdfUrl')}</b>:</strong> {permit.qrCodePdfUrl}
                                 </p>
                             )}
+                            <p className="text-gray-600">
+                                <strong>{t('gender')}:</strong> {permit.gender}
+                            </p>
+                            <p className="text-gray-600">
+                                <strong>{t('applicantPhone')}:</strong> {permit.applicantPhone}
+                            </p>
+                            <p className="text-gray-600">
+                                <strong>{t('otherProfessions')}:</strong> {permit.otherProfessions}
+                            </p>
+                            {/* <p className="text-gray-600">
+                                {
+                                    (() => {
+                                        const url = permit.photoPath;
+                                        const isDataUrl = url.startsWith('data:image/');
+                                        const extensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp'];
+                                        const isImage = isDataUrl || extensions.some(ext => url.toLowerCase().split('?')[0].endsWith(ext));
+                                      
+                                        if (isImage) {
+                                            return <img src={url} alt="Photo" className="w-20 h-20 object-cover rounded-full" />;
+                                        }
+                                        return <p>{url}</p>;
+                                    })()
+                                }
+                            </p> */}
+                            <p className="text-gray-600">
+                                <strong>{t('nationality')}:</strong> {permit.nationality}
+                            </p>
+                            <p className="text-gray-600">
+                                <strong>{t('organization')}:</strong> {permit.organization}
+                            </p>
+                            <p className="text-gray-600">
+                                <strong>{t('purposeOfVisit')}:</strong> {permit.purposeOfVisit}
+                            </p>
+                            <p className="text-gray-600">
+                                <strong>{t('rejectionReason')}:</strong> {permit.rejectionReason}
+                            </p>
+                            <p className="text-gray-600"></p>
                         </div>
                     ) : (
                         <p className="text-gray-500">Permit not found.</p>

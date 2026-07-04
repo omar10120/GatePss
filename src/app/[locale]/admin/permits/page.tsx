@@ -232,9 +232,9 @@ export default function PermitsPage() {
                                             <table className="w-full">
                                                 <thead className="bg-[#F3F4F6] border-b border-gray-200">
                                                     <tr>
-                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">ID</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">#</th>
+                                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('permitNumber')}</th>
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('approvedby')}</th>
-                                                        {/* <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('permitNumber')}</th> */}
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('date')}</th>
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('holderName')}</th>
                                                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">{t('email')}</th>
@@ -256,6 +256,7 @@ export default function PermitsPage() {
                                                         return (
                                                             <tr key={permit.id} className="hover:bg-gray-50">
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{permit.id}</td>
+                                                                <td className="px-4 py-3 text-sm text-gray-700">{permit.requestNumber}</td>
                                                                 <td className="px-4 py-3 text-sm text-gray-700 font-bold">{approvedby}</td>
                                                                 {/* <td className="px-4 py-3 text-sm text-gray-700">{permit.externalReference || permit.requestNumber}</td> */}
                                                                 <td className="px-4 py-3 text-sm text-gray-700">{formattedDate}</td>
