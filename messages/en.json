@@ -714,6 +714,10 @@
             "deleteConfirmYes": "Yes, Delete",
             "deleteConfirmCancel": "Cancel",
             "deletedSuccessfully": "Request deleted successfully.",
+            "exportCsv": "Export CSV",
+            "exportPdf": "Export PDF",
+            "exportSuccess": "Report exported successfully.",
+            "exportEmpty": "No requests to export.",
             "noResults": "No requests found",
             "pagination": {
                 "showing": "Showing",

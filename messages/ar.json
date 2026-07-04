@@ -715,6 +715,10 @@
             "deleteConfirmYes": "نعم، احذف",
             "deleteConfirmCancel": "إلغاء",
             "deletedSuccessfully": "تم حذف الطلب بنجاح.",
+            "exportCsv": "تصدير CSV",
+            "exportPdf": "تصدير PDF",
+            "exportSuccess": "تم تصدير التقرير بنجاح.",
+            "exportEmpty": "لا توجد طلبات للتصدير.",
             "noResults": "لم يتم العثور على طلبات",
             "pagination": {
                 "showing": "عرض",

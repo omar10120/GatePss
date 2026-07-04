@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname, Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { AdminShell } from '@/components/layout';
@@ -13,7 +13,13 @@ import RejectSuccessModal from '@/components/ui/RejectSuccessModal';
 import SuccessModal from '@/components/ui/SuccessModal';
 import IntegrationErrorModal from '@/components/ui/IntegrationErrorModal';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
+import { RequestExportButtons } from './[id]/components/RequestExportButtons';
 import { apiFetch } from '@/lib/api-client';
+import {
+    exportTableCsv,
+    exportTablePdf,
+    type ExportTableColumn,
+} from '@/lib/export-request-report';
 
 interface Request {
     id: number;
@@ -88,6 +94,7 @@ export default function AdminRequestsPage() {
     const [isSyncingBatch, setIsSyncingBatch] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<{ id: number; requestNumber: string } | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     // Helper function to check if user has a specific permission
     const hasPermission = (permissionKey: string) => {
@@ -323,6 +330,116 @@ export default function AdminRequestsPage() {
         });
     };
 
+    const exportColumns = useMemo<ExportTableColumn[]>(
+        () => [
+            { key: 'requestNumber', label: 'ID' },
+            { key: 'createdAt', label: t('columns.createdAt') },
+            { key: 'holderName', label: t('columns.holderName') },
+            { key: 'status', label: t('columns.status') },
+            { key: 'rejectionReason', label: t('columns.rejectionReason') },
+            { key: 'soharStatus', label: t('columns.soharStatus') },
+            { key: 'soharMessage', label: t('columns.soharMessage') },
+            { key: 'email', label: t('columns.email') },
+            { key: 'telephone', label: t('columns.telephone') },
+            { key: 'idNumber', label: t('columns.idNumber') },
+            { key: 'passType', label: t('columns.passType') },
+            { key: 'passFor', label: t('columns.passFor') },
+            { key: 'visitDate', label: t('columns.visitDate') },
+        ],
+        [t]
+    );
+
+    const mapRequestToExportRow = useCallback(
+        (request: Request): Record<string, string> => ({
+            requestNumber: request.requestNumber || String(request.id),
+            createdAt: formatDate(request.createdAt),
+            holderName: request.applicantNameEn || request.applicantNameAr || '-',
+            status: dt.has(`status.${request.status}`) ? dt(`status.${request.status}`) : request.status,
+            rejectionReason: request.rejectionReason || '-',
+            soharStatus: request.externalStatus || '-',
+            soharMessage:
+                request.lastIntegrationStatusMessage === 'Gate pass created successfully (MOCK)'
+                    ? rdt('soharSuccessMock')
+                    : request.lastIntegrationStatusMessage || '-',
+            email: request.applicantEmail || '-',
+            telephone: request.applicantPhone || '-',
+            idNumber: request.passportIdNumber || '-',
+            passType: getPassTypeLabel(request.passFor),
+            passFor: getPassForLabel(request.requestType),
+            visitDate: formatDate(request.dateOfVisit),
+        }),
+        [dt, rdt, getPassTypeLabel, getPassForLabel, formatDate]
+    );
+
+    const fetchRequestsForExport = async (): Promise<Request[]> => {
+        const params = new URLSearchParams();
+        if (filters.status) params.append('status', filters.status);
+        if (filters.requestType) params.append('requestType', filters.requestType);
+        if (filters.search) params.append('search', filters.search);
+        if (filters.date) params.append('date', filters.date);
+        params.append('page', '1');
+        params.append('limit', '10000');
+
+        const result = await apiFetch<{ requests: Request[] }>(`/api/admin/requests?${params}`);
+        return result.requests || [];
+    };
+
+    const handleExportCsv = async () => {
+        setIsExporting(true);
+        try {
+            const exportRequests = await fetchRequestsForExport();
+            if (exportRequests.length === 0) {
+                setSuccessMessage(t('exportEmpty'));
+                setShowSuccessModal(true);
+                return;
+            }
+
+            const rows = exportRequests.map(mapRequestToExportRow);
+            const labeledRows = rows.map((row) => {
+                const labeled: Record<string, string> = {};
+                exportColumns.forEach((col) => {
+                    labeled[col.label] = row[col.key] ?? '-';
+                });
+                return labeled;
+            });
+
+            exportTableCsv(`requests_${new Date().toISOString().slice(0, 10)}`, labeledRows);
+            setSuccessMessage(t('exportSuccess'));
+            setShowSuccessModal(true);
+        } catch (error) {
+            console.error('CSV export failed:', error);
+            setIntegrationError({
+                error: 'Export Error',
+                message: 'Failed to export requests',
+            });
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleExportPdf = async () => {
+        setIsExporting(true);
+        try {
+            const exportRequests = await fetchRequestsForExport();
+            if (exportRequests.length === 0) {
+                setSuccessMessage(t('exportEmpty'));
+                setShowSuccessModal(true);
+                return;
+            }
+
+            const rows = exportRequests.map(mapRequestToExportRow);
+            exportTablePdf(t('title'), exportColumns, rows, locale);
+        } catch (error) {
+            console.error('PDF export failed:', error);
+            setIntegrationError({
+                error: 'Export Error',
+                message: 'Failed to export requests',
+            });
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     if (loading && requests.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -369,25 +486,34 @@ export default function AdminRequestsPage() {
                 <Header />
 
                 <main className="px-6 py-8">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                         <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
-                        {hasPermission('MANAGE_REQUESTS') && (
-                            <button
-                                onClick={handleSyncAll}
-                                disabled={isSyncingBatch}
-                                className="flex items-center gap-2 px-4 py-2 bg-white border border-[#00B09C] rounded-[10px] text-[#00B09C] text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
-                            >
-                                <svg 
-                                    className={`w-5 h-5 ${isSyncingBatch ? 'animate-spin' : ''}`} 
-                                    fill="none" 
-                                    stroke="currentColor" 
-                                    viewBox="0 0 24 24"
+                        <div className="flex flex-wrap items-center gap-2">
+                            <RequestExportButtons
+                                onExportCsv={handleExportCsv}
+                                onExportPdf={handleExportPdf}
+                                exporting={isExporting}
+                                exportCsvLabel={t('exportCsv')}
+                                exportPdfLabel={t('exportPdf')}
+                            />
+                            {hasPermission('MANAGE_REQUESTS') && (
+                                <button
+                                    onClick={handleSyncAll}
+                                    disabled={isSyncingBatch || isExporting}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white border border-[#00B09C] rounded-[10px] text-[#00B09C] text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
                                 >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                                {isSyncingBatch ? t('updating') : t('updateFromSohar')}
-                            </button>
-                        )}
+                                    <svg 
+                                        className={`w-5 h-5 ${isSyncingBatch ? 'animate-spin' : ''}`} 
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    {isSyncingBatch ? t('updating') : t('updateFromSohar')}
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {permissionDenied ? (

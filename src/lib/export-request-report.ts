@@ -157,3 +157,82 @@ function escapeHtml(value: string): string {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
+
+export interface ExportTableColumn {
+    key: string;
+    label: string;
+}
+
+export function exportTableCsv(
+    filename: string,
+    rows: Record<string, string>[]
+): void {
+    if (rows.length === 0) return;
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const csv = XLSX.utils.sheet_to_csv(ws);
+    const blob = new Blob(['\ufeff', csv], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, `${sanitizeFilename(filename)}.csv`);
+}
+
+export function exportTablePdf(
+    title: string,
+    columns: ExportTableColumn[],
+    rows: Record<string, string>[],
+    locale: string
+): void {
+    if (rows.length === 0) return;
+
+    const isRtl = locale === 'ar';
+    const dir = isRtl ? 'rtl' : 'ltr';
+    const generatedAt = new Date().toLocaleString(locale);
+
+    const headerCells = columns
+        .map((col) => `<th>${escapeHtml(col.label)}</th>`)
+        .join('');
+
+    const bodyRows = rows
+        .map(
+            (row) => `
+                <tr>
+                    ${columns.map((col) => `<td>${escapeHtml(row[col.key] ?? '-')}</td>`).join('')}
+                </tr>`
+        )
+        .join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="${locale}" dir="${dir}">
+<head>
+    <meta charset="utf-8" />
+    <title>${escapeHtml(title)}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; color: #222; }
+        h1 { color: #005068; font-size: 22px; margin-bottom: 4px; }
+        .meta { color: #747474; font-size: 12px; margin-bottom: 24px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        th, td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: ${isRtl ? 'right' : 'left'}; font-size: 11px; word-break: break-word; }
+        th { background: #f9fafb; color: #374151; }
+        tr:nth-child(even) td { background: #fcfcfc; }
+        @media print {
+            body { margin: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>${escapeHtml(title)}</h1>
+    <p class="meta">Generated: ${escapeHtml(generatedAt)} | Rows: ${rows.length}</p>
+    <table>
+        <thead><tr>${headerCells}</tr></thead>
+        <tbody>${bodyRows}</tbody>
+    </table>
+    <script>window.onload = function() { window.print(); };</script>
+</body>
+</html>`;
+
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer');
+    if (!printWindow) return;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+}
