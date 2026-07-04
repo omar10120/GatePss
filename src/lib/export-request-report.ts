@@ -16,6 +16,72 @@ function sanitizeFilename(name: string): string {
     return name.replace(/[^\w\-]+/g, '_').replace(/_+/g, '_');
 }
 
+function escapeHtml(value: string): string {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+const PDF_PRINT_SCRIPT = `<script>
+    window.addEventListener('load', function () {
+        window.setTimeout(function () { window.print(); }, 250);
+    });
+</script>`;
+
+function openPrintableHtml(html: string): void {
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const printWindow = window.open(url, '_blank');
+
+    if (printWindow) {
+        printWindow.addEventListener('load', () => {
+            URL.revokeObjectURL(url);
+        });
+        return;
+    }
+
+    URL.revokeObjectURL(url);
+
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('title', 'Export preview');
+    iframe.style.position = 'fixed';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.opacity = '0';
+    iframe.style.pointerEvents = 'none';
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) {
+        document.body.removeChild(iframe);
+        return;
+    }
+
+    iframeDoc.open();
+    iframeDoc.write(html);
+    iframeDoc.close();
+
+    const printFrame = () => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        window.setTimeout(() => {
+            if (iframe.parentNode) {
+                document.body.removeChild(iframe);
+            }
+        }, 1000);
+    };
+
+    if (iframe.contentWindow?.document.readyState === 'complete') {
+        printFrame();
+    } else {
+        iframe.onload = printFrame;
+    }
+}
+
 export function exportRequestCsv(
     filename: string,
     details: ExportLabelValueRow[],
@@ -137,25 +203,11 @@ export function exportRequestPdf(
         <tbody>${detailsRows}</tbody>
     </table>
     ${logsSection}
-    <script>window.onload = function() { window.print(); };</script>
+    ${PDF_PRINT_SCRIPT}
 </body>
 </html>`;
 
-    const printWindow = window.open('', '_blank', 'noopener,noreferrer');
-    if (!printWindow) return;
-
-    printWindow.document.open();
-    printWindow.document.write(html);
-    printWindow.document.close();
-}
-
-function escapeHtml(value: string): string {
-    return value
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    openPrintableHtml(html);
 }
 
 export interface ExportTableColumn {
@@ -225,14 +277,9 @@ export function exportTablePdf(
         <thead><tr>${headerCells}</tr></thead>
         <tbody>${bodyRows}</tbody>
     </table>
-    <script>window.onload = function() { window.print(); };</script>
+    ${PDF_PRINT_SCRIPT}
 </body>
 </html>`;
 
-    const printWindow = window.open('', '_blank', 'noopener,noreferrer');
-    if (!printWindow) return;
-
-    printWindow.document.open();
-    printWindow.document.write(html);
-    printWindow.document.close();
+    openPrintableHtml(html);
 }
