@@ -92,6 +92,8 @@ export async function getGatePass(
             },
             externalReference: passNumber,
         });
+        console.log('Sohar Port Get Gate Pass Response:', response);
+        console.log('Sohar Port Get Gate Pass Endpoint:', getEndpointUrl('v1', 'GET_GATE_PASS'));
 
         logger.info(`Sohar Port Get Gate Pass Response: ${passNumber}`, {
             type: 'SOHAR_PORT_GET_GATE_PASS_RESPONSE',

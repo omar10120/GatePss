@@ -20,7 +20,7 @@ export const NATIONALITY_OPTIONS: NationalityOption[] = [
   { value: 'Belgian', labelKey: 'belgium' },
   { value: 'Bolivian', labelKey: 'bolivian' },
   { value: 'Bosnian/Herzegovinian', labelKey: 'Bosnian/Herzegovinc' },
-  { value: 'Brazilian', labelKey: 'brazil' },
+  { value: 'brazilian', labelKey: 'brazilian' },
   { value: 'Bulgarian', labelKey: 'bulgaria' },
   { value: 'Burmese', labelKey: 'Myanmar' },
   { value: 'Burundian', labelKey: 'Burundian' },

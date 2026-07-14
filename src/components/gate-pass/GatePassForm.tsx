@@ -994,7 +994,6 @@ export const GatePassForm: React.FC = () => {
                             required
                         />
                     )}
-
                     <Select
                         name="identification"
                         label={getBilingualNested(['fields', 'identification'])}
@@ -1014,6 +1013,7 @@ export const GatePassForm: React.FC = () => {
                         error={fieldErrors.passportIdNumber}
                         required
                     />
+                    {/* identification_document */}
                     <div className="w-full">
                         <FileUpload
                             id="passportIdImage"
@@ -1026,6 +1026,7 @@ export const GatePassForm: React.FC = () => {
                             error={fieldErrors.passportIdImage}
                         />
                     </div>
+                    {/* photo_attachment */}
                     <FileUpload
                         id="photo"
                         name="photo"
