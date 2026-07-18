@@ -110,7 +110,9 @@ export async function POST(request: NextRequest) {
 
         let visitDate: Date | null = null;
         if (dateOfVisitRaw) {
-            const parsedVisitDate = new Date(dateOfVisitRaw);
+            // const parsedVisitDate = new Date(dateOfVisitRaw);
+            const parsedVisitDate = new Date(dateOfVisitRaw + 'T00:00:00.000Z');
+
             if (isNaN(parsedVisitDate.getTime())) {
                 errors.push('Date of visit must be a valid date');
             } else {
@@ -120,16 +122,19 @@ export async function POST(request: NextRequest) {
 
         if (visitDate) {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            visitDate.setHours(0, 0, 0, 0);
+            // today.setHours(0, 0, 0, 0);
+              today.setUTCHours(0, 0, 0, 0);
+            visitDate.setUTCHours(0, 0, 0, 0);
 
             if (isPermanent && visitDate < today) {
                 errors.push('Date of visit cannot be in the past');
             }
+            
 
             // Validate passEndDate: must be at least 4 months after dateOfVisit
             if (passEndDate) {
-                const endDate = new Date(passEndDate);
+                // const endDate = new Date(passEndDate);
+                const endDate = new Date(passEndDate + 'T00:00:00.000Z');
 
                 // Check if passEndDate is a valid date
                 if (isNaN(endDate.getTime())) {
@@ -246,46 +251,47 @@ export async function POST(request: NextRequest) {
         // Keep validity calculations based on visitDate when provided,
         // and fall back to current date for temporary passes.
         const baseDate = visitDate ? new Date(visitDate) : new Date();
-        baseDate.setHours(0, 0, 0, 0);
+        baseDate.setUTCHours(0, 0, 0, 0);
         const validFrom = new Date(baseDate);
         let validTo = new Date(baseDate);
 
         if (passEndDate) {
-            validTo = new Date(passEndDate);
+            validTo = new Date(passEndDate + 'T00:00:00.000Z');
+            validTo.setUTCHours(0, 0, 0, 0);
         } else {
             switch (visitduration) {
                 case '1_DAY':
-                    validTo.setDate(validTo.getDate() + 1);
+                    validTo.setUTCDate(validTo.getUTCDate() + 1);
                     break;
                 case '1_MONTH':
-                    validTo.setMonth(validTo.getMonth() + 1);
+                    validTo.setUTCMonth(validTo.getUTCMonth() + 1);
                     break;
                 case '2_DAY':
-                    validTo.setDate(validTo.getDate() + 2);
+                    validTo.setUTCDate(validTo.getUTCDate() + 2);
                     break;
                 case '3_DAY':
-                    validTo.setDate(validTo.getDate() + 3);
+                    validTo.setUTCDate(validTo.getUTCDate() + 3);
                     break;
                 case '4_DAY':
-                    validTo.setDate(validTo.getDate() + 4);
+                    validTo.setUTCDate(validTo.getUTCDate() + 4);
                     break;
                 case '5_DAY':
-                    validTo.setDate(validTo.getDate() + 5);
+                    validTo.setUTCDate(validTo.getUTCDate() + 5);
                     break;
                 case '10_DAY':
-                    validTo.setDate(validTo.getDate() + 10);
+                    validTo.setUTCDate(validTo.getUTCDate() + 10);
                     break;
                 case '2_MONTH':
-                    validTo.setMonth(validTo.getMonth() + 2);
+                    validTo.setUTCMonth(validTo.getUTCMonth() + 2);
                     break;
                 case '3_MONTH':
-                    validTo.setMonth(validTo.getMonth() + 3);
+                    validTo.setUTCMonth(validTo.getUTCMonth() + 3);
                     break;
                 default:
-                    validTo.setDate(validTo.getDate() + 1); // Default to 1 day
+                    validTo.setUTCDate(validTo.getUTCDate() + 1); // Default to 1 day
             }
         }
-        validTo.setHours(23, 59, 59, 999);
+        validTo.setUTCHours(23, 59, 59, 999);
 
 
         const requestNumber = generateRequestNumber();
