@@ -224,6 +224,14 @@ export const GatePassForm: React.FC = () => {
                 isValid = false;
             }
         });
+        // Organization must be in Arabic only
+            const organization = formData.get('organization') as string;
+            if (organization && !/^[\u0600-\u06FF\s]+$/.test(organization)) {
+            newFieldErrors['organization'] = 
+                getBilingualNested(['errors', 'organizationArabicOnly']) || 
+                'Organization name must be in Arabic only';
+            isValid = false;
+            }
 
         // Date of Visit validation (required and must not be in the past)
         const dateOfVisit = formData.get('dateOfVisit') as string;
@@ -675,18 +683,23 @@ export const GatePassForm: React.FC = () => {
                             {getBilingualNested(['fields', 'organization'])}
                             <span className="text-red-500 ml-1">*</span>
                         </label>
+                        {/* <label >organization name should be in arabic</label> */}
+                        <label className="text-sm  font-['Tajawal'] text-red-600">{getBilingualNested(['fields', 'organizationAr'])}</label>
                         <div className="relative flex ">
                             <div className="flex-1">
-                                <Input
-                                    
-                                    
-                                    type="text"
-                                    name="organization"
-                                    value={organizationValue}
-                                    onChange={(e) => setOrganizationValue(e.target.value)}
-                                    placeholder={getBilingualNested(['placeholders', 'typeOrganization']) || 'Type organization name'}
-                                    error={fieldErrors.organization}
-                                    required
+                            <Input
+                                type="text"
+                                name="organization"
+                                value={organizationValue}
+                                onChange={(e) => {
+                                    const raw = e.target.value;
+                                    // Keep only Arabic letters (basic block) and spaces
+                                    const filtered = raw.replace(/[^\u0600-\u06FF\s]/g, '');
+                                    setOrganizationValue(filtered);
+                                }}
+                                placeholder={getBilingualNested(['placeholders', 'typeOrganization']) || 'Type organization name'}
+                                error={fieldErrors.organization}
+                                required
                                 />
                             </div>
                         </div>

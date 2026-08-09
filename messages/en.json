@@ -241,6 +241,7 @@
             "nationality": "Nationality",
             "identification": "Identification",
             "organization": "Organization \\ Host Organization.",
+            "organizationAr": "Organization Name should be in Arabic",
             "passStartingDate": "Pass Starting Date.",
             "visitduration": "Visit Duration",
             "passEndDate": "Pass End Date",
@@ -784,6 +785,7 @@
             "requestrejected": "Request Rejected Successfully!",
             "requestStatusUpdatedToPendingSuccessfully": "Request status updated to PENDING successfully!",
             "errors": {
+                "organizationArabicOnly": "Organization name must be in Arabic only",
                 "noChangesToSave": "No changes to save",
                 "rejectionReasonMin": "Rejection reason is required",
                 "rejectionReasonMinRejected": "Rejection reason is required when status is REJECTED",

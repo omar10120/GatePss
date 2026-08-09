@@ -294,7 +294,8 @@
             "invalidDate": "يرجى اختيار تاريخ صحيح (لا يمكن أن يكون في الماضي)",
             "passEndDateMin4Months": "تاريخ انتهاء التصريح يجب أن يكون بعد 4 أشهر على الأقل من تاريخ البدء",
             "visitdurationRequired": "مدة الزيارة مطلوبة",
-            "invalidFileType": "يُسمح فقط بملفات JPG و PNG و PDF"
+            "invalidFileType": "يُسمح فقط بملفات JPG و PNG و PDF",
+            "organizationArabicOnly": "اسم المؤسسة يجب أن يكون باللغة العربية"
         },
         "options": {
             "visitorPass": "تصريح مقيم",
@@ -807,6 +808,7 @@
                 "passFor": "المستفيد من التصريح",
                 "purposeOfVisit": "الغرض من الزيارة",
                 "organization": "المؤسسة المستضيفة",
+                "organizationAr": "اسم المؤسسة المستضيفة يجب أن يكون باللغة العربية",
                 "holderNameEn": "اسم الحامل (إنجليزي)",
                 "holderNameAr": "اسم الحامل (عربي)",
                 "telephone": "رقم الهاتف",
@@ -898,7 +900,8 @@
             "noPermissions": "لا توجد صلاحيات معينة",
             "leaveEmptyToKeepCurrent": "اتركه فارغاً للاحتفاظ بكلمة المرور الحالية",
             "errors": {
-                "cannotModifySelf": "لا يمكنك تعديل حسابك الخاص"
+                "cannotModifySelf": "لا يمكنك تعديل حسابك الخاص",
+                "organizationArabicOnly": "اسم المؤسسة يجب أن يكون باللغة العربية"
             },
             "pagination": {
                 "showing": "عرض",
