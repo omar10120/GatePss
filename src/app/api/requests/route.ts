@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
             const passportImageMaxSize = (file: File) => {
                 const ext = file.name.split('.').pop()?.toLowerCase().trim();
                 const isImage = file.type.startsWith('image/') || (ext ? ['jpg', 'jpeg', 'png'].includes(ext) : false);
-                return isImage ? 250 * 1024 : 2 * 1024 * 1024;
+                return isImage ? 250 * 1024 : 1 * 1024 * 1024;
             };
 
             imagePath = await uploadFile(passportIdImage!, 'passport', passportImageMaxSize(passportIdImage!), ['jpg', 'jpeg', 'png', 'pdf']);

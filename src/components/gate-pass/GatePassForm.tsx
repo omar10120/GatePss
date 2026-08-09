@@ -347,8 +347,8 @@ export const GatePassForm: React.FC = () => {
                 const isImageFile =
                     passportIdImage.type.startsWith('image/') ||
                     (fileExt ? ['jpg', 'jpeg', 'png'].includes(fileExt) : false);
-                const maxSize = isImageFile ? 250 * 1024 : 2 * 1024 * 1024;
-                const sizeLabel = isImageFile ? '250KB' : '2MB';
+                const maxSize = isImageFile ? 250 * 1024 : 1 * 1024 * 1024;
+                const sizeLabel = isImageFile ? '250KB' : '1MB';
 
                 if (passportIdImage.size > maxSize) {
                     newFieldErrors['passportIdImage'] =
@@ -1035,7 +1035,7 @@ export const GatePassForm: React.FC = () => {
                             placeholder={getBilingualNested(['placeholders', 'choosePhotoOrPdf'])}
                             required
                             accept=".png,.jpg,.jpeg,.pdf"
-                            helperText="(jpg, png) max 250KB, (pdf) max 2MB"
+                            helperText="(jpg, png) max 250KB, (pdf) max 1MB"
                             error={fieldErrors.passportIdImage}
                         />
                     </div>
@@ -1049,6 +1049,7 @@ export const GatePassForm: React.FC = () => {
                         helperText="(jpg, png) max 250KB"
                         error={fieldErrors.photo}
                     />
+                        {/* otherDocuments1 */}
                     <FileUpload
                         id="otherDocuments1"
                         name="otherDocuments1"
@@ -1060,6 +1061,7 @@ export const GatePassForm: React.FC = () => {
                         error={fieldErrors.otherDocuments1}
                     />
 
+                    {/* otherDocuments2 */}
                     <FileUpload
                         id="otherDocuments2"
                         name="otherDocuments2"
