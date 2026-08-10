@@ -461,7 +461,7 @@ export const GatePassForm: React.FC = () => {
         const fullOrganization = userOrgInput
             ? `${ORGANIZATION_PREFIX} + ${userOrgInput}`
             : ORGANIZATION_PREFIX;
-        formData.set('organization', fullOrganization);
+        
 
         // Validate all fields
         const validation = validateForm(formData);
@@ -485,6 +485,8 @@ export const GatePassForm: React.FC = () => {
             }, 100);
             return;
         }
+
+        formData.set('organization', fullOrganization);
 
         setLoading(true);
         setError('');
