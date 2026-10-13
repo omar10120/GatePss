@@ -318,6 +318,7 @@ export async function createGatePass(
             name_in_arabic: gateRequest?.applicantNameAr,
             email: request.applicantEmail,
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
+            emp_no : "1111111111",
             identification_number: request.passportIdNumber,
             blood_type: gateRequest?.bloodType || 'O+',
             start_date: formatDate(request.dateOfVisit),
