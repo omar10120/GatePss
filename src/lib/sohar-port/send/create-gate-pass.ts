@@ -319,7 +319,7 @@ export async function createGatePass(
             email: request.applicantEmail,
             identification_type: mapIdentificationType(gateRequest?.identification || 'PASSPORT'),
             emp_no : "1111111111",
-            visitor_type: "1",
+            visitor_type: "4",
             identification_number: request.passportIdNumber,
             blood_type: gateRequest?.bloodType || 'O+',
             start_date: formatDate(request.dateOfVisit),
